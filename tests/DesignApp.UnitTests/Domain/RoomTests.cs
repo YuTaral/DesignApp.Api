@@ -1,0 +1,86 @@
+using DesignApp.Domain.Common;
+using DesignApp.Domain.Rooms;
+
+namespace DesignApp.UnitTests.Domain;
+
+public class RoomTests
+{
+    private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);
+
+    internal static DetectedObject Sofa(int index = 1) =>
+        new(index, "sofa", ObjectCategory.Furniture, new BoundingBox(0.1, 0.4, 0.5, 0.4), HexColor.Parse("#8a7f72"));
+
+    internal static Room ReadyRoom(string ownerId = "user-1")
+    {
+        var room = Room.Upload(ownerId, "rooms/photo.jpg", 1600, 1200, Now);
+        room.StartAnalysis();
+        room.StartSegmentation();
+        room.MarkReady([Sofa(1), Sofa(2) with { Label = "wall", Category = ObjectCategory.Wall }]);
+        return room;
+    }
+
+    [Fact]
+    public void Upload_starts_in_uploaded_state()
+    {
+        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
+        Assert.Equal(RoomStatus.Uploaded, room.Status);
+        Assert.Empty(room.Objects);
+        Assert.Equal(Now, room.CreatedAt);
+    }
+
+    [Fact]
+    public void Analysis_pipeline_moves_through_each_stage_to_ready()
+    {
+        var room = ReadyRoom();
+
+        Assert.Equal(RoomStatus.Ready, room.Status);
+        Assert.Equal([1, 2], room.Objects.Select(o => o.Index));
+    }
+
+    [Fact]
+    public void Cannot_skip_the_segmentation_stage()
+    {
+        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        room.StartAnalysis();
+
+        Assert.Throws<DomainException>(() => room.MarkReady([Sofa()]));
+    }
+
+    [Fact]
+    public void Ready_requires_unique_object_indexes()
+    {
+        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        room.StartAnalysis();
+        room.StartSegmentation();
+
+        Assert.Throws<DomainException>(() => room.MarkReady([Sofa(1), Sofa(1)]));
+    }
+
+    [Fact]
+    public void Failing_records_the_reason()
+    {
+        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        room.StartAnalysis();
+
+        room.MarkFailed("Segmentation provider timed out");
+
+        Assert.Equal(RoomStatus.Failed, room.Status);
+        Assert.Equal("Segmentation provider timed out", room.FailureReason);
+    }
+
+    [Fact]
+    public void A_ready_room_cannot_fail()
+    {
+        Assert.Throws<DomainException>(() => ReadyRoom().MarkFailed("late error"));
+    }
+
+    [Theory]
+    [InlineData(-0.1, 0, 0.5, 0.5)]
+    [InlineData(0, 0, 0, 0.5)]
+    [InlineData(0.6, 0, 0.5, 0.5)]
+    public void Bounding_box_must_fit_inside_the_image(double x, double y, double width, double height)
+    {
+        Assert.Throws<DomainException>(() => new BoundingBox(x, y, width, height));
+    }
+}
