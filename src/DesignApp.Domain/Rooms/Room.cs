@@ -5,7 +5,7 @@ namespace DesignApp.Domain.Rooms;
 /// <summary>An uploaded room photo and the objects the AI pipeline found in it.</summary>
 public sealed class Room
 {
-    private readonly List<DetectedObject> _objects = [];
+    private IReadOnlyList<DetectedObject> _objects = [];
 
     public Guid Id { get; private set; }
     public string OwnerId { get; private set; } = "";
@@ -19,8 +19,11 @@ public sealed class Room
 
     private Room() { } // for EF Core
 
-    public static Room Upload(string ownerId, string photoKey, int width, int height, DateTimeOffset now)
+    /// <param name="id">Chosen by the caller so the photo can be stored under the room's id before the room is saved.</param>
+    public static Room Upload(Guid id, string ownerId, string photoKey, int width, int height, DateTimeOffset now)
     {
+        if (id == Guid.Empty)
+            throw new DomainException("A room needs an id.");
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerId);
         ArgumentException.ThrowIfNullOrWhiteSpace(photoKey);
         if (width <= 0 || height <= 0)
@@ -28,7 +31,7 @@ public sealed class Room
 
         return new Room
         {
-            Id = Guid.CreateVersion7(now),
+            Id = id,
             OwnerId = ownerId,
             PhotoKey = photoKey,
             Width = width,
@@ -51,8 +54,7 @@ public sealed class Room
             throw new DomainException("Detected object indexes must be unique.");
 
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
-        _objects.Clear();
-        _objects.AddRange(list.OrderBy(o => o.Index));
+        _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
     }
 
     public void MarkFailed(string reason)

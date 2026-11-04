@@ -25,7 +25,7 @@ public class DesignTests
     [Fact]
     public void Cannot_design_a_room_that_is_still_analyzing()
     {
-        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
 
         Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", [], Now));
     }

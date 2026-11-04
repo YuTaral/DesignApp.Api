@@ -12,7 +12,7 @@ public class RoomTests
 
     internal static Room ReadyRoom(string ownerId = "user-1")
     {
-        var room = Room.Upload(ownerId, "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), ownerId, "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
         room.StartSegmentation();
         room.MarkReady([Sofa(1), Sofa(2) with { Label = "wall", Category = ObjectCategory.Wall }]);
@@ -22,12 +22,16 @@ public class RoomTests
     [Fact]
     public void Upload_starts_in_uploaded_state()
     {
-        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
 
         Assert.Equal(RoomStatus.Uploaded, room.Status);
         Assert.Empty(room.Objects);
         Assert.Equal(Now, room.CreatedAt);
     }
+
+    [Fact]
+    public void Upload_rejects_an_empty_id() =>
+        Assert.Throws<DomainException>(() => Room.Upload(Guid.Empty, "user-1", "rooms/photo.jpg", 1600, 1200, Now));
 
     [Fact]
     public void Analysis_pipeline_moves_through_each_stage_to_ready()
@@ -41,7 +45,7 @@ public class RoomTests
     [Fact]
     public void Cannot_skip_the_segmentation_stage()
     {
-        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
 
         Assert.Throws<DomainException>(() => room.MarkReady([Sofa()]));
@@ -50,7 +54,7 @@ public class RoomTests
     [Fact]
     public void Ready_requires_unique_object_indexes()
     {
-        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
         room.StartSegmentation();
 
@@ -60,7 +64,7 @@ public class RoomTests
     [Fact]
     public void Failing_records_the_reason()
     {
-        var room = Room.Upload("user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
 
         room.MarkFailed("Segmentation provider timed out");

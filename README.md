@@ -17,9 +17,12 @@ Both AI providers sit behind interfaces, so they can be swapped (another SAM hos
 
 - ASP.NET Core 10 Minimal APIs, OpenAPI with the Scalar docs UI
 - Aspire for local orchestration, OpenTelemetry traces, health checks and resilience
-- PostgreSQL via EF Core, S3-compatible storage for photos and masks
+- PostgreSQL via EF Core (snake_case schema, migrations in `Infrastructure/Persistence/Migrations`)
+- S3-compatible storage for photos and masks through the AWS SDK: RustFS locally, any S3 service in the cloud
+- SkiaSharp for photo processing: uploads are validated, turned upright, scaled to at most 4096 px, converted to sRGB JPEG and stripped of metadata (including GPS location)
 - SignalR for live analysis progress
-- xUnit tests; CI on GitHub Actions
+- Rate-limited uploads, RFC 9457 problem details for every error
+- xUnit unit tests, and integration tests against real Postgres and RustFS containers (Testcontainers); CI on GitHub Actions
 
 ## Solution layout
 
@@ -51,7 +54,24 @@ DesignApp/
 dotnet run --project src/DesignApp.AppHost
 ```
 
-The Aspire dashboard opens with links to the API, the API docs (`/scalar`) and the web app.
+The Aspire dashboard opens with links to the API, the API docs (`/scalar`), the web app and the storage console. Postgres and storage run as persistent containers, so data survives restarts. The database is migrated automatically on startup in Development.
+
+### Endpoints so far
+
+| Method | Path | What it does |
+|---|---|---|
+| `POST` | `/api/rooms` | Upload a photo (multipart field `photo`; JPEG, PNG or WebP up to 15 MB) and create a room |
+| `GET` | `/api/rooms/{id}` | The room, its analysis status and detected objects |
+| `GET` | `/api/rooms/{id}/photo` | The stored photo |
+
+### Database migrations
+
+The EF Core tool is pinned in `dotnet-tools.json`:
+
+```bash
+dotnet tool restore
+dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Persistence/Migrations
+```
 
 ### AI providers and secrets
 
@@ -72,3 +92,9 @@ Remove that last secret (`dotnet user-secrets --project src/DesignApp.Api remove
 ```bash
 dotnet test DesignApp.slnx
 ```
+
+The integration tests start throwaway Postgres and RustFS containers, so Docker must be running.
+
+## Third-party licenses
+
+All dependencies are MIT or Apache-2.0 licensed.

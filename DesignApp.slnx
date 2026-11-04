@@ -8,6 +8,7 @@
     <Project Path="src/DesignApp.ServiceDefaults/DesignApp.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/DesignApp.IntegrationTests/DesignApp.IntegrationTests.csproj" />
     <Project Path="tests/DesignApp.UnitTests/DesignApp.UnitTests.csproj" />
   </Folder>
 </Solution>
