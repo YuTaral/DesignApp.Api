@@ -1,4 +1,5 @@
 using DesignApp.Application.Abstractions;
+using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
 using DesignApp.Domain.Rooms;
 
@@ -11,9 +12,13 @@ public sealed class UploadRoom(
     ICurrentUser currentUser,
     TimeProvider clock)
 {
-    public async Task<Room> HandleAsync(Stream upload, CancellationToken cancellationToken)
+    /// <returns>The new room, or a failure saying why the photo can't be used.</returns>
+    public async Task<Result<Room>> HandleAsync(Stream upload, CancellationToken cancellationToken)
     {
-        var photo = photoProcessor.Process(upload);
+        var processed = photoProcessor.Process(upload);
+        if (!processed.Succeeded)
+            return Result.Failure<Room>(processed.Error);
+        var photo = processed.Value;
 
         var now = clock.GetUtcNow();
         var id = Guid.CreateVersion7(now);

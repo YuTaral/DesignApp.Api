@@ -41,7 +41,11 @@ internal static class RoomEndpoints
         }
 
         await using var content = photo.OpenReadStream();
-        var room = await uploadRoom.HandleAsync(content, cancellationToken);
+        var result = await uploadRoom.HandleAsync(content, cancellationToken);
+        if (!result.Succeeded)
+            return TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: "Invalid photo");
+
+        var room = result.Value;
         return TypedResults.Created($"/api/rooms/{room.Id}", RoomResponse.From(room));
     }
 

@@ -1,4 +1,5 @@
 using DesignApp.Application.Abstractions;
+using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
 using DesignApp.Application.Rooms;
 using DesignApp.Domain.Rooms;
@@ -9,23 +10,37 @@ public class UploadRoomTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 4, 9, 0, 0, TimeSpan.Zero);
 
+    private readonly FixedPhotoProcessor _photos = new();
     private readonly FakeStorage _storage = new();
     private readonly FakeRooms _rooms = new();
 
     private UploadRoom CreateHandler() =>
-        new(new FixedPhotoProcessor(), _storage, _rooms, new FixedUser("user-1"), new FixedClock(Now));
+        new(_photos, _storage, _rooms, new FixedUser("user-1"), new FixedClock(Now));
 
     [Fact]
     public async Task Stores_the_photo_under_the_room_and_saves_the_room()
     {
-        var room = await CreateHandler().HandleAsync(new MemoryStream([1, 2, 3]), CancellationToken.None);
+        var result = await CreateHandler().HandleAsync(new MemoryStream([1, 2, 3]), CancellationToken.None);
 
+        var room = result.Value;
         Assert.Equal(StorageKeys.RoomPhoto(room.Id), room.PhotoKey);
         Assert.Equal(ProcessedPhoto.ContentType, _storage.Files[room.PhotoKey].ContentType);
         Assert.Equal((1600, 1200), (room.Width, room.Height));
         Assert.Equal("user-1", room.OwnerId);
         Assert.Equal(Now, room.CreatedAt);
         Assert.Same(room, Assert.Single(_rooms.Saved));
+    }
+
+    [Fact]
+    public async Task A_refused_photo_stores_nothing()
+    {
+        _photos.Refusal = "This photo is too small.";
+
+        var result = await CreateHandler().HandleAsync(new MemoryStream([1, 2, 3]), CancellationToken.None);
+
+        Assert.Equal("This photo is too small.", result.Error);
+        Assert.Empty(_storage.Files);
+        Assert.Empty(_rooms.Saved);
     }
 
     [Fact]
@@ -41,7 +56,10 @@ public class UploadRoomTests
 
     private sealed class FixedPhotoProcessor : IPhotoProcessor
     {
-        public ProcessedPhoto Process(Stream upload) => new([0xFF, 0xD8], 1600, 1200);
+        public string? Refusal { get; set; }
+
+        public Result<ProcessedPhoto> Process(Stream upload) =>
+            Refusal is null ? new ProcessedPhoto([0xFF, 0xD8], 1600, 1200) : Result.Failure<ProcessedPhoto>(Refusal);
     }
 
     private sealed class FixedUser(string id) : ICurrentUser

@@ -1,12 +1,12 @@
-using DesignApp.Application.Photos;
 using DesignApp.Domain.Common;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace DesignApp.Api;
 
 /// <summary>
-/// Turns errors caused by the request (a bad photo, a broken domain rule) into 4xx problem details
-/// with a message the frontend can show. Anything else stays a 500 without internal details.
+/// Turns exceptions caused by the request (a broken domain rule, a malformed or oversized body) into
+/// 4xx problem details with a message the frontend can show. Anything else stays a 500 without
+/// internal details. Expected refusals such as a bad photo never get here: they come back as results.
 /// </summary>
 internal sealed class UserErrorExceptionHandler(IProblemDetailsService problemDetails) : IExceptionHandler
 {
@@ -14,7 +14,6 @@ internal sealed class UserErrorExceptionHandler(IProblemDetailsService problemDe
     {
         var (status, title) = exception switch
         {
-            InvalidPhotoException => (StatusCodes.Status400BadRequest, "Invalid photo"),
             DomainException => (StatusCodes.Status400BadRequest, "Invalid request"),
             BadHttpRequestException e => (e.StatusCode, "Invalid request"),
             _ => (0, ""),

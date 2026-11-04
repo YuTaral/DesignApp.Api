@@ -1,3 +1,4 @@
+using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
 using SkiaSharp;
 
@@ -7,23 +8,23 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
 {
     private const string UnsupportedMessage = "This file isn't a photo we can read. Use a JPEG, PNG or WebP image.";
 
-    public ProcessedPhoto Process(Stream upload)
+    public Result<ProcessedPhoto> Process(Stream upload)
     {
         using var buffer = new MemoryStream();
         upload.CopyTo(buffer);
         if (buffer.Length == 0)
-            throw new InvalidPhotoException("The file is empty.");
+            return Result.Failure<ProcessedPhoto>("The file is empty.");
 
         using var data = SKData.CreateCopy(buffer.GetBuffer().AsSpan(0, (int)buffer.Length));
-        using var codec = SKCodec.Create(data) ?? throw new InvalidPhotoException(UnsupportedMessage);
-        if (codec.EncodedFormat is not (SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Png or SKEncodedImageFormat.Webp))
-            throw new InvalidPhotoException(UnsupportedMessage);
+        using var codec = SKCodec.Create(data);
+        if (codec?.EncodedFormat is not (SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Png or SKEncodedImageFormat.Webp))
+            return Result.Failure<ProcessedPhoto>(UnsupportedMessage);
 
         var source = codec.Info.Size;
         if ((long)source.Width * source.Height > PhotoRules.MaxSourcePixels)
-            throw new InvalidPhotoException("This photo has too many pixels. Use one under 100 megapixels.");
+            return Result.Failure<ProcessedPhoto>("This photo has too many pixels. Use one under 100 megapixels.");
         if (Math.Min(source.Width, source.Height) < PhotoRules.MinShortEdge)
-            throw new InvalidPhotoException($"This photo is too small. Use one at least {PhotoRules.MinShortEdge} pixels on each side.");
+            return Result.Failure<ProcessedPhoto>($"This photo is too small. Use one at least {PhotoRules.MinShortEdge} pixels on each side.");
 
         // Phones store photos sideways and record how to turn them in EXIF. Bake that in, because
         // the metadata is about to be dropped and the AI and the editor need the upright image.
@@ -38,6 +39,8 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
             Math.Max(1, (int)Math.Round(upright.Height * scale)));
 
         using var decoded = Decode(codec, scale);
+        if (decoded is null)
+            return Result.Failure<ProcessedPhoto>("This photo is damaged and can't be read.");
         using var output = new SKBitmap(new SKImageInfo(target.Width, target.Height, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb()));
         using (var canvas = new SKCanvas(output))
         {
@@ -61,7 +64,8 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
     /// Decodes in sRGB, converting wide-gamut (Display P3) phone photos. JPEGs decode straight to
     /// 1/2, 1/4 or 1/8 size when that still covers the target, which is much faster for big photos.
     /// </summary>
-    private static SKBitmap Decode(SKCodec codec, float scale)
+    /// <returns>The pixels, or <c>null</c> when the file is damaged or cut short.</returns>
+    private static SKBitmap? Decode(SKCodec codec, float scale)
     {
         var size = codec.GetScaledDimensions(scale);
         if (size.Width < codec.Info.Width * scale || size.Height < codec.Info.Height * scale)
@@ -73,7 +77,7 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
         if (result != SKCodecResult.Success)
         {
             bitmap.Dispose();
-            throw new InvalidPhotoException("This photo is damaged and can't be read.");
+            return null;
         }
         return bitmap;
     }

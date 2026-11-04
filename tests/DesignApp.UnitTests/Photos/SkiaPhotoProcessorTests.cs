@@ -10,7 +10,20 @@ public class SkiaPhotoProcessorTests
 {
     private readonly SkiaPhotoProcessor _processor = new();
 
-    private ProcessedPhoto Process(byte[] file) => _processor.Process(new MemoryStream(file));
+    private ProcessedPhoto Process(byte[] file)
+    {
+        var result = _processor.Process(new MemoryStream(file));
+        Assert.True(result.Succeeded, result.Error);
+        return result.Value;
+    }
+
+    /// <returns>Why the file was refused.</returns>
+    private string Reject(byte[] file)
+    {
+        var result = _processor.Process(new MemoryStream(file));
+        Assert.False(result.Succeeded, "The file should have been refused.");
+        return result.Error;
+    }
 
     [Theory]
     [InlineData(SKEncodedImageFormat.Jpeg)]
@@ -63,32 +76,32 @@ public class SkiaPhotoProcessorTests
     [Fact]
     public void Too_small_photos_are_rejected()
     {
-        var error = Assert.Throws<InvalidPhotoException>(() => Process(TestImages.Create(200, 600)));
-        Assert.Contains("too small", error.Message, StringComparison.Ordinal);
+        var error = Reject(TestImages.Create(200, 600));
+        Assert.Contains("too small", error, StringComparison.Ordinal);
     }
 
     [Fact]
     public void Gif_files_are_rejected() =>
-        Assert.Throws<InvalidPhotoException>(() => Process(TestImages.Gif()));
+        Assert.Contains("JPEG, PNG or WebP", Reject(TestImages.Gif()), StringComparison.Ordinal);
 
     [Fact]
     public void Bmp_files_are_rejected() =>
-        Assert.Throws<InvalidPhotoException>(() => Process(TestImages.Bmp(400, 300)));
+        Assert.Contains("JPEG, PNG or WebP", Reject(TestImages.Bmp(400, 300)), StringComparison.Ordinal);
 
     [Fact]
     public void Files_that_are_not_images_are_rejected() =>
-        Assert.Throws<InvalidPhotoException>(() => Process(Encoding.UTF8.GetBytes("definitely not a photo")));
+        Assert.Contains("JPEG, PNG or WebP", Reject(Encoding.UTF8.GetBytes("definitely not a photo")), StringComparison.Ordinal);
 
     [Fact]
     public void Empty_files_are_rejected() =>
-        Assert.Throws<InvalidPhotoException>(() => Process([]));
+        Assert.Equal("The file is empty.", Reject([]));
 
     [Fact]
     public void Truncated_photos_are_rejected()
     {
         var jpeg = TestImages.Create(800, 600);
 
-        Assert.Throws<InvalidPhotoException>(() => Process(jpeg[..(jpeg.Length / 2)]));
+        Assert.Contains("damaged", Reject(jpeg[..(jpeg.Length / 2)]), StringComparison.Ordinal);
     }
 
     private static void AssertClose(SKColor expected, SKColor actual, int tolerance = 40)

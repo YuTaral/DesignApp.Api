@@ -1,3 +1,5 @@
+using DesignApp.Application.Common;
+
 namespace DesignApp.Application.Photos;
 
 /// <summary>
@@ -6,8 +8,8 @@ namespace DesignApp.Application.Photos;
 /// </summary>
 public interface IPhotoProcessor
 {
-    /// <exception cref="InvalidPhotoException">The file is not a usable photo.</exception>
-    ProcessedPhoto Process(Stream upload);
+    /// <returns>The photo, or a failure saying why the file can't be used.</returns>
+    Result<ProcessedPhoto> Process(Stream upload);
 }
 
 public sealed record ProcessedPhoto(byte[] Content, int Width, int Height)
