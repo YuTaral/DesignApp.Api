@@ -6,6 +6,7 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.UnitTests.Rooms;
 
+/// <summary>The upload use case, with fakes in place of the database, storage and photo processor.</summary>
 public class UploadRoomTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 4, 9, 0, 0, TimeSpan.Zero);
@@ -14,6 +15,7 @@ public class UploadRoomTests
     private readonly FakeStorage _storage = new();
     private readonly FakeRooms _rooms = new();
 
+    /// <summary>The use case wired to this test's fakes.</summary>
     private UploadRoom CreateHandler() =>
         new(_photos, _storage, _rooms, new FixedUser("user-1"), new FixedClock(Now));
 
@@ -54,26 +56,34 @@ public class UploadRoomTests
         Assert.Empty(_storage.Files);
     }
 
+    /// <summary>Accepts every file as a 1600x1200 photo, unless <see cref="Refusal"/> is set.</summary>
     private sealed class FixedPhotoProcessor : IPhotoProcessor
     {
+        /// <summary>When set, every file is refused with this message.</summary>
         public string? Refusal { get; set; }
 
         public Result<ProcessedPhoto> Process(Stream upload) =>
             Refusal is null ? new ProcessedPhoto([0xFF, 0xD8], 1600, 1200) : Result.Failure<ProcessedPhoto>(Refusal);
     }
 
+    /// <summary>A current user with a fixed id.</summary>
+    /// <param name="id">The user's id.</param>
     private sealed class FixedUser(string id) : ICurrentUser
     {
         public string Id => id;
     }
 
+    /// <summary>A clock that always returns the same time.</summary>
+    /// <param name="now">The time to return.</param>
     private sealed class FixedClock(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
     }
 
+    /// <summary>In-memory file storage.</summary>
     private sealed class FakeStorage : IFileStorage
     {
+        /// <summary>The stored files by key.</summary>
         public Dictionary<string, (byte[] Content, string ContentType)> Files { get; } = [];
 
         public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken)
@@ -95,11 +105,14 @@ public class UploadRoomTests
         }
     }
 
+    /// <summary>In-memory room repository that can be told to fail on save.</summary>
     private sealed class FakeRooms : IRoomRepository
     {
         private readonly List<Room> _pending = [];
 
+        /// <summary>When set, saving throws as if the database were down.</summary>
         public bool FailOnSave { get; set; }
+        /// <summary>Rooms written by a successful save.</summary>
         public List<Room> Saved { get; } = [];
 
         public void Add(Room room) => _pending.Add(room);

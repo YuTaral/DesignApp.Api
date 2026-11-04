@@ -14,11 +14,15 @@ using Microsoft.Extensions.Options;
 
 namespace DesignApp.Infrastructure;
 
+/// <summary>Registers the Infrastructure layer: database, photo storage and photo processing.</summary>
 public static class DependencyInjection
 {
     /// <summary>Name of the Postgres database resource in the AppHost (and its connection string).</summary>
     public const string DatabaseName = "designapp";
 
+    /// <summary>Adds Postgres (EF Core), S3-compatible storage and the SkiaSharp photo processor.</summary>
+    /// <param name="builder">The host builder; reads the <c>designapp</c> connection string and the <c>Storage</c> section.</param>
+    /// <returns>The same builder, for chaining.</returns>
     public static IHostApplicationBuilder AddInfrastructure(this IHostApplicationBuilder builder)
     {
         // Aspire's integration adds connection retries, health checks and OpenTelemetry tracing.
@@ -43,6 +47,8 @@ public static class DependencyInjection
     /// only when <c>Database:MigrateOnStartup</c> is set (on in Development); production should
     /// apply them as a deployment step instead.
     /// </summary>
+    /// <param name="services">The built app's services.</param>
+    /// <param name="cancellationToken">Cancels the startup work.</param>
     public static async Task InitializeInfrastructureAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
     {
         await using var scope = services.CreateAsyncScope();
@@ -53,6 +59,8 @@ public static class DependencyInjection
         await scope.ServiceProvider.GetRequiredService<S3FileStorage>().EnsureBucketExistsAsync(cancellationToken);
     }
 
+    /// <summary>Creates the S3 client for AWS or, when a service URL is set, a self-hosted store.</summary>
+    /// <param name="options">Where the store is and how to sign in.</param>
     private static AmazonS3Client CreateS3Client(StorageOptions options)
     {
         var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);

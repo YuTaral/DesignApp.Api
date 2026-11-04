@@ -6,10 +6,13 @@ using SkiaSharp;
 
 namespace DesignApp.UnitTests.Photos;
 
+/// <summary>Photo validation, resizing, orientation and metadata removal.</summary>
 public class SkiaPhotoProcessorTests
 {
     private readonly SkiaPhotoProcessor _processor = new();
 
+    /// <summary>Processes a file and fails the test if it is refused.</summary>
+    /// <param name="file">The file's bytes.</param>
     private ProcessedPhoto Process(byte[] file)
     {
         var result = _processor.Process(new MemoryStream(file));
@@ -17,6 +20,8 @@ public class SkiaPhotoProcessorTests
         return result.Value;
     }
 
+    /// <summary>Processes a file and fails the test if it is accepted.</summary>
+    /// <param name="file">The file's bytes.</param>
     /// <returns>Why the file was refused.</returns>
     private string Reject(byte[] file)
     {
@@ -104,6 +109,10 @@ public class SkiaPhotoProcessorTests
         Assert.Contains("damaged", Reject(jpeg[..(jpeg.Length / 2)]), StringComparison.Ordinal);
     }
 
+    /// <summary>Checks that two colors match within JPEG compression error.</summary>
+    /// <param name="expected">The expected color.</param>
+    /// <param name="actual">The color read from the image.</param>
+    /// <param name="tolerance">Allowed difference per channel.</param>
     private static void AssertClose(SKColor expected, SKColor actual, int tolerance = 40)
     {
         Assert.InRange(actual.Red, Math.Max(0, expected.Red - tolerance), Math.Min(255, expected.Red + tolerance));

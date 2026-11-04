@@ -5,8 +5,12 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace DesignApp.Api.Rooms;
 
+/// <summary>The <c>/api/rooms</c> endpoints: upload a room photo, read a room and its photo.</summary>
 internal static class RoomEndpoints
 {
+    /// <summary>Maps the room endpoints under <c>/rooms</c>.</summary>
+    /// <param name="api">The <c>/api</c> route group.</param>
+    /// <returns>The same group, for chaining.</returns>
     public static RouteGroupBuilder MapRoomEndpoints(this RouteGroupBuilder api)
     {
         var rooms = api.MapGroup("/rooms").WithTags("Rooms");
@@ -29,6 +33,11 @@ internal static class RoomEndpoints
         return api;
     }
 
+    /// <summary><c>POST /api/rooms</c>: validates and stores the photo, then creates the room.</summary>
+    /// <param name="photo">The uploaded file from the <c>photo</c> form field.</param>
+    /// <param name="uploadRoom">The use case that processes and stores the photo.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>201 with the new room, 400 for an unusable photo, or 413 when it is too large.</returns>
     private static async Task<Results<Created<RoomResponse>, ProblemHttpResult>> UploadAsync(
         IFormFile photo, UploadRoom uploadRoom, CancellationToken cancellationToken)
     {
@@ -49,6 +58,11 @@ internal static class RoomEndpoints
         return TypedResults.Created($"/api/rooms/{room.Id}", RoomResponse.From(room));
     }
 
+    /// <summary><c>GET /api/rooms/{id}</c>: returns one of the current user's rooms.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room, or 404 when the user has no room with that id.</returns>
     private static async Task<Results<Ok<RoomResponse>, NotFound>> GetAsync(
         Guid id, GetRoom getRoom, CancellationToken cancellationToken)
     {
@@ -56,6 +70,13 @@ internal static class RoomEndpoints
         return room is null ? TypedResults.NotFound() : TypedResults.Ok(RoomResponse.From(room));
     }
 
+    /// <summary><c>GET /api/rooms/{id}/photo</c>: streams the room's stored photo.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the photo file is stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the JPEG, or 404 when the room or its file is missing.</returns>
     private static async Task<Results<FileStreamHttpResult, NotFound>> GetPhotoAsync(
         Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {

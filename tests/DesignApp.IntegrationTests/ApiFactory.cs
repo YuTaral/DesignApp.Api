@@ -26,8 +26,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(S3Port).ForPath("/health")))
         .Build();
 
+    /// <summary>Starts both containers before the first test.</summary>
     public Task InitializeAsync() => Task.WhenAll(_postgres.StartAsync(), _storage.StartAsync());
 
+    /// <summary>Points the API at the test containers.</summary>
+    /// <param name="builder">The test host's builder.</param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Not "Development": that would also load the developer's user secrets into the tests.
@@ -40,6 +43,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Storage:Bucket", "integration-tests");
     }
 
+    /// <summary>Stops the API, then removes the containers.</summary>
     async Task IAsyncLifetime.DisposeAsync()
     {
         await DisposeAsync();

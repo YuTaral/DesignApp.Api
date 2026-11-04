@@ -5,6 +5,12 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.Application.Rooms;
 
+/// <summary>Use case: turn an uploaded photo into a new room.</summary>
+/// <param name="photoProcessor">Validates and normalizes the photo.</param>
+/// <param name="storage">Where the photo file is stored.</param>
+/// <param name="rooms">The room database.</param>
+/// <param name="currentUser">Who will own the room.</param>
+/// <param name="clock">Supplies the upload time (replaceable in tests).</param>
 public sealed class UploadRoom(
     IPhotoProcessor photoProcessor,
     IFileStorage storage,
@@ -12,6 +18,9 @@ public sealed class UploadRoom(
     ICurrentUser currentUser,
     TimeProvider clock)
 {
+    /// <summary>Processes the photo, stores it and saves the room. Removes the photo again if the save fails.</summary>
+    /// <param name="upload">The uploaded file's bytes.</param>
+    /// <param name="cancellationToken">Cancels the upload.</param>
     /// <returns>The new room, or a failure saying why the photo can't be used.</returns>
     public async Task<Result<Room>> HandleAsync(Stream upload, CancellationToken cancellationToken)
     {

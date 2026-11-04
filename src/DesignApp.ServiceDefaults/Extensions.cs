@@ -10,14 +10,19 @@ using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
 
-// Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-// This project should be referenced by each service project in your solution.
-// To learn more about using this project, see https://aka.ms/aspire/service-defaults
+/// <summary>
+/// Common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
+/// Each service project references this. See https://aka.ms/aspire/service-defaults
+/// </summary>
 public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
 
+    /// <summary>Adds telemetry, health checks, service discovery and HTTP resilience.</summary>
+    /// <typeparam name="TBuilder">The host builder type.</typeparam>
+    /// <param name="builder">The host builder.</param>
+    /// <returns>The same builder, for chaining.</returns>
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
@@ -44,6 +49,10 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>Sends logs, metrics and traces to the Aspire dashboard (or any OTLP endpoint).</summary>
+    /// <typeparam name="TBuilder">The host builder type.</typeparam>
+    /// <param name="builder">The host builder.</param>
+    /// <returns>The same builder, for chaining.</returns>
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Logging.AddOpenTelemetry(logging =>
@@ -78,6 +87,10 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>Turns on the OTLP exporter when <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> is set.</summary>
+    /// <typeparam name="TBuilder">The host builder type.</typeparam>
+    /// <param name="builder">The host builder.</param>
+    /// <returns>The same builder, for chaining.</returns>
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
@@ -97,6 +110,10 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>Adds a basic "is the process responsive" health check.</summary>
+    /// <typeparam name="TBuilder">The host builder type.</typeparam>
+    /// <param name="builder">The host builder.</param>
+    /// <returns>The same builder, for chaining.</returns>
     public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Services.AddHealthChecks()
@@ -106,6 +123,9 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>Maps <c>/health</c> and <c>/alive</c>, in Development only.</summary>
+    /// <param name="app">The web app.</param>
+    /// <returns>The same app, for chaining.</returns>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // Adding health checks endpoints to applications in non-development environments has security implications.

@@ -3,13 +3,18 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.UnitTests.Domain;
 
+/// <summary>The room's status steps and its validation rules.</summary>
 public class RoomTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);
 
+    /// <summary>A valid detected sofa.</summary>
+    /// <param name="index">Its label-map index.</param>
     internal static DetectedObject Sofa(int index = 1) =>
         new(index, "sofa", ObjectCategory.Furniture, new BoundingBox(0.1, 0.4, 0.5, 0.4), HexColor.Parse("#8a7f72"));
 
+    /// <summary>A room that has gone through every step to Ready, with two objects.</summary>
+    /// <param name="ownerId">Who owns the room.</param>
     internal static Room ReadyRoom(string ownerId = "user-1")
     {
         var room = Room.Upload(Guid.CreateVersion7(), ownerId, "rooms/photo.jpg", 1600, 1200, Now);

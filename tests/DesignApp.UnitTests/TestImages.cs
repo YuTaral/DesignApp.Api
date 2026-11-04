@@ -5,10 +5,15 @@ namespace DesignApp.Tests;
 /// <summary>Builds small images in memory so tests don't depend on fixture files.</summary>
 internal static class TestImages
 {
+    /// <summary>Color of the top-left quadrant.</summary>
     public static readonly SKColor Red = new(220, 30, 30);
+    /// <summary>Color of the rest of the image.</summary>
     public static readonly SKColor Blue = new(30, 60, 220);
 
     /// <summary>A blue image with a red top-left quadrant, so tests can see how it was turned.</summary>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <param name="format">The encoding to use.</param>
     public static byte[] Create(int width, int height, SKEncodedImageFormat format = SKEncodedImageFormat.Jpeg)
     {
         using var bitmap = new SKBitmap(width, height);
@@ -24,6 +29,8 @@ internal static class TestImages
     }
 
     /// <summary>Adds an EXIF block with the given orientation tag (1-8) to a JPEG.</summary>
+    /// <param name="jpeg">The JPEG to add the block to.</param>
+    /// <param name="orientation">The EXIF orientation value.</param>
     public static byte[] WithExifOrientation(byte[] jpeg, ushort orientation)
     {
         byte[] tiff =
@@ -50,6 +57,8 @@ internal static class TestImages
     public static byte[] Gif() => Convert.FromBase64String("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
 
     /// <summary>A valid uncompressed 24-bit BMP. Skia can read BMPs but not write them.</summary>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
     public static byte[] Bmp(int width, int height)
     {
         var rowSize = (width * 3 + 3) / 4 * 4;
@@ -77,5 +86,7 @@ internal static class TestImages
         return output.ToArray();
     }
 
+    /// <summary>Decodes an encoded image so tests can read its pixels.</summary>
+    /// <param name="encoded">The image file's bytes.</param>
     public static SKBitmap Decode(byte[] encoded) => SKBitmap.Decode(encoded);
 }

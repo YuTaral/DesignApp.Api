@@ -1,3 +1,5 @@
+// Aspire AppHost: the one project to run for local development. It starts Postgres, the photo
+// storage, the API and the web app, wires them together and opens the Aspire dashboard.
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("postgres")

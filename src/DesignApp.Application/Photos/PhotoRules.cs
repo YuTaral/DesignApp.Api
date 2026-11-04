@@ -1,5 +1,6 @@
 namespace DesignApp.Application.Photos;
 
+/// <summary>Limits that every uploaded photo must meet.</summary>
 public static class PhotoRules
 {
     /// <summary>Matches the frontend's limit. Large enough for any phone photo.</summary>
@@ -14,5 +15,6 @@ public static class PhotoRules
     /// <summary>Refuses huge images before decoding them, so a small file cannot exhaust memory.</summary>
     public const long MaxSourcePixels = 100_000_000;
 
+    /// <summary>JPEG quality (0-100) for stored photos: visually lossless at a reasonable size.</summary>
     public const int JpegQuality = 90;
 }

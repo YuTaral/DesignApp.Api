@@ -4,6 +4,7 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.UnitTests.Domain;
 
+/// <summary>Rules for creating and editing designs, and for parsing colors.</summary>
 public class DesignTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);

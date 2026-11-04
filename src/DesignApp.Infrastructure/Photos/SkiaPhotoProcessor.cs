@@ -4,10 +4,13 @@ using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Photos;
 
+/// <summary>SkiaSharp implementation of <see cref="IPhotoProcessor"/>.</summary>
 internal sealed class SkiaPhotoProcessor : IPhotoProcessor
 {
+    /// <summary>Shown for files that aren't a JPEG, PNG or WebP image.</summary>
     private const string UnsupportedMessage = "This file isn't a photo we can read. Use a JPEG, PNG or WebP image.";
 
+    /// <inheritdoc/>
     public Result<ProcessedPhoto> Process(Stream upload)
     {
         using var buffer = new MemoryStream();
@@ -64,6 +67,8 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
     /// Decodes in sRGB, converting wide-gamut (Display P3) phone photos. JPEGs decode straight to
     /// 1/2, 1/4 or 1/8 size when that still covers the target, which is much faster for big photos.
     /// </summary>
+    /// <param name="codec">The opened image file.</param>
+    /// <param name="scale">The target size as a fraction of the stored size (at most 1).</param>
     /// <returns>The pixels, or <c>null</c> when the file is damaged or cut short.</returns>
     private static SKBitmap? Decode(SKCodec codec, float scale)
     {
@@ -83,6 +88,9 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
     }
 
     /// <summary>Maps the stored pixels (<paramref name="w"/> x <paramref name="h"/>) onto the upright image.</summary>
+    /// <param name="origin">The EXIF orientation of the stored pixels.</param>
+    /// <param name="w">Stored width in pixels.</param>
+    /// <param name="h">Stored height in pixels.</param>
     private static SKMatrix OrientationMatrix(SKEncodedOrigin origin, float w, float h) => origin switch
     {
         SKEncodedOrigin.TopRight => new SKMatrix(-1, 0, w, 0, 1, 0, 0, 0, 1),     // mirrored

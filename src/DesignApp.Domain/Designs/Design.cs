@@ -6,19 +6,33 @@ namespace DesignApp.Domain.Designs;
 /// <summary>A saved restyling of a room: the original photo plus an ordered list of edits.</summary>
 public sealed class Design
 {
+    /// <summary>The longest allowed design name, after trimming.</summary>
     public const int MaxNameLength = 80;
 
     private readonly List<EditOperation> _edits = [];
 
+    /// <summary>The design's id.</summary>
     public Guid Id { get; private set; }
+    /// <summary>The room this design restyles.</summary>
     public Guid RoomId { get; private set; }
+    /// <summary>The user who owns the design.</summary>
     public string OwnerId { get; private set; } = "";
+    /// <summary>The name the user gave the design.</summary>
     public string Name { get; private set; } = "";
+    /// <summary>When the design was last saved.</summary>
     public DateTimeOffset UpdatedAt { get; private set; }
+    /// <summary>The edits, applied in order on top of the original photo.</summary>
     public IReadOnlyList<EditOperation> Edits => _edits;
 
     private Design() { } // for EF Core
 
+    /// <summary>Creates a design for a room that finished analysis.</summary>
+    /// <param name="room">The room to restyle; must be ready and owned by <paramref name="ownerId"/>.</param>
+    /// <param name="ownerId">The user creating the design.</param>
+    /// <param name="name">The design's name; it is trimmed.</param>
+    /// <param name="edits">The edits to store.</param>
+    /// <param name="now">The creation time.</param>
+    /// <exception cref="DomainException">The room isn't ready or isn't the owner's, or the name or edits are invalid.</exception>
     public static Design Create(Room room, string ownerId, string name, IEnumerable<EditOperation> edits, DateTimeOffset now)
     {
         if (room.Status != RoomStatus.Ready)
@@ -31,6 +45,12 @@ public sealed class Design
         return design;
     }
 
+    /// <summary>Replaces the design's name and edits.</summary>
+    /// <param name="room">The design's room, used to check that every edit targets a real object.</param>
+    /// <param name="name">The new name; it is trimmed.</param>
+    /// <param name="edits">The new edits; they replace the old ones.</param>
+    /// <param name="now">The update time.</param>
+    /// <exception cref="DomainException">The room, name or edits are invalid.</exception>
     public void Update(Room room, string name, IEnumerable<EditOperation> edits, DateTimeOffset now)
     {
         if (room.Id != RoomId)

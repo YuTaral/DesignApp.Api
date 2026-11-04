@@ -7,6 +7,8 @@ using SkiaSharp;
 
 namespace DesignApp.IntegrationTests;
 
+/// <summary>End-to-end tests of the <c>/api/rooms</c> endpoints over HTTP.</summary>
+/// <param name="factory">The API running against test containers.</param>
 public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
@@ -85,6 +87,10 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.NotFound, photo.StatusCode);
     }
 
+    /// <summary>Posts a file to <c>/api/rooms</c> the way the browser does.</summary>
+    /// <param name="file">The file's bytes.</param>
+    /// <param name="fileName">The file name sent in the form.</param>
+    /// <param name="contentType">The MIME type sent in the form.</param>
     private async Task<HttpResponseMessage> UploadAsync(byte[] file, string fileName = "room.jpg", string contentType = "image/jpeg")
     {
         using var content = new ByteArrayContent(file);
@@ -93,5 +99,6 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         return await _client.PostAsync("/api/rooms", form);
     }
 
+    /// <summary>The room JSON as a client reads it, kept separate from the API's own type.</summary>
     private sealed record RoomDto(Guid Id, string Status, int Width, int Height, string PhotoUrl, DateTimeOffset CreatedAt, string? FailureReason, List<JsonElement> Objects);
 }

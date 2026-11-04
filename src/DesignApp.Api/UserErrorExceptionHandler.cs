@@ -8,8 +8,14 @@ namespace DesignApp.Api;
 /// 4xx problem details with a message the frontend can show. Anything else stays a 500 without
 /// internal details. Expected refusals such as a bad photo never get here: they come back as results.
 /// </summary>
+/// <param name="problemDetails">Writes the RFC 7807 problem response.</param>
 internal sealed class UserErrorExceptionHandler(IProblemDetailsService problemDetails) : IExceptionHandler
 {
+    /// <summary>Writes a 4xx problem response when the exception was caused by the request.</summary>
+    /// <param name="httpContext">The failed request.</param>
+    /// <param name="exception">What was thrown.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns><c>true</c> when handled; <c>false</c> lets the default 500 handling run.</returns>
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var (status, title) = exception switch

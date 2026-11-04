@@ -7,6 +7,7 @@ using DesignApp.Application.Photos;
 using DesignApp.Infrastructure;
 using Scalar.AspNetCore;
 
+// Entry point of the HTTP API: wires up services, middleware and the /api endpoints.
 var builder = WebApplication.CreateBuilder(args);
 
 // The API needs the database and storage that the AppHost starts. Fail with directions rather
@@ -71,4 +72,7 @@ api.MapRoomEndpoints();
 
 app.Run();
 
+/// <summary>Body of <c>GET /api/status</c>.</summary>
+/// <param name="Name">The service's display name.</param>
+/// <param name="Environment">The hosting environment, such as "Development".</param>
 internal sealed record ApiStatus(string Name, string Environment);
