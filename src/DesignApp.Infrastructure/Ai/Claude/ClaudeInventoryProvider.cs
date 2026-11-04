@@ -12,7 +12,7 @@ namespace DesignApp.Infrastructure.Ai.Claude;
 /// </summary>
 /// <param name="client">The Anthropic client (it retries rate limits and server errors itself).</param>
 /// <param name="options">Supplies the model name.</param>
-internal sealed class ClaudeInventoryProvider(AnthropicClient client, IOptions<AiOptions> options) : IObjectInventoryProvider
+internal sealed class ClaudeInventoryProvider(IAnthropicClient client, IOptions<AiOptions> options) : IObjectInventoryProvider
 {
     /// <summary>Tells Claude what to list and how; the schema enforces the shape.</summary>
     private const string Instructions = """

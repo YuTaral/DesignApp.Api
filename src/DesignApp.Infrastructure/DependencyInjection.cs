@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DesignApp.Infrastructure;
@@ -76,11 +77,21 @@ public static class DependencyInjection
             return;
         }
 
-        builder.Services.AddSingleton(sp => new AnthropicClient { ApiKey = sp.GetRequiredService<IOptions<AiOptions>>().Value.AnthropicApiKey });
+        builder.Services.AddSingleton<IAnthropicClient>(sp =>
+        {
+            var ai = sp.GetRequiredService<IOptions<AiOptions>>().Value;
+            var client = new AnthropicClient { ApiKey = ai.AnthropicApiKey };
+            return string.IsNullOrWhiteSpace(ai.AnthropicWorkspaceId)
+                ? client
+                : client.WithOptions(options => options with
+                {
+                    ExtraHeaders = new Dictionary<string, string> { ["anthropic-workspace-id"] = ai.AnthropicWorkspaceId.Trim() },
+                });
+        });
         builder.Services.AddSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>();
 
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
-        builder.Services.AddHttpClient<ISegmentationProvider, FalSegmentationProvider>((sp, http) =>
+        builder.Services.AddHttpClient<FalSegmentationProvider>((sp, http) =>
                 http.DefaultRequestHeaders.Authorization = new("Key", sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
             // SAM 3 on a large photo can take well over the default 10 s per attempt, so replace the
             // shared resilience handler from ServiceDefaults.
@@ -92,6 +103,10 @@ public static class DependencyInjection
                 resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
             });
 #pragma warning restore EXTEXP0001
+        builder.Services.AddSingleton<ISegmentationProvider>(sp => new RecordingSegmentationProvider(
+            sp.GetRequiredService<FalSegmentationProvider>(),
+            sp.GetRequiredService<IOptions<AiOptions>>(),
+            sp.GetRequiredService<ILogger<RecordingSegmentationProvider>>()));
     }
 
     /// <summary>

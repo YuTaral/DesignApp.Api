@@ -18,6 +18,12 @@ public sealed class AiOptions
     /// <summary>The Anthropic API key (user secrets locally). Required unless <see cref="UseFakes"/> is on.</summary>
     public string AnthropicApiKey { get; set; } = "";
 
+    /// <summary>
+    /// The Anthropic workspace to bill, sent as the <c>anthropic-workspace-id</c> header. Only needed
+    /// for an organization-level key (<c>sk-ant-usr-...</c>); a key created inside a workspace already knows it.
+    /// </summary>
+    public string? AnthropicWorkspaceId { get; set; }
+
     /// <summary>The Claude model that lists the objects.</summary>
     public string InventoryModel { get; set; } = "claude-haiku-5-5";
 
@@ -29,6 +35,12 @@ public sealed class AiOptions
 
     /// <summary>How many SAM 3 requests one analysis sends at once (one request per object).</summary>
     public int SegmentationParallelism { get; set; } = 4;
+
+    /// <summary>
+    /// When set (with the fakes off), real analyses of the sample photos are saved in this folder
+    /// as <c>name.sam3.json</c>, ready to become free fake data. Development use only.
+    /// </summary>
+    public string? RecordSamplesTo { get; set; }
 
     /// <summary>How many rooms are analyzed at the same time.</summary>
     public int MaxConcurrentAnalyses { get; set; } = 2;
