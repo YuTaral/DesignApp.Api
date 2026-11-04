@@ -15,11 +15,15 @@ var api = builder.AddProject<Projects.DesignApp_Api>("api")
 var webPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", "..", "DesignApp.Web"));
 if (Directory.Exists(webPath))
 {
-    builder.AddViteApp("web", webPath)
+    var web = builder.AddViteApp("web", webPath)
         .WithEnvironment("VITE_API_URL", api.GetEndpoint("https"))
         .WithReference(api)
         .WaitFor(api)
         .WithExternalHttpEndpoints();
+
+    // Aspire picks the web port at run time, so the API learns its CORS origin from here.
+    // Index 1 keeps the appsettings origin (index 0, used by a plain `npm run dev`) allowed.
+    api.WithEnvironment("Cors__WebOrigins__1", web.GetEndpoint("http"));
 }
 
 builder.Build().Run();
