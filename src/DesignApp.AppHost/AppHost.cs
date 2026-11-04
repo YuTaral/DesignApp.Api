@@ -29,18 +29,18 @@ var api = builder.AddProject<Projects.DesignApp_Api>("api")
     .WithExternalHttpEndpoints();
 
 // The frontend is a separate repository. Clone DesignApp.Web next to DesignApp.Api
-// (both inside one DesignApp folder) and the AppHost runs it with the API URL wired in.
+// (both inside one DesignApp folder) and the AppHost runs it. The reference gives the Vite
+// dev server the API's address, and it forwards /api there, so the browser stays on one origin.
 var webPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", "..", "DesignApp.Web"));
 if (Directory.Exists(webPath))
 {
     var web = builder.AddViteApp("web", webPath)
-        .WithEnvironment("VITE_API_URL", api.GetEndpoint("https"))
         .WithReference(api)
         .WaitFor(api)
         .WithExternalHttpEndpoints();
 
-    // Aspire picks the web port at run time, so the API learns its CORS origin from here.
-    // Index 1 keeps the appsettings origin (index 0, used by a plain `npm run dev`) allowed.
+    // Only needed if the web app is pointed straight at the API (VITE_API_URL). Aspire picks the
+    // web port at run time; index 1 keeps the appsettings origin (index 0) allowed too.
     api.WithEnvironment("Cors__WebOrigins__1", web.GetEndpoint("http"));
 }
 
