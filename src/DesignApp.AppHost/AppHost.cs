@@ -36,13 +36,16 @@ var api = builder.AddProject<Projects.DesignApp_Api>("api")
 var webPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", "..", "DesignApp.Web"));
 if (Directory.Exists(webPath))
 {
+    // Always http://localhost:5173, so a browser tab left open from an earlier run still works
+    // after a restart (a random port per run left old tabs pointing at nothing).
     var web = builder.AddViteApp("web", webPath)
+        .WithEndpoint("http", endpoint => endpoint.Port = 5173)
         .WithReference(api)
         .WaitFor(api)
         .WithExternalHttpEndpoints();
 
-    // Only needed if the web app is pointed straight at the API (VITE_API_URL). Aspire picks the
-    // web port at run time; index 1 keeps the appsettings origin (index 0) allowed too.
+    // Only needed if the web app is pointed straight at the API (VITE_API_URL). Index 1 keeps
+    // the appsettings origin (index 0) allowed too.
     api.WithEnvironment("Cors__WebOrigins__1", web.GetEndpoint("http"));
 }
 
