@@ -24,6 +24,11 @@
     <InternalsVisibleTo Include="DesignApp.UnitTests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Hand-traced analyses of the sample room photos, used by the fake AI providers. -->
+    <EmbeddedResource Include="Ai\Fakes\Samples\*.json" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

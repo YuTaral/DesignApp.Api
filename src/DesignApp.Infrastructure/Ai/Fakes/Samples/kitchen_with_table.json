@@ -1,0 +1,56 @@
+{
+  "name": "kitchen_with_table",
+  "width": 721,
+  "height": 628,
+  "fingerprint": "cab19775838672767d7e7a75726d6c78cbbba0728b8e615e6c6e6a686d67667ecbbca27c9da06c95857c7778786f738bcbbea480a4b7808c95928e8e807b7d97cbc1a7869fb9888ca9b3b6b167636595cbc3a98999bea07da9b898a6201f1c7bcbc5ac8cb1ccd7b7abaca0a15b6d6f9bcbc7ae90c9c7c1bcb7b6a799928c8681cbc9b66399a5858189857599918e8783cbc5bb7b827365585362657358848581cac5d2996c65a2403497725458918379cadfd5aaa06690503b9d704a50b19f93e7e5c2d6a0a265908559956c7c869090e5e2ccdea9b8a3a5a36e73737d747e7fe4e0ccd1b6c1a899887a8276817b7e7ed5cfcac3b6b8aea8a4a0a09897979494",
+  "objects": [
+    { "label": "beige tile floor", "category": "Floor", "shapes": [ { "polygon": [0,440, 92,385, 122,420, 190,430, 721,430, 721,628, 0,628] } ] },
+    { "label": "oak kitchen island", "category": "Furniture", "shapes": [ { "polygon": [190,283, 721,283, 721,430, 190,430] } ] },
+    { "label": "tall oak cabinets", "category": "Furniture", "shapes": [
+      { "polygon": [122,12, 287,12, 287,268, 183,268, 183,428, 122,425] },
+      { "polygon": [530,10, 700,10, 700,173, 543,173, 543,150, 530,150] }
+    ] },
+    { "label": "oak wall cabinets", "category": "Furniture", "shapes": [ { "polygon": [287,10, 530,10, 530,150, 287,150] } ] },
+    { "label": "floor-to-ceiling windows", "category": "Fixture", "shapes": [ { "polygon": [0,0, 92,0, 92,385, 0,440] } ] },
+    { "label": "left wall", "category": "Wall", "shapes": [ { "polygon": [92,0, 122,0, 122,420, 92,420] } ] },
+    { "label": "right wall", "category": "Wall", "shapes": [ { "polygon": [700,0, 721,0, 721,262, 700,262] } ] },
+    { "label": "marble backsplash", "category": "Wall", "shapes": [ { "polygon": [287,152, 530,152, 530,245, 287,245] } ] },
+    { "label": "built-in ovens", "category": "Fixture", "shapes": [ { "polygon": [543,173, 695,173, 695,250, 543,250] } ] },
+    { "label": "white island countertop", "category": "Fixture", "shapes": [ { "polygon": [183,262, 721,262, 721,283, 190,283] } ] },
+    { "label": "round walnut table", "category": "Furniture", "shapes": [
+      { "polygon": [190,343, 230,330, 280,323, 335,320, 400,322, 460,330, 505,345, 515,358, 500,368, 450,378, 390,385, 330,385, 270,380, 220,370, 195,360] },
+      { "line": [352,385, 352,570], "width": 12 },
+      { "line": [352,400, 250,538], "width": 12 },
+      { "line": [352,400, 465,538], "width": 12 }
+    ] },
+    { "label": "pendant lamp", "category": "Lighting", "shapes": [
+      { "polygon": [305,95, 335,85, 375,85, 403,118, 380,122, 365,130, 340,130, 325,122, 305,120] },
+      { "line": [353,0, 353,88], "width": 2 }
+    ] },
+    { "label": "vase with pampas grass", "category": "Decor", "shapes": [
+      { "polygon": [285,222, 300,220, 315,225, 322,245, 312,262, 293,263, 285,245] },
+      { "polygon": [258,170, 290,165, 300,160, 348,172, 340,200, 315,222, 290,222] }
+    ] },
+    { "label": "white jug", "category": "Decor", "shapes": [ { "polygon": [358,293, 375,288, 390,293, 392,345, 360,345] } ] },
+    { "label": "cutting boards", "category": "Decor", "shapes": [ { "polygon": [462,198, 500,190, 508,240, 462,240] } ] },
+    { "label": "front left chair", "category": "Furniture", "shapes": [
+      { "polygon": [117,380, 125,368, 175,372, 245,385, 262,405, 245,400, 200,393, 150,388, 130,392] },
+      { "polygon": [138,443, 175,428, 230,430, 280,440, 285,455, 255,470, 210,475, 160,468] },
+      { "line": [130,390, 140,445], "width": 6 },
+      { "line": [245,395, 270,450], "width": 7 },
+      { "line": [150,465, 112,575], "width": 7 },
+      { "line": [190,472, 195,602], "width": 7 },
+      { "line": [270,470, 290,568], "width": 7 }
+    ] },
+    { "label": "front right chair", "category": "Furniture", "shapes": [
+      { "polygon": [465,385, 500,370, 590,362, 600,370, 580,385, 520,390, 480,402] },
+      { "polygon": [430,440, 470,428, 540,428, 580,435, 585,450, 560,465, 500,470, 445,462] },
+      { "line": [475,465, 425,568], "width": 7 },
+      { "line": [500,400, 540,600], "width": 7 },
+      { "line": [585,445, 615,565], "width": 7 }
+    ] },
+    { "label": "back left chair", "category": "Furniture", "shapes": [ { "polygon": [122,335, 140,320, 205,318, 235,330, 228,345, 195,338, 150,340, 135,350] } ] },
+    { "label": "back middle chair", "category": "Furniture", "shapes": [ { "polygon": [293,318, 310,310, 390,310, 405,322, 385,330, 300,330] } ] },
+    { "label": "back right chair", "category": "Furniture", "shapes": [ { "polygon": [462,330, 475,318, 560,318, 570,330, 555,345, 470,345] } ] }
+  ]
+}

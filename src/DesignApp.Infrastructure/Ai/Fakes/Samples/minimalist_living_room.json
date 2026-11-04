@@ -1,0 +1,33 @@
+{
+  "name": "minimalist_living_room",
+  "width": 736,
+  "height": 920,
+  "fingerprint": "c7c5c4c5c5c6c7c7c6c6c5c3c2c0bfbecac9c8c8c8c9cacbcac9c8c5c3c2c0bdb3bcc0c6cccdccc8c3b5b8b8b4b0ada9c9cfccc2968f97aab3b4b2b1afadaaa6e3ebe9e5ac969eb25a8a674646acb3abe1efeeebb1a895b24d31161230b1b391dff4f2ecac8192ac89877e76686e9095d3ddcebc9c9492b1c1c7c6bfa7a69d74bcbcaca7d5d9ad899ca49eb19da4a46aa2a7c4d2c8a4a7b4babbbeb784766245d5dad3d5d9dad4bcb6adbbbcb9b4b18fdcd9d6b1a0ccc1b7c4b7a9b3b7b8bb8bcdd3d0aab4caccb6b1ba96767e899388bab9bebcc7c5ba7d748f7c6770767c82bfb7b0a7a1a7a35e5f716b646d737678b5aaa9a4a49c94837e7e817e7c7a7879",
+  "objects": [
+    { "label": "oak floor", "category": "Floor", "shapes": [ { "polygon": [300,485, 455,500, 555,505, 736,520, 736,920, 0,920, 0,740] } ] },
+    { "label": "back wall", "category": "Wall", "shapes": [ { "polygon": [197,172, 260,183, 736,150, 736,460, 197,460] } ] },
+    { "label": "ceiling", "category": "Ceiling", "shapes": [ { "polygon": [0,0, 736,0, 736,150, 260,185, 197,172, 0,152] } ] },
+    { "label": "sectional sofa", "category": "Furniture", "shapes": [ { "polygon": [0,490, 55,478, 160,452, 330,448, 342,470, 345,555, 400,575, 455,608, 452,630, 380,742, 360,760, 318,868, 175,808, 160,805, 0,740] } ] },
+    { "label": "sheer curtains", "category": "Textile", "shapes": [ { "polygon": [0,152, 197,173, 205,465, 100,485, 0,500] } ] },
+    { "label": "white rug", "category": "Textile", "shapes": [ { "polygon": [440,515, 455,510, 500,515, 575,520, 590,540, 650,555, 715,580, 715,720, 605,700, 515,690, 515,670, 470,605, 455,605, 440,598] } ] },
+    { "label": "white sideboard", "category": "Furniture", "shapes": [ { "polygon": [300,398, 700,423, 700,470, 555,505, 455,500, 300,485] } ] },
+    { "label": "wall-mounted TV", "category": "Fixture", "shapes": [ { "polygon": [377,240, 588,240, 583,362, 383,362] } ] },
+    { "label": "armchair", "category": "Furniture", "shapes": [ { "polygon": [555,448, 580,445, 640,437, 710,445, 735,458, 735,520, 720,545, 680,555, 665,580, 655,560, 565,530, 560,510, 555,470] } ] },
+    { "label": "lettered cushion", "category": "Textile", "shapes": [ { "polygon": [612,447, 650,445, 680,465, 665,490, 625,485, 612,470] } ] },
+    { "label": "marble side table", "category": "Furniture", "shapes": [ { "polygon": [368,668, 400,655, 515,670, 515,840, 465,852, 370,810] } ] },
+    { "label": "white ottoman", "category": "Furniture", "shapes": [ { "polygon": [308,515, 360,510, 425,525, 440,545, 440,590, 420,600, 360,600, 315,590, 310,560] } ] },
+    { "label": "pumpkin pouf", "category": "Furniture", "shapes": [ { "ellipse": [522,545, 52,37] } ] },
+    { "label": "chunky knit throw", "category": "Textile", "shapes": [ { "polygon": [180,448, 225,443, 320,470, 330,530, 315,560, 290,570, 255,560, 240,520, 210,485] } ] },
+    { "label": "knot cushions", "category": "Textile", "shapes": [ { "ellipse": [55,522, 55,40] }, { "ellipse": [313,615, 52,32] } ] },
+    { "label": "arc floor lamp", "category": "Lighting", "shapes": [
+      { "polygon": [255,302, 322,302, 322,322, 305,325, 270,325, 255,320] },
+      { "line": [287,272, 287,300], "width": 3 },
+      { "line": [285,280, 250,280, 220,295, 208,330, 207,445], "width": 3 }
+    ] },
+    { "label": "mushroom table lamp", "category": "Lighting", "shapes": [ { "polygon": [392,640, 412,622, 432,625, 440,645, 425,655, 420,690, 400,695, 410,655, 395,650] } ] },
+    { "label": "ceramic pumpkin", "category": "Decor", "shapes": [ { "ellipse": [473,665, 22,33] } ] },
+    { "label": "vase with eucalyptus", "category": "Decor", "shapes": [ { "polygon": [222,380, 250,355, 290,365, 300,395, 280,420, 275,445, 255,450, 250,420, 230,400] } ] },
+    { "label": "vase with flowers", "category": "Decor", "shapes": [ { "polygon": [575,355, 600,350, 640,360, 665,370, 640,400, 635,425, 605,428, 600,400, 580,385] } ] },
+    { "label": "wire magazine rack", "category": "Decor", "shapes": [ { "polygon": [452,465, 510,460, 512,505, 455,508] } ] }
+  ]
+}

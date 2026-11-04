@@ -1,0 +1,41 @@
+{
+  "name": "kitchen",
+  "width": 940,
+  "height": 564,
+  "fingerprint": "cad6d9d2d3dbcecfd2d4d5dfd1cacdcdd2d0d8d6ccdae3e3e3e3e3d0c0cdc9c8d2d1d5d2c9c7cccbcac6c0b5c1cfcec3d3d1cabebbc8cfcecdcbc4bdcad4cec3d4d17c7181c3cfceced0c5c0dbd8cec4d5d2716572a5c8ccd0ccc0bde7dbcfc7d7d3736771a1bbb9c4c3b5bee6e3d0cfd8d374696ca1c7ac8dbac5b9dbefb6c1d8d373696b97aeb9c1b6baaca5e4a3c1d3d07369767c8baea4ae987e85a39ac3d6d170646a8495a394aa8995ac9d86c1d6d07859648993a1a69e8998719c9cb7d6c379535f8692a1a59a8592879697b4d6b1584a607e95a1a2998798769697b3d4ac58336185a8b3b4ae9ea6859596b2d4aa473e5da5bec7c8c5beb9aa9492b0",
+  "objects": [
+    { "label": "back wall", "category": "Wall", "shapes": [ { "polygon": [288,92, 690,92, 660,152, 320,152] } ] },
+    { "label": "left wall", "category": "Wall", "shapes": [ { "polygon": [88,0, 215,0, 290,92, 320,190, 320,564, 88,564] } ] },
+    { "label": "right wall", "category": "Wall", "shapes": [ { "polygon": [700,0, 940,0, 940,564, 900,564, 900,68, 690,92] } ] },
+    { "label": "ceiling", "category": "Ceiling", "shapes": [ { "polygon": [215,0, 705,0, 690,92, 288,92] } ] },
+    { "label": "tile floor", "category": "Floor", "shapes": [ { "polygon": [320,510, 348,478, 633,478, 705,540, 705,564, 320,564] } ] },
+    { "label": "white door", "category": "Fixture", "shapes": [ { "polygon": [0,0, 88,0, 88,564, 0,564] } ] },
+    { "label": "steel fridge freezer", "category": "Fixture", "shapes": [ { "polygon": [133,147, 262,147, 320,190, 320,560, 300,564, 133,564] } ] },
+    { "label": "white upper cabinets", "category": "Furniture", "shapes": [
+      { "polygon": [320,150, 660,150, 660,280, 320,280] },
+      { "polygon": [660,118, 747,118, 747,268, 660,280] },
+      { "polygon": [757,68, 905,68, 905,245, 757,245] }
+    ] },
+    { "label": "glass display cabinets", "category": "Fixture", "shapes": [
+      { "polygon": [357,200, 440,200, 440,236, 357,236] },
+      { "polygon": [543,200, 625,200, 625,236, 543,236] }
+    ] },
+    { "label": "range hood", "category": "Fixture", "shapes": [ { "polygon": [440,235, 540,235, 540,250, 440,250] } ] },
+    { "label": "mosaic backsplash", "category": "Wall", "shapes": [
+      { "polygon": [320,282, 440,282, 440,250, 540,250, 540,282, 660,282, 690,280, 690,365, 320,365] },
+      { "polygon": [690,280, 757,262, 905,228, 905,385, 690,365] }
+    ] },
+    { "label": "window", "category": "Fixture", "shapes": [ { "polygon": [758,248, 822,248, 822,335, 758,335] } ] },
+    { "label": "quartz countertop", "category": "Fixture", "shapes": [ { "polygon": [320,360, 633,360, 660,365, 905,375, 905,392, 760,392, 705,382, 633,372, 320,372] } ] },
+    { "label": "grey base cabinets", "category": "Furniture", "shapes": [
+      { "polygon": [320,372, 633,372, 633,478, 348,478, 320,510] },
+      { "polygon": [633,372, 705,382, 705,540, 633,478] },
+      { "polygon": [705,382, 905,392, 905,564, 705,564] }
+    ] },
+    { "label": "wicker baskets", "category": "Decor", "shapes": [ { "polygon": [712,400, 757,410, 757,545, 712,525] } ] },
+    { "label": "potted plant", "category": "Decor", "shapes": [ { "polygon": [105,395, 130,380, 160,385, 175,420, 215,385, 240,380, 230,430, 215,520, 215,564, 135,564, 135,520, 110,460] } ] },
+    { "label": "small plant", "category": "Decor", "shapes": [ { "polygon": [218,120, 262,120, 262,147, 218,147] } ] },
+    { "label": "cookbook", "category": "Decor", "shapes": [ { "polygon": [640,320, 670,320, 670,362, 640,362] } ] },
+    { "label": "stacked bowls", "category": "Decor", "shapes": [ { "polygon": [800,345, 838,345, 838,378, 800,378] } ] }
+  ]
+}

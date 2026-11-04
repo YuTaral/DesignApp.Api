@@ -82,7 +82,7 @@ dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup
 
 ### AI providers and secrets
 
-In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). They give every photo the same plausible layout (walls, floor, a sofa, a rug, a lamp, a plant), with a short delay per step so the progress UI is visible. The whole app runs without API keys and at no cost. The tests use the same fakes, with no delay.
+In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). The five sample photos (bathroom, bedroom, two kitchens, living room) are recognized by a 16 x 16 brightness fingerprint and get their real objects, traced by hand in `src/DesignApp.Infrastructure/Ai/Fakes/Samples/*.json` (polygons, ellipses and thick lines in photo pixels). Any other photo gets a generic layout (walls, floor, a sofa, a rug, a lamp, a plant). Each step waits briefly so the progress UI is visible. The whole app runs without API keys and at no cost. The tests use the same fakes, with no delay.
 
 To call the real Claude and SAM 3 models, store the keys with user secrets (they are never committed) and switch the fakes off:
 

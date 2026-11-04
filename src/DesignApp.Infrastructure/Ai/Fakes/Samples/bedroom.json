@@ -1,0 +1,33 @@
+{
+  "name": "bedroom",
+  "width": 651,
+  "height": 468,
+  "fingerprint": "a9bbc3c4c5c5c8ccd0d5dce0dbcfbeb1a1b9bec0c1c4c8ccd2d9e2e3cfb7acb29f96a4adb2b7c3cdd8e1e5dec0b5afb0a4606d7d8a929bb5d2d8dbdabd8a88a385506162555f8492d9e3d8e49e6d96a8924c746f535c9c97dbeae1e79593aaad8c50827d565eab9fdce7d5df9c6f9fba814c9084595fb3a6dfe6c9d5b892aac6a45d968a4950bcaadad6a8a3818da7c0786e88863b3bc2cad1d0c1988a5657b3718c90937285a6bdd6bfbad2c38e8faa97b3bcd4ccbf88768a89949b934b367e8bb6a0a6b48d784556574337292e37727a916f70907a746034374b667f8f84747889564d5362796d6484a09fa09c9793976745464b728f9da1a5acadada6a2a2",
+  "objects": [
+    { "label": "white right wall", "category": "Wall", "shapes": [ { "polygon": [485,70, 651,0, 651,385, 485,345] } ] },
+    { "label": "concrete feature wall", "category": "Wall", "shapes": [ { "polygon": [47,78, 305,102, 305,318, 47,322] } ] },
+    { "label": "white back wall", "category": "Wall", "shapes": [ { "polygon": [305,102, 430,108, 485,95, 485,345, 305,318] } ] },
+    { "label": "left wall", "category": "Wall", "shapes": [ { "polygon": [0,25, 47,78, 47,322, 0,332] } ] },
+    { "label": "ceiling", "category": "Ceiling", "shapes": [ { "polygon": [0,0, 651,0, 485,68, 485,95, 430,108, 305,102, 47,78, 0,25] } ] },
+    { "label": "grey plank floor", "category": "Floor", "shapes": [ { "polygon": [0,332, 47,322, 316,312, 545,340, 651,385, 651,468, 0,468] } ] },
+    { "label": "oak bed", "category": "Furniture", "shapes": [ { "polygon": [253,287, 300,270, 408,256, 408,233, 625,245, 625,300, 545,312, 545,345, 380,373, 380,398, 345,372, 253,330] } ] },
+    { "label": "upholstered headboard", "category": "Furniture", "shapes": [ { "polygon": [408,235, 578,247, 578,282, 408,268] } ] },
+    { "label": "mint throw blanket", "category": "Textile", "shapes": [ { "polygon": [270,272, 330,268, 410,282, 460,300, 470,322, 440,325, 385,335, 370,330, 350,305, 300,288] } ] },
+    { "label": "pillows", "category": "Textile", "shapes": [ { "polygon": [378,268, 420,262, 450,262, 470,265, 495,280, 545,282, 548,297, 515,298, 480,292, 450,290, 410,282, 380,280] } ] },
+    { "label": "patterned cushion", "category": "Textile", "shapes": [ { "polygon": [455,263, 500,262, 505,280, 480,292, 460,285] } ] },
+    { "label": "sliding wardrobe", "category": "Furniture", "shapes": [ { "polygon": [68,115, 316,135, 316,312, 122,318, 122,327, 70,327] } ] },
+    { "label": "oak chest of drawers", "category": "Furniture", "shapes": [ { "polygon": [0,255, 58,252, 58,415, 12,425, 0,425] } ] },
+    { "label": "floating nightstand", "category": "Furniture", "shapes": [ { "polygon": [545,310, 648,318, 648,352, 625,357, 625,375, 600,375, 600,352, 545,345] } ] },
+    { "label": "patchwork rug", "category": "Textile", "shapes": [ { "polygon": [65,350, 255,333, 383,408, 265,430, 150,462, 45,462] } ] },
+    { "label": "knitted pouf", "category": "Furniture", "shapes": [ { "polygon": [88,375, 100,362, 140,355, 200,358, 210,372, 212,415, 200,430, 150,455, 95,450, 88,420] } ] },
+    { "label": "window", "category": "Fixture", "shapes": [ { "polygon": [343,118, 410,118, 410,262, 343,262] } ] },
+    { "label": "side window", "category": "Fixture", "shapes": [ { "polygon": [432,115, 483,110, 483,228, 432,228] } ] },
+    { "label": "portrait canvas", "category": "Decor", "shapes": [ { "polygon": [507,110, 617,85, 617,222, 507,222] } ] },
+    { "label": "potted plant", "category": "Decor", "shapes": [ { "polygon": [430,178, 458,178, 458,228, 430,228] } ] },
+    { "label": "tripod floor lamp", "category": "Lighting", "shapes": [
+      { "polygon": [5,188, 45,188, 45,212, 5,212] },
+      { "line": [20,212, 8,255], "width": 3 },
+      { "line": [20,212, 37,255], "width": 3 }
+    ] }
+  ]
+}

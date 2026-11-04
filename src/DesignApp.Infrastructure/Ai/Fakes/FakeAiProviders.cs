@@ -7,13 +7,14 @@ using Microsoft.Extensions.Options;
 namespace DesignApp.Infrastructure.Ai.Fakes;
 
 /// <summary>
-/// Stands in for Claude in development and tests: returns the same plausible room layout for any
-/// photo (walls above, floor below, a sofa, a rug, a lamp and a plant), for free and offline.
+/// Stands in for Claude in development and tests, for free and offline. A sample room photo
+/// (see <see cref="SampleRooms"/>) gets its own hand-traced objects; any other photo gets the same
+/// plausible <see cref="Layout"/> (walls above, floor below, a sofa, a rug, a lamp and a plant).
 /// </summary>
 /// <param name="options">Supplies the delay that makes the progress UI visible.</param>
 internal sealed class FakeInventoryProvider(IOptions<AiOptions> options) : IObjectInventoryProvider
 {
-    /// <summary>The layout every photo gets.</summary>
+    /// <summary>The layout every photo that isn't a sample gets.</summary>
     internal static readonly IReadOnlyList<InventoryItem> Layout =
     [
         new("back wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 0.62), HexColor.Parse("#E8E2D6")),
@@ -28,13 +29,14 @@ internal sealed class FakeInventoryProvider(IOptions<AiOptions> options) : IObje
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
-        return Result.Success(Layout);
+        return Result.Success(SampleRooms.Match(image)?.Inventory() ?? Layout);
     }
 }
 
 /// <summary>
-/// Stands in for SAM 3: outlines each item from its box alone. Walls and floors fill their box;
-/// everything else becomes an ellipse inside it, so outlines look like objects rather than boxes.
+/// Stands in for SAM 3. A sample room photo gets its hand-traced outlines. For any other photo each
+/// item is outlined from its box alone: walls and floors fill their box, everything else becomes an
+/// ellipse inside it, so outlines look like objects rather than boxes.
 /// </summary>
 /// <param name="options">Supplies the delay that makes the progress UI visible.</param>
 internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : ISegmentationProvider
@@ -44,10 +46,11 @@ internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : IS
         AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
-        return [.. items.Select(item => (ObjectMask?)Outline(image.Width, image.Height, item))];
+        var sample = SampleRooms.Match(image);
+        return [.. items.Select(item => sample?.Outline(item.Label, image.Width, image.Height) ?? Outline(image.Width, image.Height, item))];
     }
 
-    /// <summary>Draws one item's fake outline.</summary>
+    /// <summary>Draws one item's outline from its box, for photos that aren't samples.</summary>
     /// <param name="width">Image width in pixels.</param>
     /// <param name="height">Image height in pixels.</param>
     /// <param name="item">The item to outline.</param>
