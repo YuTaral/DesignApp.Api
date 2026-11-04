@@ -82,7 +82,7 @@ dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup
 
 ### AI providers and secrets
 
-In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). The five sample photos (bathroom, bedroom, two kitchens, living room) are recognized by a 16 x 16 brightness fingerprint and get their real objects, traced by hand in `src/DesignApp.Infrastructure/Ai/Fakes/Samples/*.json` (polygons, ellipses and thick lines in photo pixels). Any other photo gets a generic layout (walls, floor, a sofa, a rug, a lamp, a plant). Each step waits briefly so the progress UI is visible. The whole app runs without API keys and at no cost. The tests use the same fakes, with no delay.
+In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). The five sample photos (bathroom, bedroom, two kitchens, living room) are recognized by a 16 x 16 brightness fingerprint and get their real objects: SAM 3's recorded masks (`Samples/*.sam3.json`), with hand-traced outlines (`Samples/*.json`, polygons, ellipses and thick lines) as the fallback. Any other photo gets a generic layout (walls, floor, a sofa, a rug, a lamp, a plant). Each step waits briefly so the progress UI is visible. The whole app runs without API keys and at no cost. The tests use the same fakes, with no delay.
 
 To call the real Claude and SAM 3 models, store the keys with user secrets (they are never committed) and switch the fakes off:
 
@@ -91,6 +91,10 @@ dotnet user-secrets --project src/DesignApp.Api set "Ai:AnthropicApiKey" "<your 
 dotnet user-secrets --project src/DesignApp.Api set "Ai:FalKey" "<your key>"
 dotnet user-secrets --project src/DesignApp.Api set "Ai:UseFakes" "false"
 ```
+
+If your Anthropic key belongs to the organization rather than a workspace (it starts with `sk-ant-usr-`), also set `Ai:AnthropicWorkspaceId` to the workspace's id (`wrkspc_...`, shown in the Claude Console under Settings > Workspaces).
+
+To refresh the sample data with real results, set `Ai:RecordSamplesTo` to a folder as well: real analyses of the five sample photos are saved there as `<photo>.sam3.json`. Copied into `src/DesignApp.Infrastructure/Ai/Fakes/Samples/`, a recording replaces the hand-traced outlines of that photo, so the fakes show real SAM 3 edges for free. The current samples were recorded this way.
 
 Outside Development the fakes are off, and the API refuses to start without both keys. A photo costs a few cents: one Claude call plus one SAM 3 call per object. Other settings in the `Ai` section: `InventoryModel` (default `claude-haiku-5-5`), `SegmentationParallelism` (4) and `MaxConcurrentAnalyses` (2).
 

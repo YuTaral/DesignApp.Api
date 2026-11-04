@@ -1,0 +1,68 @@
+using System.Text.Json;
+using DesignApp.Application.Analysis;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SkiaSharp;
+
+namespace DesignApp.Infrastructure.Ai.Fakes;
+
+/// <summary>
+/// Wraps the real SAM 3 provider. When a sample room photo is analyzed for real, it saves what
+/// Claude and SAM 3 returned as <c>name.sam3.json</c> in <see cref="AiOptions.RecordSamplesTo"/>.
+/// Copied into <c>Ai/Fakes/Samples</c>, such a file makes the fakes show real SAM 3 outlines for
+/// free. Only on when that setting is given; other photos pass straight through.
+/// </summary>
+/// <param name="inner">The real segmentation provider.</param>
+/// <param name="options">Supplies the folder to record into.</param>
+/// <param name="logger">Records where each file was written.</param>
+internal sealed partial class RecordingSegmentationProvider(
+    ISegmentationProvider inner,
+    IOptions<AiOptions> options,
+    ILogger<RecordingSegmentationProvider> logger) : ISegmentationProvider
+{
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<ObjectMask?>> SegmentAsync(
+        AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
+    {
+        var masks = await inner.SegmentAsync(image, items, cancellationToken);
+        if (options.Value.RecordSamplesTo is { Length: > 0 } folder && SampleRooms.Match(image) is { } sample)
+        {
+            var recorded = new
+            {
+                name = sample.Name,
+                width = image.Width,
+                height = image.Height,
+                fingerprint = sample.Fingerprint,
+                objects = items.Zip(masks)
+                    .Where(pair => pair.Second is not null)
+                    .Select(pair => new
+                    {
+                        label = pair.First.Label,
+                        category = pair.First.Category.ToString(),
+                        shapes = new[] { new { mask = Convert.ToBase64String(EncodePng(pair.Second!)) } },
+                    }),
+            };
+            Directory.CreateDirectory(folder);
+            var path = Path.Combine(folder, $"{sample.Name}.sam3.json");
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(recorded, Json), cancellationToken);
+            LogRecorded(sample.Name, path);
+        }
+        return masks;
+    }
+
+    /// <summary>Encodes a mask as a grayscale PNG (white = object).</summary>
+    /// <param name="mask">The mask.</param>
+    private static byte[] EncodePng(ObjectMask mask)
+    {
+        using var bitmap = new SKBitmap(new SKImageInfo(mask.Width, mask.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+        mask.Coverage.CopyTo(bitmap.GetPixelSpan());
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        return png.ToArray();
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Recorded the real analysis of sample {Sample} to {Path}")]
+    private partial void LogRecorded(string sample, string path);
+}

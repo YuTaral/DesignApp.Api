@@ -11,6 +11,8 @@ namespace DesignApp.UnitTests.Analysis;
 public class SampleRoomsTests
 {
     private static readonly IOptions<AiOptions> NoDelay = Options.Create(new AiOptions { UseFakes = true });
+    private static readonly System.Text.Json.JsonSerializerOptions SampleJson =
+        new(System.Text.Json.JsonSerializerDefaults.Web) { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
 
     public static TheoryData<string> SampleNames() => [.. SampleRooms.All.Select(s => s.Name)];
 
@@ -62,31 +64,65 @@ public class SampleRoomsTests
         Assert.All(masks, m => Assert.Contains(m!.Coverage, c => c == 255));
     }
 
-    [Fact]
-    public void Outlines_are_drawn_at_the_analysis_size()
+    [Theory]
+    [MemberData(nameof(SampleNames))]
+    public void Outlines_are_drawn_at_the_analysis_size(string name)
     {
-        var bathroom = SampleRooms.All.Single(s => s.Name == "bathroom");
+        var sample = SampleRooms.All.Single(s => s.Name == name);
+        var label = sample.Objects[0].Label;
 
-        var full = bathroom.Outline("round mirror", 975, 477)!;
-        var half = bathroom.Outline("round mirror", 487, 238)!;
+        var full = sample.Outline(label, sample.Width, sample.Height)!;
+        var half = sample.Outline(label, sample.Width / 2, sample.Height / 2)!;
 
-        Assert.Equal((487, 238), (half.Width, half.Height));
-        Assert.Equal(255, full.Coverage[102 * 975 + 456]);  // the mirror's center
-        Assert.Equal(255, half.Coverage[51 * 487 + 228]);
-        Assert.Equal(0, full.Coverage[10 * 975 + 10]);      // the left wall
-        var ratio = full.Coverage.Count(c => c == 255) / (double)half.Coverage.Count(c => c == 255);
+        Assert.Equal((sample.Width / 2, sample.Height / 2), (half.Width, half.Height));
+        var ratio = full.Coverage.Count(c => c >= 128) / (double)half.Coverage.Count(c => c >= 128);
         Assert.InRange(ratio, 3.6, 4.4);
     }
 
-    [Fact]
-    public void Inventory_boxes_come_from_the_outlines()
+    [Theory]
+    [MemberData(nameof(SampleNames))]
+    public void Inventory_boxes_come_from_the_outlines(string name)
     {
-        var bathroom = SampleRooms.All.Single(s => s.Name == "bathroom");
+        var sample = SampleRooms.All.Single(s => s.Name == name);
 
-        var mirror = bathroom.Inventory().Single(i => i.Label == "round mirror");
+        foreach (var item in sample.Inventory())
+        {
+            var mask = sample.Outline(item.Label, sample.Width, sample.Height)!;
+            var (minX, minY, maxX, maxY) = (int.MaxValue, int.MaxValue, -1, -1);
+            for (var y = 0; y < mask.Height; y++)
+                for (var x = 0; x < mask.Width; x++)
+                    if (mask.Coverage[y * mask.Width + x] >= 128)
+                        (minX, minY, maxX, maxY) = (Math.Min(minX, x), Math.Min(minY, y), Math.Max(maxX, x), Math.Max(maxY, y));
 
-        Assert.Equal((377 / 975.0, 23 / 477.0), (mirror.Box.X, mirror.Box.Y), new ToleranceComparer(0.002));
-        Assert.Equal((158 / 975.0, 158 / 477.0), (mirror.Box.Width, mirror.Box.Height), new ToleranceComparer(0.002));
+            // Within 2 px: polygon edges and stroke ends round to whole pixels.
+            Assert.InRange(item.Box.X * sample.Width, minX - 2, minX + 2);
+            Assert.InRange(item.Box.Y * sample.Height, minY - 2, minY + 2);
+            Assert.InRange((item.Box.X + item.Box.Width) * sample.Width, maxX - 1, maxX + 3);
+            Assert.InRange((item.Box.Y + item.Box.Height) * sample.Height, maxY - 1, maxY + 3);
+        }
+    }
+
+    [Fact]
+    public void A_recorded_mask_plays_back_exactly()
+    {
+        // A 40x20 mask covering the left half, as the recorder stores it.
+        using var bitmap = new SKBitmap(new SKImageInfo(40, 20, SKColorType.Gray8, SKAlphaType.Opaque));
+        var coverage = new byte[40 * 20];
+        for (var y = 0; y < 20; y++)
+            Array.Fill(coverage, (byte)255, y * 40, 20);
+        coverage.CopyTo(bitmap.GetPixelSpan());
+        using var png = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100);
+        var json = $$"""
+            {"name": "test", "width": 40, "height": 20, "fingerprint": "{{new string('0', 512)}}",
+             "objects": [{"label": "sofa", "category": "Furniture", "shapes": [{"mask": "{{Convert.ToBase64String(png.ToArray())}}"}]}]}
+            """;
+        var sample = System.Text.Json.JsonSerializer.Deserialize<SampleRoom>(json, SampleJson)!;
+
+        var mask = sample.Outline("sofa", 40, 20)!;
+        var box = sample.Inventory().Single().Box;
+
+        Assert.Equal(coverage, mask.Coverage);
+        Assert.Equal((0, 0, 0.5, 1), (box.X, box.Y, box.Width, box.Height));
     }
 
     [Fact]

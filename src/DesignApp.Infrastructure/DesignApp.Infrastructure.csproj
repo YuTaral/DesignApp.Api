@@ -27,6 +27,8 @@
   <ItemGroup>
     <!-- Hand-traced analyses of the sample room photos, used by the fake AI providers. -->
     <EmbeddedResource Include="Ai\Fakes\Samples\*.json" />
+    <!-- Visual Studio's quick up-to-date check otherwise misses sample files added or edited outside it. -->
+    <UpToDateCheckInput Include="Ai\Fakes\Samples\*.json" />
   </ItemGroup>
 
   <PropertyGroup>
