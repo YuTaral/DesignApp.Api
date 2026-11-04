@@ -9,6 +9,15 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// The API needs the database and storage that the AppHost starts. Fail with directions rather
+// than a connection-string error when someone starts this project on its own.
+if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString(DesignApp.Infrastructure.DependencyInjection.DatabaseName)))
+{
+    throw new InvalidOperationException(
+        "DesignApp.Api can't run on its own: it needs the database and storage that DesignApp.AppHost starts. " +
+        "Run DesignApp.AppHost instead (in Visual Studio: right-click DesignApp.AppHost > Set as Startup Project, then F5).");
+}
+
 builder.AddServiceDefaults();
 builder.AddInfrastructure();
 builder.Services.AddApplication();

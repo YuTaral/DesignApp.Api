@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/DesignApp.Api/DesignApp.Api.csproj" />
     <Project Path="src/DesignApp.AppHost/DesignApp.AppHost.csproj" />
+    <Project Path="src/DesignApp.Api/DesignApp.Api.csproj" />
     <Project Path="src/DesignApp.Application/DesignApp.Application.csproj" />
     <Project Path="src/DesignApp.Domain/DesignApp.Domain.csproj" />
     <Project Path="src/DesignApp.Infrastructure/DesignApp.Infrastructure.csproj" />
