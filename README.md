@@ -53,14 +53,19 @@ dotnet run --project src/DesignApp.AppHost
 
 The Aspire dashboard opens with links to the API, the API docs (`/scalar`) and the web app.
 
-### Secrets
+### AI providers and secrets
 
-API keys are never committed. Store them with user secrets:
+In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). They return saved, realistic results, so the whole app runs without API keys and at no cost. The tests use the same fakes.
+
+To call the real Claude and SAM 3 models, store the keys with user secrets (they are never committed) and switch the fakes off:
 
 ```bash
 dotnet user-secrets --project src/DesignApp.Api set "Anthropic:ApiKey" "<your key>"
 dotnet user-secrets --project src/DesignApp.Api set "Fal:ApiKey" "<your key>"
+dotnet user-secrets --project src/DesignApp.Api set "Ai:UseFakes" "false"
 ```
+
+Remove that last secret (`dotnet user-secrets --project src/DesignApp.Api remove "Ai:UseFakes"`) to go back to the fakes.
 
 ## Tests
 
