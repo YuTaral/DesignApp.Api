@@ -7,6 +7,7 @@ namespace DesignApp.UnitTests.Domain;
 public class RoomTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);
+    private const string LabelMapKey = "rooms/labels.png";
 
     /// <summary>A valid detected sofa.</summary>
     /// <param name="index">Its label-map index.</param>
@@ -20,7 +21,7 @@ public class RoomTests
         var room = Room.Upload(Guid.CreateVersion7(), ownerId, "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
         room.StartSegmentation();
-        room.MarkReady([Sofa(1), Sofa(2) with { Label = "wall", Category = ObjectCategory.Wall }]);
+        room.MarkReady([Sofa(1), Sofa(2) with { Label = "wall", Category = ObjectCategory.Wall }], LabelMapKey);
         return room;
     }
 
@@ -45,6 +46,61 @@ public class RoomTests
 
         Assert.Equal(RoomStatus.Ready, room.Status);
         Assert.Equal([1, 2], room.Objects.Select(o => o.Index));
+        Assert.Equal(LabelMapKey, room.LabelMapKey);
+        Assert.Equal(1, room.AnalysisAttempts);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(256)]
+    public void Object_indexes_must_fit_the_label_map(int index)
+    {
+        var room = Segmenting();
+
+        Assert.Throws<DomainException>(() => room.MarkReady([Sofa(index)], LabelMapKey));
+    }
+
+    [Fact]
+    public void An_interrupted_analysis_can_restart()
+    {
+        var room = Segmenting();
+
+        room.RestartAnalysis();
+        room.StartAnalysis();
+
+        Assert.Equal(RoomStatus.Analyzing, room.Status);
+        Assert.Equal(2, room.AnalysisAttempts);
+    }
+
+    [Fact]
+    public void Only_a_running_analysis_can_restart()
+    {
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
+        Assert.Throws<DomainException>(room.RestartAnalysis);
+        Assert.Throws<DomainException>(() => ReadyRoom().RestartAnalysis());
+    }
+
+    [Fact]
+    public void Analysis_stops_after_the_maximum_attempts()
+    {
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        for (var i = 0; i < Room.MaxAnalysisAttempts; i++)
+        {
+            room.StartAnalysis();
+            room.RestartAnalysis();
+        }
+
+        Assert.Throws<DomainException>(room.StartAnalysis);
+    }
+
+    /// <summary>A room part-way through the analysis.</summary>
+    private static Room Segmenting()
+    {
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        room.StartAnalysis();
+        room.StartSegmentation();
+        return room;
     }
 
     [Fact]
@@ -53,7 +109,7 @@ public class RoomTests
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
         room.StartAnalysis();
 
-        Assert.Throws<DomainException>(() => room.MarkReady([Sofa()]));
+        Assert.Throws<DomainException>(() => room.MarkReady([Sofa()], LabelMapKey));
     }
 
     [Fact]
@@ -63,7 +119,7 @@ public class RoomTests
         room.StartAnalysis();
         room.StartSegmentation();
 
-        Assert.Throws<DomainException>(() => room.MarkReady([Sofa(1), Sofa(1)]));
+        Assert.Throws<DomainException>(() => room.MarkReady([Sofa(1), Sofa(1)], LabelMapKey));
     }
 
     [Fact]

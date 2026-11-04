@@ -6,10 +6,14 @@ The React frontend lives in the separate `DesignApp.Web` repository.
 
 ## How the AI pipeline works
 
-1. **Claude Haiku 5.5 (vision)** lists the objects in the photo as structured JSON: label, category, dominant color and a rough bounding box.
-2. **SAM 3 (Segment Anything 3)** turns each label into a pixel-exact mask.
-3. **Post-processing (ImageSharp)** removes duplicate masks, sets the stacking order and builds a label map, so the browser finds the object under the cursor with one pixel lookup.
-4. **The browser recolors** in the OKLab color space, keeping the original light and shadow.
+An upload returns at once; a background worker then analyzes the room and pushes each step to the browser over SignalR (`Uploaded → Analyzing → Segmenting → Ready`, or `Failed` with a reason the user can read).
+
+1. **Claude Haiku 5.5 (vision)** lists the objects in the photo as structured JSON (a schema the answer must match): label, category, main color and a rough bounding box. It also says when a photo isn't of a room.
+2. **SAM 3 (Segment Anything 3) on fal.ai** outlines each object: one request per object, with its label as the text prompt and Claude's box as a box prompt, so look-alikes are told apart.
+3. **Post-processing (SkiaSharp)** stacks the outlines (smaller objects on top), drops ones left with almost no visible pixels, measures each object's real box and main color from the photo, and builds a **label map**: a grayscale PNG where each pixel's value is the index of the object it belongs to. The browser finds the object under the cursor with one pixel lookup.
+4. **The browser recolors** in the OKLab color space, keeping the original light and shadow (milestone 4).
+
+The room's status in Postgres is the job state: rooms whose analysis was cut off (the API stopped) are picked up again on the next start, at most 3 times per room.
 
 Both AI providers sit behind interfaces, so they can be swapped (another SAM host, a self-hosted model, a different Claude model).
 
@@ -35,7 +39,8 @@ src/
   DesignApp.Domain           Rooms, detected objects, designs and edit operations
   DesignApp.Infrastructure   Database, storage and AI provider clients
 tests/
-  DesignApp.UnitTests        Domain and application tests
+  DesignApp.UnitTests        Domain, use case, imaging and AI-provider tests
+  DesignApp.IntegrationTests The real API, worker and SignalR against Postgres and RustFS containers
 ```
 
 ## Running locally
@@ -63,6 +68,8 @@ The Aspire dashboard opens with links to the API, the API docs (`/scalar`), the 
 | `POST` | `/api/rooms` | Upload a photo (multipart field `photo`; JPEG, PNG or WebP up to 15 MB) and create a room |
 | `GET` | `/api/rooms/{id}` | The room, its analysis status and detected objects |
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
+| `GET` | `/api/rooms/{id}/labels` | The label map, once the room is Ready |
+| SignalR | `/api/hubs/rooms` | Call `Watch(roomId)` to get the room now and a `RoomChanged` message on every change |
 
 ### Database migrations
 
@@ -75,15 +82,17 @@ dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup
 
 ### AI providers and secrets
 
-In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). They return saved, realistic results, so the whole app runs without API keys and at no cost. The tests use the same fakes.
+In Development the API uses **fake AI providers** by default (`Ai:UseFakes` is `true` in `appsettings.Development.json`). They give every photo the same plausible layout (walls, floor, a sofa, a rug, a lamp, a plant), with a short delay per step so the progress UI is visible. The whole app runs without API keys and at no cost. The tests use the same fakes, with no delay.
 
 To call the real Claude and SAM 3 models, store the keys with user secrets (they are never committed) and switch the fakes off:
 
 ```bash
-dotnet user-secrets --project src/DesignApp.Api set "Anthropic:ApiKey" "<your key>"
-dotnet user-secrets --project src/DesignApp.Api set "Fal:ApiKey" "<your key>"
+dotnet user-secrets --project src/DesignApp.Api set "Ai:AnthropicApiKey" "<your key>"
+dotnet user-secrets --project src/DesignApp.Api set "Ai:FalKey" "<your key>"
 dotnet user-secrets --project src/DesignApp.Api set "Ai:UseFakes" "false"
 ```
+
+Outside Development the fakes are off, and the API refuses to start without both keys. A photo costs a few cents: one Claude call plus one SAM 3 call per object. Other settings in the `Ai` section: `InventoryModel` (default `claude-haiku-5-5`), `SegmentationParallelism` (4) and `MaxConcurrentAnalyses` (2).
 
 Remove that last secret (`dotnet user-secrets --project src/DesignApp.Api remove "Ai:UseFakes"`) to go back to the fakes.
 

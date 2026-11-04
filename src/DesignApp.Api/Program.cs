@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DesignApp.Api;
 using DesignApp.Api.Rooms;
 using DesignApp.Application;
+using DesignApp.Application.Analysis;
 using DesignApp.Application.Abstractions;
 using DesignApp.Application.Photos;
 using DesignApp.Infrastructure;
@@ -23,6 +24,9 @@ builder.AddServiceDefaults();
 builder.AddInfrastructure();
 builder.Services.AddApplication();
 builder.Services.AddScoped<ICurrentUser, GuestUser>();
+builder.Services.AddSingleton<IRoomNotifier, SignalRRoomNotifier>();
+builder.Services.AddSignalR().AddJsonProtocol(options =>
+    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
@@ -69,6 +73,7 @@ api.MapGet("/status", (IHostEnvironment env) => new ApiStatus("DesignApp API", e
     .WithSummary("Reports that the API is up and which environment it runs in.");
 
 api.MapRoomEndpoints();
+app.MapHub<RoomHub>(RoomHub.Path);
 
 app.Run();
 

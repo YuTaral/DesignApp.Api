@@ -41,6 +41,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Storage:AccessKey", StorageUser);
         builder.UseSetting("Storage:SecretKey", StoragePassword);
         builder.UseSetting("Storage:Bucket", "integration-tests");
+        builder.UseSetting("Ai:UseFakes", "true"); // never call paid AI from tests
     }
 
     /// <summary>Stops the API, then removes the containers.</summary>

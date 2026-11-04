@@ -5,6 +5,12 @@ namespace DesignApp.Domain.Rooms;
 /// <summary>An uploaded room photo and the objects the AI pipeline found in it.</summary>
 public sealed class Room
 {
+    /// <summary>The label map stores one byte per pixel, and 0 means "no object", so indexes run from 1 to 255.</summary>
+    public const int MaxObjectIndex = 255;
+
+    /// <summary>How often analysis may start before the room is failed, so a photo that crashes the worker can't loop forever.</summary>
+    public const int MaxAnalysisAttempts = 3;
+
     private IReadOnlyList<DetectedObject> _objects = [];
 
     /// <summary>The room's id (a time-ordered UUID v7).</summary>
@@ -25,6 +31,10 @@ public sealed class Room
     public DateTimeOffset CreatedAt { get; private set; }
     /// <summary>The objects found in the photo, ordered by index; empty until ready.</summary>
     public IReadOnlyList<DetectedObject> Objects => _objects;
+    /// <summary>Storage key of the label map (a PNG whose pixel values are object indexes); <c>null</c> until ready.</summary>
+    public string? LabelMapKey { get; private set; }
+    /// <summary>How many times analysis has started, counting restarts after an interruption.</summary>
+    public int AnalysisAttempts { get; private set; }
 
     private Room() { } // for EF Core
 
@@ -58,24 +68,48 @@ public sealed class Room
     }
 
     /// <summary>Uploaded → Analyzing: the AI starts listing the objects.</summary>
-    public void StartAnalysis() => MoveTo(RoomStatus.Analyzing, from: RoomStatus.Uploaded);
+    /// <exception cref="DomainException">The room isn't waiting for analysis, or it has used up its attempts.</exception>
+    public void StartAnalysis()
+    {
+        if (AnalysisAttempts >= MaxAnalysisAttempts)
+            throw new DomainException($"Analysis has already been tried {MaxAnalysisAttempts} times.");
+        MoveTo(RoomStatus.Analyzing, from: RoomStatus.Uploaded);
+        AnalysisAttempts++;
+    }
+
+    /// <summary>
+    /// Analyzing or Segmenting → Uploaded: puts back a room whose analysis was cut off (the API
+    /// stopped mid-way), so it can be analyzed again.
+    /// </summary>
+    /// <exception cref="DomainException">The room isn't in the middle of an analysis.</exception>
+    public void RestartAnalysis()
+    {
+        if (Status is not (RoomStatus.Analyzing or RoomStatus.Segmenting))
+            throw new DomainException($"Cannot restart the analysis of a room that is {Status}.");
+        Status = RoomStatus.Uploaded;
+    }
 
     /// <summary>Analyzing → Segmenting: the objects are being outlined.</summary>
     public void StartSegmentation() => MoveTo(RoomStatus.Segmenting, from: RoomStatus.Analyzing);
 
-    /// <summary>Segmenting → Ready: stores the detected objects.</summary>
-    /// <param name="objects">At least one object, with unique indexes.</param>
-    /// <exception cref="DomainException">The list is empty, an index repeats, or the room isn't segmenting.</exception>
-    public void MarkReady(IEnumerable<DetectedObject> objects)
+    /// <summary>Segmenting → Ready: stores the detected objects and where their label map is.</summary>
+    /// <param name="objects">At least one object, with unique indexes from 1 to <see cref="MaxObjectIndex"/>.</param>
+    /// <param name="labelMapKey">Storage key of the label map.</param>
+    /// <exception cref="DomainException">The list is empty, an index repeats or is out of range, or the room isn't segmenting.</exception>
+    public void MarkReady(IEnumerable<DetectedObject> objects, string labelMapKey)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(labelMapKey);
         var list = objects.ToList();
         if (list.Count == 0)
             throw new DomainException("A ready room needs at least one detected object.");
         if (list.Select(o => o.Index).Distinct().Count() != list.Count)
             throw new DomainException("Detected object indexes must be unique.");
+        if (list.Any(o => o.Index is < 1 or > MaxObjectIndex))
+            throw new DomainException($"Detected object indexes must be between 1 and {MaxObjectIndex}.");
 
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
+        LabelMapKey = labelMapKey;
     }
 
     /// <summary>Stops the analysis with a reason the user can see.</summary>

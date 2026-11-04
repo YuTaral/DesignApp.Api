@@ -1,3 +1,4 @@
+using DesignApp.Application.Analysis;
 using DesignApp.Application.Rooms;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<UploadRoom>();
         services.AddScoped<GetRoom>();
+        services.AddScoped<AnalyzeRoom>();
         return services;
     }
 }

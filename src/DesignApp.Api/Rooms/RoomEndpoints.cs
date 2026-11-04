@@ -30,6 +30,11 @@ internal static class RoomEndpoints
             .WithName("GetRoomPhoto")
             .WithSummary("Returns the room's photo as stored: upright, at most 4096 px, without metadata.");
 
+        rooms.MapGet("/{id:guid}/labels", GetLabelMapAsync)
+            .WithName("GetRoomLabelMap")
+            .WithSummary("Returns the room's label map: a grayscale PNG where each pixel's value is the index of the object it belongs to (0 = none).")
+            .WithDescription("Available once the room is Ready. It is the size of the analysis image (at most 2048 px), not the photo; scale it to fit.");
+
         return api;
     }
 
@@ -81,14 +86,37 @@ internal static class RoomEndpoints
         Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
-        if (room is null)
-            return TypedResults.NotFound();
+        return room is null ? TypedResults.NotFound() : await StreamImmutableAsync(room.PhotoKey, storage, response, cancellationToken);
+    }
 
-        var file = await storage.OpenReadAsync(room.PhotoKey, cancellationToken);
+    /// <summary><c>GET /api/rooms/{id}/labels</c>: streams the room's label map.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the label map is stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the PNG, or 404 when the room is missing or not analyzed yet.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetLabelMapAsync(
+        Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var room = await getRoom.HandleAsync(id, cancellationToken);
+        return room?.LabelMapKey is { } key ? await StreamImmutableAsync(key, storage, response, cancellationToken) : TypedResults.NotFound();
+    }
+
+    /// <summary>Streams a stored file that never changes once written.</summary>
+    /// <param name="key">The file's storage key.</param>
+    /// <param name="storage">Where the file is stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the file, or 404 when it is missing.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> StreamImmutableAsync(
+        string key, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var file = await storage.OpenReadAsync(key, cancellationToken);
         if (file is null)
             return TypedResults.NotFound();
 
-        // A room's photo never changes, so browsers can keep it for good. Vary on Origin so a copy
+        // These files never change, so browsers can keep them for good. Vary on Origin so a copy
         // cached by a plain <img> is never reused for a CORS request (the WebGL editor), which would fail.
         response.Headers.CacheControl = "private, max-age=31536000, immutable";
         response.Headers.Vary = "Origin";

@@ -11,7 +11,8 @@ namespace DesignApp.Api.Rooms;
 /// <param name="CreatedAt">When the photo was uploaded.</param>
 /// <param name="FailureReason">Why the analysis failed; <c>null</c> unless <paramref name="Status"/> is Failed.</param>
 /// <param name="Objects">The objects found in the photo; empty until the analysis is ready.</param>
-internal sealed record RoomResponse(
+/// <param name="LabelMapUrl">Where to load the label map (relative, like <paramref name="PhotoUrl"/>); <c>null</c> until ready.</param>
+public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
     int Width,
@@ -19,7 +20,8 @@ internal sealed record RoomResponse(
     string PhotoUrl,
     DateTimeOffset CreatedAt,
     string? FailureReason,
-    IReadOnlyList<DetectedObjectResponse> Objects)
+    IReadOnlyList<DetectedObjectResponse> Objects,
+    string? LabelMapUrl)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -31,7 +33,8 @@ internal sealed record RoomResponse(
         $"/api/rooms/{room.Id}/photo",
         room.CreatedAt,
         room.FailureReason,
-        [.. room.Objects.Select(DetectedObjectResponse.From)]);
+        [.. room.Objects.Select(DetectedObjectResponse.From)],
+        room.LabelMapKey is null ? null : $"/api/rooms/{room.Id}/labels");
 }
 
 /// <summary>One detected object as the API returns it.</summary>
@@ -40,7 +43,7 @@ internal sealed record RoomResponse(
 /// <param name="Category">The kind of object, such as Wall or Furniture.</param>
 /// <param name="Box">Where the object is, normalized to 0..1 of the photo's width and height.</param>
 /// <param name="DominantColor">The object's main color as "#RRGGBB".</param>
-internal sealed record DetectedObjectResponse(int Index, string Label, ObjectCategory Category, BoundingBoxResponse Box, string DominantColor)
+public sealed record DetectedObjectResponse(int Index, string Label, ObjectCategory Category, BoundingBoxResponse Box, string DominantColor)
 {
     /// <summary>Maps a domain object to its API shape.</summary>
     /// <param name="o">The object to map.</param>
@@ -53,4 +56,4 @@ internal sealed record DetectedObjectResponse(int Index, string Label, ObjectCat
 /// <param name="Y">Top edge.</param>
 /// <param name="Width">Width as a fraction of the photo's width.</param>
 /// <param name="Height">Height as a fraction of the photo's height.</param>
-internal sealed record BoundingBoxResponse(double X, double Y, double Width, double Height);
+public sealed record BoundingBoxResponse(double X, double Y, double Width, double Height);

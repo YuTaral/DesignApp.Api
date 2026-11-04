@@ -1,8 +1,15 @@
 using Amazon;
+using Anthropic;
 using Amazon.Runtime;
 using Amazon.S3;
 using DesignApp.Application.Abstractions;
+using DesignApp.Application.Analysis;
 using DesignApp.Application.Photos;
+using DesignApp.Infrastructure.Ai;
+using DesignApp.Infrastructure.Ai.Claude;
+using DesignApp.Infrastructure.Ai.Fakes;
+using DesignApp.Infrastructure.Ai.Fal;
+using DesignApp.Infrastructure.Analysis;
 using DesignApp.Infrastructure.Persistence;
 using DesignApp.Infrastructure.Photos;
 using DesignApp.Infrastructure.Storage;
@@ -20,8 +27,8 @@ public static class DependencyInjection
     /// <summary>Name of the Postgres database resource in the AppHost (and its connection string).</summary>
     public const string DatabaseName = "designapp";
 
-    /// <summary>Adds Postgres (EF Core), S3-compatible storage and the SkiaSharp photo processor.</summary>
-    /// <param name="builder">The host builder; reads the <c>designapp</c> connection string and the <c>Storage</c> section.</param>
+    /// <summary>Adds Postgres (EF Core), S3-compatible storage, SkiaSharp imaging and the AI pipeline.</summary>
+    /// <param name="builder">The host builder; reads the <c>designapp</c> connection string and the <c>Storage</c> and <c>Ai</c> sections.</param>
     /// <returns>The same builder, for chaining.</returns>
     public static IHostApplicationBuilder AddInfrastructure(this IHostApplicationBuilder builder)
     {
@@ -39,7 +46,52 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IFileStorage>(sp => sp.GetRequiredService<S3FileStorage>());
 
         builder.Services.AddSingleton<IPhotoProcessor, SkiaPhotoProcessor>();
+        builder.Services.AddSingleton<IRoomImaging, SkiaRoomImaging>();
+
+        AddAiPipeline(builder);
         return builder;
+    }
+
+    /// <summary>
+    /// Adds the analysis queue, the background worker and the AI providers: the fakes when
+    /// <c>Ai:UseFakes</c> is on, otherwise Claude and SAM 3 on fal.ai (both keys then required).
+    /// </summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddAiPipeline(IHostApplicationBuilder builder)
+    {
+        builder.Services.AddOptions<AiOptions>()
+            .Bind(builder.Configuration.GetSection(AiOptions.Section))
+            .Validate(o => o.UseFakes || (o.AnthropicApiKey.Length > 0 && o.FalKey.Length > 0),
+                "Ai:AnthropicApiKey and Ai:FalKey are required unless Ai:UseFakes is true.")
+            .ValidateOnStart();
+
+        builder.Services.AddSingleton<AnalysisScheduler>();
+        builder.Services.AddSingleton<IAnalysisScheduler>(sp => sp.GetRequiredService<AnalysisScheduler>());
+        builder.Services.AddHostedService<RoomAnalysisWorker>();
+
+        if (builder.Configuration.GetValue<bool>($"{AiOptions.Section}:{nameof(AiOptions.UseFakes)}"))
+        {
+            builder.Services.AddSingleton<IObjectInventoryProvider, FakeInventoryProvider>();
+            builder.Services.AddSingleton<ISegmentationProvider, FakeSegmentationProvider>();
+            return;
+        }
+
+        builder.Services.AddSingleton(sp => new AnthropicClient { ApiKey = sp.GetRequiredService<IOptions<AiOptions>>().Value.AnthropicApiKey });
+        builder.Services.AddSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>();
+
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
+        builder.Services.AddHttpClient<ISegmentationProvider, FalSegmentationProvider>((sp, http) =>
+                http.DefaultRequestHeaders.Authorization = new("Key", sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
+            // SAM 3 on a large photo can take well over the default 10 s per attempt, so replace the
+            // shared resilience handler from ServiceDefaults.
+            .RemoveAllResilienceHandlers()
+            .AddStandardResilienceHandler(resilience =>
+            {
+                resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
+                resilience.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(120);
+                resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
+            });
+#pragma warning restore EXTEXP0001
     }
 
     /// <summary>

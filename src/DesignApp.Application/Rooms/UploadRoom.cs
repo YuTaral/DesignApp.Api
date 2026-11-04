@@ -1,4 +1,5 @@
 using DesignApp.Application.Abstractions;
+using DesignApp.Application.Analysis;
 using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
 using DesignApp.Domain.Rooms;
@@ -11,14 +12,16 @@ namespace DesignApp.Application.Rooms;
 /// <param name="rooms">The room database.</param>
 /// <param name="currentUser">Who will own the room.</param>
 /// <param name="clock">Supplies the upload time (replaceable in tests).</param>
+/// <param name="analysisScheduler">Starts the AI analysis once the room is saved.</param>
 public sealed class UploadRoom(
     IPhotoProcessor photoProcessor,
     IFileStorage storage,
     IRoomRepository rooms,
     ICurrentUser currentUser,
-    TimeProvider clock)
+    TimeProvider clock,
+    IAnalysisScheduler analysisScheduler)
 {
-    /// <summary>Processes the photo, stores it and saves the room. Removes the photo again if the save fails.</summary>
+    /// <summary>Processes the photo, stores it, saves the room and queues its analysis. Removes the photo again if the save fails.</summary>
     /// <param name="upload">The uploaded file's bytes.</param>
     /// <param name="cancellationToken">Cancels the upload.</param>
     /// <returns>The new room, or a failure saying why the photo can't be used.</returns>
@@ -57,6 +60,7 @@ public sealed class UploadRoom(
             throw;
         }
 
+        analysisScheduler.Schedule(room.Id);
         return room;
     }
 }

@@ -22,6 +22,11 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.Property(r => r.PhotoKey).HasMaxLength(300);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(r => r.FailureReason).HasMaxLength(500);
+        builder.Property(r => r.LabelMapKey).HasMaxLength(300);
+
+        // Postgres's xmin system column as an optimistic-concurrency token: if two workers ever
+        // analyze the same room, the second save fails instead of silently overwriting the first.
+        builder.Property<uint>("Version").IsRowVersion();
 
         // The detected objects are always read and written together with their room,
         // so they live in one jsonb column instead of a separate table.
@@ -32,6 +37,7 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
             .HasConversion(DetectedObjectsJson.Converter, DetectedObjectsJson.Comparer);
 
         builder.HasIndex(r => new { r.OwnerId, r.CreatedAt });
+        builder.HasIndex(r => r.Status); // finding unfinished rooms on startup
     }
 }
 

@@ -28,6 +28,10 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("AnalysisAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("analysis_attempts");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -40,6 +44,11 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("integer")
                         .HasColumnName("height");
+
+                    b.Property<string>("LabelMapKey")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("label_map_key");
 
                     b.Property<string>("Objects")
                         .IsRequired()
@@ -64,12 +73,21 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.Property<int>("Width")
                         .HasColumnType("integer")
                         .HasColumnName("width");
 
                     b.HasKey("Id")
                         .HasName("pk_rooms");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_rooms_status");
 
                     b.HasIndex("OwnerId", "CreatedAt")
                         .HasDatabaseName("ix_rooms_owner_id_created_at");
