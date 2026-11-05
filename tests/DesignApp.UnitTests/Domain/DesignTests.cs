@@ -4,31 +4,92 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.UnitTests.Domain;
 
-/// <summary>Rules for creating and editing designs, and for parsing colors.</summary>
+/// <summary>Rules for designs (a name, a description and one or more rooms with their colors), and for parsing colors.</summary>
 public class DesignTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);
     private static readonly HexColor Terracotta = HexColor.Parse("#C2552F");
 
     [Fact]
-    public void Create_stores_trimmed_name_and_edits()
+    public void Create_stores_trimmed_details_and_the_first_room_with_its_colors()
     {
         var room = RoomTests.ReadyRoom();
 
-        var design = Design.Create(room, "user-1", "  Warm living room  ", [new RecolorEdit(1, Terracotta, 0.8)], Now);
+        var design = Design.Create(room, "user-1", "  Warm living room  ", "  Terracotta and oak  ", [new RecolorEdit(1, Terracotta, 0.8)], Now);
 
-        Assert.Equal("Warm living room", design.Name);
-        Assert.Equal(room.Id, design.RoomId);
-        var edit = Assert.IsType<RecolorEdit>(Assert.Single(design.Edits));
+        Assert.Equal(("Warm living room", "Terracotta and oak", Now, Now), (design.Name, design.Description, design.CreatedAt, design.UpdatedAt));
+        var entry = Assert.Single(design.Rooms);
+        Assert.Equal(room.Id, entry.RoomId);
+        var edit = Assert.IsType<RecolorEdit>(Assert.Single(entry.Edits));
         Assert.Equal("#C2552F", edit.Color.Value);
     }
 
     [Fact]
-    public void Cannot_design_a_room_that_is_still_analyzing()
+    public void The_description_is_optional_and_limited()
     {
-        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+        var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Draft", null, [], Now);
+        Assert.Equal("", design.Description);
 
-        Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", [], Now));
+        var error = Assert.Throws<DomainException>(() => design.Rename("Draft", new string('x', Design.MaxDescriptionLength + 1), Now));
+        Assert.Equal("The description can be at most 300 characters.", error.Message);
+    }
+
+    [Fact]
+    public void Rooms_are_added_in_order_without_colors_and_get_them_later()
+    {
+        var first = RoomTests.ReadyRoom();
+        var design = Design.Create(first, "user-1", "Flat", null, [], Now);
+        var analyzing = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/b.jpg", 800, 600, Now);
+        var second = RoomTests.ReadyRoom();
+
+        design.AddRoom(analyzing, Now.AddMinutes(1));
+        design.AddRoom(second, Now.AddMinutes(2));
+        design.SetRoomEdits(second, [new RecolorEdit(2, Terracotta, 1)], Now.AddMinutes(3));
+
+        Assert.Equal([first.Id, analyzing.Id, second.Id], design.Rooms.Select(r => r.RoomId));
+        Assert.Equal([0, 1, 2], design.Rooms.Select(r => r.Position));
+        Assert.Single(design.Rooms[2].Edits);
+        Assert.Equal(Now.AddMinutes(3), design.UpdatedAt);
+    }
+
+    [Fact]
+    public void Colors_need_an_analyzed_room()
+    {
+        var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Flat", null, [], Now);
+        var analyzing = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/b.jpg", 800, 600, Now);
+        design.AddRoom(analyzing, Now);
+
+        Assert.Throws<DomainException>(() => design.SetRoomEdits(analyzing, [new RecolorEdit(1, Terracotta, 1)], Now));
+    }
+
+    [Fact]
+    public void Only_your_own_rooms_once_each_and_up_to_the_limit()
+    {
+        var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Flat", null, [], Now);
+        var room = RoomTests.ReadyRoom();
+        design.AddRoom(room, Now);
+
+        Assert.Equal("This room is already in the design.", Assert.Throws<DomainException>(() => design.AddRoom(room, Now)).Message);
+        Assert.Equal("Designs can only hold your own rooms.",
+            Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(ownerId: "user-2"), Now)).Message);
+        while (design.Rooms.Count < Design.MaxRooms)
+            design.AddRoom(RoomTests.ReadyRoom(), Now);
+        Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(), Now));
+    }
+
+    [Fact]
+    public void A_room_can_be_removed_but_never_the_last_one()
+    {
+        var first = RoomTests.ReadyRoom();
+        var design = Design.Create(first, "user-1", "Flat", null, [], Now);
+        var second = RoomTests.ReadyRoom();
+        design.AddRoom(second, Now);
+
+        design.RemoveRoom(first.Id, Now);
+
+        Assert.Equal([second.Id], design.Rooms.Select(r => r.RoomId));
+        var error = Assert.Throws<DomainException>(() => design.RemoveRoom(second.Id, Now));
+        Assert.Equal("A design needs at least one room. Delete the design instead.", error.Message);
     }
 
     [Fact]
@@ -36,7 +97,7 @@ public class DesignTests
     {
         var room = RoomTests.ReadyRoom(ownerId: "user-1");
 
-        Assert.Throws<DomainException>(() => Design.Create(room, "user-2", "Draft", [], Now));
+        Assert.Throws<DomainException>(() => Design.Create(room, "user-2", "Draft", null, [], Now));
     }
 
     [Fact]
@@ -44,7 +105,7 @@ public class DesignTests
     {
         var room = RoomTests.ReadyRoom();
 
-        Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", [new RecolorEdit(99, Terracotta, 1)], Now));
+        Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", null, [new RecolorEdit(99, Terracotta, 1)], Now));
     }
 
     [Fact]
@@ -52,23 +113,22 @@ public class DesignTests
     {
         var room = RoomTests.ReadyRoom();
 
-        var error = Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft",
+        var error = Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", null,
             [new RecolorEdit(1, Terracotta, 1), new RecolorEdit(1, HexColor.Parse("#FFFFFF"), 0.5)], Now));
         Assert.Equal("Object 1 has more than one edit.", error.Message);
     }
 
     [Fact]
-    public void Updating_replaces_the_edits_without_changing_the_old_list()
+    public void Saving_colors_replaces_them_without_changing_a_list_handed_out_earlier()
     {
         var room = RoomTests.ReadyRoom();
-        var design = Design.Create(room, "user-1", "Draft", [new RecolorEdit(1, Terracotta, 1)], Now);
-        var before = design.Edits;
+        var design = Design.Create(room, "user-1", "Draft", null, [new RecolorEdit(1, Terracotta, 1)], Now);
+        var before = design.Rooms[0].Edits;
 
-        design.Update(room, "Renamed", [], Now.AddMinutes(1));
+        design.SetRoomEdits(room, [], Now.AddMinutes(1));
 
-        Assert.Equal(("Renamed", Now.AddMinutes(1)), (design.Name, design.UpdatedAt));
-        Assert.Empty(design.Edits);
-        Assert.Single(before); // a list handed out earlier keeps what it showed
+        Assert.Empty(design.Rooms[0].Edits);
+        Assert.Single(before);
     }
 
     [Theory]
@@ -78,7 +138,7 @@ public class DesignTests
     {
         var room = RoomTests.ReadyRoom();
 
-        Assert.Throws<DomainException>(() => Design.Create(room, "user-1", name, [], Now));
+        Assert.Throws<DomainException>(() => Design.Create(room, "user-1", name, null, [], Now));
     }
 
     [Theory]

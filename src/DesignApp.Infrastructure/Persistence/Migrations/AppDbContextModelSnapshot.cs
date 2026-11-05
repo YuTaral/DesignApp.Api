@@ -28,10 +28,15 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("Edits")
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("edits");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -45,10 +50,6 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("owner_id");
 
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("room_id");
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -61,9 +62,6 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_designs");
-
-                    b.HasIndex("RoomId")
-                        .HasDatabaseName("ix_designs_room_id");
 
                     b.HasIndex("OwnerId", "UpdatedAt")
                         .HasDatabaseName("ix_designs_owner_id_updated_at");
@@ -410,12 +408,47 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("DesignApp.Domain.Designs.Design", b =>
                 {
-                    b.HasOne("DesignApp.Domain.Rooms.Room", null)
-                        .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_designs_rooms_room_id");
+                    b.OwnsMany("DesignApp.Domain.Designs.DesignRoom", "Rooms", b1 =>
+                        {
+                            b1.Property<Guid>("DesignId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("design_id");
+
+                            b1.Property<Guid>("RoomId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("room_id");
+
+                            b1.Property<string>("Edits")
+                                .IsRequired()
+                                .HasColumnType("jsonb")
+                                .HasColumnName("edits");
+
+                            b1.Property<int>("Position")
+                                .HasColumnType("integer")
+                                .HasColumnName("position");
+
+                            b1.HasKey("DesignId", "RoomId")
+                                .HasName("pk_design_rooms");
+
+                            b1.HasIndex("RoomId")
+                                .IsUnique()
+                                .HasDatabaseName("ix_design_rooms_room_id");
+
+                            b1.ToTable("design_rooms", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("DesignId")
+                                .HasConstraintName("fk_design_rooms_designs_design_id");
+
+                            b1.HasOne("DesignApp.Domain.Rooms.Room", null)
+                                .WithMany()
+                                .HasForeignKey("RoomId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired()
+                                .HasConstraintName("fk_design_rooms_rooms_room_id");
+                        });
+
+                    b.Navigation("Rooms");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

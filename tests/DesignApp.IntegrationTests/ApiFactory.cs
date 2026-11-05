@@ -2,6 +2,9 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 
 namespace DesignApp.IntegrationTests;
@@ -10,7 +13,7 @@ namespace DesignApp.IntegrationTests;
 /// Runs the real API against real Postgres and real S3-compatible storage in throwaway containers,
 /// so the tests cover the SQL and S3 calls rather than in-memory stand-ins.
 /// </summary>
-public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private const int S3Port = 9000;
     private const string StorageUser = "integration";
@@ -57,5 +60,24 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await DisposeAsync();
         await _postgres.DisposeAsync();
         await _storage.DisposeAsync();
+    }
+}
+
+/// <summary>
+/// The API without its analysis worker, for tests that write rooms straight to the database: the
+/// worker would otherwise pick up their unanalyzed rooms at startup and change them mid-test.
+/// </summary>
+public sealed class ApiFactoryWithoutAnalysis : ApiFactory
+{
+    /// <summary>Removes the analysis worker from the API's services.</summary>
+    /// <param name="builder">The test host's builder.</param>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+        builder.ConfigureServices(services =>
+        {
+            foreach (var worker in services.Where(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "RoomAnalysisWorker").ToList())
+                services.Remove(worker);
+        });
     }
 }

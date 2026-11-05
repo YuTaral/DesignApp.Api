@@ -10,7 +10,7 @@ namespace DesignApp.IntegrationTests;
 /// (a guest signs in while the room is analyzed), the same field changed twice still fails.
 /// </summary>
 /// <param name="factory">The API running against test containers.</param>
-public class RoomConcurrencyTests(ApiFactory factory) : IClassFixture<ApiFactory>
+public class RoomConcurrencyTests(ApiFactoryWithoutAnalysis factory) : IClassFixture<ApiFactoryWithoutAnalysis>
 {
     [Fact]
     public async Task Moving_a_room_to_an_account_during_its_analysis_keeps_both_changes()

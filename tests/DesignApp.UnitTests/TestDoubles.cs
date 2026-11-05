@@ -56,6 +56,7 @@ internal sealed class FakeStorage : IFileStorage
 internal sealed class FakeRooms : IRoomRepository
 {
     private readonly List<Room> _pending = [];
+    private readonly List<Room> _removed = [];
 
     /// <summary>When set, saving throws as if the database were down.</summary>
     public bool FailOnSave { get; set; }
@@ -63,9 +64,18 @@ internal sealed class FakeRooms : IRoomRepository
     public List<Room> Saved { get; } = [];
     /// <summary>How many saves succeeded.</summary>
     public int SaveCount { get; private set; }
+    /// <summary>Rooms that are in a design (the real repository asks the designs table).</summary>
+    public HashSet<Guid> InDesigns { get; } = [];
 
     /// <inheritdoc/>
     public void Add(Room room) => _pending.Add(room);
+
+    /// <inheritdoc/>
+    public void Remove(Room room) => _removed.Add(room);
+
+    /// <inheritdoc/>
+    public Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.CreatedAt < cutoff && !InDesigns.Contains(r.Id)).OrderBy(r => r.CreatedAt).Take(max)]);
 
     /// <inheritdoc/>
     public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
@@ -90,6 +100,8 @@ internal sealed class FakeRooms : IRoomRepository
             throw new InvalidOperationException("Database is down.");
         Saved.AddRange(_pending);
         _pending.Clear();
+        Saved.RemoveAll(_removed.Contains);
+        _removed.Clear();
         SaveCount++;
         return Task.CompletedTask;
     }

@@ -71,14 +71,19 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` | `/api/account` | Whether the browser is signed in, and as whom |
 | `POST` | `/api/account/sign-up`, `/sign-in`, `/sign-out` | Create an account or sign in (email and password; the browser's guest rooms move into the account), or sign out |
 | `POST` | `/api/rooms` | Upload a photo (multipart field `photo`; JPEG, PNG or WebP up to 15 MB) and create a room |
-| `GET` | `/api/rooms` | The current user's rooms, newest first |
 | `GET` | `/api/rooms/{id}` | The room, its analysis status and detected objects |
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
 | `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
-| `GET` `POST` | `/api/designs` | List the account's designs, or save a room's recolors as a new one |
-| `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open, rename or replace the recolors of, or delete a design |
+| `GET` `POST` | `/api/designs` | List the account's designs, or create one from a room and its colors |
+| `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open a design, change its name and description, or delete it with its rooms |
+| `POST` | `/api/designs/{id}/rooms` | Add one of the account's rooms to a design |
+| `PUT` `DELETE` | `/api/designs/{id}/rooms/{roomId}` | Save a room's colors, or remove the room (which deletes it) |
 | SignalR | `/api/hubs/rooms` | Call `Watch(roomId)` to get the room now and a `RoomChanged` message on every change |
+
+### Designs and rooms
+
+A design has a name, an optional description (up to 300 characters) and 1 to 20 rooms, each with its own colors. A room belongs to at most one design. Rooms are only kept inside a design: removing a room from its design deletes it (photo, outlines and all), deleting a design deletes its rooms, and an upload that isn't added to a design within 24 hours is deleted by a background job that runs every hour. A design always keeps at least one room; to remove the last one, delete the design.
 
 ### Accounts and guests
 

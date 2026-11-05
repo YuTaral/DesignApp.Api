@@ -24,8 +24,6 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.OK, (await alice.GetAsync($"/api/rooms/{room}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await bob.GetAsync($"/api/rooms/{room}")).StatusCode);
-        Assert.Equal([room], (await alice.GetFromJsonAsync<List<IdDto>>("/api/rooms"))!.Select(r => r.Id));
-        Assert.Empty((await bob.GetFromJsonAsync<List<IdDto>>("/api/rooms"))!);
     }
 
     [Fact]
@@ -65,8 +63,6 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         {
             Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync($"/api/rooms/{first}")).StatusCode);
             Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync($"/api/rooms/{second}")).StatusCode);
-            // Both rooms in the account's list, newest first.
-            Assert.Equal([second, first], (await browser.GetFromJsonAsync<List<IdDto>>("/api/rooms"))!.Select(r => r.Id));
         }
     }
 

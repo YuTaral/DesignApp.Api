@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DesignApp.Infrastructure.Persistence;
 
-/// <summary>EF Core implementation of <see cref="IDesignRepository"/>.</summary>
+/// <summary>EF Core implementation of <see cref="IDesignRepository"/>. A design's rooms load with it (they're owned).</summary>
 /// <param name="db">The database session.</param>
 internal sealed class DesignRepository(AppDbContext db) : IDesignRepository
 {
@@ -24,6 +24,10 @@ internal sealed class DesignRepository(AppDbContext db) : IDesignRepository
             .Where(d => d.OwnerId == ownerId)
             .OrderByDescending(d => d.UpdatedAt)
             .ToListAsync(cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<bool> IsRoomInADesignAsync(Guid roomId, CancellationToken cancellationToken) =>
+        db.Designs.AnyAsync(d => d.Rooms.Any(r => r.RoomId == roomId), cancellationToken);
 
     /// <inheritdoc/>
     public Task SaveChangesAsync(CancellationToken cancellationToken) => db.SaveChangesAsync(cancellationToken);

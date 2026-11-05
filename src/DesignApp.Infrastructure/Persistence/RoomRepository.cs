@@ -13,6 +13,17 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     public void Add(Room room) => db.Rooms.Add(room);
 
     /// <inheritdoc/>
+    public void Remove(Room room) => db.Rooms.Remove(room);
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken) =>
+        await db.Rooms
+            .Where(r => r.CreatedAt < cutoff && !db.Designs.Any(d => d.Rooms.Any(x => x.RoomId == r.Id)))
+            .OrderBy(r => r.CreatedAt)
+            .Take(max)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc/>
     public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
         db.Rooms.SingleOrDefaultAsync(r => r.Id == id && r.OwnerId == ownerId, cancellationToken);
 

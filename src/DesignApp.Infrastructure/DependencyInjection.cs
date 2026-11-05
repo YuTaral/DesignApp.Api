@@ -71,6 +71,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<AnalysisScheduler>();
         builder.Services.AddSingleton<IAnalysisScheduler>(sp => sp.GetRequiredService<AnalysisScheduler>());
         builder.Services.AddHostedService<RoomAnalysisWorker>();
+        builder.Services.AddHostedService<UnsavedRoomCleanupWorker>();
 
         builder.Services.AddSingleton<FakeInventoryProvider>();
         builder.Services.AddSingleton<FakeSegmentationProvider>();

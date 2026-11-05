@@ -10,10 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DesignApp.Infrastructure.Persistence;
 
-/// <summary>Maps <see cref="Design"/> to the <c>designs</c> table.</summary>
+/// <summary>Maps <see cref="Design"/> to the <c>designs</c> table and its rooms to <c>design_rooms</c>.</summary>
 internal sealed class DesignConfiguration : IEntityTypeConfiguration<Design>
 {
-    /// <summary>Configures the table, its columns and indexes.</summary>
+    /// <summary>Configures the tables, their columns and indexes.</summary>
     /// <param name="builder">Builds the entity's mapping.</param>
     public void Configure(EntityTypeBuilder<Design> builder)
     {
@@ -21,24 +21,31 @@ internal sealed class DesignConfiguration : IEntityTypeConfiguration<Design>
         builder.Property(d => d.Id).ValueGeneratedNever();
         builder.Property(d => d.OwnerId).HasMaxLength(128);
         builder.Property(d => d.Name).HasMaxLength(Design.MaxNameLength);
-
-        // Deleting a room deletes its designs.
-        builder.HasOne<Room>().WithMany().HasForeignKey(d => d.RoomId).OnDelete(DeleteBehavior.Cascade);
-
+        builder.Property(d => d.Description).HasMaxLength(Design.MaxDescriptionLength);
         builder.Property<uint>("Version").IsRowVersion();
-
-        // The edits are always read and written with their design, so they live in one jsonb column.
-        builder.Property(d => d.Edits)
-            .HasField("_edits")
-            .UsePropertyAccessMode(PropertyAccessMode.Field)
-            .HasColumnType("jsonb")
-            .HasConversion(EditsJson.Converter, EditsJson.Comparer);
-
         builder.HasIndex(d => new { d.OwnerId, d.UpdatedAt });
+
+        // A design's rooms are part of it: loaded, saved and deleted with it.
+        builder.OwnsMany(d => d.Rooms, rooms =>
+        {
+            rooms.ToTable("design_rooms");
+            rooms.WithOwner().HasForeignKey("DesignId");
+            rooms.HasKey("DesignId", nameof(DesignRoom.RoomId));
+            // A room is in at most one design, and deleting a room takes it out of its design.
+            rooms.HasIndex(r => r.RoomId).IsUnique();
+            rooms.HasOne<Room>().WithMany().HasForeignKey(r => r.RoomId).OnDelete(DeleteBehavior.Cascade);
+            // The edits are always read and written with their room, so they live in one jsonb column.
+            rooms.Property(r => r.Edits)
+                .HasField("_edits")
+                .UsePropertyAccessMode(PropertyAccessMode.Field)
+                .HasColumnType("jsonb")
+                .HasConversion(EditsJson.Converter, EditsJson.Comparer);
+        });
+        builder.Navigation(d => d.Rooms).HasField("_rooms").UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
 
-/// <summary>Stores a design's edits as JSON, each with a type so new kinds of edits can be added.</summary>
+/// <summary>Stores a room's edits as JSON, each with a type so new kinds of edits can be added.</summary>
 internal static class EditsJson
 {
     private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);

@@ -21,9 +21,14 @@ public static class DependencyInjection
         services.AddScoped<FixRoomOutline>();
         services.AddScoped<ClaimGuestRooms>();
         services.AddScoped<CreateDesign>();
-        services.AddScoped<UpdateDesign>();
+        services.AddScoped<EditDesignDetails>();
+        services.AddScoped<AddRoomToDesign>();
+        services.AddScoped<SaveRoomColors>();
+        services.AddScoped<RemoveRoomFromDesign>();
         services.AddScoped<GetDesigns>();
         services.AddScoped<DeleteDesign>();
+        services.AddScoped<RoomRemover>();
+        services.AddScoped<DeleteUnsavedRooms>();
         return services;
     }
 }
