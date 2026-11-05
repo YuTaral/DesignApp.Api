@@ -17,4 +17,8 @@
     <ProjectReference Include="..\DesignApp.ServiceDefaults\DesignApp.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="DesignApp.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

@@ -70,7 +70,8 @@ app.UseRateLimiter();
 
 app.MapDefaultEndpoints();
 
-var api = app.MapGroup("/api");
+// A request the browser abandoned ends quietly instead of as an error (see ClientDisconnectedFilter).
+var api = app.MapGroup("/api").AddEndpointFilter<ClientDisconnectedFilter>();
 
 api.MapGet("/status", (IHostEnvironment env) => new ApiStatus("DesignApp API", env.EnvironmentName))
     .WithName("GetStatus")

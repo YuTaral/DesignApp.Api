@@ -27,14 +27,27 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
 
     /// <summary>Starts sending a room's changes to this connection.</summary>
     /// <param name="roomId">The room to watch; it must belong to the caller.</param>
-    /// <returns>The room's current state, so nothing that happened before watching is missed.</returns>
+    /// <returns>
+    /// The room's current state, so nothing that happened before watching is missed; <c>null</c> when
+    /// the connection closed meanwhile.
+    /// </returns>
     /// <exception cref="HubException">The caller has no room with that id.</exception>
-    public async Task<RoomResponse> Watch(Guid roomId)
+    public async Task<RoomResponse?> Watch(Guid roomId)
     {
-        var room = (Owner() is { } owner ? await rooms.FindAsync(roomId, owner, Context.ConnectionAborted) : null)
-            ?? throw new HubException("We couldn't find that room.");
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(roomId), Context.ConnectionAborted);
-        return RoomResponse.From(room);
+        Room? room;
+        try
+        {
+            room = Owner() is { } owner ? await rooms.FindAsync(roomId, owner, Context.ConnectionAborted) : null;
+            if (room is not null)
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(roomId), Context.ConnectionAborted);
+        }
+        catch (OperationCanceledException) when (Context.ConnectionAborted.IsCancellationRequested)
+        {
+            // The browser left (page closed or the analysis finished) while this ran; no one is
+            // waiting for the answer, and it's not an error.
+            return null;
+        }
+        return room is null ? throw new HubException("We couldn't find that room.") : RoomResponse.From(room);
     }
 
     /// <summary>
