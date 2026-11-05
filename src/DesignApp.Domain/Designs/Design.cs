@@ -9,7 +9,7 @@ public sealed class Design
     /// <summary>The longest allowed design name, after trimming.</summary>
     public const int MaxNameLength = 80;
 
-    private readonly List<EditOperation> _edits = [];
+    private IReadOnlyList<EditOperation> _edits = [];
 
     /// <summary>The design's id.</summary>
     public Guid Id { get; private set; }
@@ -65,10 +65,12 @@ public sealed class Design
         var unknown = list.FirstOrDefault(e => !knownIndexes.Contains(e.ObjectIndex));
         if (unknown is not null)
             throw new DomainException($"Object {unknown.ObjectIndex} does not exist in this room.");
+        var repeated = list.GroupBy(e => e.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
+        if (repeated is not null)
+            throw new DomainException($"Object {repeated.Key} has more than one edit.");
 
         Name = trimmed;
-        _edits.Clear();
-        _edits.AddRange(list);
+        _edits = list.AsReadOnly();
         UpdatedAt = now;
     }
 }

@@ -37,6 +37,7 @@ public static class DependencyInjection
         builder.AddNpgsqlDbContext<AppDbContext>(DatabaseName,
             configureDbContextOptions: options => options.UseSnakeCaseNamingConvention());
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+        builder.Services.AddScoped<IDesignRepository, DesignRepository>();
 
         builder.Services.AddOptions<StorageOptions>()
             .Bind(builder.Configuration.GetSection(StorageOptions.Section))

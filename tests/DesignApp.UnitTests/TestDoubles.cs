@@ -6,10 +6,14 @@ namespace DesignApp.UnitTests;
 
 /// <summary>A current user with a fixed id.</summary>
 /// <param name="id">The user's id.</param>
-internal sealed class FixedUser(string id) : ICurrentUser
+/// <param name="signedIn">Whether it is an account rather than a guest.</param>
+internal sealed class FixedUser(string id, bool signedIn = true) : ICurrentUser
 {
     /// <inheritdoc/>
     public string Id => id;
+
+    /// <inheritdoc/>
+    public bool IsSignedIn => signedIn;
 }
 
 /// <summary>A clock that always returns the same time.</summary>
@@ -66,6 +70,10 @@ internal sealed class FakeRooms : IRoomRepository
     /// <inheritdoc/>
     public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
         Task.FromResult(Saved.SingleOrDefault(r => r.Id == id && r.OwnerId == ownerId));
+
+    /// <inheritdoc/>
+    public Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.OwnerId == ownerId).OrderByDescending(r => r.CreatedAt)]);
 
     /// <inheritdoc/>
     public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken) =>

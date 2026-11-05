@@ -14,4 +14,10 @@ public sealed class GetRoom(IRoomRepository rooms, ICurrentUser currentUser)
     /// <returns>The current user's room, or <c>null</c> if they have no room with that id.</returns>
     public Task<Room?> HandleAsync(Guid id, CancellationToken cancellationToken) =>
         rooms.FindAsync(id, currentUser.Id, cancellationToken);
+
+    /// <summary>Loads all of the current user's rooms: the account's, or this browser's as a guest.</summary>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    /// <returns>The rooms, newest first.</returns>
+    public Task<IReadOnlyList<Room>> AllAsync(CancellationToken cancellationToken) =>
+        rooms.ListByOwnerAsync(currentUser.Id, cancellationToken);
 }

@@ -47,6 +47,30 @@ public class DesignTests
         Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", [new RecolorEdit(99, Terracotta, 1)], Now));
     }
 
+    [Fact]
+    public void An_object_gets_at_most_one_edit()
+    {
+        var room = RoomTests.ReadyRoom();
+
+        var error = Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft",
+            [new RecolorEdit(1, Terracotta, 1), new RecolorEdit(1, HexColor.Parse("#FFFFFF"), 0.5)], Now));
+        Assert.Equal("Object 1 has more than one edit.", error.Message);
+    }
+
+    [Fact]
+    public void Updating_replaces_the_edits_without_changing_the_old_list()
+    {
+        var room = RoomTests.ReadyRoom();
+        var design = Design.Create(room, "user-1", "Draft", [new RecolorEdit(1, Terracotta, 1)], Now);
+        var before = design.Edits;
+
+        design.Update(room, "Renamed", [], Now.AddMinutes(1));
+
+        Assert.Equal(("Renamed", Now.AddMinutes(1)), (design.Name, design.UpdatedAt));
+        Assert.Empty(design.Edits);
+        Assert.Single(before); // a list handed out earlier keeps what it showed
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

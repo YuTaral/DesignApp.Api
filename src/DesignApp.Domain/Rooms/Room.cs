@@ -83,6 +83,16 @@ public sealed class Room
         };
     }
 
+    /// <summary>
+    /// Gives the room to another user: a guest who signs in keeps the rooms made before, under the account.
+    /// </summary>
+    /// <param name="newOwnerId">The account's user id.</param>
+    public void TransferTo(string newOwnerId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(newOwnerId);
+        OwnerId = newOwnerId;
+    }
+
     /// <summary>Uploaded → Analyzing: the AI starts listing the objects.</summary>
     /// <exception cref="DomainException">The room isn't waiting for analysis, or it has used up its attempts.</exception>
     public void StartAnalysis()

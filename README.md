@@ -25,7 +25,8 @@ Both AI providers sit behind interfaces, so they can be swapped (another SAM hos
 - S3-compatible storage for photos and masks through the AWS SDK: RustFS locally, any S3 service in the cloud
 - SkiaSharp for photo processing: uploads are validated, turned upright, scaled to at most 4096 px, converted to sRGB JPEG and stripped of metadata (including GPS location)
 - SignalR for live analysis progress
-- Rate-limited uploads, RFC 9457 problem details for every error
+- ASP.NET Core Identity accounts (email and password) in a secure cookie, with a private guest id per browser before sign-in
+- Rate-limited uploads and sign-in attempts, RFC 9457 problem details for every error
 - xUnit unit tests, and integration tests against real Postgres and RustFS containers (Testcontainers); CI on GitHub Actions
 
 ## Solution layout
@@ -61,15 +62,29 @@ dotnet run --project src/DesignApp.AppHost
 
 The Aspire dashboard opens with links to the API, the API docs (`/scalar`), the web app and the storage console. Postgres and storage run as persistent containers, so data survives restarts. The database is migrated automatically on startup in Development.
 
-### Endpoints so far
+### Endpoints
+
+The full list, with request and response shapes, is in the Scalar docs at `/scalar` in Development.
 
 | Method | Path | What it does |
 |---|---|---|
+| `GET` | `/api/account` | Whether the browser is signed in, and as whom |
+| `POST` | `/api/account/sign-up`, `/sign-in`, `/sign-out` | Create an account or sign in (email and password; the browser's guest rooms move into the account), or sign out |
 | `POST` | `/api/rooms` | Upload a photo (multipart field `photo`; JPEG, PNG or WebP up to 15 MB) and create a room |
+| `GET` | `/api/rooms` | The current user's rooms, newest first |
 | `GET` | `/api/rooms/{id}` | The room, its analysis status and detected objects |
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
-| `GET` | `/api/rooms/{id}/labels` | The label map, once the room is Ready |
+| `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
+| `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
+| `GET` `POST` | `/api/designs` | List the account's designs, or save a room's recolors as a new one |
+| `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open, rename or replace the recolors of, or delete a design |
 | SignalR | `/api/hubs/rooms` | Call `Watch(roomId)` to get the room now and a `RoomChanged` message on every change |
+
+### Accounts and guests
+
+Visitors can upload and edit without an account: each browser gets its own random guest id in an HTTP-only cookie (`designapp.guest`), so guests never see each other's rooms. Signing up or signing in moves that browser's rooms into the account, so nothing made before signing in is lost; signing in from several browsers brings all their rooms together. Saving designs needs an account.
+
+Accounts are ASP.NET Core Identity users in Postgres, signed in with a 30-day sliding cookie (`designapp.session`). Both cookies are HTTP-only, Secure and SameSite=Lax, so other sites can't send them with a form post. Passwords need at least 8 characters; 5 wrong passwords in a row lock an account for 5 minutes, and each address gets 20 sign-up or sign-in attempts per 10 minutes (`RateLimits:AccountAttemptsPer10Minutes`). A wrong email and a wrong password get the same answer. There is no email confirmation or password reset yet.
 
 ### Database migrations
 

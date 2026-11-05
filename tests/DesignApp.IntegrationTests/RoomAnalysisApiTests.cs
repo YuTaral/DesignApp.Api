@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using DesignApp.Tests;
 using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Mvc.Testing.Handlers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using SkiaSharp;
@@ -18,7 +19,13 @@ namespace DesignApp.IntegrationTests;
 public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
-    private readonly HttpClient _client = factory.CreateClient();
+
+    /// <summary>This test's browser cookies, shared by its HTTP client and its SignalR connections.</summary>
+    private readonly CookieContainer _cookies = new();
+
+    /// <summary>The browser's HTTP client, keeping its cookies where the hub connections use them too.</summary>
+    private HttpClient Client => field ??=
+        factory.CreateDefaultClient(factory.ClientOptions.BaseAddress, new CookieContainerHandler(_cookies));
 
     [Fact]
     public async Task An_uploaded_room_is_analyzed_in_the_background()
@@ -40,7 +47,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     {
         var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
 
-        using var response = await _client.GetAsync(room.LabelMapUrl);
+        using var response = await Client.GetAsync(room.LabelMapUrl);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("image/png", response.Content.Headers.ContentType?.MediaType);
@@ -54,7 +61,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     [Fact]
     public async Task There_is_no_label_map_for_an_unknown_room()
     {
-        using var response = await _client.GetAsync($"/api/rooms/{Guid.NewGuid()}/labels");
+        using var response = await Client.GetAsync($"/api/rooms/{Guid.NewGuid()}/labels");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -72,7 +79,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     [Fact]
     public async Task The_api_says_which_ai_uploads_can_use()
     {
-        var ai = await _client.GetFromJsonAsync<JsonElement>("/api/ai");
+        var ai = await Client.GetFromJsonAsync<JsonElement>("/api/ai");
 
         Assert.Equal("Fake", ai.GetProperty("default").GetString());
         Assert.False(ai.GetProperty("realAvailable").GetBoolean()); // tests never have keys
@@ -104,7 +111,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var spot = Array.FindIndex(before, l => l != sofa);
         var (x, y) = ((spot % 1200 + 0.5) / 1200, (spot / 1200 + 0.5) / 800);
 
-        using var fix = await _client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
+        using var fix = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
             new { baseRevision = 0, objectIndex = sofa, mode = "Paint", radius = 2, points = new[] { new { x, y } } });
         fix.EnsureSuccessStatusCode();
         var fixedRoom = (await fix.Content.ReadFromJsonAsync<RoomDto>())!;
@@ -114,14 +121,14 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.Equal(sofa, (await LabelsAsync(fixedRoom.LabelMapUrl!))[spot]);
         Assert.Equal(before, await LabelsAsync($"/api/rooms/{room.Id}/labels/0"));
 
-        using var undo = await _client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
+        using var undo = await Client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
         undo.EnsureSuccessStatusCode();
-        Assert.Equal(0, (await _client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.LabelMapRevision);
+        Assert.Equal(0, (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.LabelMapRevision);
 
-        using var again = await _client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
+        using var again = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
             new { baseRevision = 0, objectIndex = sofa, mode = "Erase", radius = 0.5, points = new[] { new { x, y } } });
         Assert.Equal(HttpStatusCode.BadRequest, again.StatusCode); // that spot isn't the sofa's in version 0
-        using var missing = await _client.GetAsync($"/api/rooms/{room.Id}/labels/7");
+        using var missing = await Client.GetAsync($"/api/rooms/{room.Id}/labels/7");
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
 
@@ -130,6 +137,8 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     {
         var statuses = new List<string>();
         var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        // Like the editor: upload first, then connect, so the connection carries the browser's guest cookie.
+        var created = await UploadAsync();
         await using var hub = ConnectToHub();
         hub.On<JsonElement>("RoomChanged", room =>
         {
@@ -141,7 +150,6 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         });
         await hub.StartAsync();
 
-        var created = await UploadAsync();
         var current = await hub.InvokeAsync<JsonElement>("Watch", created.Id);
         if (current.GetProperty("status").GetString() == "Ready")
             finished.TrySetResult(); // finished before we started watching; Watch returned the final state
@@ -162,9 +170,10 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
 
     /// <summary>A SignalR connection to the test server's room hub.</summary>
     private HubConnection ConnectToHub() => new HubConnectionBuilder()
-        .WithUrl(new Uri(factory.Server.BaseAddress, "/api/hubs/rooms"), options =>
+        .WithUrl(new Uri(factory.ClientOptions.BaseAddress, "/api/hubs/rooms"), options =>
         {
-            options.HttpMessageHandlerFactory = _ => factory.Server.CreateHandler();
+            // The browser's cookies go along, so the hub knows whose rooms it may show.
+            options.HttpMessageHandlerFactory = _ => new CookieContainerHandler(_cookies) { InnerHandler = factory.Server.CreateHandler() };
             options.Transports = HttpTransportType.LongPolling; // the test server has no WebSockets
         })
         .Build();
@@ -190,14 +199,14 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             form.Add(new StringContent(scope), "scope");
         if (ai is not null)
             form.Add(new StringContent(ai), "ai");
-        return await _client.PostAsync("/api/rooms", form);
+        return await Client.PostAsync("/api/rooms", form);
     }
 
     /// <summary>Downloads a label map and decodes it to one byte per pixel.</summary>
     /// <param name="url">The label map's URL.</param>
     private async Task<byte[]> LabelsAsync(string url)
     {
-        using var codec = SKCodec.Create(new MemoryStream(await _client.GetByteArrayAsync(url)));
+        using var codec = SKCodec.Create(new MemoryStream(await Client.GetByteArrayAsync(url)));
         using var labels = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
         return labels.GetPixelSpan().ToArray();
     }
@@ -211,7 +220,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var deadline = DateTime.UtcNow + Timeout;
         while (true)
         {
-            var room = (await _client.GetFromJsonAsync<RoomDto>($"/api/rooms/{id}"))!;
+            var room = (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{id}"))!;
             if (room.Status == status)
                 return room;
             if (room.Status == "Failed" || DateTime.UtcNow > deadline)

@@ -25,8 +25,12 @@ internal static class RoomEndpoints
             .WithDescription("Send the photo as multipart form data in a field named `photo`. JPEG, PNG or WebP up to 15 MB. " +
                 "An optional `scope` field chooses what the AI looks for: `WholeRoom` (default), `NoDoorsOrWindows` or `ObjectsOnly`. " +
                 "An optional `ai` field chooses `Fake` or `Real` where `GET /api/ai` allows it.")
-            .DisableAntiforgery() // no cookie auth yet; revisit with sign-in (milestone 5)
+            .DisableAntiforgery() // the cookies are SameSite=Lax, so another site's form posts arrive without them
             .RequireRateLimiting(RateLimitPolicies.Uploads);
+
+        rooms.MapGet("/", ListAsync)
+            .WithName("ListRooms")
+            .WithSummary("Lists the current user's rooms, newest first: the account's, or this browser's while signed out.");
 
         rooms.MapGet("/{id:guid}", GetAsync)
             .WithName("GetRoom")
@@ -112,6 +116,12 @@ internal static class RoomEndpoints
         var room = result.Value;
         return TypedResults.Created($"/api/rooms/{room.Id}", RoomResponse.From(room));
     }
+
+    /// <summary><c>GET /api/rooms</c>: the current user's rooms.</summary>
+    /// <param name="getRoom">The use case that loads the rooms.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    private static async Task<Ok<List<RoomResponse>>> ListAsync(GetRoom getRoom, CancellationToken cancellationToken) =>
+        TypedResults.Ok((await getRoom.AllAsync(cancellationToken)).Select(RoomResponse.From).ToList());
 
     /// <summary><c>GET /api/rooms/{id}</c>: returns one of the current user's rooms.</summary>
     /// <param name="id">The room's id.</param>

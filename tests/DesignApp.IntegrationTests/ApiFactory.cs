@@ -26,6 +26,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(S3Port).ForPath("/health")))
         .Build();
 
+    /// <summary>
+    /// Clients talk https, like browsers do: the guest and sign-in cookies are Secure, and a client
+    /// doesn't send those back over plain http.
+    /// </summary>
+    public ApiFactory() => ClientOptions.BaseAddress = new Uri("https://localhost");
+
     /// <summary>Starts both containers before the first test.</summary>
     public Task InitializeAsync() => Task.WhenAll(_postgres.StartAsync(), _storage.StartAsync());
 
@@ -42,6 +48,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Storage:SecretKey", StoragePassword);
         builder.UseSetting("Storage:Bucket", "integration-tests");
         builder.UseSetting("Ai:UseFakes", "true"); // never call paid AI from tests
+        builder.UseSetting("RateLimits:AccountAttemptsPer10Minutes", "1000"); // every test client shares one address
     }
 
     /// <summary>Stops the API, then removes the containers.</summary>
