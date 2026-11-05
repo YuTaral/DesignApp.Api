@@ -52,6 +52,34 @@ public sealed record SegmentedObject(InventoryItem Item, ObjectMask Mask);
 /// <param name="Objects">The kept objects, indexed 1..N, with boxes and colors measured from the photo.</param>
 public sealed record LabelMap(byte[] Png, IReadOnlyList<DetectedObject> Objects);
 
+/// <summary>Which AI modes this API can use, and which one an upload gets when it doesn't choose.</summary>
+/// <param name="Default">The mode of an upload that doesn't choose.</param>
+/// <param name="CanChoose">Whether uploads may choose (Development only: production always uses the real AI).</param>
+/// <param name="RealAvailable">Whether the real AI is set up (both API keys present).</param>
+public sealed record AiAvailability(AiMode Default, bool CanChoose, bool RealAvailable)
+{
+    /// <summary>Whether an upload may use a mode.</summary>
+    /// <param name="mode">The mode asked for.</param>
+    public bool Allows(AiMode mode) => mode == Default || (CanChoose && (mode is AiMode.Fake || RealAvailable));
+}
+
+/// <summary>Hands out the AI providers of a mode: the fakes or Claude and SAM 3.</summary>
+public interface IAiProviders
+{
+    /// <summary>Which modes can be used.</summary>
+    AiAvailability Availability { get; }
+
+    /// <summary>Step 1 of a mode.</summary>
+    /// <param name="mode">Fake or real.</param>
+    /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
+    IObjectInventoryProvider Inventory(AiMode mode);
+
+    /// <summary>Step 2 of a mode.</summary>
+    /// <param name="mode">Fake or real.</param>
+    /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
+    ISegmentationProvider Segmentation(AiMode mode);
+}
+
 /// <summary>Step 1 of the analysis (Claude): lists the objects in the photo.</summary>
 public interface IObjectInventoryProvider
 {
@@ -83,13 +111,55 @@ public interface IRoomImaging
 
     /// <summary>
     /// Combines the outlines into one label map. Smaller objects sit on top of larger ones (a cushion
-    /// on a sofa on the floor), objects left with almost no visible pixels are dropped, and each kept
-    /// object's box and main color are measured from its visible pixels.
+    /// on a sofa on the floor), objects left with almost no visible pixels are dropped, the masks are
+    /// cleaned up (speckles removed, enclosed holes filled, walls, floors and ceilings grown into gaps
+    /// up to the photo's edges), and each kept object's box and main color are measured from its pixels.
     /// </summary>
     /// <param name="image">The analysis image the outlines belong to.</param>
     /// <param name="objects">The outlined objects.</param>
     LabelMap BuildLabelMap(AnalysisImage image, IReadOnlyList<SegmentedObject> objects);
+
+    /// <summary>Paints or erases one object's outline with a brush stroke the user drew.</summary>
+    /// <param name="labelMapPng">The current label map.</param>
+    /// <param name="stroke">The stroke.</param>
+    /// <returns>The changed label map, or a failure the user can read (such as a stroke that changes nothing).</returns>
+    Result<byte[]> PaintOutline(byte[] labelMapPng, OutlineStroke stroke);
 }
+
+/// <summary>Whether a brush stroke adds pixels to the object or takes them away.</summary>
+public enum OutlineBrushMode
+{
+    /// <summary>Every covered pixel becomes the object's, even if another object had it.</summary>
+    Paint,
+    /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
+    Erase,
+}
+
+/// <summary>Limits for brush strokes.</summary>
+public static class OutlineStrokeRules
+{
+    /// <summary>The most points one stroke may have.</summary>
+    public const int MaxPoints = 10_000;
+
+    /// <summary>The smallest brush radius, in label map pixels.</summary>
+    public const double MinRadius = 0.5;
+
+    /// <summary>The largest brush radius, in label map pixels.</summary>
+    public const double MaxRadius = 400;
+}
+
+/// <summary>A point of a stroke.</summary>
+/// <param name="X">0..1 of the photo's width.</param>
+/// <param name="Y">0..1 of the photo's height.</param>
+public readonly record struct StrokePoint(double X, double Y);
+
+/// <summary>One brush stroke the user drew on an object.</summary>
+/// <param name="ObjectIndex">The object to change.</param>
+/// <param name="ObjectLabel">Its name, for messages.</param>
+/// <param name="Mode">Paint or erase.</param>
+/// <param name="Radius">The brush radius, in label map pixels.</param>
+/// <param name="Points">The path, at least one point; the brush is stamped along it.</param>
+public sealed record OutlineStroke(int ObjectIndex, string ObjectLabel, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint> Points);
 
 /// <summary>Tells the browser that a room changed (live progress over SignalR).</summary>
 public interface IRoomNotifier

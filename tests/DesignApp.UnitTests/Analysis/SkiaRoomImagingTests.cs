@@ -52,10 +52,14 @@ public class SkiaRoomImagingTests
     [Fact]
     public void Boxes_are_measured_from_the_visible_pixels()
     {
-        var map = _imaging.BuildLabelMap(Image(200, 100), [new(Item("rug", ObjectCategory.Textile), Rect(200, 100, 20, 60, 100, 30))]);
+        // TestImages: a red top-left quadrant on blue; the mask covers exactly the red part, so the
+        // color edge stops the cleanup from moving its border.
+        var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
+
+        var map = _imaging.BuildLabelMap(image, [new(Item("rug", ObjectCategory.Textile), Rect(200, 100, 0, 0, 100, 50))]);
 
         var box = Assert.Single(map.Objects).Box;
-        Assert.Equal((0.1, 0.6, 0.5, 0.3), (Math.Round(box.X, 3), Math.Round(box.Y, 3), Math.Round(box.Width, 3), Math.Round(box.Height, 3)));
+        Assert.Equal((0, 0, 0.5, 0.5), (Math.Round(box.X, 2), Math.Round(box.Y, 2), Math.Round(box.Width, 2), Math.Round(box.Height, 2)));
     }
 
     [Fact]
@@ -83,12 +87,64 @@ public class SkiaRoomImagingTests
     [Fact]
     public void Masks_of_another_size_are_scaled_to_fit()
     {
-        // A half-size mask covering the right half.
-        var map = _imaging.BuildLabelMap(Image(200, 100), [new(Item("wall", ObjectCategory.Wall), Rect(100, 50, 50, 0, 50, 50))]);
+        // A half-size mask covering the right half. A sofa (not a surface) grows a few pixels at most.
+        var map = _imaging.BuildLabelMap(Image(200, 100), [new(Item("sofa", ObjectCategory.Furniture), Rect(100, 50, 50, 0, 50, 50))]);
 
         var labels = DecodeLabels(map.Png);
         Assert.Equal(0, labels[50 * 200 + 50]);
         Assert.Equal(1, labels[50 * 200 + 150]);
+    }
+
+    [Fact]
+    public void A_wall_fills_the_gaps_its_mask_missed_up_to_a_color_edge()
+    {
+        // Red top-left quadrant on blue. The wall's mask covers only part of the blue, with a
+        // ragged gap; the gap is blue too, so the wall takes it. The red quadrant has a real edge.
+        var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
+        var ragged = Rect(200, 100, 100, 0, 100, 100);
+        for (var y = 0; y < 100; y++)
+            for (var x = 100; x < 130; x++)
+                ragged.Coverage[y * 200 + x] = (byte)((x + y) % 3 == 0 ? 0 : 255);
+
+        var map = _imaging.BuildLabelMap(image, [new(Item("wall", ObjectCategory.Wall), ragged)]);
+
+        var labels = DecodeLabels(map.Png);
+        Assert.All(Enumerable.Range(100, 30), x => Assert.Equal(1, labels[10 * 200 + x])); // the ragged strip, filled
+        Assert.Equal(1, labels[80 * 200 + 95]);   // blue just past the mask: within reach
+        Assert.Equal(0, labels[80 * 200 + 20]);   // blue far from the mask: too far to claim
+        Assert.Equal(0, labels[25 * 200 + 50]);   // inside the red quadrant: behind a color edge
+    }
+
+    [Fact]
+    public void Holes_inside_an_object_are_filled()
+    {
+        // A mirror whose mask has a hole where it reflects something of a very different color.
+        var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
+        var mirror = Rect(200, 100, 110, 10, 80, 80);
+        for (var y = 40; y < 60; y++)
+            for (var x = 140; x < 160; x++)
+                mirror.Coverage[y * 200 + x] = 0;
+
+        var map = _imaging.BuildLabelMap(image, [new(Item("mirror", ObjectCategory.Decor), mirror)]);
+
+        Assert.Equal(1, DecodeLabels(map.Png)[50 * 200 + 150]);
+    }
+
+    [Fact]
+    public void Stray_speckles_of_an_object_are_removed()
+    {
+        // A blanket with a 3x3 speck far away from it, on a different color.
+        var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
+        var blanket = Rect(200, 100, 0, 0, 100, 50);
+        for (var y = 80; y < 83; y++)
+            for (var x = 180; x < 183; x++)
+                blanket.Coverage[y * 200 + x] = 255;
+
+        var map = _imaging.BuildLabelMap(image, [new(Item("blanket", ObjectCategory.Textile), blanket)]);
+
+        var labels = DecodeLabels(map.Png);
+        Assert.Equal(0, labels[81 * 200 + 181]);
+        Assert.Equal(1, labels[25 * 200 + 50]);
     }
 
     /// <summary>A plain gray analysis image.</summary>

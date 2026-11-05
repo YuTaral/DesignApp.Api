@@ -54,8 +54,9 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Adds the analysis queue, the background worker and the AI providers: the fakes when
-    /// <c>Ai:UseFakes</c> is on, otherwise Claude and SAM 3 on fal.ai (both keys then required).
+    /// Adds the analysis queue, the background worker and the AI providers. The fakes are always
+    /// there; Claude and SAM 3 on fal.ai whenever both keys are set (required unless
+    /// <c>Ai:UseFakes</c> is on). Each room uses the mode it was uploaded with.
     /// </summary>
     /// <param name="builder">The host builder.</param>
     private static void AddAiPipeline(IHostApplicationBuilder builder)
@@ -70,12 +71,13 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IAnalysisScheduler>(sp => sp.GetRequiredService<AnalysisScheduler>());
         builder.Services.AddHostedService<RoomAnalysisWorker>();
 
-        if (builder.Configuration.GetValue<bool>($"{AiOptions.Section}:{nameof(AiOptions.UseFakes)}"))
-        {
-            builder.Services.AddSingleton<IObjectInventoryProvider, FakeInventoryProvider>();
-            builder.Services.AddSingleton<ISegmentationProvider, FakeSegmentationProvider>();
+        builder.Services.AddSingleton<FakeInventoryProvider>();
+        builder.Services.AddSingleton<FakeSegmentationProvider>();
+        builder.Services.AddSingleton<IAiProviders, AiProviders>();
+
+        var configured = builder.Configuration.GetSection(AiOptions.Section).Get<AiOptions>() ?? new AiOptions();
+        if (!configured.HasRealKeys)
             return;
-        }
 
         builder.Services.AddSingleton<IAnthropicClient>(sp =>
         {
@@ -88,7 +90,7 @@ public static class DependencyInjection
                     ExtraHeaders = new Dictionary<string, string> { ["anthropic-workspace-id"] = ai.AnthropicWorkspaceId.Trim() },
                 });
         });
-        builder.Services.AddSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>();
+        builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(AiProviders.RealKey);
 
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
         builder.Services.AddHttpClient<FalSegmentationProvider>((sp, http) =>
@@ -103,7 +105,7 @@ public static class DependencyInjection
                 resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
             });
 #pragma warning restore EXTEXP0001
-        builder.Services.AddSingleton<ISegmentationProvider>(sp => new RecordingSegmentationProvider(
+        builder.Services.AddKeyedSingleton<ISegmentationProvider>(AiProviders.RealKey, (sp, _) => new RecordingSegmentationProvider(
             sp.GetRequiredService<FalSegmentationProvider>(),
             sp.GetRequiredService<IOptions<AiOptions>>(),
             sp.GetRequiredService<ILogger<RecordingSegmentationProvider>>()));

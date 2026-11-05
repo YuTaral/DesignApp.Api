@@ -17,7 +17,7 @@
     { "label": "framed botanical print", "category": "Decor", "shapes": [ { "polygon": [583,53, 657,53, 657,165, 583,165] } ] },
     { "label": "wall-hung toilet", "category": "Fixture", "shapes": [ { "polygon": [580,328, 600,323, 655,324, 674,335, 677,355, 675,375, 668,395, 655,415, 638,425, 620,428, 603,420, 593,395, 585,365, 578,345] } ] },
     { "label": "flush plate", "category": "Fixture", "shapes": [ { "polygon": [589,212, 642,212, 642,246, 589,246] } ] },
-    { "label": "window", "category": "Fixture", "shapes": [ { "polygon": [713,0, 795,0, 795,247, 713,245] } ] },
+    { "label": "window", "category": "Opening", "shapes": [ { "polygon": [713,0, 795,0, 795,247, 713,245] } ] },
     { "label": "window sill", "category": "Fixture", "shapes": [ { "polygon": [713,243, 793,252, 797,268, 713,257] } ] },
     { "label": "plant in dark vase", "category": "Decor", "shapes": [ { "polygon": [714,195, 740,140, 770,140, 785,170, 770,200, 765,250, 738,250, 735,205] } ] },
     { "label": "small potted plant", "category": "Decor", "shapes": [ { "polygon": [500,250, 520,250, 522,230, 535,205, 525,185, 505,190, 488,205, 498,230] } ] },

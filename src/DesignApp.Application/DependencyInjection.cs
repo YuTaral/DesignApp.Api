@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<UploadRoom>();
         services.AddScoped<GetRoom>();
         services.AddScoped<AnalyzeRoom>();
+        services.AddScoped<FixRoomOutline>();
         return services;
     }
 }

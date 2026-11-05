@@ -17,8 +17,10 @@ public enum ObjectCategory
     Decor,
     /// <summary>Lamps and light fittings.</summary>
     Lighting,
-    /// <summary>Built-in items such as doors, windows and counters.</summary>
+    /// <summary>Built-in items such as counters, cabinets, appliances and sanitary ware.</summary>
     Fixture,
     /// <summary>Anything that fits no other category.</summary>
     Other,
+    /// <summary>Doors and windows (including glass doors), but not cabinet doors.</summary>
+    Opening,
 }

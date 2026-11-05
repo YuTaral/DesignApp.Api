@@ -7,6 +7,7 @@ using DesignApp.Domain.Rooms;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Claude;
 using DesignApp.Infrastructure.Ai.Fal;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 
@@ -88,6 +89,94 @@ public class AiProviderTests
             box.GetProperty("x_max").GetInt32(), box.GetProperty("y_max").GetInt32()));
         Assert.StartsWith("data:image/jpeg;base64,", sofa.GetProperty("image_url").GetString(), StringComparison.Ordinal);
         Assert.False(sofa.GetProperty("apply_mask").GetBoolean());
+        Assert.True(sofa.GetProperty("return_multiple_masks").GetBoolean());
+        Assert.Equal(FalSegmentationProvider.MaxMasks, sofa.GetProperty("max_masks").GetInt32());
+    }
+
+    [Fact]
+    public async Task A_mask_that_misses_the_box_is_asked_for_again_with_the_box_alone()
+    {
+        // The stub's mask (left half) hardly overlaps the sofa's box on the right.
+        var fal = new StubFal(MaskPng(4, 2));
+        var provider = Provider(fal);
+
+        await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200),
+            [new("sofa", ObjectCategory.Furniture, new BoundingBox(0.6, 0.1, 0.3, 0.8), HexColor.Parse("#000000"))], CancellationToken.None);
+
+        Assert.Equal(["sofa", ""], fal.Bodies.Select(b => b.GetProperty("prompt").GetString()));
+    }
+
+    [Fact]
+    public async Task A_mask_that_fits_the_box_needs_no_second_request()
+    {
+        var fal = new StubFal(MaskPng(4, 2));
+        var provider = Provider(fal);
+
+        await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200),
+            [new("sofa", ObjectCategory.Furniture, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000"))], CancellationToken.None);
+
+        Assert.Single(fal.Bodies);
+    }
+
+    [Fact]
+    public void The_mask_that_fits_the_box_wins_over_a_look_alike()
+    {
+        // SAM's first mask is the look-alike at the left; the object Claude boxed is at the right.
+        var lookAlike = Block(10, 10, 0, 0, 4, 10);
+        var target = Block(10, 10, 6, 2, 4, 6);
+
+        var picked = FalSegmentationProvider.Pick([lookAlike, target], new BoundingBox(0.6, 0.2, 0.4, 0.6));
+
+        Assert.Same(target, picked?.Mask);
+        Assert.Equal(1, picked!.Value.Fit, 6);
+    }
+
+    [Fact]
+    public void A_mask_spilling_past_a_tight_box_beats_one_covering_part_of_it()
+    {
+        // Claude's box stops short of the cabinets' right end. SAM's first mask is the left 60% of
+        // the box; its second is the whole cabinet run, twice as wide as the box (old box IoU picked the part).
+        var part = Block(10, 10, 0, 0, 3, 5);
+        var whole = Block(10, 10, 0, 0, 10, 5);
+
+        var picked = FalSegmentationProvider.Pick([part, whole], new BoundingBox(0, 0, 0.5, 0.5));
+
+        Assert.Same(whole, picked?.Mask);
+    }
+
+    [Fact]
+    public void Pieces_inside_the_box_are_joined()
+    {
+        // SAM split a pouf in two halves; together they fill Claude's box.
+        var left = Block(10, 10, 2, 2, 3, 6);
+        var right = Block(10, 10, 5, 2, 3, 6);
+
+        var picked = FalSegmentationProvider.Pick([left, right], new BoundingBox(0.2, 0.2, 0.6, 0.6));
+
+        Assert.Equal(1, picked!.Value.Fit, 6);
+        Assert.Equal(36, picked.Value.Mask.Coverage.Count(c => c == 255));
+    }
+
+    [Fact]
+    public void No_masks_means_no_pick()
+    {
+        Assert.Null(FalSegmentationProvider.Pick([Block(10, 10, 0, 0, 0, 0)], new BoundingBox(0, 0, 1, 1)));
+    }
+
+    /// <summary>A mask with one filled rectangle.</summary>
+    /// <param name="width">Mask width.</param>
+    /// <param name="height">Mask height.</param>
+    /// <param name="x">Rectangle left.</param>
+    /// <param name="y">Rectangle top.</param>
+    /// <param name="w">Rectangle width.</param>
+    /// <param name="h">Rectangle height.</param>
+    private static ObjectMask Block(int width, int height, int x, int y, int w, int h)
+    {
+        var coverage = new byte[width * height];
+        for (var row = y; row < y + h; row++)
+            for (var col = x; col < x + w; col++)
+                coverage[row * width + col] = 255;
+        return new ObjectMask(width, height, coverage);
     }
 
     [Fact]
@@ -117,7 +206,7 @@ public class AiProviderTests
     {
         var http = new HttpClient(fal);
         http.DefaultRequestHeaders.Authorization = new("Key", "test-key");
-        return new FalSegmentationProvider(http, Options.Create(new AiOptions()));
+        return new FalSegmentationProvider(http, Options.Create(new AiOptions()), NullLogger<FalSegmentationProvider>.Instance);
     }
 
     /// <summary>A mask PNG: white on the left half, black on the right.</summary>

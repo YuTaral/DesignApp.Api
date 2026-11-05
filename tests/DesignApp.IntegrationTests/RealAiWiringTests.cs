@@ -1,4 +1,5 @@
 using DesignApp.Application.Analysis;
+using DesignApp.Domain.Rooms;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,11 +27,22 @@ public class RealAiWiringTests(ApiFactory factory) : IClassFixture<ApiFactory>
         });
 
         using var scope = app.Services.CreateScope();
-        var inventory = scope.ServiceProvider.GetRequiredService<IObjectInventoryProvider>();
-        var segmentation = scope.ServiceProvider.GetRequiredService<ISegmentationProvider>();
+        var ai = scope.ServiceProvider.GetRequiredService<IAiProviders>();
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<AnalyzeRoom>());
 
-        Assert.Equal("ClaudeInventoryProvider", inventory.GetType().Name);
-        Assert.Equal("RecordingSegmentationProvider", segmentation.GetType().Name);
+        Assert.Equal("ClaudeInventoryProvider", ai.Inventory(AiMode.Real).GetType().Name);
+        Assert.Equal("RecordingSegmentationProvider", ai.Segmentation(AiMode.Real).GetType().Name);
+        Assert.Equal("FakeInventoryProvider", ai.Inventory(AiMode.Fake).GetType().Name);
+        Assert.Equal(AiMode.Real, ai.Availability.Default);
+    }
+
+    [Fact]
+    public void Without_keys_only_the_fakes_exist()
+    {
+        using var scope = factory.Services.CreateScope();
+        var ai = scope.ServiceProvider.GetRequiredService<IAiProviders>();
+
+        Assert.False(ai.Availability.RealAvailable);
+        Assert.Throws<InvalidOperationException>(() => ai.Inventory(AiMode.Real));
     }
 }

@@ -24,8 +24,11 @@ public sealed class UploadRoom(
     /// <summary>Processes the photo, stores it, saves the room and queues its analysis. Removes the photo again if the save fails.</summary>
     /// <param name="upload">The uploaded file's bytes.</param>
     /// <param name="cancellationToken">Cancels the upload.</param>
+    /// <param name="scope">Which objects the analysis should look for.</param>
+    /// <param name="aiMode">Which AI analyzes the photo (the caller checks that it's allowed).</param>
     /// <returns>The new room, or a failure saying why the photo can't be used.</returns>
-    public async Task<Result<Room>> HandleAsync(Stream upload, CancellationToken cancellationToken)
+    public async Task<Result<Room>> HandleAsync(Stream upload, CancellationToken cancellationToken,
+        AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake)
     {
         var processed = photoProcessor.Process(upload);
         if (!processed.Succeeded)
@@ -35,7 +38,7 @@ public sealed class UploadRoom(
         var now = clock.GetUtcNow();
         var id = Guid.CreateVersion7(now);
         var photoKey = StorageKeys.RoomPhoto(id);
-        var room = Room.Upload(id, currentUser.Id, photoKey, photo.Width, photo.Height, now);
+        var room = Room.Upload(id, currentUser.Id, photoKey, photo.Width, photo.Height, now, scope, aiMode);
 
         using (var content = new MemoryStream(photo.Content, writable: false))
             await storage.SaveAsync(photoKey, content, ProcessedPhoto.ContentType, cancellationToken);

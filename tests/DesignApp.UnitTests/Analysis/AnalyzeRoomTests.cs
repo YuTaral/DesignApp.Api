@@ -29,7 +29,7 @@ public class AnalyzeRoomTests
 
     /// <summary>The use case wired to this test's fakes.</summary>
     private AnalyzeRoom CreateHandler() =>
-        new(_rooms, _storage, new SkiaRoomImaging(), _inventory, _segmentation, _notifier, NullLogger<AnalyzeRoom>.Instance);
+        new(_rooms, _storage, new SkiaRoomImaging(), new FixedAiProviders(_inventory, _segmentation), _notifier, NullLogger<AnalyzeRoom>.Instance);
 
     /// <summary>Saves a freshly uploaded room with a real photo in storage.</summary>
     private async Task<Room> UploadedRoomAsync()

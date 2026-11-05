@@ -12,16 +12,14 @@ namespace DesignApp.Application.Analysis;
 /// <param name="rooms">The room database.</param>
 /// <param name="storage">Where the photo and the label map are stored.</param>
 /// <param name="imaging">Scales the photo and builds the label map.</param>
-/// <param name="inventory">Step 1: lists the objects.</param>
-/// <param name="segmentation">Step 2: outlines them.</param>
+/// <param name="ai">The providers of the AI the room was uploaded with: step 1 lists the objects, step 2 outlines them.</param>
 /// <param name="notifier">Pushes each change to the browser.</param>
 /// <param name="logger">Records why an analysis failed.</param>
 public sealed partial class AnalyzeRoom(
     IRoomRepository rooms,
     IFileStorage storage,
     IRoomImaging imaging,
-    IObjectInventoryProvider inventory,
-    ISegmentationProvider segmentation,
+    IAiProviders ai,
     IRoomNotifier notifier,
     ILogger<AnalyzeRoom> logger)
 {
@@ -78,13 +76,14 @@ public sealed partial class AnalyzeRoom(
             image = imaging.PrepareForAnalysis(photo.Content);
         }
 
-        var listed = await inventory.ListObjectsAsync(image, cancellationToken);
+        var listed = await ai.Inventory(room.AiMode).ListObjectsAsync(image, cancellationToken);
         if (!listed.Succeeded)
         {
             await FailAsync(room, listed.Error, cancellationToken);
             return;
         }
-        var items = listed.Value.Take(AnalysisRules.MaxObjects).ToList();
+        // Objects outside the scope the user chose are never outlined, which also saves their SAM 3 requests.
+        var items = listed.Value.Where(item => room.Scope.Includes(item.Category)).Take(AnalysisRules.MaxObjects).ToList();
         if (items.Count == 0)
         {
             await FailAsync(room, NothingFound, cancellationToken);
@@ -94,7 +93,7 @@ public sealed partial class AnalyzeRoom(
         room.StartSegmentation();
         await SaveAndNotifyAsync(room, cancellationToken);
 
-        var masks = await segmentation.SegmentAsync(image, items, cancellationToken);
+        var masks = await ai.Segmentation(room.AiMode).SegmentAsync(image, items, cancellationToken);
         var outlined = items.Zip(masks)
             .Where(pair => pair.Second is not null)
             .Select(pair => new SegmentedObject(pair.First, pair.Second!))

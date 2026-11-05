@@ -23,6 +23,8 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(r => r.FailureReason).HasMaxLength(500);
         builder.Property(r => r.LabelMapKey).HasMaxLength(300);
+        builder.Property(r => r.Scope).HasConversion<string>().HasMaxLength(20);
+        builder.Property(r => r.AiMode).HasConversion<string>().HasMaxLength(10);
 
         // Postgres's xmin system column as an optimistic-concurrency token: if two workers ever
         // analyze the same room, the second save fails instead of silently overwriting the first.

@@ -11,7 +11,7 @@
       { "polygon": [530,10, 700,10, 700,173, 543,173, 543,150, 530,150] }
     ] },
     { "label": "oak wall cabinets", "category": "Furniture", "shapes": [ { "polygon": [287,10, 530,10, 530,150, 287,150] } ] },
-    { "label": "floor-to-ceiling windows", "category": "Fixture", "shapes": [ { "polygon": [0,0, 92,0, 92,385, 0,440] } ] },
+    { "label": "floor-to-ceiling windows", "category": "Opening", "shapes": [ { "polygon": [0,0, 92,0, 92,385, 0,440] } ] },
     { "label": "left wall", "category": "Wall", "shapes": [ { "polygon": [92,0, 122,0, 122,420, 92,420] } ] },
     { "label": "right wall", "category": "Wall", "shapes": [ { "polygon": [700,0, 721,0, 721,262, 700,262] } ] },
     { "label": "marble backsplash", "category": "Wall", "shapes": [ { "polygon": [287,152, 530,152, 530,245, 287,245] } ] },

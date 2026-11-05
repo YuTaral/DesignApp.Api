@@ -11,7 +11,10 @@ namespace DesignApp.Api.Rooms;
 /// <param name="CreatedAt">When the photo was uploaded.</param>
 /// <param name="FailureReason">Why the analysis failed; <c>null</c> unless <paramref name="Status"/> is Failed.</param>
 /// <param name="Objects">The objects found in the photo; empty until the analysis is ready.</param>
-/// <param name="LabelMapUrl">Where to load the label map (relative, like <paramref name="PhotoUrl"/>); <c>null</c> until ready.</param>
+/// <param name="LabelMapUrl">Where to load the current label map version (relative, like <paramref name="PhotoUrl"/>); <c>null</c> until ready.</param>
+/// <param name="LabelMapRevision">The current label map version: 0 from the analysis, higher after outline fixes.</param>
+/// <param name="Scope">Which objects the analysis looked for.</param>
+/// <param name="AiMode">Which AI analyzed the photo.</param>
 public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
@@ -21,7 +24,10 @@ public sealed record RoomResponse(
     DateTimeOffset CreatedAt,
     string? FailureReason,
     IReadOnlyList<DetectedObjectResponse> Objects,
-    string? LabelMapUrl)
+    string? LabelMapUrl,
+    int LabelMapRevision,
+    AnalysisScope Scope,
+    AiMode AiMode)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -34,7 +40,10 @@ public sealed record RoomResponse(
         room.CreatedAt,
         room.FailureReason,
         [.. room.Objects.Select(DetectedObjectResponse.From)],
-        room.LabelMapKey is null ? null : $"/api/rooms/{room.Id}/labels");
+        room.LabelMapKey is null ? null : $"/api/rooms/{room.Id}/labels/{room.LabelMapRevision}",
+        room.LabelMapRevision,
+        room.Scope,
+        room.AiMode);
 }
 
 /// <summary>One detected object as the API returns it.</summary>

@@ -22,6 +22,11 @@ internal sealed class ClaudeInventoryProvider(IAnthropicClient client, IOptions<
         and fixtures such as doors, windows, cabinets and counters.
 
         Rules:
+        - Always list every visible wall as its own entry ("left wall", "back wall", "right wall"), even
+          plain white walls and walls partly hidden by cabinets or tiles, and the floor and ceiling
+          when visible. A tiled area or backsplash is an extra entry, not a replacement for its wall.
+        - Doors and windows (glass doors included) have the category Opening; cabinet and wardrobe
+          doors belong to their cabinet or wardrobe.
         - One entry per physical object. Give similar objects distinct labels ("left armchair", "right armchair").
         - Labels are short, lower-case and concrete ("oak dining table", "jute rug"), usable as a segmentation prompt.
         - Skip things smaller than about 1% of the image, people, pets, and text.

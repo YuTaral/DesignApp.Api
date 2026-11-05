@@ -9,7 +9,7 @@
     { "label": "right wall", "category": "Wall", "shapes": [ { "polygon": [700,0, 940,0, 940,564, 900,564, 900,68, 690,92] } ] },
     { "label": "ceiling", "category": "Ceiling", "shapes": [ { "polygon": [215,0, 705,0, 690,92, 288,92] } ] },
     { "label": "tile floor", "category": "Floor", "shapes": [ { "polygon": [320,510, 348,478, 633,478, 705,540, 705,564, 320,564] } ] },
-    { "label": "white door", "category": "Fixture", "shapes": [ { "polygon": [0,0, 88,0, 88,564, 0,564] } ] },
+    { "label": "white door", "category": "Opening", "shapes": [ { "polygon": [0,0, 88,0, 88,564, 0,564] } ] },
     { "label": "steel fridge freezer", "category": "Fixture", "shapes": [ { "polygon": [133,147, 262,147, 320,190, 320,560, 300,564, 133,564] } ] },
     { "label": "white upper cabinets", "category": "Furniture", "shapes": [
       { "polygon": [320,150, 660,150, 660,280, 320,280] },
@@ -25,7 +25,7 @@
       { "polygon": [320,282, 440,282, 440,250, 540,250, 540,282, 660,282, 690,280, 690,365, 320,365] },
       { "polygon": [690,280, 757,262, 905,228, 905,385, 690,365] }
     ] },
-    { "label": "window", "category": "Fixture", "shapes": [ { "polygon": [758,248, 822,248, 822,335, 758,335] } ] },
+    { "label": "window", "category": "Opening", "shapes": [ { "polygon": [758,248, 822,248, 822,335, 758,335] } ] },
     { "label": "quartz countertop", "category": "Fixture", "shapes": [ { "polygon": [320,360, 633,360, 660,365, 905,375, 905,392, 760,392, 705,382, 633,372, 320,372] } ] },
     { "label": "grey base cabinets", "category": "Furniture", "shapes": [
       { "polygon": [320,372, 633,372, 633,478, 348,478, 320,510] },

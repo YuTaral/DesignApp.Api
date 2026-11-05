@@ -28,7 +28,8 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var room = await WaitForStatusAsync(created.Id, "Ready");
 
         Assert.NotEmpty(room.Objects);
-        Assert.Equal($"/api/rooms/{room.Id}/labels", room.LabelMapUrl);
+        Assert.Equal($"/api/rooms/{room.Id}/labels/0", room.LabelMapUrl);
+        Assert.Equal((0, "WholeRoom", "Fake"), (room.LabelMapRevision, room.Scope, room.AiMode));
         var sofa = room.Objects.Single(o => o.GetProperty("label").GetString() == "sofa");
         Assert.Equal("Furniture", sofa.GetProperty("category").GetString());
         Assert.Matches("^#[0-9A-F]{6}$", sofa.GetProperty("dominantColor").GetString());
@@ -56,6 +57,72 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         using var response = await _client.GetAsync($"/api/rooms/{Guid.NewGuid()}/labels");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task The_scope_chosen_at_upload_limits_what_is_found()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync("ObjectsOnly")).Id, "Ready");
+
+        Assert.Equal("ObjectsOnly", room.Scope);
+        Assert.DoesNotContain(room.Objects, o => o.GetProperty("category").GetString() is "Wall" or "Floor" or "Ceiling" or "Opening");
+        Assert.Contains(room.Objects, o => o.GetProperty("label").GetString() == "sofa");
+    }
+
+    [Fact]
+    public async Task The_api_says_which_ai_uploads_can_use()
+    {
+        var ai = await _client.GetFromJsonAsync<JsonElement>("/api/ai");
+
+        Assert.Equal("Fake", ai.GetProperty("default").GetString());
+        Assert.False(ai.GetProperty("realAvailable").GetBoolean()); // tests never have keys
+    }
+
+    [Fact]
+    public async Task Choosing_the_real_ai_without_keys_is_refused()
+    {
+        using var response = await PostPhotoAsync(null, ai: "Real");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Contains("isn't set up", await response.Content.ReadAsStringAsync(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task An_unknown_scope_is_refused()
+    {
+        using var response = await PostPhotoAsync("Kitchen");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task An_outline_fix_creates_a_new_label_map_version_and_undo_switches_back()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var sofa = room.Objects.Single(o => o.GetProperty("label").GetString() == "sofa").GetProperty("index").GetInt32();
+        var before = await LabelsAsync(room.LabelMapUrl!);
+        var spot = Array.FindIndex(before, l => l != sofa);
+        var (x, y) = ((spot % 1200 + 0.5) / 1200, (spot / 1200 + 0.5) / 800);
+
+        using var fix = await _client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
+            new { baseRevision = 0, objectIndex = sofa, mode = "Paint", radius = 2, points = new[] { new { x, y } } });
+        fix.EnsureSuccessStatusCode();
+        var fixedRoom = (await fix.Content.ReadFromJsonAsync<RoomDto>())!;
+
+        Assert.Equal(1, fixedRoom.LabelMapRevision);
+        Assert.Equal($"/api/rooms/{room.Id}/labels/1", fixedRoom.LabelMapUrl);
+        Assert.Equal(sofa, (await LabelsAsync(fixedRoom.LabelMapUrl!))[spot]);
+        Assert.Equal(before, await LabelsAsync($"/api/rooms/{room.Id}/labels/0"));
+
+        using var undo = await _client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
+        undo.EnsureSuccessStatusCode();
+        Assert.Equal(0, (await _client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.LabelMapRevision);
+
+        using var again = await _client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
+            new { baseRevision = 0, objectIndex = sofa, mode = "Erase", radius = 0.5, points = new[] { new { x, y } } });
+        Assert.Equal(HttpStatusCode.BadRequest, again.StatusCode); // that spot isn't the sofa's in version 0
+        using var missing = await _client.GetAsync($"/api/rooms/{room.Id}/labels/7");
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
 
     [Fact]
@@ -103,14 +170,36 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         .Build();
 
     /// <summary>Uploads a 1200x800 test photo.</summary>
-    private async Task<RoomDto> UploadAsync()
+    /// <param name="scope">The optional scope form field.</param>
+    private async Task<RoomDto> UploadAsync(string? scope = null)
+    {
+        using var response = await PostPhotoAsync(scope);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RoomDto>())!;
+    }
+
+    /// <summary>Posts a 1200x800 test photo.</summary>
+    /// <param name="scope">The optional scope form field.</param>
+    /// <param name="ai">The optional ai form field.</param>
+    private async Task<HttpResponseMessage> PostPhotoAsync(string? scope, string? ai = null)
     {
         using var content = new ByteArrayContent(TestImages.Create(1200, 800));
         content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
-        using var response = await _client.PostAsync("/api/rooms", form);
-        response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<RoomDto>())!;
+        if (scope is not null)
+            form.Add(new StringContent(scope), "scope");
+        if (ai is not null)
+            form.Add(new StringContent(ai), "ai");
+        return await _client.PostAsync("/api/rooms", form);
+    }
+
+    /// <summary>Downloads a label map and decodes it to one byte per pixel.</summary>
+    /// <param name="url">The label map's URL.</param>
+    private async Task<byte[]> LabelsAsync(string url)
+    {
+        using var codec = SKCodec.Create(new MemoryStream(await _client.GetByteArrayAsync(url)));
+        using var labels = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+        return labels.GetPixelSpan().ToArray();
     }
 
     /// <summary>Polls the room until it reaches a status.</summary>
@@ -137,5 +226,8 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     /// <param name="FailureReason">Why it failed, if it did.</param>
     /// <param name="Objects">The detected objects.</param>
     /// <param name="LabelMapUrl">Where the label map is, once ready.</param>
-    private sealed record RoomDto(Guid Id, string Status, string? FailureReason, List<JsonElement> Objects, string? LabelMapUrl);
+    /// <param name="LabelMapRevision">The current label map version.</param>
+    /// <param name="Scope">What the analysis looked for.</param>
+    private sealed record RoomDto(Guid Id, string Status, string? FailureReason, List<JsonElement> Objects, string? LabelMapUrl,
+        int LabelMapRevision, string Scope, string AiMode);
 }

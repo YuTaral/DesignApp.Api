@@ -28,6 +28,12 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AiMode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("ai_mode");
+
                     b.Property<int>("AnalysisAttempts")
                         .HasColumnType("integer")
                         .HasColumnName("analysis_attempts");
@@ -50,6 +56,14 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(300)")
                         .HasColumnName("label_map_key");
 
+                    b.Property<int>("LabelMapRevision")
+                        .HasColumnType("integer")
+                        .HasColumnName("label_map_revision");
+
+                    b.Property<int>("LatestLabelMapRevision")
+                        .HasColumnType("integer")
+                        .HasColumnName("latest_label_map_revision");
+
                     b.Property<string>("Objects")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -66,6 +80,12 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
                         .HasColumnName("photo_key");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("scope");
 
                     b.Property<string>("Status")
                         .IsRequired()

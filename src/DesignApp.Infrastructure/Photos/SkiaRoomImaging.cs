@@ -1,4 +1,5 @@
 using DesignApp.Application.Analysis;
+using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
@@ -52,8 +53,23 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         foreach (var (o, paintId, _) in paintOrder)
             Paint(labels, width, height, o.Mask, paintId);
 
-        var stats = Measure(labels, width, height, objects.Count, image.Jpeg);
+        // Objects too small to keep are cleared before the cleanup, so they can't grow.
         var minPixels = AnalysisRules.MinAreaFraction * width * height;
+        var painted = new int[objects.Count + 1];
+        foreach (var label in labels)
+            painted[label]++;
+        for (var p = 0; p < labels.Length; p++)
+        {
+            if (painted[labels[p]] < minPixels)
+                labels[p] = 0;
+        }
+
+        using var photo = DecodeRgba(image);
+        var pixels = photo.GetPixelSpan();
+        var surfaces = objects.Select(o => o.Item.Category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling).ToArray();
+        LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1]);
+
+        var stats = Measure(labels, width, height, objects.Count, pixels);
 
         // Keep Claude's order (most important first) for the final indexes.
         var renumber = new byte[objects.Count + 1];
@@ -125,18 +141,13 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     /// <param name="width">Label map width.</param>
     /// <param name="height">Label map height.</param>
     /// <param name="count">How many objects were painted.</param>
-    /// <param name="jpeg">The analysis image, for the colors.</param>
+    /// <param name="pixels">The analysis image, 4 bytes per pixel, for the colors.</param>
     /// <returns>Statistics by paint id (index 0 is unused).</returns>
-    private static ObjectStats[] Measure(byte[] labels, int width, int height, int count, byte[] jpeg)
+    private static ObjectStats[] Measure(byte[] labels, int width, int height, int count, ReadOnlySpan<byte> pixels)
     {
         var stats = new ObjectStats[count + 1];
         for (var i = 0; i < stats.Length; i++)
             stats[i] = new ObjectStats();
-
-        using var codec = SKCodec.Create(new MemoryStream(jpeg));
-        var info = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
-        using var photo = SKBitmap.Decode(codec, info) ?? throw new InvalidOperationException("The analysis image can't be decoded.");
-        var pixels = photo.GetPixelSpan();
 
         for (var y = 0; y < height; y++)
         {
@@ -148,6 +159,36 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             }
         }
         return stats;
+    }
+
+    /// <summary>Decodes the analysis image to sRGB RGBA, one 4-byte pixel per label-map pixel.</summary>
+    /// <param name="image">The analysis image.</param>
+    private static SKBitmap DecodeRgba(AnalysisImage image)
+    {
+        using var codec = SKCodec.Create(new MemoryStream(image.Jpeg));
+        var info = new SKImageInfo(image.Width, image.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
+        return SKBitmap.Decode(codec, info) ?? throw new InvalidOperationException("The analysis image can't be decoded.");
+    }
+
+    /// <inheritdoc/>
+    public Result<byte[]> PaintOutline(byte[] labelMapPng, OutlineStroke stroke)
+    {
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var changed = OutlineBrush.Apply(labels, width, height, stroke);
+        return changed.Succeeded ? EncodeGrayPng(labels, width, height) : Result.Failure<byte[]>(changed.Error);
+    }
+
+    /// <summary>Reads a label map PNG back into one byte per pixel.</summary>
+    /// <param name="png">The label map file.</param>
+    /// <returns>The labels and the map's size.</returns>
+    /// <exception cref="InvalidOperationException">The file can't be read.</exception>
+    private static (byte[] Labels, int Width, int Height) DecodeGrayPng(byte[] png)
+    {
+        using var codec = SKCodec.Create(new MemoryStream(png)) ?? throw new InvalidOperationException("The label map can't be decoded.");
+        var (width, height) = (codec.Info.Width, codec.Info.Height);
+        using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque))
+            ?? throw new InvalidOperationException("The label map can't be decoded.");
+        return (bitmap.GetPixelSpan().ToArray(), width, height);
     }
 
     /// <summary>Encodes the label map as an 8-bit grayscale PNG, so pixel values survive exactly.</summary>

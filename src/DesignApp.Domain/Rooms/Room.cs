@@ -35,6 +35,17 @@ public sealed class Room
     public string? LabelMapKey { get; private set; }
     /// <summary>How many times analysis has started, counting restarts after an interruption.</summary>
     public int AnalysisAttempts { get; private set; }
+    /// <summary>Which objects the analysis looks for.</summary>
+    public AnalysisScope Scope { get; private set; }
+    /// <summary>Which AI analyzes the photo.</summary>
+    public AiMode AiMode { get; private set; }
+    /// <summary>
+    /// Which version of the label map is current: 0 is the one the analysis made, each outline fix
+    /// adds one. Every version stays stored, so undo can go back to it.
+    /// </summary>
+    public int LabelMapRevision { get; private set; }
+    /// <summary>The newest label map version stored; fixes made after an undo get numbers above it.</summary>
+    public int LatestLabelMapRevision { get; private set; }
 
     private Room() { } // for EF Core
 
@@ -45,8 +56,11 @@ public sealed class Room
     /// <param name="width">Photo width in pixels.</param>
     /// <param name="height">Photo height in pixels.</param>
     /// <param name="now">The upload time.</param>
+    /// <param name="scope">Which objects the analysis looks for.</param>
+    /// <param name="aiMode">Which AI analyzes the photo.</param>
     /// <exception cref="DomainException">The id is empty or the size isn't positive.</exception>
-    public static Room Upload(Guid id, string ownerId, string photoKey, int width, int height, DateTimeOffset now)
+    public static Room Upload(Guid id, string ownerId, string photoKey, int width, int height, DateTimeOffset now,
+        AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake)
     {
         if (id == Guid.Empty)
             throw new DomainException("A room needs an id.");
@@ -64,6 +78,8 @@ public sealed class Room
             Height = height,
             Status = RoomStatus.Uploaded,
             CreatedAt = now,
+            Scope = Enum.IsDefined(scope) ? scope : throw new DomainException($"Unknown analysis scope {scope}."),
+            AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException($"Unknown AI mode {aiMode}."),
         };
     }
 
@@ -111,6 +127,43 @@ public sealed class Room
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
         LabelMapKey = labelMapKey;
     }
+
+    /// <summary>
+    /// Stores a fixed label map as a new version and makes it current. The caller saves the file
+    /// under <paramref name="keyFor"/> of the returned revision first.
+    /// </summary>
+    /// <param name="keyFor">The storage key of a revision.</param>
+    /// <returns>The new revision's number.</returns>
+    /// <exception cref="DomainException">The room isn't ready.</exception>
+    public int AddLabelMapRevision(Func<int, string> keyFor)
+    {
+        ArgumentNullException.ThrowIfNull(keyFor);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException($"Cannot fix the outlines of a room that is {Status}.");
+        LatestLabelMapRevision++;
+        LabelMapRevision = LatestLabelMapRevision;
+        LabelMapKey = keyFor(LabelMapRevision);
+        return LabelMapRevision;
+    }
+
+    /// <summary>Makes an earlier or later stored label map version current again (undo and redo of outline fixes).</summary>
+    /// <param name="revision">A stored version, from 0 to <see cref="LatestLabelMapRevision"/>.</param>
+    /// <param name="keyFor">The storage key of a revision.</param>
+    /// <exception cref="DomainException">The room isn't ready or there is no such version.</exception>
+    public void UseLabelMapRevision(int revision, Func<int, string> keyFor)
+    {
+        ArgumentNullException.ThrowIfNull(keyFor);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException($"Cannot change the outlines of a room that is {Status}.");
+        if (!HasLabelMapRevision(revision))
+            throw new DomainException($"The room has no label map version {revision}.");
+        LabelMapRevision = revision;
+        LabelMapKey = keyFor(revision);
+    }
+
+    /// <summary>Whether a label map version is stored.</summary>
+    /// <param name="revision">The version.</param>
+    public bool HasLabelMapRevision(int revision) => Status is RoomStatus.Ready && revision >= 0 && revision <= LatestLabelMapRevision;
 
     /// <summary>Stops the analysis with a reason the user can see.</summary>
     /// <param name="reason">Why the analysis failed.</param>

@@ -20,8 +20,8 @@
     { "label": "floating nightstand", "category": "Furniture", "shapes": [ { "polygon": [545,310, 648,318, 648,352, 625,357, 625,375, 600,375, 600,352, 545,345] } ] },
     { "label": "patchwork rug", "category": "Textile", "shapes": [ { "polygon": [65,350, 255,333, 383,408, 265,430, 150,462, 45,462] } ] },
     { "label": "knitted pouf", "category": "Furniture", "shapes": [ { "polygon": [88,375, 100,362, 140,355, 200,358, 210,372, 212,415, 200,430, 150,455, 95,450, 88,420] } ] },
-    { "label": "window", "category": "Fixture", "shapes": [ { "polygon": [343,118, 410,118, 410,262, 343,262] } ] },
-    { "label": "side window", "category": "Fixture", "shapes": [ { "polygon": [432,115, 483,110, 483,228, 432,228] } ] },
+    { "label": "window", "category": "Opening", "shapes": [ { "polygon": [343,118, 410,118, 410,262, 343,262] } ] },
+    { "label": "side window", "category": "Opening", "shapes": [ { "polygon": [432,115, 483,110, 483,228, 432,228] } ] },
     { "label": "portrait canvas", "category": "Decor", "shapes": [ { "polygon": [507,110, 617,85, 617,222, 507,222] } ] },
     { "label": "potted plant", "category": "Decor", "shapes": [ { "polygon": [430,178, 458,178, 458,228, 430,228] } ] },
     { "label": "tripod floor lamp", "category": "Lighting", "shapes": [

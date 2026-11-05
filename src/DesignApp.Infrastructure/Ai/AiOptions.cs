@@ -7,10 +7,19 @@ public sealed class AiOptions
     public const string Section = "Ai";
 
     /// <summary>
-    /// Use built-in fake providers instead of Claude and SAM 3: free, offline and instant. On in
-    /// Development; turn it off (with keys set) to try the real AI.
+    /// Whether uploads that don't choose use the built-in fake providers instead of Claude and SAM 3
+    /// (free, offline and instant). On in Development.
     /// </summary>
     public bool UseFakes { get; set; }
+
+    /// <summary>
+    /// Whether each upload may choose fake or real AI (the switch above the upload area). On in
+    /// Development only, so production always uses the real AI.
+    /// </summary>
+    public bool AllowAiSwitch { get; set; }
+
+    /// <summary>Whether both keys of the real AI are set.</summary>
+    public bool HasRealKeys => !string.IsNullOrWhiteSpace(AnthropicApiKey) && !string.IsNullOrWhiteSpace(FalKey);
 
     /// <summary>How long each fake step waits, so the progress UI can be seen. Ignored by the real providers.</summary>
     public TimeSpan FakeStepDelay { get; set; } = TimeSpan.Zero;
