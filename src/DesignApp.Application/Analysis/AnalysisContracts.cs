@@ -31,7 +31,17 @@ public sealed record AnalysisImage(byte[] Jpeg, int Width, int Height);
 /// <param name="Category">The kind of object.</param>
 /// <param name="Box">Roughly where the object is.</param>
 /// <param name="Color">The object's main color as the AI saw it.</param>
-public sealed record InventoryItem(string Label, ObjectCategory Category, BoundingBox Box, HexColor Color);
+/// <param name="Points">
+/// A few spots on the object itself, for walls, floors and ceilings: they tell the outlining step
+/// which surface is meant when its box also holds furniture. Empty when the AI gave none.
+/// </param>
+public sealed record InventoryItem(
+    string Label, ObjectCategory Category, BoundingBox Box, HexColor Color, IReadOnlyList<ImagePoint>? Points = null);
+
+/// <summary>A spot in the image, as fractions (0 to 1) of its width and height from the top-left corner.</summary>
+/// <param name="X">Across.</param>
+/// <param name="Y">Down.</param>
+public sealed record ImagePoint(double X, double Y);
 
 /// <summary>
 /// The outline of one object: how much each pixel belongs to it, from 0 (not at all) to 255 (fully).

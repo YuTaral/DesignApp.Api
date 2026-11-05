@@ -9,12 +9,16 @@ using SkiaSharp;
 namespace DesignApp.Infrastructure.Ai.Fal;
 
 /// <summary>
-/// Step 2 of the analysis on Meta's SAM 3, hosted by fal.ai. Each object gets its own request with
-/// its label as the text prompt and Claude's box as a box prompt. SAM 3 finds every match of the
-/// text, so it can return a look-alike next to the object (the end of the bed for "mint throw
-/// blanket") or only part of it; it is asked for several masks, and the one (or the union of
-/// pieces) whose outline best fits Claude's box is kept. When nothing fits, the object is asked
-/// for again with the box alone. Requests run in parallel up to <see cref="AiOptions.SegmentationParallelism"/>.
+/// Step 2 of the analysis on Meta's SAM 3, hosted by fal.ai, which charges per request. All objects
+/// share one request: every box at once, with no text, and one mask comes back per box. A wall's,
+/// floor's or ceiling's box covers much of the photo, and a box alone outlines it in patches, so
+/// surfaces join only with the few points Claude put on them; a surface without points gets a
+/// request of its own with its label as the text prompt. So does any object whose shared-request
+/// mask doesn't fit its box. SAM 3 finds every match of a text, so
+/// it can return a look-alike next to the object (the end of the bed for "mint throw blanket") or
+/// only part of it; it is asked for several masks, and the one (or the union of pieces) whose
+/// outline best fits Claude's box is kept. When nothing fits, the object is asked for again with
+/// the box alone. Requests run in parallel up to <see cref="AiOptions.SegmentationParallelism"/>.
 /// </summary>
 /// <param name="http">Sends the requests; authenticated and given long timeouts at registration.</param>
 /// <param name="options">Supplies the endpoint and parallelism.</param>
@@ -35,13 +39,117 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     public async Task<IReadOnlyList<ObjectMask?>> SegmentAsync(
         AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
+        var requests = CountRequests();
+        var before = requests.Value;
         var imageUrl = "data:image/jpeg;base64," + Convert.ToBase64String(image.Jpeg);
         var masks = new ObjectMask?[items.Count];
-        await Parallel.ForEachAsync(
-            Enumerable.Range(0, items.Count),
+        // A surface shares only when it has points; without them its box alone outlines it in patches.
+        var shared = Enumerable.Range(0, items.Count)
+            .Where(i => !IsSurface(items[i].Category) || items[i].Points is { Count: > 0 })
+            .ToList();
+        // One object gains nothing from sharing; its own request costs the same and has its label.
+        if (shared.Count < 2)
+            shared.Clear();
+
+        var own = Enumerable.Range(0, items.Count).Except(shared).ToList();
+        var sharedTask = SegmentSharedAsync(imageUrl, image, [.. shared.Select(i => items[i])], cancellationToken);
+        await SegmentEachAsync(own);
+
+        var sharedMasks = await sharedTask;
+        var retry = new List<int>();
+        for (var k = 0; k < shared.Count; k++)
+        {
+            if (sharedMasks[k] is { } mask)
+                masks[shared[k]] = mask;
+            else
+                retry.Add(shared[k]);
+        }
+        if (shared.Count > 0)
+            LogShared(shared.Count, shared.Count - retry.Count);
+        await SegmentEachAsync(retry);
+        LogRequests(items.Count, requests.Value - before);
+        return masks;
+
+        Task SegmentEachAsync(List<int> indexes) => Parallel.ForEachAsync(
+            indexes,
             new ParallelOptions { MaxDegreeOfParallelism = options.Value.SegmentationParallelism, CancellationToken = cancellationToken },
             async (i, ct) => masks[i] = await SegmentOneAsync(imageUrl, image, items[i], ct));
-        return masks;
+    }
+
+    /// <summary>The requests sent in the current analysis; fal.ai charges per request.</summary>
+    internal sealed class RequestCount
+    {
+        private int _value;
+
+        /// <summary>How many requests were sent.</summary>
+        public int Value => Volatile.Read(ref _value);
+
+        /// <summary>Counts one more request.</summary>
+        public void Add() => Interlocked.Increment(ref _value);
+    }
+
+    /// <summary>The count of the analysis running in this async flow, shared with its parallel requests.</summary>
+    private static readonly AsyncLocal<RequestCount?> CurrentCount = new();
+
+    /// <summary>
+    /// The request count for this async flow, starting one when there is none. A caller that calls
+    /// this before <see cref="SegmentAsync"/> reads afterwards how many requests the analysis sent.
+    /// </summary>
+    internal static RequestCount CountRequests() => CurrentCount.Value ??= new RequestCount();
+
+    /// <summary>Whether an object is a large surface that needs its label to be outlined well.</summary>
+    /// <param name="category">The object's category.</param>
+    internal static bool IsSurface(ObjectCategory category) =>
+        category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling;
+
+    /// <summary>
+    /// Outlines several objects in one request from their boxes (and surfaces' points), with no
+    /// text. A mask is kept only when it
+    /// fits its box; a refused or failed request keeps none, so every object gets its own request.
+    /// </summary>
+    /// <param name="imageUrl">The analysis image as a data URI.</param>
+    /// <param name="image">The analysis image, for its size.</param>
+    /// <param name="items">The objects; none sends no request.</param>
+    /// <param name="cancellationToken">Cancels the request.</param>
+    /// <returns>Per object, in order, its mask or <c>null</c> when it needs its own request.</returns>
+    private async Task<ObjectMask?[]> SegmentSharedAsync(
+        string imageUrl, AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
+    {
+        var result = new ObjectMask?[items.Count];
+        if (items.Count == 0)
+            return result;
+
+        List<(ObjectMask Mask, int? Index)> answer;
+        try
+        {
+            // Each box is its own object (its id), and one mask is asked for per box. A surface's
+            // points carry its id, so SAM 3 adds them to that box.
+            var boxes = items.Select((item, k) => PixelBox(item, image) with { ObjectId = k + 1 }).ToList();
+            var points = items
+                .SelectMany((item, k) => IsSurface(item.Category) ? (item.Points ?? []).Select(p => PixelPoint(p, image, k + 1)) : [])
+                .ToList();
+            answer = await RequestWithIndexesAsync(
+                new SamRequest(imageUrl, "", boxes, MaxMasks: items.Count, PointPrompts: points.Count > 0 ? points : null),
+                cancellationToken);
+        }
+        catch (Exception e) when (e is HttpRequestException or System.Text.Json.JsonException)
+        {
+            LogSharedFailed(items.Count, e.Message);
+            return result;
+        }
+
+        // A mask's index is the position of the box it outlines.
+        foreach (var (mask, index) in answer)
+        {
+            if (index is not { } k || k < 0 || k >= items.Count || result[k] is not null)
+                continue;
+            if (Pick([mask], items[k].Box) is { Fit: >= MinFit } picked)
+            {
+                LogPicked(items[k].Label, picked.Fit, "shared request");
+                result[k] = picked.Mask;
+            }
+        }
+        return result;
     }
 
     /// <summary>Outlines one object: the best-fitting mask of a text-and-box request, else of a box-only one.</summary>
@@ -52,12 +160,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// <returns>The mask, or <c>null</c> when SAM 3 found nothing for it.</returns>
     private async Task<ObjectMask?> SegmentOneAsync(string imageUrl, AnalysisImage image, InventoryItem item, CancellationToken cancellationToken)
     {
-        var box = new SamBox(
-            (int)Math.Floor(item.Box.X * image.Width),
-            (int)Math.Floor(item.Box.Y * image.Height),
-            (int)Math.Ceiling((item.Box.X + item.Box.Width) * image.Width),
-            (int)Math.Ceiling((item.Box.Y + item.Box.Height) * image.Height));
-
+        var box = PixelBox(item, image);
         var best = Pick(await RequestAsync(new SamRequest(imageUrl, item.Label, [box]), cancellationToken), item.Box);
         if (best is { Fit: >= MinFit })
         {
@@ -73,24 +176,54 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         return chosen?.Mask;
     }
 
+    /// <summary>Claude's box for an object in the analysis image's pixels.</summary>
+    /// <param name="item">The object.</param>
+    /// <param name="image">The analysis image.</param>
+    private static SamBox PixelBox(InventoryItem item, AnalysisImage image) => new(
+        (int)Math.Floor(item.Box.X * image.Width),
+        (int)Math.Floor(item.Box.Y * image.Height),
+        (int)Math.Ceiling((item.Box.X + item.Box.Width) * image.Width),
+        (int)Math.Ceiling((item.Box.Y + item.Box.Height) * image.Height));
+
+    /// <summary>A spot on an object in the analysis image's pixels, marked as part of it.</summary>
+    /// <param name="point">The spot, as fractions of the image.</param>
+    /// <param name="image">The analysis image.</param>
+    /// <param name="objectId">The object it belongs to.</param>
+    private static SamPoint PixelPoint(ImagePoint point, AnalysisImage image, int objectId) => new(
+        Math.Clamp((int)(point.X * image.Width), 0, image.Width - 1),
+        Math.Clamp((int)(point.Y * image.Height), 0, image.Height - 1),
+        Label: 1,
+        ObjectId: objectId);
+
     /// <summary>Sends a request and decodes every returned mask.</summary>
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">Cancels it.</param>
     /// <returns>The masks SAM 3 returned, best first by its own score.</returns>
-    private async Task<List<ObjectMask>> RequestAsync(SamRequest request, CancellationToken cancellationToken)
+    private async Task<List<ObjectMask>> RequestAsync(SamRequest request, CancellationToken cancellationToken) =>
+        [.. (await RequestWithIndexesAsync(request, cancellationToken)).Select(m => m.Mask)];
+
+    /// <summary>Sends a request and decodes every returned mask with the index SAM 3 gave it.</summary>
+    /// <param name="request">The request.</param>
+    /// <param name="cancellationToken">Cancels it.</param>
+    /// <returns>The masks, best first, each with the position of the box it answers when SAM 3 says.</returns>
+    private async Task<List<(ObjectMask Mask, int? Index)>> RequestWithIndexesAsync(SamRequest request, CancellationToken cancellationToken)
     {
+        CountRequests().Add();
         using var response = await http.PostAsJsonAsync(options.Value.SegmentationEndpoint, request, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<SamResponse>(cancellationToken);
 
-        var masks = new List<ObjectMask>();
-        foreach (var url in (result?.Masks ?? []).Select(m => m.Url).OfType<string>().Where(u => u.Length > 0))
+        var masks = new List<(ObjectMask, int?)>();
+        var returned = result?.Masks ?? [];
+        for (var i = 0; i < returned.Count; i++)
         {
+            if (returned[i].Url is not { Length: > 0 } url)
+                continue;
             var png = url.StartsWith("data:", StringComparison.Ordinal)
                 ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
                 : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
             if (Decode(png) is { } mask)
-                masks.Add(mask);
+                masks.Add((mask, result?.Metadata is { } metadata && i < metadata.Count ? metadata[i].Index : null));
         }
         return masks;
     }
@@ -255,6 +388,24 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     [LoggerMessage(Level = LogLevel.Information, Message = "SAM 3 {Label}: poor fit {TextFit:0.00}, box only {BoxFit:0.00}, kept {Kept}")]
     private partial void LogFallback(string label, double textFit, double boxFit, string kept);
 
+    /// <summary>Logs how many requests an analysis sent, which is what it cost.</summary>
+    /// <param name="objects">Objects outlined.</param>
+    /// <param name="requests">Requests sent.</param>
+    [LoggerMessage(Level = LogLevel.Information, Message = "SAM 3 outlined {Objects} objects with {Requests} requests")]
+    private partial void LogRequests(int objects, int requests);
+
+    /// <summary>Logs how many objects the shared request outlined.</summary>
+    /// <param name="count">Objects in the shared request.</param>
+    /// <param name="kept">Objects whose mask fit their box.</param>
+    [LoggerMessage(Level = LogLevel.Information, Message = "SAM 3 shared request: {Kept} of {Count} objects outlined, the rest get their own request")]
+    private partial void LogShared(int count, int kept);
+
+    /// <summary>Logs a failed shared request.</summary>
+    /// <param name="count">Objects in it, which now get a request each.</param>
+    /// <param name="error">What went wrong.</param>
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SAM 3 shared request for {Count} objects failed ({Error}); each gets its own request")]
+    private partial void LogSharedFailed(int count, string error);
+
     /// <summary>Logs a refused box-only request.</summary>
     /// <param name="status">The HTTP status.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "SAM 3 refused a box-only request ({Status})")]
@@ -269,6 +420,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// <param name="OutputFormat">PNG keeps the mask edges exact.</param>
     /// <param name="ReturnMultipleMasks">True: return up to <paramref name="MaxMasks"/> masks to pick from.</param>
     /// <param name="MaxMasks">How many masks to return.</param>
+    /// <param name="PointPrompts">Spots on objects, each tied to its object's box; none when null.</param>
     private sealed record SamRequest(
         [property: JsonPropertyName("image_url")] string ImageUrl,
         [property: JsonPropertyName("prompt")] string Prompt,
@@ -277,22 +429,43 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         [property: JsonPropertyName("sync_mode")] bool SyncMode = true,
         [property: JsonPropertyName("output_format")] string OutputFormat = "png",
         [property: JsonPropertyName("return_multiple_masks")] bool ReturnMultipleMasks = true,
-        [property: JsonPropertyName("max_masks")] int MaxMasks = MaxMasks);
+        [property: JsonPropertyName("max_masks")] int MaxMasks = MaxMasks,
+        [property: JsonPropertyName("point_prompts"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<SamPoint>? PointPrompts = null);
+
+    /// <summary>A point prompt in pixels.</summary>
+    /// <param name="X">Across.</param>
+    /// <param name="Y">Down.</param>
+    /// <param name="Label">1: the spot is part of the object.</param>
+    /// <param name="ObjectId">The object (box) it belongs to.</param>
+    private sealed record SamPoint(
+        [property: JsonPropertyName("x")] int X,
+        [property: JsonPropertyName("y")] int Y,
+        [property: JsonPropertyName("label")] int Label,
+        [property: JsonPropertyName("object_id")] int ObjectId);
 
     /// <summary>A box prompt in pixels.</summary>
     /// <param name="XMin">Left edge.</param>
     /// <param name="YMin">Top edge.</param>
     /// <param name="XMax">Right edge.</param>
     /// <param name="YMax">Bottom edge.</param>
+    /// <param name="ObjectId">Which object the box belongs to, when one request outlines several.</param>
     private sealed record SamBox(
         [property: JsonPropertyName("x_min")] int XMin,
         [property: JsonPropertyName("y_min")] int YMin,
         [property: JsonPropertyName("x_max")] int XMax,
-        [property: JsonPropertyName("y_max")] int YMax);
+        [property: JsonPropertyName("y_max")] int YMax,
+        [property: JsonPropertyName("object_id"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ObjectId = null);
 
     /// <summary>The part of the SAM 3 response the app uses.</summary>
     /// <param name="Masks">The masks, best first.</param>
-    private sealed record SamResponse([property: JsonPropertyName("masks")] List<SamImage>? Masks);
+    /// <param name="Metadata">Per mask, in the same order, which box it answers.</param>
+    private sealed record SamResponse(
+        [property: JsonPropertyName("masks")] List<SamImage>? Masks,
+        [property: JsonPropertyName("metadata")] List<SamMaskInfo>? Metadata = null);
+
+    /// <summary>What SAM 3 says about one returned mask.</summary>
+    /// <param name="Index">The position of the box prompt it answers.</param>
+    private sealed record SamMaskInfo([property: JsonPropertyName("index")] int? Index);
 
     /// <summary>One returned mask image.</summary>
     /// <param name="Url">A data URI (sync mode) or a download URL.</param>

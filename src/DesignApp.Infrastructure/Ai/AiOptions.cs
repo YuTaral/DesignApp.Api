@@ -34,7 +34,13 @@ public sealed class AiOptions
     public string? AnthropicWorkspaceId { get; set; }
 
     /// <summary>The Claude model that lists the objects.</summary>
-    public string InventoryModel { get; set; } = "claude-haiku-5-5";
+    public string InventoryModel { get; set; } = "claude-sonnet-5-5";
+
+    /// <summary>
+    /// How much Claude reasons before listing the objects. Lower effort writes fewer output tokens,
+    /// which is most of the call's cost.
+    /// </summary>
+    public InventoryEffort InventoryEffort { get; set; } = InventoryEffort.Medium;
 
     /// <summary>The fal.ai API key (user secrets locally). Required unless <see cref="UseFakes"/> is on.</summary>
     public string FalKey { get; set; } = "";
@@ -53,4 +59,17 @@ public sealed class AiOptions
 
     /// <summary>How many rooms are analyzed at the same time.</summary>
     public int MaxConcurrentAnalyses { get; set; } = 2;
+}
+
+/// <summary>Claude's effort levels the object listing can use.</summary>
+public enum InventoryEffort
+{
+    /// <summary>Least reasoning: cheapest and fastest.</summary>
+    Low,
+
+    /// <summary>The default.</summary>
+    Medium,
+
+    /// <summary>More reasoning, for harder photos.</summary>
+    High,
 }

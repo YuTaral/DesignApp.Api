@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DesignApp.Application.Analysis;
+using DesignApp.Infrastructure.Ai.Fal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
@@ -26,9 +27,18 @@ internal sealed partial class RecordingSegmentationProvider(
     public async Task<IReadOnlyList<ObjectMask?>> SegmentAsync(
         AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
+        var requests = FalSegmentationProvider.CountRequests();
+        var before = requests.Value;
         var masks = await inner.SegmentAsync(image, items, cancellationToken);
         if (options.Value.RecordSamplesTo is { Length: > 0 } folder && SampleRooms.Match(image) is { } sample)
         {
+            // How many paid SAM 3 requests the photo took, to compare ways of asking.
+            Directory.CreateDirectory(folder);
+            await File.WriteAllTextAsync(
+                Path.Combine(folder, $"{sample.Name}.sam3-usage.json"),
+                JsonSerializer.Serialize(new { name = sample.Name, objects = items.Count, requests = requests.Value - before }, Json),
+                cancellationToken);
+
             var recorded = new
             {
                 name = sample.Name,

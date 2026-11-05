@@ -8,8 +8,8 @@ The React frontend lives in the separate `DesignApp.Web` repository.
 
 An upload returns at once; a background worker then analyzes the room and pushes each step to the browser over SignalR (`Uploaded → Analyzing → Segmenting → Ready`, or `Failed` with a reason the user can read).
 
-1. **Claude Haiku 5.5 (vision)** lists the objects in the photo as structured JSON (a schema the answer must match): label, category, main color and a rough bounding box. It also says when a photo isn't of a room.
-2. **SAM 3 (Segment Anything 3) on fal.ai** outlines each object: one request per object, with its label as the text prompt and Claude's box as a box prompt, so look-alikes are told apart.
+1. **Claude Sonnet 5.5 (vision)** lists the objects in the photo as structured JSON (a schema the answer must match): label, category, main color and a rough bounding box. It also says when a photo isn't of a room.
+2. **SAM 3 (Segment Anything 3) on fal.ai** outlines every object in one request: all of Claude's boxes at once, one mask per box. A box alone outlines a large surface in patches, so Claude also puts 2-3 points on each wall, floor and ceiling, and they go in the same request. A surface without points, or any object whose mask doesn't fit its box, gets a request of its own with its label as the text prompt.
 3. **Post-processing (SkiaSharp)** stacks the outlines (smaller objects on top), drops ones left with almost no visible pixels, measures each object's real box and main color from the photo, and builds a **label map**: a grayscale PNG where each pixel's value is the index of the object it belongs to. The browser finds the object under the cursor with one pixel lookup.
 4. **The browser recolors** in the OKLab color space, keeping the original light and shadow (milestone 4).
 
@@ -97,7 +97,7 @@ If your Anthropic key belongs to the organization rather than a workspace (it st
 
 To refresh the sample data with real results, set `Ai:RecordSamplesTo` to a folder as well: real analyses of the five sample photos are saved there as `<photo>.sam3.json`. Copied into `src/DesignApp.Infrastructure/Ai/Fakes/Samples/`, a recording replaces the hand-traced outlines of that photo, so the fakes show real SAM 3 edges for free. The current samples were recorded this way.
 
-Outside Development the fakes are off and there is no switch: every photo uses the real AI, and the API refuses to start without both keys. A photo costs a few cents: one Claude call plus one SAM 3 call per object (fewer with the "Skip doors & windows" or "Objects only" choices). Other settings in the `Ai` section: `InventoryModel` (default `claude-haiku-5-5`), `SegmentationParallelism` (4) and `MaxConcurrentAnalyses` (2).
+Outside Development the fakes are off and there is no switch: every photo uses the real AI, and the API refuses to start without both keys. A photo costs about 3 cents: one Claude call and one SAM 3 call, plus a SAM 3 retry for any outline that doesn't fit its box (fewer with the "Skip doors & windows" or "Objects only" choices). Other settings in the `Ai` section: `InventoryModel` (default `claude-sonnet-5-5`; Haiku is cheaper but misplaces boxes and forgets objects), `InventoryEffort` (`Medium`; `Low` measured only about 4% fewer tokens), `SegmentationParallelism` (4) and `MaxConcurrentAnalyses` (2).
 
 ## Tests
 

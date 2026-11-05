@@ -37,7 +37,7 @@ internal static class InventoryJson
                 {
                     ["type"] = "object",
                     ["additionalProperties"] = false,
-                    ["required"] = new[] { "label", "category", "box", "color" },
+                    ["required"] = new[] { "label", "category", "box", "color", "points" },
                     ["properties"] = new Dictionary<string, object>
                     {
                         ["label"] = new { type = "string", description = "Short name a person would use, such as \"grey sofa\" or \"left wall\"." },
@@ -57,6 +57,18 @@ internal static class InventoryJson
                             },
                         },
                         ["color"] = new { type = "string", description = "The object's main color as #RRGGBB." },
+                        ["points"] = new Dictionary<string, object>
+                        {
+                            ["type"] = "array",
+                            ["description"] = "For walls, floors and ceilings: 2 or 3 spots on the visible surface itself, as fractions (0 to 1) of the image. Empty for every other object.",
+                            ["items"] = new Dictionary<string, object>
+                            {
+                                ["type"] = "object",
+                                ["additionalProperties"] = false,
+                                ["required"] = new[] { "x", "y" },
+                                ["properties"] = new { x = new { type = "number" }, y = new { type = "number" } },
+                            },
+                        },
                     },
                 },
             },
@@ -83,10 +95,18 @@ internal static class InventoryJson
             if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box) is not { } box)
                 continue;
             var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse("#808080");
-            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color));
+            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points)));
         }
         return items;
     }
+
+    /// <summary>The points inside the image, at most <see cref="MaxPoints"/>.</summary>
+    /// <param name="points">The points as Claude sent them.</param>
+    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points) =>
+        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(MaxPoints).Select(p => new ImagePoint(p.X, p.Y))];
+
+    /// <summary>How many points per object are kept.</summary>
+    internal const int MaxPoints = 3;
 
     /// <summary>Clips a box to the image.</summary>
     /// <param name="b">The box as Claude sent it.</param>
@@ -119,7 +139,13 @@ internal static class InventoryJson
     /// <param name="Category">The kind of object.</param>
     /// <param name="Box">Where it is.</param>
     /// <param name="Color">Its main color.</param>
-    private sealed record AnswerObject(string? Label, ObjectCategory Category, AnswerBox? Box, string? Color);
+    /// <param name="Points">Spots on its surface (walls, floors and ceilings).</param>
+    private sealed record AnswerObject(string? Label, ObjectCategory Category, AnswerBox? Box, string? Color, List<AnswerPoint>? Points = null);
+
+    /// <summary>A spot in Claude's answer, as fractions of the image.</summary>
+    /// <param name="X">Across.</param>
+    /// <param name="Y">Down.</param>
+    private sealed record AnswerPoint(double X, double Y);
 
     /// <summary>A box in Claude's answer, as fractions of the image.</summary>
     /// <param name="X">Left edge.</param>

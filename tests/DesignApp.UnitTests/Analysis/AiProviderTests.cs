@@ -51,6 +51,21 @@ public class AiProviderTests
     }
 
     [Fact]
+    public void Surface_points_inside_the_image_are_kept_up_to_three()
+    {
+        var result = InventoryJson.Parse("""
+            {"isRoom": true, "objects": [
+              {"label": "oak floor", "category": "Floor", "box": {"x": 0, "y": 0.6, "width": 1, "height": 0.4}, "color": "#aa8855",
+               "points": [{"x": 0.2, "y": 0.9}, {"x": 1.4, "y": 0.9}, {"x": 0.5, "y": 0.8}, {"x": 0.8, "y": 0.95}, {"x": 0.1, "y": 0.7}]},
+              {"label": "sofa", "category": "Furniture", "box": {"x": 0.2, "y": 0.4, "width": 0.5, "height": 0.3}, "color": "#8a8a8a", "points": []}
+            ]}
+            """);
+
+        Assert.Equal([new(0.2, 0.9), new(0.5, 0.8), new(0.8, 0.95)], result.Value[0].Points!);
+        Assert.Empty(result.Value[1].Points!);
+    }
+
+    [Fact]
     public void A_photo_that_is_not_a_room_is_refused()
     {
         var result = InventoryJson.Parse("""{"isRoom": false, "objects": []}""");
@@ -67,15 +82,15 @@ public class AiProviderTests
     }
 
     [Fact]
-    public async Task Sam_gets_one_request_per_object_with_its_label_and_pixel_box()
+    public async Task A_surface_gets_its_own_request_with_its_label_and_pixel_box()
     {
         var fal = new StubFal(MaskPng(4, 2));
         var provider = Provider(fal);
         var image = new AnalysisImage([0xFF, 0xD8], 400, 200);
         InventoryItem[] items =
         [
-            new("sofa", ObjectCategory.Furniture, new BoundingBox(0.25, 0.5, 0.5, 0.25), HexColor.Parse("#000000")),
-            new("lamp", ObjectCategory.Lighting, new BoundingBox(0.1, 0.1, 0.1, 0.1), HexColor.Parse("#000000")),
+            new("grey wall", ObjectCategory.Wall, new BoundingBox(0.25, 0.5, 0.5, 0.25), HexColor.Parse("#000000")),
+            new("oak floor", ObjectCategory.Floor, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000")),
         ];
 
         var masks = await provider.SegmentAsync(image, items, CancellationToken.None);
@@ -83,14 +98,97 @@ public class AiProviderTests
         Assert.Equal(2, masks.Count);
         Assert.All(masks, Assert.NotNull);
         Assert.All(fal.Requests, r => Assert.Equal("Key test-key", r.Authorization));
-        var sofa = fal.Bodies.Single(b => b.GetProperty("prompt").GetString() == "sofa");
-        var box = sofa.GetProperty("box_prompts")[0];
+        Assert.Single(fal.Bodies, b => b.GetProperty("prompt").GetString() == "oak floor");
+        var wall = fal.Bodies.First(b => b.GetProperty("prompt").GetString() == "grey wall");
+        var box = Assert.Single(wall.GetProperty("box_prompts").EnumerateArray());
         Assert.Equal((100, 100, 300, 150), (box.GetProperty("x_min").GetInt32(), box.GetProperty("y_min").GetInt32(),
             box.GetProperty("x_max").GetInt32(), box.GetProperty("y_max").GetInt32()));
-        Assert.StartsWith("data:image/jpeg;base64,", sofa.GetProperty("image_url").GetString(), StringComparison.Ordinal);
-        Assert.False(sofa.GetProperty("apply_mask").GetBoolean());
-        Assert.True(sofa.GetProperty("return_multiple_masks").GetBoolean());
-        Assert.Equal(FalSegmentationProvider.MaxMasks, sofa.GetProperty("max_masks").GetInt32());
+        Assert.False(box.TryGetProperty("object_id", out _));
+        Assert.StartsWith("data:image/jpeg;base64,", wall.GetProperty("image_url").GetString(), StringComparison.Ordinal);
+        Assert.False(wall.GetProperty("apply_mask").GetBoolean());
+        Assert.True(wall.GetProperty("return_multiple_masks").GetBoolean());
+        Assert.Equal(FalSegmentationProvider.MaxMasks, wall.GetProperty("max_masks").GetInt32());
+    }
+
+    [Fact]
+    public async Task Objects_share_one_box_only_request_with_a_mask_per_box()
+    {
+        var fal = new StubFal(MaskPng(4, 2));
+        var provider = Provider(fal);
+        InventoryItem[] items =
+        [
+            new("sofa", ObjectCategory.Furniture, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000")),
+            new("lamp", ObjectCategory.Lighting, new BoundingBox(0, 0.2, 0.5, 0.8), HexColor.Parse("#000000")),
+            new("rug", ObjectCategory.Textile, new BoundingBox(0, 0, 0.5, 0.9), HexColor.Parse("#000000")),
+        ];
+
+        var requests = FalSegmentationProvider.CountRequests();
+        var masks = await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200), items, CancellationToken.None);
+
+        Assert.All(masks, Assert.NotNull);
+        Assert.Equal(1, requests.Value);
+        var shared = Assert.Single(fal.Bodies);
+        Assert.Equal("", shared.GetProperty("prompt").GetString());
+        Assert.Equal([1, 2, 3], shared.GetProperty("box_prompts").EnumerateArray().Select(b => b.GetProperty("object_id").GetInt32()));
+        Assert.Equal(3, shared.GetProperty("max_masks").GetInt32());
+    }
+
+    [Fact]
+    public async Task A_surface_with_points_joins_the_shared_request_with_its_points()
+    {
+        var fal = new StubFal(MaskPng(4, 2));
+        var provider = Provider(fal);
+        InventoryItem[] items =
+        [
+            new("sofa", ObjectCategory.Furniture, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000")),
+            new("oak floor", ObjectCategory.Floor, new BoundingBox(0, 0.2, 0.5, 0.8), HexColor.Parse("#000000"),
+                [new ImagePoint(0.1, 0.5), new ImagePoint(0.4, 0.9)]),
+        ];
+
+        var masks = await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200), items, CancellationToken.None);
+
+        Assert.All(masks, Assert.NotNull);
+        var shared = Assert.Single(fal.Bodies);
+        Assert.Equal(2, shared.GetProperty("box_prompts").GetArrayLength());
+        var points = shared.GetProperty("point_prompts").EnumerateArray()
+            .Select(p => (p.GetProperty("x").GetInt32(), p.GetProperty("y").GetInt32(), p.GetProperty("label").GetInt32(), p.GetProperty("object_id").GetInt32()));
+        Assert.Equal([(40, 100, 1, 2), (160, 180, 1, 2)], points);
+    }
+
+    [Fact]
+    public async Task An_object_whose_shared_mask_misses_its_box_gets_its_own_requests()
+    {
+        // The stub's mask (left half) fits the sofa but hardly overlaps the lamp's box on the right.
+        var fal = new StubFal(MaskPng(4, 2));
+        var provider = Provider(fal);
+        InventoryItem[] items =
+        [
+            new("sofa", ObjectCategory.Furniture, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000")),
+            new("lamp", ObjectCategory.Lighting, new BoundingBox(0.6, 0.1, 0.3, 0.8), HexColor.Parse("#000000")),
+        ];
+
+        await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200), items, CancellationToken.None);
+
+        // The shared request, then the lamp with its label, then the lamp's box alone.
+        Assert.Equal([2, 1, 1], fal.Bodies.Select(b => b.GetProperty("box_prompts").GetArrayLength()));
+        Assert.Equal(["", "lamp", ""], fal.Bodies.Select(b => b.GetProperty("prompt").GetString()));
+    }
+
+    [Fact]
+    public async Task A_failed_shared_request_gives_every_object_its_own_request()
+    {
+        var fal = new StubFal(MaskPng(4, 2), sharedFails: true);
+        var provider = Provider(fal);
+        InventoryItem[] items =
+        [
+            new("sofa", ObjectCategory.Furniture, new BoundingBox(0, 0, 0.5, 1), HexColor.Parse("#000000")),
+            new("lamp", ObjectCategory.Lighting, new BoundingBox(0, 0.2, 0.5, 0.8), HexColor.Parse("#000000")),
+        ];
+
+        var masks = await provider.SegmentAsync(new AnalysisImage([0xFF, 0xD8], 400, 200), items, CancellationToken.None);
+
+        Assert.All(masks, Assert.NotNull);
+        Assert.Equal(["", "lamp", "sofa"], fal.Bodies.Select(b => b.GetProperty("prompt").GetString()).Order());
     }
 
     [Fact]
@@ -223,9 +321,13 @@ public class AiProviderTests
         return png.ToArray();
     }
 
-    /// <summary>Answers like fal.ai's SAM 3 endpoint in sync mode, recording each request.</summary>
+    /// <summary>
+    /// Answers like fal.ai's SAM 3 endpoint in sync mode, recording each request. A request with
+    /// several boxes gets the mask once per box, each with that box's index, like the real one.
+    /// </summary>
     /// <param name="mask">The mask to return as a data URI; <c>null</c> returns no masks.</param>
-    private sealed class StubFal(byte[]? mask) : HttpMessageHandler
+    /// <param name="sharedFails">Answers requests with several boxes with a server error.</param>
+    private sealed class StubFal(byte[]? mask, bool sharedFails = false) : HttpMessageHandler
     {
         private readonly Lock _gate = new();
 
@@ -242,10 +344,17 @@ public class AiProviderTests
                 Requests.Add((request.Headers.Authorization?.ToString(), request.RequestUri!.AbsolutePath));
                 Bodies.Add(body);
             }
-            var masks = mask is null ? "[]" : $$"""[{"url": "data:image/png;base64,{{Convert.ToBase64String(mask)}}"}]""";
+            var boxes = body.GetProperty("box_prompts").GetArrayLength();
+            if (boxes > 1 && sharedFails)
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            var url = mask is null ? "" : $"data:image/png;base64,{Convert.ToBase64String(mask)}";
+            var count = mask is null ? 0 : Math.Max(1, boxes);
+            var masks = string.Join(",", Enumerable.Range(0, count).Select(_ => $$"""{"url": "{{url}}"}"""));
+            var metadata = string.Join(",", Enumerable.Range(0, count).Select(i => $$"""{"index": {{i}}, "score": 0.9}"""));
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent($$"""{"masks": {{masks}}}""", Encoding.UTF8, "application/json"),
+                Content = new StringContent($$"""{"masks": [{{masks}}], "metadata": [{{metadata}}]}""", Encoding.UTF8, "application/json"),
             };
         }
     }
