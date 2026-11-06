@@ -26,29 +26,20 @@ namespace DesignApp.Infrastructure.Ai.Fal;
 internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<AiOptions> options, ILogger<FalSegmentationProvider> logger)
     : ISegmentationProvider
 {
-    /// <summary>How many masks SAM 3 returns per request.</summary>
-    internal const int MaxMasks = 3;
-
-    /// <summary>Below this box fit (see <see cref="Fit"/>) the object is asked for again with its box alone.</summary>
-    internal const double MinFit = 0.5;
-
-    /// <summary>A piece joins a union only when at least this share of its pixels lies inside Claude's box.</summary>
-    internal const double MinShareInsideBox = 0.8;
-
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ObjectMask?>> SegmentAsync(
         AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
         var requests = CountRequests();
         var before = requests.Value;
-        var imageUrl = "data:image/jpeg;base64," + Convert.ToBase64String(image.Jpeg);
+        var imageUrl = Constants.Ai.Fal.JpegDataUri + Convert.ToBase64String(image.Jpeg);
         var masks = new ObjectMask?[items.Count];
         // A surface shares only when it has points; without them its box alone outlines it in patches.
         var shared = Enumerable.Range(0, items.Count)
-            .Where(i => !IsSurface(items[i].Category) || items[i].Points is { Count: > 0 })
+            .Where(i => !items[i].Category.IsSurface() || items[i].Points is { Count: > 0 })
             .ToList();
         // One object gains nothing from sharing; its own request costs the same and has its label.
-        if (shared.Count < 2)
+        if (shared.Count < Constants.Ai.Fal.MinShared)
             shared.Clear();
 
         var own = Enumerable.Range(0, items.Count).Except(shared).ToList();
@@ -97,11 +88,6 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// </summary>
     internal static RequestCount CountRequests() => CurrentCount.Value ??= new RequestCount();
 
-    /// <summary>Whether an object is a large surface that needs its label to be outlined well.</summary>
-    /// <param name="category">The object's category.</param>
-    internal static bool IsSurface(ObjectCategory category) =>
-        category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling;
-
     /// <summary>
     /// Outlines several objects in one request from their boxes (and surfaces' points), with no
     /// text. A mask is kept only when it
@@ -126,7 +112,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
             // points carry its id, so SAM 3 adds them to that box.
             var boxes = items.Select((item, k) => PixelBox(item, image) with { ObjectId = k + 1 }).ToList();
             var points = items
-                .SelectMany((item, k) => IsSurface(item.Category) ? (item.Points ?? []).Select(p => PixelPoint(p, image, k + 1)) : [])
+                .SelectMany((item, k) => item.Category.IsSurface() ? (item.Points ?? []).Select(p => PixelPoint(p, image, k + 1)) : [])
                 .ToList();
             answer = await RequestWithIndexesAsync(
                 new SamRequest(imageUrl, "", boxes, MaxMasks: items.Count, PointPrompts: points.Count > 0 ? points : null),
@@ -143,7 +129,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         {
             if (index is not { } k || k < 0 || k >= items.Count || result[k] is not null)
                 continue;
-            if (Pick([mask], items[k].Box) is { Fit: >= MinFit } picked)
+            if (Pick([mask], items[k].Box) is { Fit: >= Constants.Ai.Fal.MinFit } picked)
             {
                 LogPicked(items[k].Label, picked.Fit, "shared request");
                 result[k] = picked.Mask;
@@ -162,7 +148,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     {
         var box = PixelBox(item, image);
         var best = Pick(await RequestAsync(new SamRequest(imageUrl, item.Label, [box]), cancellationToken), item.Box);
-        if (best is { Fit: >= MinFit })
+        if (best is { Fit: >= Constants.Ai.Fal.MinFit })
         {
             LogPicked(item.Label, best.Value.Fit, best.Value.How);
             return best.Value.Mask;
@@ -192,7 +178,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     private static SamPoint PixelPoint(ImagePoint point, AnalysisImage image, int objectId) => new(
         Math.Clamp((int)(point.X * image.Width), 0, image.Width - 1),
         Math.Clamp((int)(point.Y * image.Height), 0, image.Height - 1),
-        Label: 1,
+        Label: Constants.Ai.Fal.ForegroundPoint,
         ObjectId: objectId);
 
     /// <summary>Sends a request and decodes every returned mask.</summary>
@@ -219,7 +205,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         {
             if (returned[i].Url is not { Length: > 0 } url)
                 continue;
-            var png = url.StartsWith("data:", StringComparison.Ordinal)
+            var png = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
                 ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
                 : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
             if (Decode(png) is { } mask)
@@ -270,7 +256,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         for (var i = 0; i < masks.Count; i++)
             Consider(masks[i], $"mask {i + 1} of {masks.Count}");
 
-        var inside = masks.Where(m => ShareInside(m, box) >= MinShareInsideBox).ToList();
+        var inside = masks.Where(m => ShareInside(m, box) >= Constants.Ai.Fal.MinShareInsideBox).ToList();
         if (inside.Count > 1)
             Consider(Union(inside), $"{inside.Count} pieces joined");
         return best;
@@ -285,7 +271,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         {
             for (var x = 0; x < mask.Width; x++)
             {
-                if (mask.Coverage[y * mask.Width + x] < 128)
+                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
                     continue;
                 (x0, y0, x1, y1) = (Math.Min(x0, x), Math.Min(y0, y), Math.Max(x1, x), Math.Max(y1, y));
             }
@@ -325,7 +311,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         {
             for (var x = 0; x < mask.Width; x++)
             {
-                if (mask.Coverage[y * mask.Width + x] < 128)
+                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
                     continue;
                 all++;
                 var (nx, ny) = ((x + 0.5) / mask.Width, (y + 0.5) / mask.Height);
@@ -368,7 +354,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         for (var i = 0; i < coverage.Length; i++)
         {
             var (r, g, b, a) = (pixels[i * 4], pixels[i * 4 + 1], pixels[i * 4 + 2], pixels[i * 4 + 3]);
-            coverage[i] = (byte)(Math.Max(r, Math.Max(g, b)) * a / 255);
+            coverage[i] = (byte)(Math.Max(r, Math.Max(g, b)) * a / Constants.Imaging.FullCoverage);
         }
         return new ObjectMask(info.Width, info.Height, coverage);
     }
@@ -422,15 +408,15 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// <param name="MaxMasks">How many masks to return.</param>
     /// <param name="PointPrompts">Spots on objects, each tied to its object's box; none when null.</param>
     private sealed record SamRequest(
-        [property: JsonPropertyName("image_url")] string ImageUrl,
-        [property: JsonPropertyName("prompt")] string Prompt,
-        [property: JsonPropertyName("box_prompts")] IReadOnlyList<SamBox> BoxPrompts,
-        [property: JsonPropertyName("apply_mask")] bool ApplyMask = false,
-        [property: JsonPropertyName("sync_mode")] bool SyncMode = true,
-        [property: JsonPropertyName("output_format")] string OutputFormat = "png",
-        [property: JsonPropertyName("return_multiple_masks")] bool ReturnMultipleMasks = true,
-        [property: JsonPropertyName("max_masks")] int MaxMasks = MaxMasks,
-        [property: JsonPropertyName("point_prompts"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<SamPoint>? PointPrompts = null);
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.ImageUrl)] string ImageUrl,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.Prompt)] string Prompt,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.BoxPrompts)] IReadOnlyList<SamBox> BoxPrompts,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.ApplyMask)] bool ApplyMask = false,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.SyncMode)] bool SyncMode = true,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.OutputFormat)] string OutputFormat = Constants.Ai.Fal.OutputFormat,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.ReturnMultipleMasks)] bool ReturnMultipleMasks = true,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.MaxMasks)] int MaxMasks = Constants.Ai.Fal.MaxMasks,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.PointPrompts), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<SamPoint>? PointPrompts = null);
 
     /// <summary>A point prompt in pixels.</summary>
     /// <param name="X">Across.</param>
@@ -438,10 +424,10 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// <param name="Label">1: the spot is part of the object.</param>
     /// <param name="ObjectId">The object (box) it belongs to.</param>
     private sealed record SamPoint(
-        [property: JsonPropertyName("x")] int X,
-        [property: JsonPropertyName("y")] int Y,
-        [property: JsonPropertyName("label")] int Label,
-        [property: JsonPropertyName("object_id")] int ObjectId);
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.X)] int X,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.Y)] int Y,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.Label)] int Label,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.ObjectId)] int ObjectId);
 
     /// <summary>A box prompt in pixels.</summary>
     /// <param name="XMin">Left edge.</param>
@@ -450,24 +436,24 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// <param name="YMax">Bottom edge.</param>
     /// <param name="ObjectId">Which object the box belongs to, when one request outlines several.</param>
     private sealed record SamBox(
-        [property: JsonPropertyName("x_min")] int XMin,
-        [property: JsonPropertyName("y_min")] int YMin,
-        [property: JsonPropertyName("x_max")] int XMax,
-        [property: JsonPropertyName("y_max")] int YMax,
-        [property: JsonPropertyName("object_id"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ObjectId = null);
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.XMin)] int XMin,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.YMin)] int YMin,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.XMax)] int XMax,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.YMax)] int YMax,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ObjectId = null);
 
     /// <summary>The part of the SAM 3 response the app uses.</summary>
     /// <param name="Masks">The masks, best first.</param>
     /// <param name="Metadata">Per mask, in the same order, which box it answers.</param>
     private sealed record SamResponse(
-        [property: JsonPropertyName("masks")] List<SamImage>? Masks,
-        [property: JsonPropertyName("metadata")] List<SamMaskInfo>? Metadata = null);
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.Masks)] List<SamImage>? Masks,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.Metadata)] List<SamMaskInfo>? Metadata = null);
 
     /// <summary>What SAM 3 says about one returned mask.</summary>
     /// <param name="Index">The position of the box prompt it answers.</param>
-    private sealed record SamMaskInfo([property: JsonPropertyName("index")] int? Index);
+    private sealed record SamMaskInfo([property: JsonPropertyName(Constants.Ai.Fal.Json.Index)] int? Index);
 
     /// <summary>One returned mask image.</summary>
     /// <param name="Url">A data URI (sync mode) or a download URL.</param>
-    private sealed record SamImage([property: JsonPropertyName("url")] string? Url);
+    private sealed record SamImage([property: JsonPropertyName(Constants.Ai.Fal.Json.Url)] string? Url);
 }

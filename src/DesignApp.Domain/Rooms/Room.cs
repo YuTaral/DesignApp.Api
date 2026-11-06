@@ -5,12 +5,6 @@ namespace DesignApp.Domain.Rooms;
 /// <summary>An uploaded room photo and the objects the AI pipeline found in it.</summary>
 public sealed class Room
 {
-    /// <summary>The label map stores one byte per pixel, and 0 means "no object", so indexes run from 1 to 255.</summary>
-    public const int MaxObjectIndex = 255;
-
-    /// <summary>How often analysis may start before the room is failed, so a photo that crashes the worker can't loop forever.</summary>
-    public const int MaxAnalysisAttempts = 3;
-
     private IReadOnlyList<DetectedObject> _objects = [];
 
     /// <summary>The room's id (a time-ordered UUID v7).</summary>
@@ -63,11 +57,11 @@ public sealed class Room
         AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake)
     {
         if (id == Guid.Empty)
-            throw new DomainException("A room needs an id.");
+            throw new DomainException(Constants.Messages.RoomNeedsId);
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerId);
         ArgumentException.ThrowIfNullOrWhiteSpace(photoKey);
         if (width <= 0 || height <= 0)
-            throw new DomainException("Photo dimensions must be positive.");
+            throw new DomainException(Constants.Messages.PhotoSize);
 
         return new Room
         {
@@ -78,8 +72,8 @@ public sealed class Room
             Height = height,
             Status = RoomStatus.Uploaded,
             CreatedAt = now,
-            Scope = Enum.IsDefined(scope) ? scope : throw new DomainException($"Unknown analysis scope {scope}."),
-            AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException($"Unknown AI mode {aiMode}."),
+            Scope = Enum.IsDefined(scope) ? scope : throw new DomainException(Constants.Messages.UnknownScope(scope)),
+            AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException(Constants.Messages.UnknownAiMode(aiMode)),
         };
     }
 
@@ -97,8 +91,8 @@ public sealed class Room
     /// <exception cref="DomainException">The room isn't waiting for analysis, or it has used up its attempts.</exception>
     public void StartAnalysis()
     {
-        if (AnalysisAttempts >= MaxAnalysisAttempts)
-            throw new DomainException($"Analysis has already been tried {MaxAnalysisAttempts} times.");
+        if (AnalysisAttempts >= Constants.Rooms.MaxAnalysisAttempts)
+            throw new DomainException(Constants.Messages.TooManyAttempts);
         MoveTo(RoomStatus.Analyzing, from: RoomStatus.Uploaded);
         AnalysisAttempts++;
     }
@@ -111,7 +105,7 @@ public sealed class Room
     public void RestartAnalysis()
     {
         if (Status is not (RoomStatus.Analyzing or RoomStatus.Segmenting))
-            throw new DomainException($"Cannot restart the analysis of a room that is {Status}.");
+            throw new DomainException(Constants.Messages.CannotRestart(Status));
         Status = RoomStatus.Uploaded;
     }
 
@@ -119,7 +113,7 @@ public sealed class Room
     public void StartSegmentation() => MoveTo(RoomStatus.Segmenting, from: RoomStatus.Analyzing);
 
     /// <summary>Segmenting → Ready: stores the detected objects and where their label map is.</summary>
-    /// <param name="objects">At least one object, with unique indexes from 1 to <see cref="MaxObjectIndex"/>.</param>
+    /// <param name="objects">At least one object, with unique indexes from 1 to <see cref="Constants.Rooms.MaxObjectIndex"/>.</param>
     /// <param name="labelMapKey">Storage key of the label map.</param>
     /// <exception cref="DomainException">The list is empty, an index repeats or is out of range, or the room isn't segmenting.</exception>
     public void MarkReady(IEnumerable<DetectedObject> objects, string labelMapKey)
@@ -127,11 +121,11 @@ public sealed class Room
         ArgumentException.ThrowIfNullOrWhiteSpace(labelMapKey);
         var list = objects.ToList();
         if (list.Count == 0)
-            throw new DomainException("A ready room needs at least one detected object.");
+            throw new DomainException(Constants.Messages.ReadyNeedsObjects);
         if (list.Select(o => o.Index).Distinct().Count() != list.Count)
-            throw new DomainException("Detected object indexes must be unique.");
-        if (list.Any(o => o.Index is < 1 or > MaxObjectIndex))
-            throw new DomainException($"Detected object indexes must be between 1 and {MaxObjectIndex}.");
+            throw new DomainException(Constants.Messages.DuplicateObjectIndexes);
+        if (list.Any(o => o.Index is < 1 or > Constants.Rooms.MaxObjectIndex))
+            throw new DomainException(Constants.Messages.ObjectIndexRange);
 
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
@@ -149,7 +143,7 @@ public sealed class Room
     {
         ArgumentNullException.ThrowIfNull(keyFor);
         if (Status is not RoomStatus.Ready)
-            throw new DomainException($"Cannot fix the outlines of a room that is {Status}.");
+            throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
         LatestLabelMapRevision++;
         LabelMapRevision = LatestLabelMapRevision;
         LabelMapKey = keyFor(LabelMapRevision);
@@ -164,9 +158,9 @@ public sealed class Room
     {
         ArgumentNullException.ThrowIfNull(keyFor);
         if (Status is not RoomStatus.Ready)
-            throw new DomainException($"Cannot change the outlines of a room that is {Status}.");
+            throw new DomainException(Constants.Messages.CannotChangeOutlines(Status));
         if (!HasLabelMapRevision(revision))
-            throw new DomainException($"The room has no label map version {revision}.");
+            throw new DomainException(Constants.Messages.NoLabelMapRevision(revision));
         LabelMapRevision = revision;
         LabelMapKey = keyFor(revision);
     }
@@ -182,7 +176,7 @@ public sealed class Room
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
         if (Status is RoomStatus.Ready or RoomStatus.Failed)
-            throw new DomainException($"Cannot fail a room that is already {Status}.");
+            throw new DomainException(Constants.Messages.CannotFail(Status));
         Status = RoomStatus.Failed;
         FailureReason = reason;
     }
@@ -193,7 +187,7 @@ public sealed class Room
     private void MoveTo(RoomStatus next, RoomStatus from)
     {
         if (Status != from)
-            throw new DomainException($"Cannot move a room from {Status} to {next}.");
+            throw new DomainException(Constants.Messages.CannotMove(Status, next));
         Status = next;
     }
 }

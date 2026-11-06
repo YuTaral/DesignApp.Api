@@ -17,46 +17,46 @@ internal static class RoomEndpoints
     /// <returns>The same group, for chaining.</returns>
     public static RouteGroupBuilder MapRoomEndpoints(this RouteGroupBuilder api)
     {
-        var rooms = api.MapGroup("/rooms").WithTags("Rooms");
+        var rooms = api.MapGroup(Constants.Routes.Rooms).WithTags(Constants.OpenApi.RoomsTag);
 
-        rooms.MapPost("/", UploadAsync)
+        rooms.MapPost(Constants.Routes.Root, UploadAsync)
             .WithName("UploadRoom")
             .WithSummary("Uploads a room photo and creates a room for it.")
-            .WithDescription("Send the photo as multipart form data in a field named `photo`. JPEG, PNG or WebP up to 15 MB. " +
+            .WithDescription($"Send the photo as multipart form data in a field named `photo`. JPEG, PNG or WebP up to {Application.Constants.Photos.MaxUploadMegabytes} MB. " +
                 "An optional `scope` field chooses what the AI looks for: `WholeRoom` (default), `NoDoorsOrWindows` or `ObjectsOnly`. " +
                 "An optional `ai` field chooses `Fake` or `Real` where `GET /api/ai` allows it.")
             .DisableAntiforgery() // the cookies are SameSite=Lax, so another site's form posts arrive without them
-            .RequireRateLimiting(RateLimitPolicies.Uploads);
+            .RequireRateLimiting(Constants.RateLimits.UploadsPolicy);
 
-        rooms.MapGet("/{id:guid}", GetAsync)
+        rooms.MapGet(Constants.Routes.ById, GetAsync)
             .WithName("GetRoom")
             .WithSummary("Returns a room with its analysis status and detected objects.");
 
-        rooms.MapGet("/{id:guid}/photo", GetPhotoAsync)
+        rooms.MapGet(Constants.Routes.RoomPhoto, GetPhotoAsync)
             .WithName("GetRoomPhoto")
-            .WithSummary("Returns the room's photo as stored: upright, at most 4096 px, without metadata.");
+            .WithSummary($"Returns the room's photo as stored: upright, at most {Application.Constants.Photos.MaxLongEdge} px, without metadata.");
 
-        rooms.MapGet("/{id:guid}/labels", GetLabelMapAsync)
+        rooms.MapGet(Constants.Routes.RoomLabels, GetLabelMapAsync)
             .WithName("GetRoomLabelMap")
             .WithSummary("Returns the room's label map: a grayscale PNG where each pixel's value is the index of the object it belongs to (0 = none).")
-            .WithDescription("Available once the room is Ready. It is the size of the analysis image (at most 2048 px), not the photo; scale it to fit.");
+            .WithDescription($"Available once the room is Ready. It is the size of the analysis image (at most {Application.Constants.Analysis.MaxLongEdge} px), not the photo; scale it to fit.");
 
-        rooms.MapGet("/{id:guid}/labels/{revision:int}", GetLabelMapRevisionAsync)
+        rooms.MapGet(Constants.Routes.RoomLabelRevision, GetLabelMapRevisionAsync)
             .WithName("GetRoomLabelMapRevision")
             .WithSummary("Returns one stored version of the room's label map: 0 from the analysis, then one per outline fix.")
             .WithDescription("Each version never changes, so it can be cached for good.");
 
-        rooms.MapPost("/{id:guid}/outline", FixOutlineAsync)
+        rooms.MapPost(Constants.Routes.RoomOutline, FixOutlineAsync)
             .WithName("FixRoomOutline")
             .WithSummary("Paints or erases one object's outline with a brush stroke: a round brush of `radius` label-map pixels stamped along `points`.")
             .WithDescription("Starts from `baseRevision`, the label map version the editor shows, and stores the result as a new version that becomes current.");
 
-        rooms.MapPut("/{id:guid}/labels/current", UseLabelMapRevisionAsync)
+        rooms.MapPut(Constants.Routes.RoomCurrentLabels, UseLabelMapRevisionAsync)
             .WithName("UseRoomLabelMapRevision")
             .WithSummary("Makes a stored label map version current again (undo or redo of an outline fix).");
 
-        api.MapGet("/ai", (IAiProviders aiProviders) => TypedResults.Ok(AiAvailabilityResponse.From(aiProviders.Availability)))
-            .WithTags("Rooms")
+        api.MapGet(Constants.Routes.Ai, (IAiProviders aiProviders) => TypedResults.Ok(AiAvailabilityResponse.From(aiProviders.Availability)))
+            .WithTags(Constants.OpenApi.RoomsTag)
             .WithName("GetAiAvailability")
             .WithSummary("Says which AI the uploads use, and whether each upload may choose between the fake and the real AI.");
 
@@ -78,39 +78,39 @@ internal static class RoomEndpoints
         var availability = aiProviders.Availability;
         var aiMode = availability.Default;
         if (!string.IsNullOrWhiteSpace(ai) && (!Enum.TryParse(ai, ignoreCase: true, out aiMode) || !Enum.IsDefined(aiMode)))
-            return TypedResults.Problem($"Unknown AI \"{ai}\". Use Fake or Real.", statusCode: StatusCodes.Status400BadRequest, title: "Invalid AI");
+            return TypedResults.Problem(Constants.Messages.UnknownAi(ai), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidAi);
         if (!availability.Allows(aiMode))
         {
             var why = aiMode is AiMode.Real && !availability.RealAvailable
-                ? "The real AI isn't set up yet: add the Anthropic and fal.ai keys to the API's user secrets."
-                : $"This server only uses the {availability.Default.ToString().ToLowerInvariant()} AI.";
-            return TypedResults.Problem(why, statusCode: StatusCodes.Status400BadRequest, title: "AI not available");
+                ? Constants.Messages.RealAiNotSetUp
+                : Constants.Messages.OnlyAi(availability.Default.ToString());
+            return TypedResults.Problem(why, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.AiNotAvailable);
         }
 
         var analysisScope = AnalysisScope.WholeRoom;
         if (!string.IsNullOrWhiteSpace(scope) && (!Enum.TryParse(scope, ignoreCase: true, out analysisScope) || !Enum.IsDefined(analysisScope)))
         {
             return TypedResults.Problem(
-                $"Unknown scope \"{scope}\". Use {string.Join(", ", Enum.GetNames<AnalysisScope>())}.",
+                Constants.Messages.UnknownScope(scope, Enum.GetNames<AnalysisScope>()),
                 statusCode: StatusCodes.Status400BadRequest,
-                title: "Invalid scope");
+                title: Constants.Titles.InvalidScope);
         }
 
-        if (photo.Length > PhotoRules.MaxUploadBytes)
+        if (photo.Length > Application.Constants.Photos.MaxUploadBytes)
         {
             return TypedResults.Problem(
-                $"Photos can be up to {PhotoRules.MaxUploadBytes / (1024 * 1024)} MB.",
+                Constants.Messages.PhotoTooLarge,
                 statusCode: StatusCodes.Status413PayloadTooLarge,
-                title: "Photo too large");
+                title: Constants.Titles.PhotoTooLarge);
         }
 
         await using var content = photo.OpenReadStream();
         var result = await uploadRoom.HandleAsync(content, cancellationToken, analysisScope, aiMode);
         if (!result.Succeeded)
-            return TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: "Invalid photo");
+            return TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidPhoto);
 
         var room = result.Value;
-        return TypedResults.Created($"/api/rooms/{room.Id}", RoomResponse.From(room));
+        return TypedResults.Created(Constants.Routes.RoomUrl(room.Id), RoomResponse.From(room));
     }
 
     /// <summary><c>GET /api/rooms/{id}</c>: returns one of the current user's rooms.</summary>
@@ -166,7 +166,7 @@ internal static class RoomEndpoints
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
         return room is not null && room.HasLabelMapRevision(revision)
-            ? await StreamImmutableAsync(StorageKeys.RoomLabelMap(room.Id, revision), storage, response, cancellationToken)
+            ? await StreamImmutableAsync(Application.Constants.Rooms.LabelMapKey(room.Id, revision), storage, response, cancellationToken)
             : TypedResults.NotFound();
     }
 
@@ -179,7 +179,7 @@ internal static class RoomEndpoints
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> FixOutlineAsync(
         Guid id, OutlineStrokeRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken) =>
         ToResponse(await fixOutline.FixAsync(id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius,
-            request.Points ?? [], cancellationToken), "Can't fix the outline");
+            request.Points ?? [], cancellationToken), Constants.Titles.OutlineFixFailed);
 
     /// <summary><c>PUT /api/rooms/{id}/labels/current</c>: makes a stored label map version current.</summary>
     /// <param name="id">The room's id.</param>
@@ -189,7 +189,7 @@ internal static class RoomEndpoints
     /// <returns>200 with the room, 400 for an unknown version, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> UseLabelMapRevisionAsync(
         Guid id, LabelMapRevisionRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken) =>
-        ToResponse(await fixOutline.UseRevisionAsync(id, request.Revision, cancellationToken), "Unknown outline version");
+        ToResponse(await fixOutline.UseRevisionAsync(id, request.Revision, cancellationToken), Constants.Titles.UnknownOutlineVersion);
 
     /// <summary>Turns a use case's outcome into a response.</summary>
     /// <param name="result">The outcome; <c>null</c> when the room wasn't found.</param>
@@ -214,8 +214,8 @@ internal static class RoomEndpoints
 
         // These files never change, so browsers can keep them for good. Vary on Origin so a copy
         // cached by a plain <img> is never reused for a CORS request (the WebGL editor), which would fail.
-        response.Headers.CacheControl = "private, max-age=31536000, immutable";
-        response.Headers.Vary = "Origin";
+        response.Headers.CacheControl = Constants.Http.ImmutableCache;
+        response.Headers.Vary = Constants.Http.Origin;
         return TypedResults.Stream(file.Content, file.ContentType);
     }
 }

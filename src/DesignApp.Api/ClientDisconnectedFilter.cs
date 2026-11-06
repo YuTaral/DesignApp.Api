@@ -9,9 +9,6 @@ namespace DesignApp.Api;
 /// </summary>
 internal sealed class ClientDisconnectedFilter : IEndpointFilter
 {
-    /// <summary>Status code for a request the client abandoned (nginx's convention); no one receives it.</summary>
-    internal const int ClientClosedRequest = 499;
-
     /// <inheritdoc/>
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -21,7 +18,7 @@ internal sealed class ClientDisconnectedFilter : IEndpointFilter
         }
         catch (OperationCanceledException) when (context.HttpContext.RequestAborted.IsCancellationRequested)
         {
-            return Results.StatusCode(ClientClosedRequest);
+            return Results.StatusCode(Constants.Http.ClientClosedRequest);
         }
     }
 }

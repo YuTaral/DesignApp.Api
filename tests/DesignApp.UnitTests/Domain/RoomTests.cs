@@ -85,7 +85,7 @@ public class RoomTests
     public void Analysis_stops_after_the_maximum_attempts()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
-        for (var i = 0; i < Room.MaxAnalysisAttempts; i++)
+        for (var i = 0; i < DesignApp.Domain.Constants.Rooms.MaxAnalysisAttempts; i++)
         {
             room.StartAnalysis();
             room.RestartAnalysis();

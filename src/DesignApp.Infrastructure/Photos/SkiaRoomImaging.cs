@@ -10,9 +10,6 @@ namespace DesignApp.Infrastructure.Photos;
 /// <summary>SkiaSharp implementation of <see cref="IRoomImaging"/>.</summary>
 internal sealed class SkiaRoomImaging : IRoomImaging
 {
-    /// <summary>A mask pixel at or above this coverage belongs to the object.</summary>
-    private const byte CoverageThreshold = 128;
-
     /// <inheritdoc/>
     public AnalysisImage PrepareForAnalysis(Stream photo)
     {
@@ -21,7 +18,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var jpeg = buffer.ToArray();
 
         using var source = SKBitmap.Decode(jpeg) ?? throw new InvalidOperationException("The stored photo can't be decoded.");
-        var scale = Math.Min(1f, (float)AnalysisRules.MaxLongEdge / Math.Max(source.Width, source.Height));
+        var scale = Math.Min(1f, (float)Application.Constants.Analysis.MaxLongEdge / Math.Max(source.Width, source.Height));
         if (scale >= 1f)
             return new AnalysisImage(jpeg, source.Width, source.Height);
 
@@ -31,15 +28,15 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
         using var scaled = source.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
         using var image = SKImage.FromBitmap(scaled);
-        using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, PhotoRules.JpegQuality);
+        using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
         return new AnalysisImage(encoded.ToArray(), info.Width, info.Height);
     }
 
     /// <inheritdoc/>
     public LabelMap BuildLabelMap(AnalysisImage image, IReadOnlyList<SegmentedObject> objects)
     {
-        if (objects.Count > Room.MaxObjectIndex)
-            objects = [.. objects.Take(Room.MaxObjectIndex)];
+        if (objects.Count > Domain.Constants.Rooms.MaxObjectIndex)
+            objects = [.. objects.Take(Domain.Constants.Rooms.MaxObjectIndex)];
         var (width, height) = (image.Width, image.Height);
         var labels = new byte[width * height];
 
@@ -54,7 +51,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             Paint(labels, width, height, o.Mask, paintId);
 
         // Objects too small to keep are cleared before the cleanup, so they can't grow.
-        var minPixels = AnalysisRules.MinAreaFraction * width * height;
+        var minPixels = Application.Constants.Analysis.MinAreaFraction * width * height;
         var painted = new int[objects.Count + 1];
         foreach (var label in labels)
             painted[label]++;
@@ -66,7 +63,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
 
         using var photo = DecodeRgba(image);
         var pixels = photo.GetPixelSpan();
-        var surfaces = objects.Select(o => o.Item.Category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling).ToArray();
+        var surfaces = objects.Select(o => o.Item.Category.IsSurface()).ToArray();
         LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1]);
 
         var stats = Measure(labels, width, height, objects.Count, pixels);
@@ -96,7 +93,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
 
     /// <summary>Counts the mask pixels that belong to the object.</summary>
     /// <param name="mask">The mask.</param>
-    private static int CountCovered(ObjectMask mask) => mask.Coverage.Count(c => c >= CoverageThreshold);
+    private static int CountCovered(ObjectMask mask) => mask.Coverage.Count(c => c >= Constants.Imaging.CoverageThreshold);
 
     /// <summary>Writes <paramref name="paintId"/> into every label pixel the mask covers, scaling the mask to fit.</summary>
     /// <param name="labels">The label map being built.</param>
@@ -112,7 +109,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         {
             for (var x = 0; x < mask.Width; x++)
             {
-                if (mask.Coverage[y * mask.Width + x] < CoverageThreshold)
+                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
                     continue;
                 (minX, minY) = (Math.Min(minX, x), Math.Min(minY, y));
                 (maxX, maxY) = (Math.Max(maxX, x), Math.Max(maxY, y));
@@ -130,7 +127,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             for (var x = fromX; x <= toX; x++)
             {
                 var mx = Math.Min(mask.Width - 1, (int)((x + 0.5) * sx));
-                if (mask.Coverage[my * mask.Width + mx] >= CoverageThreshold)
+                if (mask.Coverage[my * mask.Width + mx] >= Constants.Imaging.CoverageThreshold)
                     labels[y * width + x] = paintId;
             }
         }
@@ -200,16 +197,16 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
         labels.CopyTo(bitmap.GetPixelSpan());
         using var image = SKImage.FromBitmap(bitmap);
-        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
         return png.ToArray();
     }
 
     /// <summary>Running totals for one object's visible pixels.</summary>
     private sealed class ObjectStats
     {
-        private readonly int[] _red = new int[256];
-        private readonly int[] _green = new int[256];
-        private readonly int[] _blue = new int[256];
+        private readonly int[] _red = new int[Constants.Imaging.ByteValues];
+        private readonly int[] _green = new int[Constants.Imaging.ByteValues];
+        private readonly int[] _blue = new int[Constants.Imaging.ByteValues];
 
         /// <summary>How many pixels the object has.</summary>
         public int Pixels { get; private set; }
@@ -246,7 +243,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         private int Median(int[] histogram)
         {
             var half = Pixels / 2;
-            for (int value = 0, seen = 0; value < 256; value++)
+            for (int value = 0, seen = 0; value < Constants.Imaging.ByteValues; value++)
             {
                 seen += histogram[value];
                 if (seen > half)

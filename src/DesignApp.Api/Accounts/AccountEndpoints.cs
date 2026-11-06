@@ -9,32 +9,29 @@ namespace DesignApp.Api.Accounts;
 /// <summary>The <c>/api/account</c> endpoints: sign up, sign in, sign out, and who is signed in.</summary>
 internal static class AccountEndpoints
 {
-    /// <summary>Shown for an unknown email or a wrong password alike, so it can't reveal which accounts exist.</summary>
-    internal const string WrongCredentials = "Wrong email or password.";
-
     /// <summary>Maps the account endpoints under <c>/account</c>.</summary>
     /// <param name="api">The <c>/api</c> route group.</param>
     /// <returns>The same group, for chaining.</returns>
     public static RouteGroupBuilder MapAccountEndpoints(this RouteGroupBuilder api)
     {
-        var account = api.MapGroup("/account").WithTags("Account");
+        var account = api.MapGroup(Constants.Routes.Account).WithTags(Constants.OpenApi.AccountTag);
 
-        account.MapGet("/", GetAsync)
+        account.MapGet(Constants.Routes.Root, GetAsync)
             .WithName("GetAccount")
             .WithSummary("Says whether the browser is signed in, and as whom.");
 
-        account.MapPost("/sign-up", SignUpAsync)
+        account.MapPost(Constants.Routes.SignUp, SignUpAsync)
             .WithName("SignUp")
             .WithSummary("Creates an account with an email and a password, signs in, and moves this browser's guest rooms into it.")
-            .RequireRateLimiting(RateLimitPolicies.Accounts);
+            .RequireRateLimiting(Constants.RateLimits.AccountsPolicy);
 
-        account.MapPost("/sign-in", SignInAsync)
+        account.MapPost(Constants.Routes.SignIn, SignInAsync)
             .WithName("SignIn")
             .WithSummary("Signs in with an email and a password, and moves this browser's guest rooms into the account.")
-            .WithDescription("After 5 wrong passwords in a row the account is locked for 5 minutes.")
-            .RequireRateLimiting(RateLimitPolicies.Accounts);
+            .WithDescription($"After {Constants.Accounts.MaxFailedAttempts} wrong passwords in a row the account is locked for {Constants.Accounts.LockoutTime.TotalMinutes} minutes.")
+            .RequireRateLimiting(Constants.RateLimits.AccountsPolicy);
 
-        account.MapPost("/sign-out", SignOutAsync)
+        account.MapPost(Constants.Routes.SignOut, SignOutAsync)
             .WithName("SignOut")
             .WithSummary("Signs out. The browser continues as a new guest.");
 
@@ -58,13 +55,13 @@ internal static class AccountEndpoints
         ClaimGuestRooms claimGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
-            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: "Couldn't sign up");
+            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
 
         var email = request.Email!.Trim();
         var user = new AppUser { UserName = email, Email = email };
         var created = await users.CreateAsync(user, request.Password!);
         if (!created.Succeeded)
-            return TypedResults.Problem(Describe(created.Errors), statusCode: StatusCodes.Status400BadRequest, title: "Couldn't sign up");
+            return TypedResults.Problem(Describe(created.Errors), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
 
         await signIn.SignInAsync(user, isPersistent: true);
         await ClaimAsync(claimGuestRooms, http, user, cancellationToken);
@@ -84,18 +81,18 @@ internal static class AccountEndpoints
         ClaimGuestRooms claimGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
-            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: "Couldn't sign in");
+            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
 
         var user = await users.FindByEmailAsync(request.Email!.Trim());
         if (user is null)
-            return TypedResults.Problem(WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: "Couldn't sign in");
+            return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
 
         var result = await signIn.PasswordSignInAsync(user, request.Password!, isPersistent: true, lockoutOnFailure: true);
         if (result.IsLockedOut)
-            return TypedResults.Problem("Too many wrong passwords. Try again in a few minutes.",
-                statusCode: StatusCodes.Status429TooManyRequests, title: "Couldn't sign in");
+            return TypedResults.Problem(Constants.Messages.LockedOut,
+                statusCode: StatusCodes.Status429TooManyRequests, title: Constants.Titles.SignInFailed);
         if (!result.Succeeded)
-            return TypedResults.Problem(WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: "Couldn't sign in");
+            return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
 
         await ClaimAsync(claimGuestRooms, http, user, cancellationToken);
         return TypedResults.Ok(new AccountResponse(true, user.Email));
@@ -126,8 +123,8 @@ internal static class AccountEndpoints
     /// <summary>What's missing from the form, or <c>null</c> when both fields are filled in.</summary>
     /// <param name="request">The form.</param>
     private static string? Missing(CredentialsRequest request) =>
-        string.IsNullOrWhiteSpace(request.Email) ? "Enter your email."
-        : string.IsNullOrEmpty(request.Password) ? "Enter your password."
+        string.IsNullOrWhiteSpace(request.Email) ? Constants.Messages.EnterEmail
+        : string.IsNullOrEmpty(request.Password) ? Constants.Messages.EnterPassword
         : null;
 
     /// <summary>Identity's errors in the app's words.</summary>
@@ -135,9 +132,9 @@ internal static class AccountEndpoints
     private static string Describe(IEnumerable<IdentityError> errors) => string.Join(" ", errors
         .Select(e => e.Code switch
         {
-            "DuplicateUserName" or "DuplicateEmail" => "An account with this email already exists. Sign in instead.",
-            "InvalidEmail" or "InvalidUserName" => "Enter a valid email address.",
-            "PasswordTooShort" => $"Use a password of at least {AccountSetup.MinPasswordLength} characters.",
+            Constants.Accounts.ErrorCodes.DuplicateUserName or Constants.Accounts.ErrorCodes.DuplicateEmail => Constants.Messages.EmailTaken,
+            Constants.Accounts.ErrorCodes.InvalidEmail or Constants.Accounts.ErrorCodes.InvalidUserName => Constants.Messages.InvalidEmail,
+            Constants.Accounts.ErrorCodes.PasswordTooShort => Constants.Messages.PasswordTooShort,
             _ => e.Description,
         })
         .Distinct());

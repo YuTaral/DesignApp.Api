@@ -20,7 +20,7 @@ public class ClientDisconnectedFilterTests
         var result = await new ClientDisconnectedFilter().InvokeAsync(
             new DefaultEndpointFilterInvocationContext(http), _ => throw new OperationCanceledException(aborted.Token));
 
-        Assert.Equal(ClientDisconnectedFilter.ClientClosedRequest, Assert.IsType<StatusCodeHttpResult>(result).StatusCode);
+        Assert.Equal(Constants.Http.ClientClosedRequest, Assert.IsType<StatusCodeHttpResult>(result).StatusCode);
     }
 
     [Fact]

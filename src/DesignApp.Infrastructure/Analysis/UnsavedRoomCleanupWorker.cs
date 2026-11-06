@@ -7,26 +7,20 @@ namespace DesignApp.Infrastructure.Analysis;
 
 /// <summary>
 /// Every hour, deletes the uploads nobody saved to a design within
-/// <see cref="DeleteUnsavedRooms.Lifetime"/> (with their photos and outlines). It first runs a
+/// <see cref="Application.Constants.Rooms.UnsavedLifetime"/> (with their photos and outlines). It first runs a
 /// minute after startup, so the API is up before it does any work.
 /// </summary>
 /// <param name="scopes">Creates a scope per pass, like a request.</param>
 /// <param name="logger">Records what was deleted, and failures.</param>
 internal sealed partial class UnsavedRoomCleanupWorker(IServiceScopeFactory scopes, ILogger<UnsavedRoomCleanupWorker> logger) : BackgroundService
 {
-    /// <summary>How often the cleanup runs.</summary>
-    internal static readonly TimeSpan Interval = TimeSpan.FromHours(1);
-
-    /// <summary>How long after startup the first pass waits.</summary>
-    internal static readonly TimeSpan FirstRunDelay = TimeSpan.FromMinutes(1);
-
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            await Task.Delay(FirstRunDelay, stoppingToken);
-            using var timer = new PeriodicTimer(Interval);
+            await Task.Delay(Constants.Workers.CleanupFirstRunDelay, stoppingToken);
+            using var timer = new PeriodicTimer(Constants.Workers.CleanupInterval);
             do
             {
                 await RunOnceAsync(stoppingToken);
@@ -53,7 +47,7 @@ internal sealed partial class UnsavedRoomCleanupWorker(IServiceScopeFactory scop
                 if (deleted > 0)
                     LogDeleted(deleted);
             }
-            while (deleted == DeleteUnsavedRooms.BatchSize);
+            while (deleted == Application.Constants.Rooms.CleanupBatchSize);
         }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         {

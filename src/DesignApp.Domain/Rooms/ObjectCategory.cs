@@ -24,3 +24,12 @@ public enum ObjectCategory
     /// <summary>Doors and windows (including glass doors), but not cabinet doors.</summary>
     Opening,
 }
+
+/// <summary>Rules about object categories.</summary>
+public static class ObjectCategories
+{
+    /// <summary>Whether a category is a large surface of the room: a wall, the floor or the ceiling.</summary>
+    /// <param name="category">The category.</param>
+    public static bool IsSurface(this ObjectCategory category) =>
+        category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling;
+}

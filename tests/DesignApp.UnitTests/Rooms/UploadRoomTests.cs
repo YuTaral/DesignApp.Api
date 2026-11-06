@@ -24,8 +24,8 @@ public class UploadRoomTests
         var result = await CreateHandler().HandleAsync(new MemoryStream([1, 2, 3]), CancellationToken.None);
 
         var room = result.Value;
-        Assert.Equal(StorageKeys.RoomPhoto(room.Id), room.PhotoKey);
-        Assert.Equal(ProcessedPhoto.ContentType, _storage.Files[room.PhotoKey].ContentType);
+        Assert.Equal(DesignApp.Application.Constants.Rooms.PhotoKey(room.Id), room.PhotoKey);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, _storage.Files[room.PhotoKey].ContentType);
         Assert.Equal((1600, 1200), (room.Width, room.Height));
         Assert.Equal("user-1", room.OwnerId);
         Assert.Equal(Now, room.CreatedAt);

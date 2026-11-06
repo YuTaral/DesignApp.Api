@@ -22,9 +22,6 @@ public interface IRoomClient
 /// <param name="rooms">Loads the room, checking that the caller owns it.</param>
 internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
 {
-    /// <summary>The hub's URL path.</summary>
-    public const string Path = "/api/hubs/rooms";
-
     /// <summary>Starts sending a room's changes to this connection.</summary>
     /// <param name="roomId">The room to watch; it must belong to the caller.</param>
     /// <returns>
@@ -39,7 +36,7 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
         {
             room = Owner() is { } owner ? await rooms.FindAsync(roomId, owner, Context.ConnectionAborted) : null;
             if (room is not null)
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(roomId), Context.ConnectionAborted);
+                await Groups.AddToGroupAsync(Context.ConnectionId, Constants.Hub.Group(roomId), Context.ConnectionAborted);
         }
         catch (OperationCanceledException) when (Context.ConnectionAborted.IsCancellationRequested)
         {
@@ -47,7 +44,7 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
             // waiting for the answer, and it's not an error.
             return null;
         }
-        return room is null ? throw new HubException("We couldn't find that room.") : RoomResponse.From(room);
+        return room is null ? throw new HubException(Constants.Messages.RoomNotFound) : RoomResponse.From(room);
     }
 
     /// <summary>
@@ -59,10 +56,6 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
         Context.User?.Identity?.IsAuthenticated == true
             ? Context.User.FindFirstValue(ClaimTypes.NameIdentifier)
             : Context.GetHttpContext() is { } http ? GuestCookie.Read(http) : null;
-
-    /// <summary>The SignalR group of everyone watching a room.</summary>
-    /// <param name="roomId">The room's id.</param>
-    public static string GroupName(Guid roomId) => $"rooms:{roomId}";
 }
 
 /// <summary><see cref="IRoomNotifier"/> that pushes room changes over <see cref="RoomHub"/>.</summary>
@@ -71,5 +64,5 @@ internal sealed class SignalRRoomNotifier(IHubContext<RoomHub, IRoomClient> hub)
 {
     /// <inheritdoc/>
     public Task RoomChangedAsync(Room room, CancellationToken cancellationToken) =>
-        hub.Clients.Group(RoomHub.GroupName(room.Id)).RoomChanged(RoomResponse.From(room));
+        hub.Clients.Group(Constants.Hub.Group(room.Id)).RoomChanged(RoomResponse.From(room));
 }

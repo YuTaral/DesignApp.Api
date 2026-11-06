@@ -45,7 +45,7 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     {
         yield return room.PhotoKey;
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
-            yield return StorageKeys.RoomLabelMap(room.Id, revision);
+            yield return Constants.Rooms.LabelMapKey(room.Id, revision);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Couldn't delete the file {Key} of a deleted room")]

@@ -10,15 +10,6 @@ namespace DesignApp.Domain.Designs;
 /// </summary>
 public sealed class Design
 {
-    /// <summary>The longest allowed design name, after trimming.</summary>
-    public const int MaxNameLength = 80;
-
-    /// <summary>The longest allowed description, after trimming.</summary>
-    public const int MaxDescriptionLength = 300;
-
-    /// <summary>The most rooms one design can hold.</summary>
-    public const int MaxRooms = 20;
-
     private readonly List<DesignRoom> _rooms = [];
 
     /// <summary>The design's id.</summary>
@@ -63,11 +54,11 @@ public sealed class Design
     public void Rename(string name, string? description, DateTimeOffset now)
     {
         var trimmedName = name.Trim();
-        if (trimmedName.Length is 0 or > MaxNameLength)
-            throw new DomainException($"Design name must be 1 to {MaxNameLength} characters.");
+        if (trimmedName.Length is 0 or > Constants.Designs.MaxNameLength)
+            throw new DomainException(Constants.Messages.NameLength);
         var trimmedDescription = (description ?? "").Trim();
-        if (trimmedDescription.Length > MaxDescriptionLength)
-            throw new DomainException($"The description can be at most {MaxDescriptionLength} characters.");
+        if (trimmedDescription.Length > Constants.Designs.MaxDescriptionLength)
+            throw new DomainException(Constants.Messages.DescriptionLength);
 
         Name = trimmedName;
         Description = trimmedDescription;
@@ -81,11 +72,11 @@ public sealed class Design
     public void AddRoom(Room room, DateTimeOffset now)
     {
         if (room.OwnerId != OwnerId)
-            throw new DomainException("Designs can only hold your own rooms.");
+            throw new DomainException(Constants.Messages.NotYourRoom);
         if (_rooms.Any(r => r.RoomId == room.Id))
-            throw new DomainException("This room is already in the design.");
-        if (_rooms.Count >= MaxRooms)
-            throw new DomainException($"A design can hold at most {MaxRooms} rooms.");
+            throw new DomainException(Constants.Messages.RoomAlreadyInThisDesign);
+        if (_rooms.Count >= Constants.Designs.MaxRooms)
+            throw new DomainException(Constants.Messages.DesignFull);
 
         _rooms.Add(new DesignRoom(room.Id, _rooms.Count == 0 ? 0 : _rooms.Max(r => r.Position) + 1));
         UpdatedAt = now;
@@ -99,18 +90,18 @@ public sealed class Design
     public void SetRoomEdits(Room room, IEnumerable<EditOperation> edits, DateTimeOffset now)
     {
         var entry = _rooms.SingleOrDefault(r => r.RoomId == room.Id)
-            ?? throw new DomainException("This room isn't in the design.");
+            ?? throw new DomainException(Constants.Messages.RoomNotInDesign);
 
         var list = edits.ToList();
         if (list.Count > 0 && room.Status != RoomStatus.Ready)
-            throw new DomainException("Colors can only be saved for rooms that finished analysis.");
+            throw new DomainException(Constants.Messages.ColorsNeedAnalysis);
         var knownIndexes = room.Objects.Select(o => o.Index).ToHashSet();
         var unknown = list.FirstOrDefault(e => !knownIndexes.Contains(e.ObjectIndex));
         if (unknown is not null)
-            throw new DomainException($"Object {unknown.ObjectIndex} does not exist in this room.");
+            throw new DomainException(Constants.Messages.UnknownObject(unknown.ObjectIndex));
         var repeated = list.GroupBy(e => e.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
         if (repeated is not null)
-            throw new DomainException($"Object {repeated.Key} has more than one edit.");
+            throw new DomainException(Constants.Messages.DuplicateEdit(repeated.Key));
 
         entry.SetEdits(list.AsReadOnly());
         UpdatedAt = now;
@@ -123,9 +114,9 @@ public sealed class Design
     public void RemoveRoom(Guid roomId, DateTimeOffset now)
     {
         var entry = _rooms.SingleOrDefault(r => r.RoomId == roomId)
-            ?? throw new DomainException("This room isn't in the design.");
+            ?? throw new DomainException(Constants.Messages.RoomNotInDesign);
         if (_rooms.Count == 1)
-            throw new DomainException("A design needs at least one room. Delete the design instead.");
+            throw new DomainException(Constants.Messages.LastRoom);
 
         _rooms.Remove(entry);
         UpdatedAt = now;

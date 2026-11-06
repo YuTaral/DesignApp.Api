@@ -10,7 +10,7 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<A
     /// <param name="args">Arguments from the EF tools (unused).</param>
     public AppDbContext CreateDbContext(string[] args) =>
         new(new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql("Host=localhost;Database=designapp")
+            .UseNpgsql(Constants.Config.DesignTimeConnection)
             .UseSnakeCaseNamingConvention()
             .Options);
 }

@@ -35,7 +35,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var room = await WaitForStatusAsync(created.Id, "Ready");
 
         Assert.NotEmpty(room.Objects);
-        Assert.Equal($"/api/rooms/{room.Id}/labels/0", room.LabelMapUrl);
+        Assert.Equal(DesignApp.Api.Constants.Routes.RoomLabelMapUrl(room.Id, 0), room.LabelMapUrl);
         Assert.Equal((0, "WholeRoom", "Fake"), (room.LabelMapRevision, room.Scope, room.AiMode));
         var sofa = room.Objects.Single(o => o.GetProperty("label").GetString() == "sofa");
         Assert.Equal("Furniture", sofa.GetProperty("category").GetString());
@@ -50,7 +50,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         using var response = await Client.GetAsync(room.LabelMapUrl);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("image/png", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Png, response.Content.Headers.ContentType?.MediaType);
         using var codec = SKCodec.Create(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
         Assert.Equal((1200, 800), (codec.Info.Width, codec.Info.Height));
         using var labels = SKBitmap.Decode(codec, new SKImageInfo(1200, 800, SKColorType.Gray8, SKAlphaType.Opaque));
@@ -193,7 +193,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     private async Task<HttpResponseMessage> PostPhotoAsync(string? scope, string? ai = null)
     {
         using var content = new ByteArrayContent(TestImages.Create(1200, 800));
-        content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
         if (scope is not null)
             form.Add(new StringContent(scope), "scope");

@@ -70,7 +70,7 @@ public class AiProviderTests
     {
         var result = InventoryJson.Parse("""{"isRoom": false, "objects": []}""");
 
-        Assert.Equal(InventoryJson.NotARoom, result.Error);
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.NotARoom, result.Error);
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class AiProviderTests
         Assert.StartsWith("data:image/jpeg;base64,", wall.GetProperty("image_url").GetString(), StringComparison.Ordinal);
         Assert.False(wall.GetProperty("apply_mask").GetBoolean());
         Assert.True(wall.GetProperty("return_multiple_masks").GetBoolean());
-        Assert.Equal(FalSegmentationProvider.MaxMasks, wall.GetProperty("max_masks").GetInt32());
+        Assert.Equal(DesignApp.Infrastructure.Constants.Ai.Fal.MaxMasks, wall.GetProperty("max_masks").GetInt32());
     }
 
     [Fact]

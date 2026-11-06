@@ -16,7 +16,7 @@ public readonly record struct HexColor
     public static HexColor Parse(string input)
     {
         if (!TryParse(input, out var color))
-            throw new DomainException($"'{input}' is not a #RRGGBB color.");
+            throw new DomainException(Constants.Messages.NotAColor(input));
         return color;
     }
 
@@ -27,7 +27,7 @@ public readonly record struct HexColor
     public static bool TryParse(string? input, out HexColor color)
     {
         color = default;
-        if (input is null || input.Length != 7 || input[0] != '#')
+        if (input is null || input.Length != Constants.Colors.Length || input[0] != Constants.Colors.Prefix)
             return false;
         if (!int.TryParse(input.AsSpan(1), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
             return false;

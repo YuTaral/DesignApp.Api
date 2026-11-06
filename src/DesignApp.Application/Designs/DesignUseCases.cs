@@ -27,7 +27,7 @@ public sealed class CreateDesign(IRoomRepository rooms, IDesignRepository design
         if (room is null)
             return null;
         if (await designs.IsRoomInADesignAsync(room.Id, cancellationToken))
-            throw new DomainException("This room is already in a design.");
+            throw new DomainException(Constants.Messages.RoomInADesign);
 
         var design = Design.Create(room, currentUser.Id, name, description, edits, clock.GetUtcNow());
         designs.Add(design);
@@ -81,7 +81,7 @@ public sealed class AddRoomToDesign(IRoomRepository rooms, IDesignRepository des
         if (design is null || room is null)
             return null;
         if (await designs.IsRoomInADesignAsync(room.Id, cancellationToken))
-            throw new DomainException("This room is already in a design.");
+            throw new DomainException(Constants.Messages.RoomInADesign);
 
         var now = clock.GetUtcNow();
         design.AddRoom(room, now);

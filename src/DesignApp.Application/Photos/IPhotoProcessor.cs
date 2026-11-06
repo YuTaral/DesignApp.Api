@@ -4,7 +4,7 @@ namespace DesignApp.Application.Photos;
 
 /// <summary>
 /// Turns an uploaded file into the photo the app works with: a validated, upright sRGB JPEG,
-/// no larger than <see cref="PhotoRules.MaxLongEdge"/>, with all metadata (including GPS) removed.
+/// no larger than <see cref="Constants.Photos.MaxLongEdge"/>, with all metadata (including GPS) removed.
 /// </summary>
 public interface IPhotoProcessor
 {
@@ -18,8 +18,4 @@ public interface IPhotoProcessor
 /// <param name="Content">The encoded JPEG bytes.</param>
 /// <param name="Width">Width in pixels.</param>
 /// <param name="Height">Height in pixels.</param>
-public sealed record ProcessedPhoto(byte[] Content, int Width, int Height)
-{
-    /// <summary>The MIME type of <see cref="Content"/>; processed photos are always JPEG.</summary>
-    public const string ContentType = "image/jpeg";
-}
+public sealed record ProcessedPhoto(byte[] Content, int Width, int Height);

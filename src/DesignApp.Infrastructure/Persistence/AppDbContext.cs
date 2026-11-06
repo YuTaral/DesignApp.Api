@@ -26,13 +26,13 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
     {
         base.OnModelCreating(builder);
         // Identity names its tables like "AspNetUsers"; keep them snake_case like the rest.
-        builder.Entity<AppUser>().ToTable("users");
-        builder.Entity<IdentityRole>().ToTable("roles");
-        builder.Entity<IdentityUserClaim<string>>().ToTable("user_claims");
-        builder.Entity<IdentityUserLogin<string>>().ToTable("user_logins");
-        builder.Entity<IdentityUserRole<string>>().ToTable("user_roles");
-        builder.Entity<IdentityUserToken<string>>().ToTable("user_tokens");
-        builder.Entity<IdentityRoleClaim<string>>().ToTable("role_claims");
+        builder.Entity<AppUser>().ToTable(Constants.Persistence.Tables.Users);
+        builder.Entity<IdentityRole>().ToTable(Constants.Persistence.Tables.Roles);
+        builder.Entity<IdentityUserClaim<string>>().ToTable(Constants.Persistence.Tables.UserClaims);
+        builder.Entity<IdentityUserLogin<string>>().ToTable(Constants.Persistence.Tables.UserLogins);
+        builder.Entity<IdentityUserRole<string>>().ToTable(Constants.Persistence.Tables.UserRoles);
+        builder.Entity<IdentityUserToken<string>>().ToTable(Constants.Persistence.Tables.UserTokens);
+        builder.Entity<IdentityRoleClaim<string>>().ToTable(Constants.Persistence.Tables.RoleClaims);
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }

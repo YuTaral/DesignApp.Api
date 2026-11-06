@@ -48,7 +48,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
         Assert.Equal(("Flat makeover", "Calm greens"), (design.Name, design.Description));
         var first = Assert.Single(design.Rooms);
-        Assert.Equal((kitchen.Id, $"/api/rooms/{kitchen.Id}/photo"), (first.RoomId, first.PhotoUrl));
+        Assert.Equal((kitchen.Id, DesignApp.Api.Constants.Routes.RoomPhotoUrl(kitchen.Id)), (first.RoomId, first.PhotoUrl));
         Assert.Equal([new EditDto(kitchen.Objects[0], "#8FA98B", 0.8)], first.Edits);
 
         var added = await OkAsync(await browser.PostAsJsonAsync($"/api/designs/{design.Id}/rooms", new { roomId = bedroom.Id }));
@@ -83,7 +83,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal([bedroom.Id], left.Rooms.Select(r => r.RoomId));
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/rooms/{kitchen.Id}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/rooms/{kitchen.Id}/photo")).StatusCode);
-        Assert.Equal("A design needs at least one room. Delete the design instead.",
+        Assert.Equal(DesignApp.Domain.Constants.Messages.LastRoom,
             await ProblemAsync(await browser.DeleteAsync($"/api/designs/{design.Id}/rooms/{bedroom.Id}")));
     }
 
@@ -107,9 +107,9 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var kitchen = await ReadyRoomAsync(browser);
         var design = await CreateAsync(browser, kitchen.Id, "First");
 
-        Assert.Equal("This room is already in a design.",
+        Assert.Equal(DesignApp.Application.Constants.Messages.RoomInADesign,
             await ProblemAsync(await browser.PostAsJsonAsync("/api/designs", new { roomId = kitchen.Id, name = "Second" })));
-        Assert.Equal("This room is already in a design.",
+        Assert.Equal(DesignApp.Application.Constants.Messages.RoomInADesign,
             await ProblemAsync(await browser.PostAsJsonAsync($"/api/designs/{design.Id}/rooms", new { roomId = kitchen.Id })));
     }
 
@@ -153,15 +153,15 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         async Task<string?> Refused(object body) => await ProblemAsync(await browser.PostAsJsonAsync("/api/designs", body));
 
-        Assert.Equal("Design name must be 1 to 80 characters.", await Refused(new { roomId = room.Id, name = "  " }));
-        Assert.Equal("The description can be at most 300 characters.", await Refused(new { roomId = room.Id, name = "x", description = new string('d', 301) }));
-        Assert.Equal("Object 250 does not exist in this room.",
+        Assert.Equal(DesignApp.Domain.Constants.Messages.NameLength, await Refused(new { roomId = room.Id, name = "  " }));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.DescriptionLength, await Refused(new { roomId = room.Id, name = "x", description = new string('d', DesignApp.Domain.Constants.Designs.MaxDescriptionLength + 1) }));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.UnknownObject(250),
             await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = 250, color = "#000000", strength = 1.0 } } }));
         Assert.Equal("'red' is not a #RRGGBB color.",
             await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "red", strength = 1.0 } } }));
-        Assert.Equal("Recolor strength must be between 0 and 1.",
+        Assert.Equal(DesignApp.Domain.Constants.Messages.StrengthRange,
             await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "#000000", strength = 1.5 } } }));
-        Assert.Equal($"Object {index} has more than one edit.",
+        Assert.Equal(DesignApp.Domain.Constants.Messages.DuplicateEdit(index),
             await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "#000000", strength = 1.0 }, new { objectIndex = index, color = "#FFFFFF", strength = 1.0 } } }));
     }
 
@@ -244,7 +244,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<ReadyRoom> ReadyRoomAsync(HttpClient browser)
     {
         using var content = new ByteArrayContent(TestImages.Create(1200, 800));
-        content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
         using var upload = await browser.PostAsync("/api/rooms", form);
         upload.EnsureSuccessStatusCode();

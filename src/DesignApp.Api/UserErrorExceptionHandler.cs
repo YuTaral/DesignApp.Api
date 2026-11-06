@@ -20,8 +20,8 @@ internal sealed class UserErrorExceptionHandler(IProblemDetailsService problemDe
     {
         var (status, title) = exception switch
         {
-            DomainException => (StatusCodes.Status400BadRequest, "Invalid request"),
-            BadHttpRequestException e => (e.StatusCode, "Invalid request"),
+            DomainException => (StatusCodes.Status400BadRequest, Constants.Titles.InvalidRequest),
+            BadHttpRequestException e => (e.StatusCode, Constants.Titles.InvalidRequest),
             _ => (0, ""),
         };
         if (status == 0)

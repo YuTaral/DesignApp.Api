@@ -5,6 +5,9 @@ using DesignApp.Application.Common;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
 
+using D = DesignApp.Infrastructure.Constants.Ai.Claude.Descriptions;
+using F = DesignApp.Infrastructure.Constants.Ai.Claude.Fields;
+
 namespace DesignApp.Infrastructure.Ai.Claude;
 
 /// <summary>
@@ -13,9 +16,6 @@ namespace DesignApp.Infrastructure.Ai.Claude;
 /// </summary>
 internal static class InventoryJson
 {
-    /// <summary>Shown when Claude says the photo isn't of a room.</summary>
-    public const string NotARoom = "This doesn't look like a photo of a room. Upload a photo of a room's interior.";
-
     private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter() },
@@ -26,47 +26,47 @@ internal static class InventoryJson
     {
         ["type"] = JsonSerializer.SerializeToElement("object"),
         ["additionalProperties"] = JsonSerializer.SerializeToElement(false),
-        ["required"] = JsonSerializer.SerializeToElement(new[] { "isRoom", "objects" }),
+        ["required"] = JsonSerializer.SerializeToElement(new[] { F.IsRoom, F.Objects }),
         ["properties"] = JsonSerializer.SerializeToElement(new Dictionary<string, object>
         {
-            ["isRoom"] = new { type = "boolean", description = "True when the photo shows the interior of a room." },
-            ["objects"] = new
+            [F.IsRoom] = new { type = "boolean", description = D.IsRoom },
+            [F.Objects] = new
             {
                 type = "array",
                 items = new Dictionary<string, object>
                 {
                     ["type"] = "object",
                     ["additionalProperties"] = false,
-                    ["required"] = new[] { "label", "category", "box", "color", "points" },
+                    ["required"] = new[] { F.Label, F.Category, F.Box, F.Color, F.Points },
                     ["properties"] = new Dictionary<string, object>
                     {
-                        ["label"] = new { type = "string", description = "Short name a person would use, such as \"grey sofa\" or \"left wall\"." },
-                        ["category"] = new { type = "string", @enum = Enum.GetNames<ObjectCategory>() },
-                        ["box"] = new Dictionary<string, object>
+                        [F.Label] = new { type = "string", description = D.Label },
+                        [F.Category] = new { type = "string", @enum = Enum.GetNames<ObjectCategory>() },
+                        [F.Box] = new Dictionary<string, object>
                         {
                             ["type"] = "object",
                             ["additionalProperties"] = false,
-                            ["required"] = new[] { "x", "y", "width", "height" },
-                            ["description"] = "Bounding box as fractions (0 to 1) of the image width and height, from the top-left corner.",
-                            ["properties"] = new
+                            ["required"] = new[] { F.X, F.Y, F.Width, F.Height },
+                            ["description"] = D.Box,
+                            ["properties"] = new Dictionary<string, object>
                             {
-                                x = new { type = "number" },
-                                y = new { type = "number" },
-                                width = new { type = "number" },
-                                height = new { type = "number" },
+                                [F.X] = new { type = "number" },
+                                [F.Y] = new { type = "number" },
+                                [F.Width] = new { type = "number" },
+                                [F.Height] = new { type = "number" },
                             },
                         },
-                        ["color"] = new { type = "string", description = "The object's main color as #RRGGBB." },
-                        ["points"] = new Dictionary<string, object>
+                        [F.Color] = new { type = "string", description = D.Color },
+                        [F.Points] = new Dictionary<string, object>
                         {
                             ["type"] = "array",
-                            ["description"] = "For walls, floors and ceilings: 2 or 3 spots on the visible surface itself, as fractions (0 to 1) of the image. Empty for every other object.",
+                            ["description"] = D.Points,
                             ["items"] = new Dictionary<string, object>
                             {
                                 ["type"] = "object",
                                 ["additionalProperties"] = false,
-                                ["required"] = new[] { "x", "y" },
-                                ["properties"] = new { x = new { type = "number" }, y = new { type = "number" } },
+                                ["required"] = new[] { F.X, F.Y },
+                                ["properties"] = new Dictionary<string, object> { [F.X] = new { type = "number" }, [F.Y] = new { type = "number" } },
                             },
                         },
                     },
@@ -87,26 +87,23 @@ internal static class InventoryJson
         var answer = JsonSerializer.Deserialize<Answer>(json, Options)
             ?? throw new JsonException("Claude returned an empty answer.");
         if (!answer.IsRoom)
-            return Result.Failure<IReadOnlyList<InventoryItem>>(NotARoom);
+            return Result.Failure<IReadOnlyList<InventoryItem>>(Constants.Messages.NotARoom);
 
         var items = new List<InventoryItem>();
         foreach (var o in answer.Objects ?? [])
         {
             if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box) is not { } box)
                 continue;
-            var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse("#808080");
+            var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse(Domain.Constants.Colors.Fallback);
             items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points)));
         }
         return items;
     }
 
-    /// <summary>The points inside the image, at most <see cref="MaxPoints"/>.</summary>
+    /// <summary>The points inside the image, at most <see cref="Constants.Ai.Claude.MaxPoints"/>.</summary>
     /// <param name="points">The points as Claude sent them.</param>
     private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points) =>
-        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(MaxPoints).Select(p => new ImagePoint(p.X, p.Y))];
-
-    /// <summary>How many points per object are kept.</summary>
-    internal const int MaxPoints = 3;
+        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(Constants.Ai.Claude.MaxPoints).Select(p => new ImagePoint(p.X, p.Y))];
 
     /// <summary>Clips a box to the image.</summary>
     /// <param name="b">The box as Claude sent it.</param>
@@ -115,7 +112,7 @@ internal static class InventoryJson
     {
         var (x, width) = Clip(b.X, b.Width);
         var (y, height) = Clip(b.Y, b.Height);
-        return width > 0.001 && height > 0.001 ? new BoundingBox(x, y, width, height) : null;
+        return width > Constants.Ai.Claude.MinBoxSide && height > Constants.Ai.Claude.MinBoxSide ? new BoundingBox(x, y, width, height) : null;
     }
 
     /// <summary>Clips one axis of a box to 0..1, leaving values that already fit untouched.</summary>

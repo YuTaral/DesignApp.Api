@@ -15,9 +15,6 @@ namespace DesignApp.Application.Rooms;
 /// <param name="imaging">Does the pixel work.</param>
 public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUser, IFileStorage storage, IRoomImaging imaging)
 {
-    /// <summary>Shown when a fix starts from a label map version that isn't stored.</summary>
-    public const string UnknownRevision = "This room has changed since you opened it. Reload the page and try again.";
-
     /// <summary>Paints or erases an object's outline with a brush stroke, starting from a given label map version.</summary>
     /// <param name="roomId">The room.</param>
     /// <param name="baseRevision">The label map version the user drew on.</param>
@@ -35,21 +32,21 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
         if (room is null)
             return null;
         if (room.Status is not RoomStatus.Ready)
-            return Result.Failure<Room>("The outlines can be fixed once the analysis is ready.");
+            return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
         if (!room.HasLabelMapRevision(baseRevision))
-            return Result.Failure<Room>(UnknownRevision);
+            return Result.Failure<Room>(Constants.Messages.UnknownRevision);
         var target = room.Objects.FirstOrDefault(o => o.Index == objectIndex);
         if (target is null)
-            return Result.Failure<Room>("That object isn't in this room.");
-        if (points.Count is 0 or > OutlineStrokeRules.MaxPoints)
-            return Result.Failure<Room>($"A stroke needs between 1 and {OutlineStrokeRules.MaxPoints} points.");
-        if (double.IsNaN(radius) || radius is < OutlineStrokeRules.MinRadius or > OutlineStrokeRules.MaxRadius)
-            return Result.Failure<Room>($"The brush radius must be between {OutlineStrokeRules.MinRadius} and {OutlineStrokeRules.MaxRadius} pixels.");
-        if (points.Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y) || p.X is < -1 or > 2 || p.Y is < -1 or > 2))
-            return Result.Failure<Room>("The stroke has points far outside the photo.");
+            return Result.Failure<Room>(Constants.Messages.UnknownStrokeObject);
+        if (points.Count is 0 or > Constants.Strokes.MaxPoints)
+            return Result.Failure<Room>(Constants.Messages.StrokePoints);
+        if (double.IsNaN(radius) || radius is < Constants.Strokes.MinRadius or > Constants.Strokes.MaxRadius)
+            return Result.Failure<Room>(Constants.Messages.BrushRadius);
+        if (points.Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y) || p.X is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint || p.Y is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint))
+            return Result.Failure<Room>(Constants.Messages.StrokeOutside);
 
         byte[] labelMap;
-        await using (var stored = await storage.OpenReadAsync(StorageKeys.RoomLabelMap(room.Id, baseRevision), cancellationToken)
+        await using (var stored = await storage.OpenReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken)
             ?? throw new InvalidOperationException($"Label map {baseRevision} of room {room.Id} is missing from storage."))
         {
             using var buffer = new MemoryStream();
@@ -64,8 +61,8 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
         // The new version is stored before the room points at it, so a failed save leaves only an unused file.
         var revision = room.LatestLabelMapRevision + 1;
         using (var content = new MemoryStream(painted.Value, writable: false))
-            await storage.SaveAsync(StorageKeys.RoomLabelMap(room.Id, revision), content, "image/png", cancellationToken);
-        room.AddLabelMapRevision(r => StorageKeys.RoomLabelMap(room.Id, r));
+            await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
+        room.AddLabelMapRevision(r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
         return room;
     }
@@ -81,10 +78,10 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
         if (room is null)
             return null;
         if (!room.HasLabelMapRevision(revision))
-            return Result.Failure<Room>(UnknownRevision);
+            return Result.Failure<Room>(Constants.Messages.UnknownRevision);
         if (room.LabelMapRevision != revision)
         {
-            room.UseLabelMapRevision(revision, r => StorageKeys.RoomLabelMap(room.Id, r));
+            room.UseLabelMapRevision(revision, r => Constants.Rooms.LabelMapKey(room.Id, r));
             await rooms.SaveChangesAsync(cancellationToken);
         }
         return room;

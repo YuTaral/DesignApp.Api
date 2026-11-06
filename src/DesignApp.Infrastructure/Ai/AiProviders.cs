@@ -14,9 +14,6 @@ namespace DesignApp.Infrastructure.Ai;
 /// <param name="options">The AI settings.</param>
 internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions> options) : IAiProviders
 {
-    /// <summary>Registration key of the real providers.</summary>
-    internal const string RealKey = "real";
-
     /// <inheritdoc/>
     public AiAvailability Availability { get; } = new(
         options.Value.UseFakes ? AiMode.Fake : AiMode.Real,
@@ -26,14 +23,14 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
     /// <inheritdoc/>
     public IObjectInventoryProvider Inventory(AiMode mode) => mode is AiMode.Fake
         ? services.GetRequiredService<FakeInventoryProvider>()
-        : services.GetKeyedService<IObjectInventoryProvider>(RealKey) ?? throw NotSetUp();
+        : services.GetKeyedService<IObjectInventoryProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
 
     /// <inheritdoc/>
     public ISegmentationProvider Segmentation(AiMode mode) => mode is AiMode.Fake
         ? services.GetRequiredService<FakeSegmentationProvider>()
-        : services.GetKeyedService<ISegmentationProvider>(RealKey) ?? throw NotSetUp();
+        : services.GetKeyedService<ISegmentationProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
 
     /// <summary>The error for a real analysis without keys (uploads are refused before this can happen).</summary>
     private static InvalidOperationException NotSetUp() =>
-        new("The real AI isn't set up: Ai:AnthropicApiKey and Ai:FalKey are needed.");
+        new(Constants.Config.RealAiNotSetUp);
 }

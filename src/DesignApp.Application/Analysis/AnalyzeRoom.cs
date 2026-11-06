@@ -23,12 +23,6 @@ public sealed partial class AnalyzeRoom(
     IRoomNotifier notifier,
     ILogger<AnalyzeRoom> logger)
 {
-    /// <summary>Shown when something went wrong on our side; the details go to the log only.</summary>
-    public const string UnexpectedFailure = "We couldn't analyze this photo. Try uploading it again in a moment.";
-
-    /// <summary>Shown when no object survived segmentation.</summary>
-    public const string NothingFound = "We couldn't find any objects to restyle in this photo. Try a wider shot of the room.";
-
     /// <summary>Analyzes the room, unless it is already finished. Safe to call twice for the same room.</summary>
     /// <param name="roomId">The room to analyze.</param>
     /// <param name="cancellationToken">
@@ -42,9 +36,9 @@ public sealed partial class AnalyzeRoom(
 
         if (room.Status is not RoomStatus.Uploaded)
             room.RestartAnalysis(); // a previous run was cut off
-        if (room.AnalysisAttempts >= Room.MaxAnalysisAttempts)
+        if (room.AnalysisAttempts >= Domain.Constants.Rooms.MaxAnalysisAttempts)
         {
-            await FailAsync(room, UnexpectedFailure, cancellationToken);
+            await FailAsync(room, Constants.Messages.UnexpectedFailure, cancellationToken);
             return;
         }
 
@@ -60,7 +54,7 @@ public sealed partial class AnalyzeRoom(
             LogAnalysisFailed(error, room.Id);
             // If the failure came after the room was finished (a save that failed), there is nothing left to mark.
             if (room.Status is not (RoomStatus.Ready or RoomStatus.Failed))
-                await FailAsync(room, UnexpectedFailure, CancellationToken.None);
+                await FailAsync(room, Constants.Messages.UnexpectedFailure, CancellationToken.None);
         }
     }
 
@@ -83,10 +77,10 @@ public sealed partial class AnalyzeRoom(
             return;
         }
         // Objects outside the scope the user chose are never outlined, which also saves their SAM 3 requests.
-        var items = listed.Value.Where(item => room.Scope.Includes(item.Category)).Take(AnalysisRules.MaxObjects).ToList();
+        var items = listed.Value.Where(item => room.Scope.Includes(item.Category)).Take(Constants.Analysis.MaxObjects).ToList();
         if (items.Count == 0)
         {
-            await FailAsync(room, NothingFound, cancellationToken);
+            await FailAsync(room, Constants.Messages.NothingFound, cancellationToken);
             return;
         }
 
@@ -101,13 +95,13 @@ public sealed partial class AnalyzeRoom(
         var labelMap = imaging.BuildLabelMap(image, outlined);
         if (labelMap.Objects.Count == 0)
         {
-            await FailAsync(room, NothingFound, cancellationToken);
+            await FailAsync(room, Constants.Messages.NothingFound, cancellationToken);
             return;
         }
 
-        var key = StorageKeys.RoomLabelMap(room.Id);
+        var key = Constants.Rooms.LabelMapKey(room.Id);
         using (var content = new MemoryStream(labelMap.Png, writable: false))
-            await storage.SaveAsync(key, content, "image/png", cancellationToken);
+            await storage.SaveAsync(key, content, Constants.ContentTypes.Png, cancellationToken);
 
         room.MarkReady(labelMap.Objects, key);
         await SaveAndNotifyAsync(room, cancellationToken);

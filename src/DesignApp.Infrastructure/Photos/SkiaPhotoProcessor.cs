@@ -7,27 +7,24 @@ namespace DesignApp.Infrastructure.Photos;
 /// <summary>SkiaSharp implementation of <see cref="IPhotoProcessor"/>.</summary>
 internal sealed class SkiaPhotoProcessor : IPhotoProcessor
 {
-    /// <summary>Shown for files that aren't a JPEG, PNG or WebP image.</summary>
-    private const string UnsupportedMessage = "This file isn't a photo we can read. Use a JPEG, PNG or WebP image.";
-
     /// <inheritdoc/>
     public Result<ProcessedPhoto> Process(Stream upload)
     {
         using var buffer = new MemoryStream();
         upload.CopyTo(buffer);
         if (buffer.Length == 0)
-            return Result.Failure<ProcessedPhoto>("The file is empty.");
+            return Result.Failure<ProcessedPhoto>(Constants.Messages.EmptyFile);
 
         using var data = SKData.CreateCopy(buffer.GetBuffer().AsSpan(0, (int)buffer.Length));
         using var codec = SKCodec.Create(data);
         if (codec?.EncodedFormat is not (SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Png or SKEncodedImageFormat.Webp))
-            return Result.Failure<ProcessedPhoto>(UnsupportedMessage);
+            return Result.Failure<ProcessedPhoto>(Constants.Messages.UnsupportedPhoto);
 
         var source = codec.Info.Size;
-        if ((long)source.Width * source.Height > PhotoRules.MaxSourcePixels)
-            return Result.Failure<ProcessedPhoto>("This photo has too many pixels. Use one under 100 megapixels.");
-        if (Math.Min(source.Width, source.Height) < PhotoRules.MinShortEdge)
-            return Result.Failure<ProcessedPhoto>($"This photo is too small. Use one at least {PhotoRules.MinShortEdge} pixels on each side.");
+        if ((long)source.Width * source.Height > Application.Constants.Photos.MaxSourcePixels)
+            return Result.Failure<ProcessedPhoto>(Constants.Messages.TooManyPixels);
+        if (Math.Min(source.Width, source.Height) < Application.Constants.Photos.MinShortEdge)
+            return Result.Failure<ProcessedPhoto>(Constants.Messages.PhotoTooSmall);
 
         // Phones store photos sideways and record how to turn them in EXIF. Bake that in, because
         // the metadata is about to be dropped and the AI and the editor need the upright image.
@@ -36,14 +33,14 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
             or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
         var upright = sideways ? new SKSizeI(source.Height, source.Width) : source;
 
-        var scale = Math.Min(1f, (float)PhotoRules.MaxLongEdge / Math.Max(upright.Width, upright.Height));
+        var scale = Math.Min(1f, (float)Application.Constants.Photos.MaxLongEdge / Math.Max(upright.Width, upright.Height));
         var target = new SKSizeI(
             Math.Max(1, (int)Math.Round(upright.Width * scale)),
             Math.Max(1, (int)Math.Round(upright.Height * scale)));
 
         using var decoded = Decode(codec, scale);
         if (decoded is null)
-            return Result.Failure<ProcessedPhoto>("This photo is damaged and can't be read.");
+            return Result.Failure<ProcessedPhoto>(Constants.Messages.DamagedPhoto);
         using var output = new SKBitmap(new SKImageInfo(target.Width, target.Height, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb()));
         using (var canvas = new SKCanvas(output))
         {
@@ -59,7 +56,7 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
 
         // Re-encoding writes no metadata, so EXIF (including GPS location) never reaches storage.
         using var encodedImage = SKImage.FromBitmap(output);
-        using var encoded = encodedImage.Encode(SKEncodedImageFormat.Jpeg, PhotoRules.JpegQuality);
+        using var encoded = encodedImage.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
         return new ProcessedPhoto(encoded.ToArray(), target.Width, target.Height);
     }
 

@@ -36,11 +36,11 @@ public sealed record RoomResponse(
         room.Status,
         room.Width,
         room.Height,
-        $"/api/rooms/{room.Id}/photo",
+        Constants.Routes.RoomPhotoUrl(room.Id),
         room.CreatedAt,
         room.FailureReason,
         [.. room.Objects.Select(DetectedObjectResponse.From)],
-        room.LabelMapKey is null ? null : $"/api/rooms/{room.Id}/labels/{room.LabelMapRevision}",
+        room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision),
         room.LabelMapRevision,
         room.Scope,
         room.AiMode);

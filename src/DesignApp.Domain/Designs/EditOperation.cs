@@ -25,8 +25,8 @@ public sealed record RecolorEdit : EditOperation
     /// <exception cref="DomainException"><paramref name="strength"/> is outside 0..1.</exception>
     public RecolorEdit(int objectIndex, HexColor color, double strength) : base(objectIndex)
     {
-        if (strength is < 0 or > 1 || double.IsNaN(strength))
-            throw new DomainException("Recolor strength must be between 0 and 1.");
+        if (strength is < Constants.Colors.MinStrength or > Constants.Colors.MaxStrength || double.IsNaN(strength))
+            throw new DomainException(Constants.Messages.StrengthRange);
         Color = color;
         Strength = strength;
     }

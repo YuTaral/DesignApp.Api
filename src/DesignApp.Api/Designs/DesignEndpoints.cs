@@ -16,38 +16,38 @@ internal static class DesignEndpoints
     /// <returns>The same group, for chaining.</returns>
     public static RouteGroupBuilder MapDesignEndpoints(this RouteGroupBuilder api)
     {
-        var designs = api.MapGroup("/designs").WithTags("Designs").RequireAuthorization();
+        var designs = api.MapGroup(Constants.Routes.Designs).WithTags(Constants.OpenApi.DesignsTag).RequireAuthorization();
 
-        designs.MapGet("/", ListAsync)
+        designs.MapGet(Constants.Routes.Root, ListAsync)
             .WithName("ListDesigns")
             .WithSummary("Lists the account's designs with their rooms, most recently changed first.");
 
-        designs.MapPost("/", CreateAsync)
+        designs.MapPost(Constants.Routes.Root, CreateAsync)
             .WithName("CreateDesign")
             .WithSummary("Creates a design from one of the account's rooms and its colors.")
-            .WithDescription("The room must not be in another design. Uploads that are never added to a design are deleted after 24 hours.");
+            .WithDescription($"The room must not be in another design. Uploads that are never added to a design are deleted after {Application.Constants.Rooms.UnsavedLifetime.TotalHours} hours.");
 
-        designs.MapGet("/{id:guid}", GetAsync)
+        designs.MapGet(Constants.Routes.ById, GetAsync)
             .WithName("GetDesign")
             .WithSummary("Returns one design with its rooms and their colors.");
 
-        designs.MapPut("/{id:guid}", EditAsync)
+        designs.MapPut(Constants.Routes.ById, EditAsync)
             .WithName("EditDesign")
             .WithSummary("Changes a design's name and description.");
 
-        designs.MapDelete("/{id:guid}", DeleteAsync)
+        designs.MapDelete(Constants.Routes.ById, DeleteAsync)
             .WithName("DeleteDesign")
             .WithSummary("Deletes a design together with its rooms, their photos and outlines.");
 
-        designs.MapPost("/{id:guid}/rooms", AddRoomAsync)
+        designs.MapPost(Constants.Routes.DesignRooms, AddRoomAsync)
             .WithName("AddDesignRoom")
             .WithSummary("Adds one of the account's rooms to a design, optionally with its colors (none while it is still analyzed).");
 
-        designs.MapPut("/{id:guid}/rooms/{roomId:guid}", SaveRoomColorsAsync)
+        designs.MapPut(Constants.Routes.DesignRoom, SaveRoomColorsAsync)
             .WithName("SaveDesignRoomColors")
             .WithSummary("Replaces the colors of one room of a design.");
 
-        designs.MapDelete("/{id:guid}/rooms/{roomId:guid}", RemoveRoomAsync)
+        designs.MapDelete(Constants.Routes.DesignRoom, RemoveRoomAsync)
             .WithName("RemoveDesignRoom")
             .WithSummary("Takes a room out of a design and deletes it. The last room can't be removed; delete the design instead.");
 
@@ -72,7 +72,7 @@ internal static class DesignEndpoints
             request.RoomId, request.Name ?? "", request.Description, ToEdits(request.Edits), cancellationToken);
         return design is null
             ? TypedResults.NotFound()
-            : TypedResults.Created($"/api/designs/{design.Id}", DesignResponse.From(design));
+            : TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design));
     }
 
     /// <summary><c>GET /api/designs/{id}</c>.</summary>
@@ -196,6 +196,6 @@ internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<Edi
     /// <param name="room">The room.</param>
     public static DesignRoomResponse From(DesignRoom room) => new(
         room.RoomId,
-        $"/api/rooms/{room.RoomId}/photo",
+        Constants.Routes.RoomPhotoUrl(room.RoomId),
         [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength))]);
 }

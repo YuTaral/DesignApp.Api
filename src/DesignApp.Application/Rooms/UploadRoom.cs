@@ -37,11 +37,11 @@ public sealed class UploadRoom(
 
         var now = clock.GetUtcNow();
         var id = Guid.CreateVersion7(now);
-        var photoKey = StorageKeys.RoomPhoto(id);
+        var photoKey = Constants.Rooms.PhotoKey(id);
         var room = Room.Upload(id, currentUser.Id, photoKey, photo.Width, photo.Height, now, scope, aiMode);
 
         using (var content = new MemoryStream(photo.Content, writable: false))
-            await storage.SaveAsync(photoKey, content, ProcessedPhoto.ContentType, cancellationToken);
+            await storage.SaveAsync(photoKey, content, Constants.ContentTypes.Jpeg, cancellationToken);
 
         rooms.Add(room);
         try

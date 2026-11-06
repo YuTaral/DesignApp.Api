@@ -11,24 +11,6 @@ namespace DesignApp.Infrastructure.Photos;
 /// </summary>
 internal static class LabelMapRefiner
 {
-    /// <summary>A piece of an object smaller than this fraction of the photo, apart from its largest piece, is a speckle.</summary>
-    internal const double FragmentFraction = 0.0003;
-
-    /// <summary>An enclosed gap is filled only up to this fraction of the photo (larger ones may be an unlisted object).</summary>
-    internal const double MaxHoleFraction = 0.02;
-
-    /// <summary>
-    /// Growing crosses from a pixel to its neighbor only when their colors differ by at most this
-    /// much (RGB distance, 0-441). JPEG noise and soft shading stay below it; object edges don't.
-    /// </summary>
-    internal const double MaxStepDistance = 24;
-
-    /// <summary>How far (in pixels) an object that isn't a surface may grow past its mask.</summary>
-    internal const int MaxObjectGrowth = 6;
-
-    /// <summary>How far a surface may grow past its mask, as a fraction of the photo's long side.</summary>
-    internal const double MaxSurfaceGrowthFraction = 0.05;
-
     /// <summary>Refines the label map in place.</summary>
     /// <param name="labels">One object id per pixel (0 = none); changed in place.</param>
     /// <param name="width">Width in pixels.</param>
@@ -48,7 +30,7 @@ internal static class LabelMapRefiner
     /// <param name="height">Height in pixels.</param>
     internal static void RemoveFragments(byte[] labels, int width, int height)
     {
-        var minPixels = Math.Max(20, (int)(FragmentFraction * width * height));
+        var minPixels = Math.Max(Constants.Refiner.MinFragmentPixels, (int)(Constants.Refiner.FragmentFraction * width * height));
         var pieces = Components(labels, width, height, keep: label => label != 0);
         var largest = new Dictionary<byte, int>();
         foreach (var piece in pieces)
@@ -68,7 +50,7 @@ internal static class LabelMapRefiner
     /// <param name="height">Height in pixels.</param>
     internal static void FillEnclosedHoles(byte[] labels, int width, int height)
     {
-        var maxPixels = (int)(MaxHoleFraction * width * height);
+        var maxPixels = (int)(Constants.Refiner.MaxHoleFraction * width * height);
         foreach (var gap in Components(labels, width, height, keep: label => label == 0))
         {
             if (gap.Pixels.Count > maxPixels || gap.TouchesBorder || gap.Neighbors.Count != 1)
@@ -82,9 +64,9 @@ internal static class LabelMapRefiner
     /// <summary>
     /// Seeded region growing: unassigned pixels are claimed by neighboring objects, the most similar
     /// color step first, so gaps split along the photo's edges. Steps larger than
-    /// <see cref="MaxStepDistance"/> are never taken, so a gap behind a real edge stays unassigned,
-    /// objects that aren't surfaces stop after <see cref="MaxObjectGrowth"/> pixels, and surfaces after
-    /// <see cref="MaxSurfaceGrowthFraction"/> of the long side.
+    /// <see cref="Constants.Refiner.MaxStepDistance"/> are never taken, so a gap behind a real edge stays unassigned,
+    /// objects that aren't surfaces stop after <see cref="Constants.Refiner.MaxObjectGrowth"/> pixels, and surfaces after
+    /// <see cref="Constants.Refiner.MaxSurfaceGrowthFraction"/> of the long side.
     /// </summary>
     /// <param name="labels">The label map.</param>
     /// <param name="width">Width in pixels.</param>
@@ -94,17 +76,17 @@ internal static class LabelMapRefiner
     internal static void GrowIntoGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface)
     {
         var queue = new PriorityQueue<(int Pixel, byte Label, int Steps), float>();
-        var surfaceGrowth = Math.Max(MaxObjectGrowth, (int)(MaxSurfaceGrowthFraction * Math.Max(width, height)));
-        var limit = new int[256];
-        for (var label = 1; label < 256; label++)
-            limit[label] = isSurface((byte)label) ? surfaceGrowth : MaxObjectGrowth;
+        var surfaceGrowth = Math.Max(Constants.Refiner.MaxObjectGrowth, (int)(Constants.Refiner.MaxSurfaceGrowthFraction * Math.Max(width, height)));
+        var limit = new int[Constants.Imaging.ByteValues];
+        for (var label = 1; label < Constants.Imaging.ByteValues; label++)
+            limit[label] = isSurface((byte)label) ? surfaceGrowth : Constants.Refiner.MaxObjectGrowth;
 
         void Offer(int from, int to, int steps, ReadOnlySpan<byte> photo)
         {
             if (labels[to] != 0 || steps > limit[labels[from]])
                 return;
             var step = Distance(photo, from, to);
-            if (step <= MaxStepDistance)
+            if (step <= Constants.Refiner.MaxStepDistance)
                 queue.Enqueue((to, labels[from], steps), step);
         }
 

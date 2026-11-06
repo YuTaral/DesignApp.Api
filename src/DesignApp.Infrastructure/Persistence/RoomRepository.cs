@@ -62,7 +62,7 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
                 await db.SaveChangesAsync(cancellationToken);
                 return;
             }
-            catch (DbUpdateConcurrencyException conflict) when (attempt < MaxSaveAttempts)
+            catch (DbUpdateConcurrencyException conflict) when (attempt < Constants.Persistence.MaxSaveAttempts)
             {
                 foreach (var entry in conflict.Entries)
                 {
@@ -72,9 +72,6 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
             }
         }
     }
-
-    /// <summary>How often a save is tried when other writers keep changing the same rooms.</summary>
-    private const int MaxSaveAttempts = 3;
 
     /// <summary>
     /// Takes the stored values of the fields this save didn't change, so only its own changes are

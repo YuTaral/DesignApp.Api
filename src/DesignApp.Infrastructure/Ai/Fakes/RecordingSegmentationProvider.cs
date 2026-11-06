@@ -35,7 +35,7 @@ internal sealed partial class RecordingSegmentationProvider(
             // How many paid SAM 3 requests the photo took, to compare ways of asking.
             Directory.CreateDirectory(folder);
             await File.WriteAllTextAsync(
-                Path.Combine(folder, $"{sample.Name}.sam3-usage.json"),
+                Path.Combine(folder, sample.Name + Constants.Samples.RequestsSuffix),
                 JsonSerializer.Serialize(new { name = sample.Name, objects = items.Count, requests = requests.Value - before }, Json),
                 cancellationToken);
 
@@ -55,7 +55,7 @@ internal sealed partial class RecordingSegmentationProvider(
                     }),
             };
             Directory.CreateDirectory(folder);
-            var path = Path.Combine(folder, $"{sample.Name}.sam3.json");
+            var path = Path.Combine(folder, sample.Name + Constants.Samples.RecordedSuffix);
             await File.WriteAllTextAsync(path, JsonSerializer.Serialize(recorded, Json), cancellationToken);
             LogRecorded(sample.Name, path);
         }
@@ -69,7 +69,7 @@ internal sealed partial class RecordingSegmentationProvider(
         using var bitmap = new SKBitmap(new SKImageInfo(mask.Width, mask.Height, SKColorType.Gray8, SKAlphaType.Opaque));
         mask.Coverage.CopyTo(bitmap.GetPixelSpan());
         using var image = SKImage.FromBitmap(bitmap);
-        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
         return png.ToArray();
     }
 

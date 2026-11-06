@@ -17,7 +17,7 @@ public class SkiaRoomImagingTests
     {
         var image = _imaging.PrepareForAnalysis(new MemoryStream(TestImages.Create(4096, 2048)));
 
-        Assert.Equal((AnalysisRules.MaxLongEdge, AnalysisRules.MaxLongEdge / 2), (image.Width, image.Height));
+        Assert.Equal((DesignApp.Application.Constants.Analysis.MaxLongEdge, DesignApp.Application.Constants.Analysis.MaxLongEdge / 2), (image.Width, image.Height));
         using var decoded = TestImages.Decode(image.Jpeg);
         Assert.Equal((image.Width, image.Height), (decoded.Width, decoded.Height));
     }

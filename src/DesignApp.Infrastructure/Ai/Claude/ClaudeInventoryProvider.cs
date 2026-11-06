@@ -24,45 +24,6 @@ internal sealed partial class ClaudeInventoryProvider(
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
-    /// <summary>Tells Claude what to list and how; the schema enforces the shape.</summary>
-    private const string Instructions = """
-        You prepare room photos for an interior-restyling app. The user will tap an object and
-        recolor it, so list the surfaces and objects a person would want to restyle: each wall
-        separately, the floor, the ceiling, furniture, rugs and other textiles, lamps, large decor,
-        and fixtures such as doors, windows, cabinets and counters.
-
-        Rules:
-        - Always list every wall that shows wall surface as its own entry ("left wall", "back wall",
-          "right wall"), even plain white walls and narrow strips beside windows, and the floor and
-          ceiling when visible. A tiled area or backsplash is an extra entry, not a replacement for its wall.
-        - A wall is only its own surface (paint, plaster, wallpaper). Cabinets, shelves and appliances
-          built against it are separate entries, never part of the wall. The wall's box still spans the
-          whole wall from edge to edge, including the parts behind furniture, a TV or cabinets. Don't
-          list a wall that is completely hidden behind full-height cabinets.
-        - Labels of walls, floors and ceilings name their finish ("light grey painted back wall",
-          "light oak floor"), not just "wall" or "floor".
-        - Split large built-in units into one entry per section, so each entry is one continuous
-          surface: "left tall cabinets", "upper cabinets", "right tall cabinets", "lower cabinets",
-          "island". Every section of cabinetry needs an entry, including ones at the edges of the photo.
-        - Doors and windows (glass doors included) have the category Opening; cabinet and wardrobe
-          doors belong to their cabinet or wardrobe.
-        - One entry per physical object. Give similar objects distinct labels ("left armchair", "right armchair").
-        - Labels are short, lower-case and concrete ("oak dining table", "jute rug"), usable as a segmentation prompt.
-        - Skip things smaller than about 1% of the image, people, pets, and text.
-        - The box encloses the object's whole visible extent, from its leftmost to its rightmost and
-          its top to its bottom visible pixel, as fractions of the image (0 to 1). Check each box
-          against the photo before answering; long objects such as islands and counters often span
-          most of the photo's width.
-        - Give every wall, floor and ceiling 2 or 3 points spread over its visible surface, each
-          clearly on the surface itself: on bare wall, floorboards or tiles, never on furniture, a
-          rug, a picture or anything else in front of it. Every other object gets no points.
-        - Together the entries should cover nearly the whole photo: every large region of the photo
-          belongs to exactly one entry.
-        - color is the object's main color as #RRGGBB, ignoring shadows and highlights.
-        - At most 30 objects, largest and most important first.
-        - Set isRoom to false, with no objects, when the photo is not the interior of a room.
-        """;
-
     /// <inheritdoc/>
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
@@ -71,8 +32,8 @@ internal sealed partial class ClaudeInventoryProvider(
         var response = await client.Messages.Create(new MessageCreateParams
         {
             Model = settings.InventoryModel,
-            MaxTokens = 16000,
-            System = Instructions,
+            MaxTokens = Constants.Ai.Claude.MaxTokens,
+            System = Constants.Ai.Claude.Instructions,
             OutputConfig = new OutputConfig
             {
                 Effort = settings.InventoryEffort switch
@@ -93,7 +54,7 @@ internal sealed partial class ClaudeInventoryProvider(
                         {
                             Source = new Base64ImageSource { Data = Convert.ToBase64String(image.Jpeg), MediaType = MediaType.ImageJpeg },
                         },
-                        new TextBlockParam { Text = "List the objects in this room photo." },
+                        new TextBlockParam { Text = Constants.Ai.Claude.UserMessage },
                     },
                 },
             ],
@@ -135,7 +96,7 @@ internal sealed partial class ClaudeInventoryProvider(
             seconds = Math.Round(elapsed.TotalSeconds, 1),
         };
         Directory.CreateDirectory(folder);
-        await File.WriteAllTextAsync(Path.Combine(folder, $"{sample.Name}.claude-usage.json"), JsonSerializer.Serialize(recorded, Json), cancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(folder, sample.Name + Constants.Samples.ClaudeUsageSuffix), JsonSerializer.Serialize(recorded, Json), cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Information,

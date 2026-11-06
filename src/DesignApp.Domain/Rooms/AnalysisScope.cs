@@ -20,7 +20,7 @@ public static class AnalysisScopes
     public static bool Includes(this AnalysisScope scope, ObjectCategory category) => scope switch
     {
         AnalysisScope.NoDoorsOrWindows => category is not ObjectCategory.Opening,
-        AnalysisScope.ObjectsOnly => category is not (ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling or ObjectCategory.Opening),
+        AnalysisScope.ObjectsOnly => !category.IsSurface() && category is not ObjectCategory.Opening,
         _ => true,
     };
 }

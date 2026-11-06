@@ -3,9 +3,6 @@ namespace DesignApp.Infrastructure.Ai;
 /// <summary>Settings for the AI pipeline, read from the <c>Ai</c> configuration section.</summary>
 public sealed class AiOptions
 {
-    /// <summary>The configuration section these options are read from.</summary>
-    public const string Section = "Ai";
-
     /// <summary>
     /// Whether uploads that don't choose use the built-in fake providers instead of Claude and SAM 3
     /// (free, offline and instant). On in Development.
@@ -34,7 +31,7 @@ public sealed class AiOptions
     public string? AnthropicWorkspaceId { get; set; }
 
     /// <summary>The Claude model that lists the objects.</summary>
-    public string InventoryModel { get; set; } = "claude-sonnet-5-5";
+    public string InventoryModel { get; set; } = Constants.Ai.DefaultInventoryModel;
 
     /// <summary>
     /// How much Claude reasons before listing the objects. Lower effort writes fewer output tokens,
@@ -46,10 +43,10 @@ public sealed class AiOptions
     public string FalKey { get; set; } = "";
 
     /// <summary>fal.ai's synchronous endpoint for SAM 3 image segmentation.</summary>
-    public Uri SegmentationEndpoint { get; set; } = new("https://fal.run/fal-ai/sam-3/image");
+    public Uri SegmentationEndpoint { get; set; } = new(Constants.Ai.DefaultSegmentationEndpoint);
 
     /// <summary>How many SAM 3 requests one analysis sends at once (one request per object).</summary>
-    public int SegmentationParallelism { get; set; } = 4;
+    public int SegmentationParallelism { get; set; } = Constants.Ai.DefaultSegmentationParallelism;
 
     /// <summary>
     /// When set (with the fakes off), real analyses of the sample photos are saved in this folder
@@ -58,7 +55,7 @@ public sealed class AiOptions
     public string? RecordSamplesTo { get; set; }
 
     /// <summary>How many rooms are analyzed at the same time.</summary>
-    public int MaxConcurrentAnalyses { get; set; } = 2;
+    public int MaxConcurrentAnalyses { get; set; } = Constants.Ai.DefaultMaxConcurrentAnalyses;
 }
 
 /// <summary>Claude's effort levels the object listing can use.</summary>

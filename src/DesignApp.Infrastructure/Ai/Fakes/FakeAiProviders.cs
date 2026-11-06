@@ -59,7 +59,7 @@ internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : IS
         var coverage = new byte[width * height];
         var (left, top) = (item.Box.X * width, item.Box.Y * height);
         var (boxWidth, boxHeight) = (item.Box.Width * width, item.Box.Height * height);
-        var filled = item.Category is ObjectCategory.Wall or ObjectCategory.Floor or ObjectCategory.Ceiling;
+        var filled = item.Category.IsSurface();
 
         for (var y = (int)top; y < Math.Min(height, (int)Math.Ceiling(top + boxHeight)); y++)
         {
@@ -68,7 +68,7 @@ internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : IS
                 var dx = (x + 0.5 - left) / boxWidth * 2 - 1;
                 var dy = (y + 0.5 - top) / boxHeight * 2 - 1;
                 if (filled || dx * dx + dy * dy <= 1)
-                    coverage[y * width + x] = 255;
+                    coverage[y * width + x] = Constants.Imaging.FullCoverage;
             }
         }
         return new ObjectMask(width, height, coverage);

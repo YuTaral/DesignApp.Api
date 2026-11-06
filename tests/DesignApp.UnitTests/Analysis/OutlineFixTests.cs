@@ -109,7 +109,7 @@ public class OutlineFixTests
         var room = await AnalyzedRoomAsync(AnalysisScope.WholeRoom);
         var imaging = new SkiaRoomImaging();
         var fixer = new FixRoomOutline(_rooms, new FixedUser("user-1"), _storage, imaging);
-        var before = DecodeLabels(_storage.Files[StorageKeys.RoomLabelMap(room.Id)].Content);
+        var before = DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id)].Content);
 
         // Paint a dab on a pixel the sofa doesn't have yet.
         var image = imaging.PrepareForAnalysis(new MemoryStream(_storage.Files[room.PhotoKey].Content));
@@ -121,9 +121,9 @@ public class OutlineFixTests
 
         Assert.True(result!.Succeeded, result.Error);
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
-        Assert.Equal(StorageKeys.RoomLabelMap(room.Id, 1), room.LabelMapKey);
+        Assert.Equal(DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 1), room.LabelMapKey);
         Assert.Equal(sofa, DecodeLabels(_storage.Files[room.LabelMapKey!].Content)[spot]);
-        Assert.Equal(before, DecodeLabels(_storage.Files[StorageKeys.RoomLabelMap(room.Id, 0)].Content)); // version 0 is kept
+        Assert.Equal(before, DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content)); // version 0 is kept
 
         Assert.True((await fixer.UseRevisionAsync(room.Id, 0, CancellationToken.None))!.Succeeded);
         Assert.Equal((0, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
@@ -147,8 +147,8 @@ public class OutlineFixTests
     public async Task A_room_is_analyzed_by_the_ai_it_was_uploaded_with()
     {
         var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", StorageKeys.RoomPhoto(id), 600, 400, Now, aiMode: AiMode.Real);
-        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), "image/jpeg");
+        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now, aiMode: AiMode.Real);
+        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
         var ai = new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay));
@@ -183,8 +183,8 @@ public class OutlineFixTests
     private async Task<Room> AnalyzedRoomAsync(AnalysisScope scope)
     {
         var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", StorageKeys.RoomPhoto(id), 600, 400, Now, scope);
-        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), "image/jpeg");
+        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now, scope);
+        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
 

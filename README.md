@@ -44,6 +44,12 @@ tests/
   DesignApp.IntegrationTests The real API, worker and SignalR against Postgres and RustFS containers
 ```
 
+Fixed values (limits, durations, setting keys, routes, cookie and header names, table names and
+the messages people see) live in each project's `Constants` class at its root, in nested groups
+such as `Constants.Photos` or `Constants.Messages`. Add a new value there first and reference it;
+don't write it inline. Texts with values are small methods, such as `Constants.Messages.UnknownObject(index)`.
+Exceptions: developer-only exception texts, logger templates and math constants stay where they are used.
+
 ## Running locally
 
 Requirements: .NET 10 SDK and Docker Desktop (running).

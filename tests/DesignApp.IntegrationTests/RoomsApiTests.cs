@@ -23,7 +23,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.NotNull(room);
         Assert.Equal("Uploaded", room.Status);
         Assert.Equal((1200, 800), (room.Width, room.Height));
-        Assert.Equal($"/api/rooms/{room.Id}/photo", room.PhotoUrl);
+        Assert.Equal(DesignApp.Api.Constants.Routes.RoomPhotoUrl(room.Id), room.PhotoUrl);
         Assert.Empty(room.Objects);
         Assert.Equal($"/api/rooms/{room.Id}", response.Headers.Location?.OriginalString);
     }
@@ -31,7 +31,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task An_uploaded_room_and_its_photo_can_be_read_back()
     {
-        using var upload = await UploadAsync(TestImages.Create(6000, 3000, SKEncodedImageFormat.Png), "big.png", "image/png");
+        using var upload = await UploadAsync(TestImages.Create(6000, 3000, SKEncodedImageFormat.Png), "big.png", DesignApp.Application.Constants.ContentTypes.Png);
         var created = await upload.Content.ReadFromJsonAsync<RoomDto>();
 
         var room = await _client.GetFromJsonAsync<RoomDto>($"/api/rooms/{created!.Id}");
@@ -40,7 +40,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         using var photo = await _client.GetAsync(room.PhotoUrl);
         Assert.Equal(HttpStatusCode.OK, photo.StatusCode);
-        Assert.Equal("image/jpeg", photo.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, photo.Content.Headers.ContentType?.MediaType);
         Assert.True(photo.Headers.CacheControl?.Private);
         Assert.Contains("Origin", photo.Headers.Vary);
         using var decoded = TestImages.Decode(await photo.Content.ReadAsByteArrayAsync());
@@ -50,13 +50,13 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Uploading_something_that_is_not_a_photo_returns_a_readable_error()
     {
-        using var response = await UploadAsync("hello"u8.ToArray(), "notes.jpg", "image/jpeg");
+        using var response = await UploadAsync("hello"u8.ToArray(), "notes.jpg", DesignApp.Application.Constants.ContentTypes.Jpeg);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         var problem = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("Invalid photo", problem.GetProperty("title").GetString());
-        Assert.Contains("JPEG, PNG or WebP", problem.GetProperty("detail").GetString(), StringComparison.Ordinal);
+        Assert.Equal(DesignApp.Api.Constants.Titles.InvalidPhoto, problem.GetProperty("title").GetString());
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, problem.GetProperty("detail").GetString());
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     /// <param name="file">The file's bytes.</param>
     /// <param name="fileName">The file name sent in the form.</param>
     /// <param name="contentType">The MIME type sent in the form.</param>
-    private async Task<HttpResponseMessage> UploadAsync(byte[] file, string fileName = "room.jpg", string contentType = "image/jpeg")
+    private async Task<HttpResponseMessage> UploadAsync(byte[] file, string fileName = "room.jpg", string contentType = DesignApp.Application.Constants.ContentTypes.Jpeg)
     {
         using var content = new ByteArrayContent(file);
         content.Headers.ContentType = new MediaTypeHeaderValue(contentType);

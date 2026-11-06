@@ -25,8 +25,8 @@ public class DeleteUnsavedRoomsTests
         Assert.Equal(new[] { recent.Id, saved.Id }.Order(), rooms.Saved.Select(r => r.Id).Order());
         // The photo and all three label map versions of the old upload are gone; the others keep theirs.
         Assert.DoesNotContain(storage.Files.Keys, key => key.Contains(old.Id.ToString()));
-        Assert.Contains(StorageKeys.RoomPhoto(recent.Id), storage.Files.Keys);
-        Assert.Contains(StorageKeys.RoomPhoto(saved.Id), storage.Files.Keys);
+        Assert.Contains(DesignApp.Application.Constants.Rooms.PhotoKey(recent.Id), storage.Files.Keys);
+        Assert.Contains(DesignApp.Application.Constants.Rooms.PhotoKey(saved.Id), storage.Files.Keys);
     }
 
     [Fact]
@@ -48,18 +48,18 @@ public class DeleteUnsavedRoomsTests
     private static async Task<Room> AddAsync(FakeRooms rooms, FakeStorage storage, DateTimeOffset uploaded, int outlineFixes = 0)
     {
         var id = Guid.CreateVersion7(uploaded);
-        var room = Room.Upload(id, "user-1", StorageKeys.RoomPhoto(id), 800, 600, uploaded);
+        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 800, 600, uploaded);
         room.StartAnalysis();
         room.StartSegmentation();
         room.MarkReady([new DetectedObject(1, "wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 1), DesignApp.Domain.Common.HexColor.Parse("#FFFFFF"))],
-            StorageKeys.RoomLabelMap(id));
+            DesignApp.Application.Constants.Rooms.LabelMapKey(id));
         for (var i = 0; i < outlineFixes; i++)
-            room.AddLabelMapRevision(revision => StorageKeys.RoomLabelMap(id, revision));
+            room.AddLabelMapRevision(revision => DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision));
         rooms.Add(room);
         await rooms.SaveChangesAsync(CancellationToken.None);
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
-            await storage.SaveAsync(StorageKeys.RoomLabelMap(id, revision), new MemoryStream([1]), "image/png", CancellationToken.None);
-        await storage.SaveAsync(room.PhotoKey, new MemoryStream([1]), "image/jpeg", CancellationToken.None);
+            await storage.SaveAsync(DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision), new MemoryStream([1]), DesignApp.Application.Constants.ContentTypes.Png, CancellationToken.None);
+        await storage.SaveAsync(room.PhotoKey, new MemoryStream([1]), DesignApp.Application.Constants.ContentTypes.Jpeg, CancellationToken.None);
         return room;
     }
 }

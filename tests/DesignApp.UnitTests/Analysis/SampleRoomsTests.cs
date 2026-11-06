@@ -28,7 +28,7 @@ public class SampleRoomsTests
     {
         var sample = SampleRooms.All.Single(s => s.Name == name);
 
-        Assert.InRange(sample.Objects.Count, 10, AnalysisRules.MaxObjects);
+        Assert.InRange(sample.Objects.Count, 10, DesignApp.Application.Constants.Analysis.MaxObjects);
         Assert.Equal(sample.Objects.Count, sample.Objects.Select(o => o.Label).Distinct().Count());
         Assert.All(sample.Objects, o => Assert.NotEmpty(o.Shapes));
         Assert.Equal(256, sample.FingerprintBytes.Length);
@@ -142,7 +142,7 @@ public class SampleRoomsTests
         var pairs = SampleRooms.All.SelectMany(a => SampleRooms.All.Where(b => string.CompareOrdinal(a.Name, b.Name) < 0), (a, b) => (a, b));
 
         Assert.All(pairs, p => Assert.True(
-            SampleRooms.Difference(p.a.FingerprintBytes, p.b.FingerprintBytes) > SampleRooms.MaxDifference * 2,
+            SampleRooms.Difference(p.a.FingerprintBytes, p.b.FingerprintBytes) > DesignApp.Infrastructure.Constants.Samples.MaxDifference * 2,
             $"{p.a.Name} and {p.b.Name} look too alike to tell apart."));
     }
 

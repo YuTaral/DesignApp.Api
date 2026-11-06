@@ -19,16 +19,16 @@ internal sealed class DesignConfiguration : IEntityTypeConfiguration<Design>
     {
         builder.HasKey(d => d.Id);
         builder.Property(d => d.Id).ValueGeneratedNever();
-        builder.Property(d => d.OwnerId).HasMaxLength(128);
-        builder.Property(d => d.Name).HasMaxLength(Design.MaxNameLength);
-        builder.Property(d => d.Description).HasMaxLength(Design.MaxDescriptionLength);
-        builder.Property<uint>("Version").IsRowVersion();
+        builder.Property(d => d.OwnerId).HasMaxLength(Constants.Persistence.OwnerIdLength);
+        builder.Property(d => d.Name).HasMaxLength(Domain.Constants.Designs.MaxNameLength);
+        builder.Property(d => d.Description).HasMaxLength(Domain.Constants.Designs.MaxDescriptionLength);
+        builder.Property<uint>(Constants.Persistence.Version).IsRowVersion();
         builder.HasIndex(d => new { d.OwnerId, d.UpdatedAt });
 
         // A design's rooms are part of it: loaded, saved and deleted with it.
         builder.OwnsMany(d => d.Rooms, rooms =>
         {
-            rooms.ToTable("design_rooms");
+            rooms.ToTable(Constants.Persistence.Tables.DesignRooms);
             rooms.WithOwner().HasForeignKey("DesignId");
             rooms.HasKey("DesignId", nameof(DesignRoom.RoomId));
             // A room is in at most one design, and deleting a room takes it out of its design.
@@ -38,7 +38,7 @@ internal sealed class DesignConfiguration : IEntityTypeConfiguration<Design>
             rooms.Property(r => r.Edits)
                 .HasField("_edits")
                 .UsePropertyAccessMode(PropertyAccessMode.Field)
-                .HasColumnType("jsonb")
+                .HasColumnType(Constants.Persistence.Json)
                 .HasConversion(EditsJson.Converter, EditsJson.Comparer);
         });
         builder.Navigation(d => d.Rooms).HasField("_rooms").UsePropertyAccessMode(PropertyAccessMode.Field);
@@ -82,7 +82,7 @@ internal static class EditsJson
         /// <param name="edit">The edit.</param>
         public static StoredEdit From(EditOperation edit) => edit switch
         {
-            RecolorEdit r => new("recolor", r.ObjectIndex, r.Color.Value, r.Strength),
+            RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength),
             _ => throw new NotSupportedException($"Edits of type {edit.GetType().Name} can't be stored yet."),
         };
 
@@ -90,7 +90,7 @@ internal static class EditsJson
 #pragma warning disable CA1859 // more kinds of edits will come; callers only need EditOperation
         public EditOperation ToDomain() => Type switch
         {
-            "recolor" => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength),
+            Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength),
             _ => throw new NotSupportedException($"Unknown stored edit type '{Type}'."),
         };
 #pragma warning restore CA1859

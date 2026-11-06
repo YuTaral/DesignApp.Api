@@ -15,18 +15,6 @@ namespace DesignApp.Infrastructure.Ai.Fakes;
 /// </summary>
 internal static class SampleRooms
 {
-    /// <summary>Fingerprints are the mean brightness of a <c>Grid</c> x <c>Grid</c> grid of cells.</summary>
-    private const int Grid = 16;
-
-    /// <summary>
-    /// The largest mean brightness difference per cell (0-255) still counted as the same photo.
-    /// Re-encoding and scaling change a photo by 1-3; different rooms differ by far more.
-    /// </summary>
-    internal const double MaxDifference = 10;
-
-    /// <summary>The largest relative difference in aspect ratio still counted as the same photo.</summary>
-    private const double MaxAspectDifference = 0.02;
-
     private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter() },
@@ -41,14 +29,14 @@ internal static class SampleRooms
     internal static SampleRoom? Match(AnalysisImage image)
     {
         var aspect = image.Width / (double)image.Height;
-        var candidates = All.Where(s => Math.Abs(s.Width / (double)s.Height / aspect - 1) <= MaxAspectDifference).ToList();
+        var candidates = All.Where(s => Math.Abs(s.Width / (double)s.Height / aspect - 1) <= Constants.Samples.MaxAspectDifference).ToList();
         if (candidates.Count == 0)
             return null;
 
         var fingerprint = Fingerprint(image.Jpeg);
         return candidates
             .Select(s => (Sample: s, Difference: Difference(fingerprint, s.FingerprintBytes)))
-            .Where(c => c.Difference <= MaxDifference)
+            .Where(c => c.Difference <= Constants.Samples.MaxDifference)
             .OrderBy(c => c.Difference)
             .Select(c => c.Sample)
             .FirstOrDefault();
@@ -67,12 +55,12 @@ internal static class SampleRooms
         var pixels = bitmap.GetPixelSpan();
         var (w, h) = (info.Width, info.Height);
 
-        var cells = new byte[Grid * Grid];
-        for (var cy = 0; cy < Grid; cy++)
+        var cells = new byte[Constants.Samples.Grid * Constants.Samples.Grid];
+        for (var cy = 0; cy < Constants.Samples.Grid; cy++)
         {
-            for (var cx = 0; cx < Grid; cx++)
+            for (var cx = 0; cx < Constants.Samples.Grid; cx++)
             {
-                var (x0, x1, y0, y1) = (cx * w / Grid, (cx + 1) * w / Grid, cy * h / Grid, (cy + 1) * h / Grid);
+                var (x0, x1, y0, y1) = (cx * w / Constants.Samples.Grid, (cx + 1) * w / Constants.Samples.Grid, cy * h / Constants.Samples.Grid, (cy + 1) * h / Constants.Samples.Grid);
                 var total = 0.0;
                 for (var y = y0; y < y1; y++)
                 {
@@ -84,7 +72,7 @@ internal static class SampleRooms
                         total += 0.299 * Over(pixels[p]) + 0.587 * Over(pixels[p + 1]) + 0.114 * Over(pixels[p + 2]);
                     }
                 }
-                cells[cy * Grid + cx] = (byte)Math.Round(total / ((x1 - x0) * (y1 - y0)));
+                cells[cy * Constants.Samples.Grid + cx] = (byte)Math.Round(total / ((x1 - x0) * (y1 - y0)));
             }
         }
         return cells;
@@ -103,13 +91,13 @@ internal static class SampleRooms
     {
         var assembly = typeof(SampleRooms).Assembly;
         return [.. assembly.GetManifestResourceNames()
-            .Where(n => n.Contains(".Ai.Fakes.Samples.", StringComparison.Ordinal) && n.EndsWith(".json", StringComparison.Ordinal))
+            .Where(n => n.Contains(Constants.Samples.ResourceFolder, StringComparison.Ordinal) && n.EndsWith(Constants.Samples.Extension, StringComparison.Ordinal))
             .Select(n =>
             {
                 using var stream = assembly.GetManifestResourceStream(n)!;
                 var sample = JsonSerializer.Deserialize<SampleRoom>(stream, Options)
                     ?? throw new InvalidDataException($"Sample {n} is empty.");
-                return (Sample: sample, Recorded: n.EndsWith(".sam3.json", StringComparison.Ordinal));
+                return (Sample: sample, Recorded: n.EndsWith(Constants.Samples.RecordedSuffix, StringComparison.Ordinal));
             })
             .GroupBy(s => s.Sample.Name)
             .Select(g => g.OrderByDescending(s => s.Recorded).First().Sample)
@@ -144,7 +132,7 @@ internal sealed record SampleRoom(string Name, int Width, int Height, string Fin
 
     /// <summary>The objects as the inventory step reports them, with boxes from their outlines.</summary>
     public IReadOnlyList<InventoryItem> Inventory() =>
-        [.. Objects.Select(o => new InventoryItem(o.Label, o.Category, o.Box(Width, Height), HexColor.Parse("#808080")))];
+        [.. Objects.Select(o => new InventoryItem(o.Label, o.Category, o.Box(Width, Height), HexColor.Parse(Domain.Constants.Colors.Fallback)))];
 
     /// <summary>Draws one object's outline at the analysis image's size.</summary>
     /// <param name="label">The object's label.</param>
@@ -265,7 +253,7 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
         {
             for (var x = 0; x < mask.Width; x++)
             {
-                if (bitmap.GetPixel(x, y).Red < 128)
+                if (bitmap.GetPixel(x, y).Red < Constants.Imaging.CoverageThreshold)
                     continue;
                 (minX, minY, maxX, maxY) = (Math.Min(minX, x), Math.Min(minY, y), Math.Max(maxX, x), Math.Max(maxY, y));
             }

@@ -4,22 +4,6 @@ using DesignApp.Domain.Rooms;
 
 namespace DesignApp.Application.Analysis;
 
-/// <summary>Limits for the AI analysis of a room photo.</summary>
-public static class AnalysisRules
-{
-    /// <summary>
-    /// The AI works on a copy of the photo scaled to this long edge. More pixels cost more and are
-    /// slower to send without finding objects any better; the label map is made at this size too.
-    /// </summary>
-    public const int MaxLongEdge = 2048;
-
-    /// <summary>At most this many objects are kept per room, so the editor's object list stays usable.</summary>
-    public const int MaxObjects = 40;
-
-    /// <summary>Objects covering less of the photo than this (after overlaps) are dropped as noise.</summary>
-    public const double MinAreaFraction = 0.002;
-}
-
 /// <summary>The copy of a room photo that the AI providers see.</summary>
 /// <param name="Jpeg">The image as JPEG bytes.</param>
 /// <param name="Width">Width in pixels.</param>
@@ -116,7 +100,7 @@ public interface IRoomImaging
 {
     /// <summary>Makes the copy of a stored photo that the AI providers see.</summary>
     /// <param name="photo">The stored room photo (JPEG).</param>
-    /// <returns>The photo scaled to at most <see cref="AnalysisRules.MaxLongEdge"/>.</returns>
+    /// <returns>The photo scaled to at most <see cref="Constants.Analysis.MaxLongEdge"/>.</returns>
     AnalysisImage PrepareForAnalysis(Stream photo);
 
     /// <summary>
@@ -143,19 +127,6 @@ public enum OutlineBrushMode
     Paint,
     /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
     Erase,
-}
-
-/// <summary>Limits for brush strokes.</summary>
-public static class OutlineStrokeRules
-{
-    /// <summary>The most points one stroke may have.</summary>
-    public const int MaxPoints = 10_000;
-
-    /// <summary>The smallest brush radius, in label map pixels.</summary>
-    public const double MinRadius = 0.5;
-
-    /// <summary>The largest brush radius, in label map pixels.</summary>
-    public const double MaxRadius = 400;
 }
 
 /// <summary>A point of a stroke.</summary>

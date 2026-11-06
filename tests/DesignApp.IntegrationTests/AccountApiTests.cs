@@ -74,13 +74,13 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         (await browser.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })).EnsureSuccessStatusCode();
 
         using var again = factory.CreateClient();
-        Assert.Equal("An account with this email already exists. Sign in instead.",
+        Assert.Equal(DesignApp.Api.Constants.Messages.EmailTaken,
             await ProblemAsync(await again.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })));
-        Assert.Equal("Use a password of at least 8 characters.",
+        Assert.Equal(DesignApp.Api.Constants.Messages.PasswordTooShort,
             await ProblemAsync(await again.PostAsJsonAsync("/api/account/sign-up", new { email = NewEmail(), password = "short" })));
-        Assert.Equal("Enter a valid email address.",
+        Assert.Equal(DesignApp.Api.Constants.Messages.InvalidEmail,
             await ProblemAsync(await again.PostAsJsonAsync("/api/account/sign-up", new { email = "not an email", password = Password })));
-        Assert.Equal("Enter your email.",
+        Assert.Equal(DesignApp.Api.Constants.Messages.EnterEmail,
             await ProblemAsync(await again.PostAsJsonAsync("/api/account/sign-up", new { email = " ", password = Password })));
     }
 
@@ -92,11 +92,11 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         (await owner.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })).EnsureSuccessStatusCode();
 
         using var stranger = factory.CreateClient();
-        Assert.Equal("Wrong email or password.",
+        Assert.Equal(DesignApp.Api.Constants.Messages.WrongCredentials,
             await ProblemAsync(await stranger.PostAsJsonAsync("/api/account/sign-in", new { email = NewEmail(), password = Password })));
         for (var attempt = 1; attempt < 5; attempt++)
         {
-            Assert.Equal("Wrong email or password.",
+            Assert.Equal(DesignApp.Api.Constants.Messages.WrongCredentials,
                 await ProblemAsync(await stranger.PostAsJsonAsync("/api/account/sign-in", new { email, password = "guess number " + attempt })));
         }
 
@@ -115,7 +115,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<Guid> UploadAsync(HttpClient browser)
     {
         using var content = new ByteArrayContent(TestImages.Create(800, 600));
-        content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
         using var response = await browser.PostAsync("/api/rooms", form);
         response.EnsureSuccessStatusCode();

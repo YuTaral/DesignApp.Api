@@ -1,0 +1,142 @@
+namespace DesignApp.Application;
+
+/// <summary>
+/// Every fixed value of the use cases in one place: the limits of photos, the analysis and brush
+/// strokes, how long unsaved uploads are kept, storage keys, and the messages shown to users.
+/// </summary>
+public static class Constants
+{
+    /// <summary>Limits for the AI analysis of a room photo.</summary>
+    public static class Analysis
+    {
+        /// <summary>
+        /// The AI works on a copy of the photo scaled to this long edge. More pixels cost more and are
+        /// slower to send without finding objects any better; the label map is made at this size too.
+        /// </summary>
+        public const int MaxLongEdge = 2048;
+
+        /// <summary>At most this many objects are kept per room, so the editor's object list stays usable.</summary>
+        public const int MaxObjects = 40;
+
+        /// <summary>Objects covering less of the photo than this (after overlaps) are dropped as noise.</summary>
+        public const double MinAreaFraction = 0.002;
+    }
+
+    /// <summary>Limits for brush strokes on an outline.</summary>
+    public static class Strokes
+    {
+        /// <summary>The most points one stroke may have.</summary>
+        public const int MaxPoints = 10_000;
+
+        /// <summary>The smallest brush radius, in label map pixels.</summary>
+        public const double MinRadius = 0.5;
+
+        /// <summary>The largest brush radius, in label map pixels.</summary>
+        public const double MaxRadius = 400;
+
+        /// <summary>How far left of or above the photo a point may lie, as a fraction of its size.</summary>
+        public const double MinPoint = -1;
+
+        /// <summary>How far right of or below the photo a point may lie, as a fraction of its size.</summary>
+        public const double MaxPoint = 2;
+    }
+
+    /// <summary>Limits that every uploaded photo must meet, and how it is stored.</summary>
+    public static class Photos
+    {
+        /// <summary>One mebibyte, for limits given in MB.</summary>
+        public const long Megabyte = 1024 * 1024;
+
+        /// <summary>The largest upload in MB. Matches the frontend's limit; large enough for any phone photo.</summary>
+        public const int MaxUploadMegabytes = 15;
+
+        /// <summary>The largest upload in bytes.</summary>
+        public const long MaxUploadBytes = MaxUploadMegabytes * Megabyte;
+
+        /// <summary>Below this the AI cannot find objects reliably.</summary>
+        public const int MinShortEdge = 256;
+
+        /// <summary>Larger photos are scaled down: more pixels cost more to analyze without improving results.</summary>
+        public const int MaxLongEdge = 4096;
+
+        /// <summary>The most megapixels an upload may have; refused before decoding, so a small file can't exhaust memory.</summary>
+        public const int MaxSourceMegapixels = 100;
+
+        /// <summary>The most pixels an upload may have.</summary>
+        public const long MaxSourcePixels = MaxSourceMegapixels * 1_000_000L;
+
+        /// <summary>JPEG quality (0-100) for stored photos: visually lossless at a reasonable size.</summary>
+        public const int JpegQuality = 90;
+    }
+
+    /// <summary>MIME types of the files the app stores and serves.</summary>
+    public static class ContentTypes
+    {
+        /// <summary>Photos: processed photos are always JPEG.</summary>
+        public const string Jpeg = "image/jpeg";
+
+        /// <summary>Label maps.</summary>
+        public const string Png = "image/png";
+    }
+
+    /// <summary>How rooms are stored and kept.</summary>
+    public static class Rooms
+    {
+        /// <summary>How long an upload is kept without being saved to a design: long enough to edit it, reload, or sign in.</summary>
+        public static readonly TimeSpan UnsavedLifetime = TimeSpan.FromHours(24);
+
+        /// <summary>How many expired rooms one cleanup pass deletes, so a big backlog is cleared in steps.</summary>
+        public const int CleanupBatchSize = 100;
+
+        /// <summary>Storage key of a room's photo. One folder per room keeps its files together.</summary>
+        /// <param name="roomId">The room's id.</param>
+        public static string PhotoKey(Guid roomId) => $"rooms/{roomId}/photo.jpg";
+
+        /// <summary>Storage key of a room's label map, as the analysis made it or after outline fixes.</summary>
+        /// <param name="roomId">The room's id.</param>
+        /// <param name="revision">The label map version: 0 from the analysis, then one per fix.</param>
+        public static string LabelMapKey(Guid roomId, int revision = 0) =>
+            revision == 0 ? $"rooms/{roomId}/labels.png" : $"rooms/{roomId}/labels-{revision}.png";
+    }
+
+    /// <summary>Owner ids of visitors who haven't signed in.</summary>
+    public static class Guests
+    {
+        /// <summary>Starts every guest id, keeping them apart from account ids.</summary>
+        public const string Prefix = "guest:";
+
+        /// <summary>How a guest's UUID is written: 32 hex digits, no dashes.</summary>
+        public const string TokenFormat = "N";
+    }
+
+    /// <summary>The messages the use cases show to users.</summary>
+    public static class Messages
+    {
+        /// <summary>The analysis failed unexpectedly. The details are only logged.</summary>
+        public const string UnexpectedFailure = "We couldn't analyze this photo. Try uploading it again in a moment.";
+
+        /// <summary>The analysis found no objects worth restyling.</summary>
+        public const string NothingFound = "We couldn't find any objects to restyle in this photo. Try a wider shot of the room.";
+
+        /// <summary>The editor is on an outline version that is no longer current (another tab changed it).</summary>
+        public const string UnknownRevision = "This room has changed since you opened it. Reload the page and try again.";
+
+        /// <summary>A stroke on a room that isn't analyzed yet.</summary>
+        public const string OutlinesNotReady = "The outlines can be fixed once the analysis is ready.";
+
+        /// <summary>A stroke for an object the room doesn't have.</summary>
+        public const string UnknownStrokeObject = "That object isn't in this room.";
+
+        /// <summary>A stroke with too few or too many points.</summary>
+        public static readonly string StrokePoints = $"A stroke needs between 1 and {Strokes.MaxPoints} points.";
+
+        /// <summary>A brush that is too small or too large.</summary>
+        public static readonly string BrushRadius = $"The brush radius must be between {Strokes.MinRadius} and {Strokes.MaxRadius} pixels.";
+
+        /// <summary>A stroke far outside the photo.</summary>
+        public const string StrokeOutside = "The stroke has points far outside the photo.";
+
+        /// <summary>A room that is in a design already (a room belongs to one design).</summary>
+        public const string RoomInADesign = "This room is already in a design.";
+    }
+}

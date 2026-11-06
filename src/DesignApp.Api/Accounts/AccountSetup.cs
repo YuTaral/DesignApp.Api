@@ -8,12 +8,6 @@ namespace DesignApp.Api.Accounts;
 /// <summary>Wires up accounts: ASP.NET Core Identity with email and password, kept in a cookie.</summary>
 internal static class AccountSetup
 {
-    /// <summary>The shortest password accepted. Length matters most; no other rules.</summary>
-    public const int MinPasswordLength = 8;
-
-    /// <summary>The sign-in cookie's name.</summary>
-    public const string SessionCookie = "designapp.session";
-
     /// <summary>Adds Identity, the sign-in cookie and <see cref="ICurrentUser"/>.</summary>
     /// <param name="services">The app's services.</param>
     /// <returns>The same services, for chaining.</returns>
@@ -24,27 +18,27 @@ internal static class AccountSetup
         services.AddIdentityCore<AppUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-                options.Password.RequiredLength = MinPasswordLength;
+                options.Password.RequiredLength = Constants.Accounts.MinPasswordLength;
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 1;
                 options.Lockout.AllowedForNewUsers = true;
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = Constants.Accounts.MaxFailedAttempts;
+                options.Lockout.DefaultLockoutTimeSpan = Constants.Accounts.LockoutTime;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddSignInManager();
 
         services.ConfigureApplicationCookie(options =>
         {
-            options.Cookie.Name = SessionCookie;
+            options.Cookie.Name = Constants.Cookies.Session;
             options.Cookie.HttpOnly = true;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             // Lax: other sites can't send it with a POST, so they can't act as the user.
             options.Cookie.SameSite = SameSiteMode.Lax;
-            options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            options.ExpireTimeSpan = Constants.Cookies.SessionLifetime;
             options.SlidingExpiration = true;
             // An API answers with a status, not a redirect to a sign-in page.
             options.Events.OnRedirectToLogin = context =>

@@ -15,11 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // The API needs the database and storage that the AppHost starts. Fail with directions rather
 // than a connection-string error when someone starts this project on its own.
-if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString(DesignApp.Infrastructure.DependencyInjection.DatabaseName)))
+if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString(DesignApp.Infrastructure.Constants.Config.DatabaseName)))
 {
-    throw new InvalidOperationException(
-        "DesignApp.Api can't run on its own: it needs the database and storage that DesignApp.AppHost starts. " +
-        "Run DesignApp.AppHost instead (in Visual Studio: right-click DesignApp.AppHost > Set as Startup Project, then F5).");
+    throw new InvalidOperationException(DesignApp.Api.Constants.Messages.NeedsAppHost);
 }
 
 builder.AddServiceDefaults();
@@ -38,16 +36,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddDesignAppRateLimits(builder.Configuration);
 
 // Room for the photo plus the multipart framing; the endpoint enforces the exact photo limit.
-builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = PhotoRules.MaxUploadBytes + 1024 * 1024);
+builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = DesignApp.Application.Constants.Photos.MaxUploadBytes + DesignApp.Api.Constants.Http.UploadFramingBytes);
 
-const string WebCorsPolicy = "web";
-var webOrigins = builder.Configuration.GetSection("Cors:WebOrigins").Get<string[]>() ?? [];
-builder.Services.AddCors(options => options.AddPolicy(WebCorsPolicy, policy => policy
+var webOrigins = builder.Configuration.GetSection(DesignApp.Api.Constants.Http.WebOriginsKey).Get<string[]>() ?? [];
+builder.Services.AddCors(options => options.AddPolicy(DesignApp.Api.Constants.Http.WebCorsPolicy, policy => policy
     .WithOrigins(webOrigins)
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()
-    .WithExposedHeaders("Location")));
+    .WithExposedHeaders(DesignApp.Api.Constants.Http.Location)));
 
 var app = builder.Build();
 
@@ -59,11 +56,11 @@ app.UseStatusCodePages();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(options => options.WithTitle("DesignApp API"));
+    app.MapScalarApiReference(options => options.WithTitle(DesignApp.Api.Constants.OpenApi.Title));
 }
 
 app.UseHttpsRedirection();
-app.UseCors(WebCorsPolicy);
+app.UseCors(DesignApp.Api.Constants.Http.WebCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
@@ -71,16 +68,16 @@ app.UseRateLimiter();
 app.MapDefaultEndpoints();
 
 // A request the browser abandoned ends quietly instead of as an error (see ClientDisconnectedFilter).
-var api = app.MapGroup("/api").AddEndpointFilter<ClientDisconnectedFilter>();
+var api = app.MapGroup(DesignApp.Api.Constants.Routes.Api).AddEndpointFilter<ClientDisconnectedFilter>();
 
-api.MapGet("/status", (IHostEnvironment env) => new ApiStatus("DesignApp API", env.EnvironmentName))
+api.MapGet(DesignApp.Api.Constants.Routes.Status, (IHostEnvironment env) => new ApiStatus(DesignApp.Api.Constants.OpenApi.Title, env.EnvironmentName))
     .WithName("GetStatus")
     .WithSummary("Reports that the API is up and which environment it runs in.");
 
 api.MapAccountEndpoints();
 api.MapDesignEndpoints();
 api.MapRoomEndpoints();
-app.MapHub<RoomHub>(RoomHub.Path);
+app.MapHub<RoomHub>(DesignApp.Api.Constants.Hub.Path);
 
 app.Run();
 

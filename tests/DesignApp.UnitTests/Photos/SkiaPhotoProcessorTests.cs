@@ -49,7 +49,7 @@ public class SkiaPhotoProcessorTests
     {
         var photo = Process(TestImages.Create(6000, 3000));
 
-        Assert.Equal((PhotoRules.MaxLongEdge, PhotoRules.MaxLongEdge / 2), (photo.Width, photo.Height));
+        Assert.Equal((DesignApp.Application.Constants.Photos.MaxLongEdge, DesignApp.Application.Constants.Photos.MaxLongEdge / 2), (photo.Width, photo.Height));
     }
 
     [Fact]
@@ -87,19 +87,19 @@ public class SkiaPhotoProcessorTests
 
     [Fact]
     public void Gif_files_are_rejected() =>
-        Assert.Contains("JPEG, PNG or WebP", Reject(TestImages.Gif()), StringComparison.Ordinal);
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(TestImages.Gif()));
 
     [Fact]
     public void Bmp_files_are_rejected() =>
-        Assert.Contains("JPEG, PNG or WebP", Reject(TestImages.Bmp(400, 300)), StringComparison.Ordinal);
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(TestImages.Bmp(400, 300)));
 
     [Fact]
     public void Files_that_are_not_images_are_rejected() =>
-        Assert.Contains("JPEG, PNG or WebP", Reject(Encoding.UTF8.GetBytes("definitely not a photo")), StringComparison.Ordinal);
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(Encoding.UTF8.GetBytes("definitely not a photo")));
 
     [Fact]
     public void Empty_files_are_rejected() =>
-        Assert.Equal("The file is empty.", Reject([]));
+        Assert.Equal(DesignApp.Infrastructure.Constants.Messages.EmptyFile, Reject([]));
 
     [Fact]
     public void Truncated_photos_are_rejected()

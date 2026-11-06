@@ -25,23 +25,20 @@ namespace DesignApp.Infrastructure;
 /// <summary>Registers the Infrastructure layer: database, photo storage and photo processing.</summary>
 public static class DependencyInjection
 {
-    /// <summary>Name of the Postgres database resource in the AppHost (and its connection string).</summary>
-    public const string DatabaseName = "designapp";
-
     /// <summary>Adds Postgres (EF Core), S3-compatible storage, SkiaSharp imaging and the AI pipeline.</summary>
     /// <param name="builder">The host builder; reads the <c>designapp</c> connection string and the <c>Storage</c> and <c>Ai</c> sections.</param>
     /// <returns>The same builder, for chaining.</returns>
     public static IHostApplicationBuilder AddInfrastructure(this IHostApplicationBuilder builder)
     {
         // Aspire's integration adds connection retries, health checks and OpenTelemetry tracing.
-        builder.AddNpgsqlDbContext<AppDbContext>(DatabaseName,
+        builder.AddNpgsqlDbContext<AppDbContext>(Constants.Config.DatabaseName,
             configureDbContextOptions: options => options.UseSnakeCaseNamingConvention());
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IDesignRepository, DesignRepository>();
 
         builder.Services.AddOptions<StorageOptions>()
-            .Bind(builder.Configuration.GetSection(StorageOptions.Section))
-            .Validate(o => o.AccessKey.Length > 0 && o.SecretKey.Length > 0, "Storage:AccessKey and Storage:SecretKey are required.")
+            .Bind(builder.Configuration.GetSection(Constants.Config.StorageSection))
+            .Validate(o => o.AccessKey.Length > 0 && o.SecretKey.Length > 0, Constants.Config.StorageKeysRequired)
             .ValidateOnStart();
         builder.Services.AddSingleton<IAmazonS3>(sp => CreateS3Client(sp.GetRequiredService<IOptions<StorageOptions>>().Value));
         builder.Services.AddSingleton<S3FileStorage>();
@@ -63,9 +60,9 @@ public static class DependencyInjection
     private static void AddAiPipeline(IHostApplicationBuilder builder)
     {
         builder.Services.AddOptions<AiOptions>()
-            .Bind(builder.Configuration.GetSection(AiOptions.Section))
+            .Bind(builder.Configuration.GetSection(Constants.Config.AiSection))
             .Validate(o => o.UseFakes || (o.AnthropicApiKey.Length > 0 && o.FalKey.Length > 0),
-                "Ai:AnthropicApiKey and Ai:FalKey are required unless Ai:UseFakes is true.")
+                Constants.Config.AiKeysRequired)
             .ValidateOnStart();
 
         builder.Services.AddSingleton<AnalysisScheduler>();
@@ -77,7 +74,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<FakeSegmentationProvider>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
 
-        var configured = builder.Configuration.GetSection(AiOptions.Section).Get<AiOptions>() ?? new AiOptions();
+        var configured = builder.Configuration.GetSection(Constants.Config.AiSection).Get<AiOptions>() ?? new AiOptions();
         if (!configured.HasRealKeys)
             return;
 
@@ -89,25 +86,25 @@ public static class DependencyInjection
                 ? client
                 : client.WithOptions(options => options with
                 {
-                    ExtraHeaders = new Dictionary<string, string> { ["anthropic-workspace-id"] = ai.AnthropicWorkspaceId.Trim() },
+                    ExtraHeaders = new Dictionary<string, string> { [Constants.Ai.WorkspaceHeader] = ai.AnthropicWorkspaceId.Trim() },
                 });
         });
-        builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(AiProviders.RealKey);
+        builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(Constants.Ai.RealKey);
 
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
         builder.Services.AddHttpClient<FalSegmentationProvider>((sp, http) =>
-                http.DefaultRequestHeaders.Authorization = new("Key", sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
+                http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
             // SAM 3 on a large photo can take well over the default 10 s per attempt, so replace the
             // shared resilience handler from ServiceDefaults.
             .RemoveAllResilienceHandlers()
             .AddStandardResilienceHandler(resilience =>
             {
-                resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
-                resilience.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(120);
-                resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
+                resilience.AttemptTimeout.Timeout = Constants.Ai.Resilience.AttemptTimeout;
+                resilience.CircuitBreaker.SamplingDuration = Constants.Ai.Resilience.SamplingDuration;
+                resilience.TotalRequestTimeout.Timeout = Constants.Ai.Resilience.TotalTimeout;
             });
 #pragma warning restore EXTEXP0001
-        builder.Services.AddKeyedSingleton<ISegmentationProvider>(AiProviders.RealKey, (sp, _) => new RecordingSegmentationProvider(
+        builder.Services.AddKeyedSingleton<ISegmentationProvider>(Constants.Ai.RealKey, (sp, _) => new RecordingSegmentationProvider(
             sp.GetRequiredService<FalSegmentationProvider>(),
             sp.GetRequiredService<IOptions<AiOptions>>(),
             sp.GetRequiredService<ILogger<RecordingSegmentationProvider>>()));
@@ -124,7 +121,7 @@ public static class DependencyInjection
     {
         await using var scope = services.CreateAsyncScope();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        if (configuration.GetValue<bool>("Database:MigrateOnStartup"))
+        if (configuration.GetValue<bool>(Constants.Config.MigrateOnStartup))
             await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync(cancellationToken);
 
         await scope.ServiceProvider.GetRequiredService<S3FileStorage>().EnsureBucketExistsAsync(cancellationToken);

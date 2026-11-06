@@ -18,24 +18,24 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
     {
         builder.HasKey(r => r.Id);
         builder.Property(r => r.Id).ValueGeneratedNever();
-        builder.Property(r => r.OwnerId).HasMaxLength(128);
-        builder.Property(r => r.PhotoKey).HasMaxLength(300);
-        builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(r => r.FailureReason).HasMaxLength(500);
-        builder.Property(r => r.LabelMapKey).HasMaxLength(300);
-        builder.Property(r => r.Scope).HasConversion<string>().HasMaxLength(20);
-        builder.Property(r => r.AiMode).HasConversion<string>().HasMaxLength(10);
+        builder.Property(r => r.OwnerId).HasMaxLength(Constants.Persistence.OwnerIdLength);
+        builder.Property(r => r.PhotoKey).HasMaxLength(Constants.Persistence.StorageKeyLength);
+        builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(Constants.Persistence.EnumNameLength);
+        builder.Property(r => r.FailureReason).HasMaxLength(Constants.Persistence.FailureReasonLength);
+        builder.Property(r => r.LabelMapKey).HasMaxLength(Constants.Persistence.StorageKeyLength);
+        builder.Property(r => r.Scope).HasConversion<string>().HasMaxLength(Constants.Persistence.EnumNameLength);
+        builder.Property(r => r.AiMode).HasConversion<string>().HasMaxLength(Constants.Persistence.AiModeLength);
 
         // Postgres's xmin system column as an optimistic-concurrency token: if two workers ever
         // analyze the same room, the second save fails instead of silently overwriting the first.
-        builder.Property<uint>("Version").IsRowVersion();
+        builder.Property<uint>(Constants.Persistence.Version).IsRowVersion();
 
         // The detected objects are always read and written together with their room,
         // so they live in one jsonb column instead of a separate table.
         builder.Property(r => r.Objects)
             .HasField("_objects")
             .UsePropertyAccessMode(PropertyAccessMode.Field)
-            .HasColumnType("jsonb")
+            .HasColumnType(Constants.Persistence.Json)
             .HasConversion(DetectedObjectsJson.Converter, DetectedObjectsJson.Comparer);
 
         builder.HasIndex(r => new { r.OwnerId, r.CreatedAt });

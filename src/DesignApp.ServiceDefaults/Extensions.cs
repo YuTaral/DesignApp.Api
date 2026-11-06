@@ -1,3 +1,4 @@
+using DesignApp.ServiceDefaults;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,9 +17,6 @@ namespace Microsoft.Extensions.Hosting;
 /// </summary>
 public static class Extensions
 {
-    private const string HealthEndpointPath = "/health";
-    private const string AlivenessEndpointPath = "/alive";
-
     /// <summary>Adds telemetry, health checks, service discovery and HTTP resilience.</summary>
     /// <typeparam name="TBuilder">The host builder type.</typeparam>
     /// <param name="builder">The host builder.</param>
@@ -74,8 +72,8 @@ public static class Extensions
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context =>
-                            !context.Request.Path.StartsWithSegments(HealthEndpointPath)
-                            && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
+                            !context.Request.Path.StartsWithSegments(Constants.Health.ReadyPath)
+                            && !context.Request.Path.StartsWithSegments(Constants.Health.AlivePath)
                     )
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
@@ -93,7 +91,7 @@ public static class Extensions
     /// <returns>The same builder, for chaining.</returns>
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration[Constants.Health.OtlpEndpointKey]);
 
         if (useOtlpExporter)
         {
@@ -118,7 +116,7 @@ public static class Extensions
     {
         builder.Services.AddHealthChecks()
             // Add a default liveness check to ensure app is responsive
-            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+            .AddCheck(Constants.Health.SelfCheck, () => HealthCheckResult.Healthy(), [Constants.Health.LiveTag]);
 
         return builder;
     }
@@ -133,12 +131,12 @@ public static class Extensions
         if (app.Environment.IsDevelopment())
         {
             // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks(HealthEndpointPath);
+            app.MapHealthChecks(Constants.Health.ReadyPath);
 
             // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+            app.MapHealthChecks(Constants.Health.AlivePath, new HealthCheckOptions
             {
-                Predicate = r => r.Tags.Contains("live")
+                Predicate = r => r.Tags.Contains(Constants.Health.LiveTag)
             });
         }
 

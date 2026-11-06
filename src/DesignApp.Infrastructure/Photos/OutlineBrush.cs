@@ -65,12 +65,12 @@ internal static class OutlineBrush
 
         if (changed == 0)
             return Result.Failure<int>(stroke.Mode is OutlineBrushMode.Paint
-                ? $"That part is already the {stroke.ObjectLabel}."
-                : $"There's no {stroke.ObjectLabel} there to erase.");
+                ? Constants.Messages.AlreadyThere(stroke.ObjectLabel)
+                : Constants.Messages.NothingToErase(stroke.ObjectLabel));
         if (copy is not null && changed == before)
         {
             copy.CopyTo(labels, 0);
-            return Result.Failure<int>($"That would erase the whole {stroke.ObjectLabel}. Use Reset to remove its color instead.");
+            return Result.Failure<int>(Constants.Messages.WouldEraseAll(stroke.ObjectLabel));
         }
         return changed;
     }

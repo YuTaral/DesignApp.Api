@@ -30,8 +30,8 @@ public class DesignTests
         var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Draft", null, [], Now);
         Assert.Equal("", design.Description);
 
-        var error = Assert.Throws<DomainException>(() => design.Rename("Draft", new string('x', Design.MaxDescriptionLength + 1), Now));
-        Assert.Equal("The description can be at most 300 characters.", error.Message);
+        var error = Assert.Throws<DomainException>(() => design.Rename("Draft", new string('x', DesignApp.Domain.Constants.Designs.MaxDescriptionLength + 1), Now));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.DescriptionLength, error.Message);
     }
 
     [Fact]
@@ -69,10 +69,10 @@ public class DesignTests
         var room = RoomTests.ReadyRoom();
         design.AddRoom(room, Now);
 
-        Assert.Equal("This room is already in the design.", Assert.Throws<DomainException>(() => design.AddRoom(room, Now)).Message);
-        Assert.Equal("Designs can only hold your own rooms.",
+        Assert.Equal(DesignApp.Domain.Constants.Messages.RoomAlreadyInThisDesign, Assert.Throws<DomainException>(() => design.AddRoom(room, Now)).Message);
+        Assert.Equal(DesignApp.Domain.Constants.Messages.NotYourRoom,
             Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(ownerId: "user-2"), Now)).Message);
-        while (design.Rooms.Count < Design.MaxRooms)
+        while (design.Rooms.Count < DesignApp.Domain.Constants.Designs.MaxRooms)
             design.AddRoom(RoomTests.ReadyRoom(), Now);
         Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(), Now));
     }
@@ -89,7 +89,7 @@ public class DesignTests
 
         Assert.Equal([second.Id], design.Rooms.Select(r => r.RoomId));
         var error = Assert.Throws<DomainException>(() => design.RemoveRoom(second.Id, Now));
-        Assert.Equal("A design needs at least one room. Delete the design instead.", error.Message);
+        Assert.Equal(DesignApp.Domain.Constants.Messages.LastRoom, error.Message);
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class DesignTests
 
         var error = Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", null,
             [new RecolorEdit(1, Terracotta, 1), new RecolorEdit(1, HexColor.Parse("#FFFFFF"), 0.5)], Now));
-        Assert.Equal("Object 1 has more than one edit.", error.Message);
+        Assert.Equal(DesignApp.Domain.Constants.Messages.DuplicateEdit(1), error.Message);
     }
 
     [Fact]

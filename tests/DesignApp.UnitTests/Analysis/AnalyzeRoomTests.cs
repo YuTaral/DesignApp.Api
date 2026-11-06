@@ -35,8 +35,8 @@ public class AnalyzeRoomTests
     private async Task<Room> UploadedRoomAsync()
     {
         var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", StorageKeys.RoomPhoto(id), 1200, 800, Now);
-        _storage.Files[room.PhotoKey] = (TestImages.Create(1200, 800), "image/jpeg");
+        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 1200, 800, Now);
+        _storage.Files[room.PhotoKey] = (TestImages.Create(1200, 800), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
         return room;
@@ -51,8 +51,8 @@ public class AnalyzeRoomTests
 
         Assert.Equal(RoomStatus.Ready, room.Status);
         Assert.Equal([RoomStatus.Analyzing, RoomStatus.Segmenting, RoomStatus.Ready], _notifier.Sent);
-        Assert.Equal(StorageKeys.RoomLabelMap(room.Id), room.LabelMapKey);
-        Assert.Equal("image/png", _storage.Files[room.LabelMapKey!].ContentType);
+        Assert.Equal(DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id), room.LabelMapKey);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Png, _storage.Files[room.LabelMapKey!].ContentType);
         Assert.Equal(FakeInventoryProvider.Layout.Select(i => i.Label), room.Objects.Select(o => o.Label));
         Assert.Equal(Enumerable.Range(1, room.Objects.Count), room.Objects.Select(o => o.Index));
     }
@@ -79,7 +79,7 @@ public class AnalyzeRoomTests
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
 
         Assert.Equal(RoomStatus.Failed, room.Status);
-        Assert.Equal(AnalyzeRoom.UnexpectedFailure, room.FailureReason);
+        Assert.Equal(DesignApp.Application.Constants.Messages.UnexpectedFailure, room.FailureReason);
         Assert.Equal(RoomStatus.Failed, _notifier.Sent[^1]);
     }
 
@@ -92,7 +92,7 @@ public class AnalyzeRoomTests
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
 
         Assert.Equal(RoomStatus.Failed, room.Status);
-        Assert.Equal(AnalyzeRoom.NothingFound, room.FailureReason);
+        Assert.Equal(DesignApp.Application.Constants.Messages.NothingFound, room.FailureReason);
         Assert.Null(room.LabelMapKey);
     }
 
@@ -112,7 +112,7 @@ public class AnalyzeRoomTests
     public async Task A_room_that_keeps_getting_interrupted_is_failed()
     {
         var room = await UploadedRoomAsync();
-        for (var i = 0; i < Room.MaxAnalysisAttempts; i++)
+        for (var i = 0; i < DesignApp.Domain.Constants.Rooms.MaxAnalysisAttempts; i++)
         {
             room.StartAnalysis();
             room.RestartAnalysis();
@@ -121,7 +121,7 @@ public class AnalyzeRoomTests
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
 
         Assert.Equal(RoomStatus.Failed, room.Status);
-        Assert.Equal(AnalyzeRoom.UnexpectedFailure, room.FailureReason);
+        Assert.Equal(DesignApp.Application.Constants.Messages.UnexpectedFailure, room.FailureReason);
     }
 
     [Fact]
