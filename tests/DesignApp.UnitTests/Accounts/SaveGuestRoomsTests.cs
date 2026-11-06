@@ -5,7 +5,7 @@ using DesignApp.Domain.Rooms;
 namespace DesignApp.UnitTests.Accounts;
 
 /// <summary>Moving a guest's rooms into an account, and the guest ids themselves.</summary>
-public class ClaimGuestRoomsTests
+public class SaveGuestRoomsTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 5, 12, 0, 0, TimeSpan.Zero);
 
@@ -17,7 +17,7 @@ public class ClaimGuestRoomsTests
         var otherGuest = GuestIds.New();
         var mine = await SaveAsync(rooms, guest, guest, otherGuest);
 
-        var moved = await new ClaimGuestRooms(rooms).HandleAsync(guest, "user-1", CancellationToken.None);
+        var moved = await new SaveGuestRooms(rooms).HandleAsync(guest, "user-1", CancellationToken.None);
 
         Assert.Equal(2, moved);
         Assert.All(mine.Take(2), r => Assert.Equal("user-1", r.OwnerId));
@@ -26,14 +26,14 @@ public class ClaimGuestRoomsTests
 
     [Theory]
     [InlineData(null)]
-    [InlineData("user-2")] // an account's id is never claimed as if it were a guest
-    public async Task Only_guest_ids_are_claimed(string? from)
+    [InlineData("user-2")] // an account's id is never saved as if it were a guest
+    public async Task Only_guest_ids_are_saved(string? from)
     {
         var rooms = new FakeRooms();
         var saved = await SaveAsync(rooms, "user-2");
         var saves = rooms.SaveCount;
 
-        var moved = await new ClaimGuestRooms(rooms).HandleAsync(from, "user-1", CancellationToken.None);
+        var moved = await new SaveGuestRooms(rooms).HandleAsync(from, "user-1", CancellationToken.None);
 
         Assert.Equal(0, moved);
         Assert.Equal("user-2", saved[0].OwnerId);

@@ -7,7 +7,7 @@ namespace DesignApp.Application.Accounts;
 /// app first loses nothing.
 /// </summary>
 /// <param name="rooms">Loads and saves the rooms.</param>
-public sealed class ClaimGuestRooms(IRoomRepository rooms)
+public sealed class SaveGuestRooms(IRoomRepository rooms)
 {
     /// <summary>Gives every room of the guest to the account.</summary>
     /// <param name="guestId">The browser's guest id; anything else is ignored.</param>

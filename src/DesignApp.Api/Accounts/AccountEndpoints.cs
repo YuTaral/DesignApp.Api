@@ -45,13 +45,13 @@ internal static class AccountEndpoints
     /// <param name="request">The email and password.</param>
     /// <param name="users">Creates the account.</param>
     /// <param name="signIn">Sets the sign-in cookie.</param>
-    /// <param name="claimGuestRooms">Moves the guest's rooms.</param>
+    /// <param name="saveGuestRooms">Moves the guest's rooms.</param>
     /// <param name="http">The request, for the guest cookie.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the account, or 400 with what to fix.</returns>
     private static async Task<Results<Ok<AccountResponse>, ProblemHttpResult>> SignUpAsync(
         CredentialsRequest request, UserManager<AppUser> users, SignInManager<AppUser> signIn,
-        ClaimGuestRooms claimGuestRooms, HttpContext http, CancellationToken cancellationToken)
+        SaveGuestRooms saveGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
             return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
@@ -63,7 +63,7 @@ internal static class AccountEndpoints
             return TypedResults.Problem(Describe(created.Errors), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
 
         await signIn.SignInAsync(user, isPersistent: true);
-        await ClaimAsync(claimGuestRooms, http, user, cancellationToken);
+        await SaveGuestRoomsAsync(saveGuestRooms, http, user, cancellationToken);
         return TypedResults.Ok(new AccountResponse(true, email));
     }
 
@@ -71,13 +71,13 @@ internal static class AccountEndpoints
     /// <param name="request">The email and password.</param>
     /// <param name="users">Finds the account.</param>
     /// <param name="signIn">Checks the password and sets the sign-in cookie.</param>
-    /// <param name="claimGuestRooms">Moves the guest's rooms.</param>
+    /// <param name="saveGuestRooms">Moves the guest's rooms.</param>
     /// <param name="http">The request, for the guest cookie.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the account, 400 for wrong details, or 429 while the account is locked.</returns>
     private static async Task<Results<Ok<AccountResponse>, ProblemHttpResult>> SignInAsync(
         CredentialsRequest request, UserManager<AppUser> users, SignInManager<AppUser> signIn,
-        ClaimGuestRooms claimGuestRooms, HttpContext http, CancellationToken cancellationToken)
+        SaveGuestRooms saveGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
             return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
@@ -93,7 +93,7 @@ internal static class AccountEndpoints
         if (!result.Succeeded)
             return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
 
-        await ClaimAsync(claimGuestRooms, http, user, cancellationToken);
+        await SaveGuestRoomsAsync(saveGuestRooms, http, user, cancellationToken);
         return TypedResults.Ok(new AccountResponse(true, user.Email));
     }
 
@@ -107,15 +107,15 @@ internal static class AccountEndpoints
     }
 
     /// <summary>Moves the browser's guest rooms into the account and forgets the guest id.</summary>
-    /// <param name="claimGuestRooms">The use case.</param>
+    /// <param name="saveGuestRooms">The use case.</param>
     /// <param name="http">The request.</param>
     /// <param name="user">The account just signed in to.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
-    private static async Task ClaimAsync(ClaimGuestRooms claimGuestRooms, HttpContext http, AppUser user, CancellationToken cancellationToken)
+    private static async Task SaveGuestRoomsAsync(SaveGuestRooms saveGuestRooms, HttpContext http, AppUser user, CancellationToken cancellationToken)
     {
         if (GuestCookie.Read(http) is not { } guestId)
             return;
-        await claimGuestRooms.HandleAsync(guestId, user.Id, cancellationToken);
+        await saveGuestRooms.HandleAsync(guestId, user.Id, cancellationToken);
         GuestCookie.Clear(http);
     }
 
