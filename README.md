@@ -53,8 +53,9 @@ Enums are part of it: `RoomStatus`, `ObjectCategory`, `AnalysisScope` and `AiMod
 `Constants`, `OutlineBrushMode` in the Application's and `InventoryEffort` in the Infrastructure's; files that
 use them add `using static DesignApp.<Layer>.Constants;`.
 
-Each use case is its own sealed class, and an entity's use cases share one file: `Rooms/RoomUseCases.cs`,
-`Designs/DesignUseCases.cs` and `Accounts/AccountUseCases.cs`.
+Each use case is its own sealed class in its own file, grouped in a folder per entity:
+`Rooms/RoomUseCases/` (such as `UploadRoom.cs` and `AnalyzeRoom.cs`), `Designs/DesignUseCases/` and
+`Accounts/AccountUseCases/`. A use case takes only the services it needs.
 
 ## Running locally
 
