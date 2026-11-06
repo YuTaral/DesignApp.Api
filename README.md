@@ -60,9 +60,10 @@ Each use case is its own sealed class in its own file, grouped in a folder per e
 Every type has its own file named after it, small records and interfaces included (`StoredFile.cs` next to
 `IFileStorage.cs`). The one exception is `Common/Result.cs`, which keeps `Result<T>` with its `Result` helper.
 
-Ports shared by every use case (the repositories, `IFileStorage`, `ICurrentUser`) are in `Abstractions/`. A
-feature's own ports sit in an `Interfaces/` folder inside that feature, next to its data records:
-`Analysis/Interfaces/` (the AI providers, imaging, the notifier and the scheduler) and `Photos/Interfaces/`.
+Every interface sits in an `Interfaces/` folder inside the folder it belongs to, in every project: the ports
+shared by every use case in `Application/Abstractions/Interfaces/` (the repositories, `IFileStorage`,
+`ICurrentUser`), a feature's own ports in `Application/Analysis/Interfaces/` and `Application/Photos/Interfaces/`,
+and `Infrastructure/Ai/Interfaces/IAiSettingsStore.cs` and `Api/Rooms/Interfaces/IRoomClient.cs`.
 Records and record structs sit in an `Objects/` folder inside theirs, in every project: for example
 `Domain/Rooms/Objects/BoundingBox.cs`, `Application/Analysis/Objects/InventoryItem.cs` and
 `Api/Designs/Objects/DesignResponse.cs`. Like the `UseCases` folders, the `Interfaces` and `Objects` folders
@@ -177,6 +178,17 @@ dotnet test DesignApp.slnx
 ```
 
 The integration tests start throwaway Postgres and RustFS containers, so Docker must be running.
+
+The browser passes live in the web repository: with the app running, `npm run e2e` in `DesignApp.Web`
+runs them in Firefox against the five sample photos.
+
+## Tools
+
+- `tools/docs`: builds the two Word documents next to the repositories (`npm install` once, then
+  `npm run docs`). The Class Reference is generated from the code's XML documentation comments, so it
+  always matches the commit it follows.
+- `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the
+  solution when a turn ends with uncommitted C# changes and sends any errors back.
 
 ## Third-party licenses
 

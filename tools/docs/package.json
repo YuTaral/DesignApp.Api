@@ -1,0 +1,12 @@
+{
+  "name": "designapp-docs",
+  "private": true,
+  "description": "Builds the DesignApp Word documents: the Class Reference from the code, and the Architecture Overview.",
+  "type": "commonjs",
+  "scripts": {
+    "docs": "node build.js"
+  },
+  "dependencies": {
+    "docx": "^9.15.2"
+  }
+}
