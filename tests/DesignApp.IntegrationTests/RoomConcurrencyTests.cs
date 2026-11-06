@@ -2,6 +2,7 @@ using DesignApp.Application.Abstractions;
 using DesignApp.Domain.Rooms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.IntegrationTests;
 

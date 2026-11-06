@@ -1,6 +1,8 @@
 using DesignApp.Application.Common;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
+using static DesignApp.Application.Constants;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Application.Analysis;
 
@@ -118,15 +120,6 @@ public interface IRoomImaging
     /// <param name="stroke">The stroke.</param>
     /// <returns>The changed label map, or a failure the user can read (such as a stroke that changes nothing).</returns>
     Result<byte[]> PaintOutline(byte[] labelMapPng, OutlineStroke stroke);
-}
-
-/// <summary>Whether a brush stroke adds pixels to the object or takes them away.</summary>
-public enum OutlineBrushMode
-{
-    /// <summary>Every covered pixel becomes the object's, even if another object had it.</summary>
-    Paint,
-    /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
-    Erase,
 }
 
 /// <summary>A point of a stroke.</summary>

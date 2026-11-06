@@ -1,3 +1,5 @@
+using static DesignApp.Infrastructure.Constants;
+
 namespace DesignApp.Infrastructure.Ai;
 
 /// <summary>Settings for the AI pipeline, read from the <c>Ai</c> configuration section.</summary>
@@ -56,17 +58,4 @@ public sealed class AiOptions
 
     /// <summary>How many rooms are analyzed at the same time.</summary>
     public int MaxConcurrentAnalyses { get; set; } = Constants.Ai.DefaultMaxConcurrentAnalyses;
-}
-
-/// <summary>Claude's effort levels the object listing can use.</summary>
-public enum InventoryEffort
-{
-    /// <summary>Least reasoning: cheapest and fastest.</summary>
-    Low,
-
-    /// <summary>The default.</summary>
-    Medium,
-
-    /// <summary>More reasoning, for harder photos.</summary>
-    High,
 }

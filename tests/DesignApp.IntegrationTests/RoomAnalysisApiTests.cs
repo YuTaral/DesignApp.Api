@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing.Handlers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using SkiaSharp;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.IntegrationTests;
 

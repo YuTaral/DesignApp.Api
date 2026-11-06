@@ -7,6 +7,7 @@ using DesignApp.Application.Common;
 using DesignApp.Infrastructure.Ai.Fakes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static DesignApp.Infrastructure.Constants;
 
 namespace DesignApp.Infrastructure.Ai.Claude;
 

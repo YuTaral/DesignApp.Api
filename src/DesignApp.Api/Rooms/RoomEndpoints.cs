@@ -6,6 +6,7 @@ using DesignApp.Application.Rooms;
 using DesignApp.Domain.Rooms;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Api.Rooms;
 

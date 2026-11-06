@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Threading.Channels;
 using DesignApp.Application.Abstractions;
 using DesignApp.Application.Analysis;
+using DesignApp.Application.Rooms;
 using DesignApp.Infrastructure.Ai;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

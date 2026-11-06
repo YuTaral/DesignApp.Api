@@ -1,4 +1,5 @@
 using DesignApp.Application.Analysis;
+using static DesignApp.Application.Constants;
 
 namespace DesignApp.Api.Rooms;
 

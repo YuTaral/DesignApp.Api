@@ -161,4 +161,64 @@ public static class Constants
         /// <param name="to">The requested status.</param>
         public static string CannotMove(RoomStatus from, RoomStatus to) => $"Cannot move a room from {from} to {to}.";
     }
+
+    /// <summary>The steps a room goes through, from upload to editable.</summary>
+    public enum RoomStatus
+    {
+        /// <summary>The photo is stored; analysis hasn't started.</summary>
+        Uploaded,
+        /// <summary>The AI is listing the objects in the photo.</summary>
+        Analyzing,
+        /// <summary>The objects are being outlined into masks.</summary>
+        Segmenting,
+        /// <summary>Analysis finished; the room can be edited.</summary>
+        Ready,
+        /// <summary>Analysis stopped; see <see cref="DesignApp.Domain.Rooms.Room.FailureReason"/>.</summary>
+        Failed,
+    }
+
+    /// <summary>Which AI analyzes a room photo.</summary>
+    public enum AiMode
+    {
+        /// <summary>The built-in fakes: free, offline and instant, with hand-traced or recorded outlines for the sample photos.</summary>
+        Fake,
+        /// <summary>Claude and SAM 3: real outlines for any photo, at a few cents per analysis.</summary>
+        Real,
+    }
+
+    /// <summary>The kind of a detected object. The editor groups objects by it.</summary>
+    public enum ObjectCategory
+    {
+        /// <summary>A wall surface.</summary>
+        Wall,
+        /// <summary>The floor.</summary>
+        Floor,
+        /// <summary>The ceiling.</summary>
+        Ceiling,
+        /// <summary>Sofas, tables, chairs, beds, cabinets.</summary>
+        Furniture,
+        /// <summary>Rugs, curtains, cushions, bedding.</summary>
+        Textile,
+        /// <summary>Plants, art, vases and other decoration.</summary>
+        Decor,
+        /// <summary>Lamps and light fittings.</summary>
+        Lighting,
+        /// <summary>Built-in items such as counters, cabinets, appliances and sanitary ware.</summary>
+        Fixture,
+        /// <summary>Anything that fits no other category.</summary>
+        Other,
+        /// <summary>Doors and windows (including glass doors), but not cabinet doors.</summary>
+        Opening,
+    }
+
+    /// <summary>Which objects the analysis looks for, chosen by the user at upload.</summary>
+    public enum AnalysisScope
+    {
+        /// <summary>Everything worth restyling: walls, floor, ceiling, doors, windows, furniture and decor.</summary>
+        WholeRoom,
+        /// <summary>Everything except doors and windows (glass and white door panels outline poorly and are rarely recolored).</summary>
+        NoDoorsOrWindows,
+        /// <summary>Only objects: furniture, cabinets, textiles, lamps and decor; no walls, floor, ceiling, doors or windows.</summary>
+        ObjectsOnly,
+    }
 }

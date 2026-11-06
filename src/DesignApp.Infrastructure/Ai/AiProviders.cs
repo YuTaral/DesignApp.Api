@@ -3,6 +3,7 @@ using DesignApp.Domain.Rooms;
 using DesignApp.Infrastructure.Ai.Fakes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Infrastructure.Ai;
 

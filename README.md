@@ -49,6 +49,12 @@ the messages people see) live in each project's `Constants` class at its root, i
 such as `Constants.Photos` or `Constants.Messages`. Add a new value there first and reference it;
 don't write it inline. Texts with values are small methods, such as `Constants.Messages.UnknownObject(index)`.
 Exceptions: developer-only exception texts, logger templates and math constants stay where they are used.
+Enums are part of it: `RoomStatus`, `ObjectCategory`, `AnalysisScope` and `AiMode` are nested in the Domain's
+`Constants`, `OutlineBrushMode` in the Application's and `InventoryEffort` in the Infrastructure's; files that
+use them add `using static DesignApp.<Layer>.Constants;`.
+
+Each use case is its own sealed class, and an entity's use cases share one file: `Rooms/RoomUseCases.cs`,
+`Designs/DesignUseCases.cs` and `Accounts/AccountUseCases.cs`.
 
 ## Running locally
 

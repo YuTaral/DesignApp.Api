@@ -1,5 +1,6 @@
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Domain;
 

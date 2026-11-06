@@ -1,6 +1,7 @@
 using DesignApp.Application.Rooms;
 using DesignApp.Domain.Rooms;
 using Microsoft.Extensions.Logging.Abstractions;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Rooms;
 

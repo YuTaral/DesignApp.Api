@@ -4,6 +4,7 @@ using DesignApp.Application.Analysis;
 using DesignApp.Application.Common;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
+using static DesignApp.Domain.Constants;
 
 using D = DesignApp.Infrastructure.Constants.Ai.Claude.Descriptions;
 using F = DesignApp.Infrastructure.Constants.Ai.Claude.Fields;

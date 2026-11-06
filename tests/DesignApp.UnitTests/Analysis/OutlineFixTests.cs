@@ -8,6 +8,8 @@ using DesignApp.Tests;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
+using static DesignApp.Application.Constants;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Analysis;
 

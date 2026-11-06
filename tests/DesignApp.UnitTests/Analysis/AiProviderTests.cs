@@ -10,6 +10,7 @@ using DesignApp.Infrastructure.Ai.Fal;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Analysis;
 

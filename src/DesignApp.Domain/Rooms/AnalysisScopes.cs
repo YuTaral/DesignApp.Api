@@ -1,15 +1,6 @@
-namespace DesignApp.Domain.Rooms;
+using static DesignApp.Domain.Constants;
 
-/// <summary>Which objects the analysis looks for, chosen by the user at upload.</summary>
-public enum AnalysisScope
-{
-    /// <summary>Everything worth restyling: walls, floor, ceiling, doors, windows, furniture and decor.</summary>
-    WholeRoom,
-    /// <summary>Everything except doors and windows (glass and white door panels outline poorly and are rarely recolored).</summary>
-    NoDoorsOrWindows,
-    /// <summary>Only objects: furniture, cabinets, textiles, lamps and decor; no walls, floor, ceiling, doors or windows.</summary>
-    ObjectsOnly,
-}
+namespace DesignApp.Domain.Rooms;
 
 /// <summary>Rules for <see cref="AnalysisScope"/>.</summary>
 public static class AnalysisScopes

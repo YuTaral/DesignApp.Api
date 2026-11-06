@@ -139,4 +139,13 @@ public static class Constants
         /// <summary>A room that is in a design already (a room belongs to one design).</summary>
         public const string RoomInADesign = "This room is already in a design.";
     }
+
+    /// <summary>Whether a brush stroke adds pixels to the object or takes them away.</summary>
+    public enum OutlineBrushMode
+    {
+        /// <summary>Every covered pixel becomes the object's, even if another object had it.</summary>
+        Paint,
+        /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
+        Erase,
+    }
 }

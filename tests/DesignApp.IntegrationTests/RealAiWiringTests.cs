@@ -1,7 +1,9 @@
 using DesignApp.Application.Analysis;
+using DesignApp.Application.Rooms;
 using DesignApp.Domain.Rooms;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.IntegrationTests;
 

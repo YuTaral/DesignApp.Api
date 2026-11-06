@@ -1,6 +1,7 @@
 using DesignApp.Application.Abstractions;
 using DesignApp.Application.Analysis;
 using DesignApp.Domain.Rooms;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests;
 

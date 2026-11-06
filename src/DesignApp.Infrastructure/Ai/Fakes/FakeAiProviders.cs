@@ -3,6 +3,7 @@ using DesignApp.Application.Common;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
 using Microsoft.Extensions.Options;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;
 

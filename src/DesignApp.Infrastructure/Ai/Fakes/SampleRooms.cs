@@ -4,6 +4,7 @@ using DesignApp.Application.Analysis;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
 using SkiaSharp;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;
 

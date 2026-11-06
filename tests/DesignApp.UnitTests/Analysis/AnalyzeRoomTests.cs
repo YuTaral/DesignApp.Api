@@ -8,6 +8,7 @@ using DesignApp.Infrastructure.Photos;
 using DesignApp.Tests;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Analysis;
 

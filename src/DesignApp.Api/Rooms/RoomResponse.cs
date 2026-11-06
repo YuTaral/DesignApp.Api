@@ -1,4 +1,5 @@
 using DesignApp.Domain.Rooms;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Api.Rooms;
 

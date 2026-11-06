@@ -4,6 +4,7 @@ using DesignApp.Domain.Rooms;
 using DesignApp.Infrastructure.Photos;
 using DesignApp.Tests;
 using SkiaSharp;
+using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Analysis;
 

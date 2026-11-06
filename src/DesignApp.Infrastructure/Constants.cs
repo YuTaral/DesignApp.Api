@@ -431,4 +431,17 @@ public static class Constants
         /// <param name="label">The object.</param>
         public static string WouldEraseAll(string label) => $"That would erase the whole {label}. Use Reset to remove its color instead.";
     }
+
+    /// <summary>Claude's effort levels the object listing can use.</summary>
+    public enum InventoryEffort
+    {
+        /// <summary>Least reasoning: cheapest and fastest.</summary>
+        Low,
+
+        /// <summary>The default.</summary>
+        Medium,
+
+        /// <summary>More reasoning, for harder photos.</summary>
+        High,
+    }
 }
