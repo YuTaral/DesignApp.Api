@@ -1,5 +1,6 @@
 using DesignApp.Application.Common;
 using DesignApp.Application.Photos;
+using DesignApp.Application.Photos.Objects;
 using DesignApp.Application.Rooms;
 
 namespace DesignApp.UnitTests.Rooms;

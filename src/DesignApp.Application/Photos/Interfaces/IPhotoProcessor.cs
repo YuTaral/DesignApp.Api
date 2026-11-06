@@ -1,4 +1,5 @@
 using DesignApp.Application.Common;
+using DesignApp.Application.Photos.Objects;
 
 namespace DesignApp.Application.Photos;
 
