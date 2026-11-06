@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using DesignApp.Application.Accounts;
 using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -138,22 +137,4 @@ internal static class AccountEndpoints
             _ => e.Description,
         })
         .Distinct());
-}
-
-/// <summary>Body of <c>POST /api/account/sign-up</c> and <c>/sign-in</c>.</summary>
-/// <param name="Email">The account's email.</param>
-/// <param name="Password">The password.</param>
-internal sealed record CredentialsRequest(string? Email, string? Password);
-
-/// <summary>Who is signed in.</summary>
-/// <param name="SignedIn">Whether an account is signed in; otherwise the browser is a guest.</param>
-/// <param name="Email">The account's email, when signed in.</param>
-internal sealed record AccountResponse(bool SignedIn, string? Email)
-{
-    /// <summary>Reads the signed-in account from the request's user.</summary>
-    /// <param name="user">The request's user.</param>
-    public static AccountResponse From(ClaimsPrincipal user) =>
-        user.Identity?.IsAuthenticated == true
-            ? new AccountResponse(true, user.FindFirstValue(ClaimTypes.Email) ?? user.Identity.Name)
-            : new AccountResponse(false, null);
 }

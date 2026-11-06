@@ -10,7 +10,3 @@ namespace DesignApp.Api.Rooms;
 /// <param name="Radius">The brush radius, in label map pixels.</param>
 /// <param name="Points">The stroke's path, each point 0..1 of the photo's width and height.</param>
 public sealed record OutlineStrokeRequest(int BaseRevision, int ObjectIndex, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint>? Points);
-
-/// <summary>The body of <c>PUT /api/rooms/{id}/labels/current</c>.</summary>
-/// <param name="Revision">The stored label map version to make current.</param>
-public sealed record LabelMapRevisionRequest(int Revision);

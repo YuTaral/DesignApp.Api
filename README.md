@@ -57,6 +57,9 @@ Each use case is its own sealed class in its own file, grouped in a folder per e
 `Rooms/RoomUseCases/` (such as `UploadRoom.cs` and `AnalyzeRoom.cs`), `Designs/DesignUseCases/` and
 `Accounts/AccountUseCases/`. A use case takes only the services it needs.
 
+Every type has its own file named after it, small records and interfaces included (`StoredFile.cs` next to
+`IFileStorage.cs`). The one exception is `Common/Result.cs`, which keeps `Result<T>` with its `Result` helper.
+
 ## Running locally
 
 Requirements: .NET 10 SDK and Docker Desktop (running).

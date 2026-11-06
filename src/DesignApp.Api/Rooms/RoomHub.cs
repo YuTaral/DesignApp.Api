@@ -1,19 +1,10 @@
 using System.Security.Claims;
 using DesignApp.Api.Accounts;
 using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
 using DesignApp.Domain.Rooms;
 using Microsoft.AspNetCore.SignalR;
 
 namespace DesignApp.Api.Rooms;
-
-/// <summary>Messages the server sends to a browser watching a room.</summary>
-public interface IRoomClient
-{
-    /// <summary>The room changed (a new analysis status, or the finished objects).</summary>
-    /// <param name="room">The room's current state.</param>
-    Task RoomChanged(RoomResponse room);
-}
 
 /// <summary>
 /// SignalR hub at <c>/api/hubs/rooms</c> for live analysis progress. The browser calls
@@ -56,13 +47,4 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
         Context.User?.Identity?.IsAuthenticated == true
             ? Context.User.FindFirstValue(ClaimTypes.NameIdentifier)
             : Context.GetHttpContext() is { } http ? GuestCookie.Read(http) : null;
-}
-
-/// <summary><see cref="IRoomNotifier"/> that pushes room changes over <see cref="RoomHub"/>.</summary>
-/// <param name="hub">Sends to the room's watchers.</param>
-internal sealed class SignalRRoomNotifier(IHubContext<RoomHub, IRoomClient> hub) : IRoomNotifier
-{
-    /// <inheritdoc/>
-    public Task RoomChangedAsync(Room room, CancellationToken cancellationToken) =>
-        hub.Clients.Group(Constants.Hub.Group(room.Id)).RoomChanged(RoomResponse.From(room));
 }
