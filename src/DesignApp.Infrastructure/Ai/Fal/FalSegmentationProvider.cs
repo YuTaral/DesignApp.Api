@@ -18,18 +18,20 @@ namespace DesignApp.Infrastructure.Ai.Fal;
 /// it can return a look-alike next to the object (the end of the bed for "mint throw blanket") or
 /// only part of it; it is asked for several masks, and the one (or the union of pieces) whose
 /// outline best fits Claude's box is kept. When nothing fits, the object is asked for again with
-/// the box alone. Requests run in parallel up to <see cref="AiOptions.SegmentationParallelism"/>.
+/// the box alone. Requests run in parallel up to <see cref="AiSettings.SegmentationParallelism"/>;
+/// the endpoint and the mask rules come from the stored <see cref="AiSettings"/> too.
 /// </summary>
 /// <param name="http">Sends the requests; authenticated and given long timeouts at registration.</param>
-/// <param name="options">Supplies the endpoint and parallelism.</param>
+/// <param name="settingsStore">Supplies the endpoint, parallelism and mask rules, read per photo.</param>
 /// <param name="logger">Logs which mask was picked for each object.</param>
-internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<AiOptions> options, ILogger<FalSegmentationProvider> logger)
+internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettingsStore settingsStore, ILogger<FalSegmentationProvider> logger)
     : ISegmentationProvider
 {
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ObjectMask?>> SegmentAsync(
         AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
+        var settings = await settingsStore.GetAsync(cancellationToken);
         var requests = CountRequests();
         var before = requests.Value;
         var imageUrl = Constants.Ai.Fal.JpegDataUri + Convert.ToBase64String(image.Jpeg);
@@ -43,7 +45,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
             shared.Clear();
 
         var own = Enumerable.Range(0, items.Count).Except(shared).ToList();
-        var sharedTask = SegmentSharedAsync(imageUrl, image, [.. shared.Select(i => items[i])], cancellationToken);
+        var sharedTask = SegmentSharedAsync(settings, imageUrl, image, [.. shared.Select(i => items[i])], cancellationToken);
         await SegmentEachAsync(own);
 
         var sharedMasks = await sharedTask;
@@ -63,8 +65,8 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
 
         Task SegmentEachAsync(List<int> indexes) => Parallel.ForEachAsync(
             indexes,
-            new ParallelOptions { MaxDegreeOfParallelism = options.Value.SegmentationParallelism, CancellationToken = cancellationToken },
-            async (i, ct) => masks[i] = await SegmentOneAsync(imageUrl, image, items[i], ct));
+            new ParallelOptions { MaxDegreeOfParallelism = settings.SegmentationParallelism, CancellationToken = cancellationToken },
+            async (i, ct) => masks[i] = await SegmentOneAsync(settings, imageUrl, image, items[i], ct));
     }
 
     /// <summary>The requests sent in the current analysis; fal.ai charges per request.</summary>
@@ -93,13 +95,14 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// text. A mask is kept only when it
     /// fits its box; a refused or failed request keeps none, so every object gets its own request.
     /// </summary>
+    /// <param name="settings">The endpoint and mask rules.</param>
     /// <param name="imageUrl">The analysis image as a data URI.</param>
     /// <param name="image">The analysis image, for its size.</param>
     /// <param name="items">The objects; none sends no request.</param>
     /// <param name="cancellationToken">Cancels the request.</param>
     /// <returns>Per object, in order, its mask or <c>null</c> when it needs its own request.</returns>
     private async Task<ObjectMask?[]> SegmentSharedAsync(
-        string imageUrl, AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
+        AiSettings settings, string imageUrl, AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
         var result = new ObjectMask?[items.Count];
         if (items.Count == 0)
@@ -114,7 +117,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
             var points = items
                 .SelectMany((item, k) => item.Category.IsSurface() ? (item.Points ?? []).Select(p => PixelPoint(p, image, k + 1)) : [])
                 .ToList();
-            answer = await RequestWithIndexesAsync(
+            answer = await RequestWithIndexesAsync(settings,
                 new SamRequest(imageUrl, "", boxes, MaxMasks: items.Count, PointPrompts: points.Count > 0 ? points : null),
                 cancellationToken);
         }
@@ -129,7 +132,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         {
             if (index is not { } k || k < 0 || k >= items.Count || result[k] is not null)
                 continue;
-            if (Pick([mask], items[k].Box) is { Fit: >= Constants.Ai.Fal.MinFit } picked)
+            if (Pick([mask], items[k].Box, settings.MinShareInsideBox) is { } picked && picked.Fit >= settings.MinFit)
             {
                 LogPicked(items[k].Label, picked.Fit, "shared request");
                 result[k] = picked.Mask;
@@ -139,16 +142,17 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     }
 
     /// <summary>Outlines one object: the best-fitting mask of a text-and-box request, else of a box-only one.</summary>
+    /// <param name="settings">The endpoint and mask rules.</param>
     /// <param name="imageUrl">The analysis image as a data URI.</param>
     /// <param name="image">The analysis image, for its size.</param>
     /// <param name="item">The object to outline.</param>
     /// <param name="cancellationToken">Cancels the requests.</param>
     /// <returns>The mask, or <c>null</c> when SAM 3 found nothing for it.</returns>
-    private async Task<ObjectMask?> SegmentOneAsync(string imageUrl, AnalysisImage image, InventoryItem item, CancellationToken cancellationToken)
+    private async Task<ObjectMask?> SegmentOneAsync(AiSettings settings, string imageUrl, AnalysisImage image, InventoryItem item, CancellationToken cancellationToken)
     {
         var box = PixelBox(item, image);
-        var best = Pick(await RequestAsync(new SamRequest(imageUrl, item.Label, [box]), cancellationToken), item.Box);
-        if (best is { Fit: >= Constants.Ai.Fal.MinFit })
+        var best = Pick(await RequestAsync(settings, new SamRequest(imageUrl, item.Label, [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox);
+        if (best is { } fitting && fitting.Fit >= settings.MinFit)
         {
             LogPicked(item.Label, best.Value.Fit, best.Value.How);
             return best.Value.Mask;
@@ -156,7 +160,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
 
         // Nothing fits the box: ask again with the box alone. Some prompts are refused; then the
         // text answer stands.
-        var boxOnly = Pick(await TryRequestAsync(new SamRequest(imageUrl, "", [box]), cancellationToken), item.Box);
+        var boxOnly = Pick(await TryRequestAsync(settings, new SamRequest(imageUrl, "", [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox);
         var chosen = boxOnly is { } b && b.Fit > (best?.Fit ?? -1) ? boxOnly : best;
         LogFallback(item.Label, best?.Fit ?? 0, boxOnly?.Fit ?? 0, chosen == boxOnly && boxOnly is not null ? "box only" : "text");
         return chosen?.Mask;
@@ -182,20 +186,22 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         ObjectId: objectId);
 
     /// <summary>Sends a request and decodes every returned mask.</summary>
+    /// <param name="settings">The endpoint.</param>
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">Cancels it.</param>
     /// <returns>The masks SAM 3 returned, best first by its own score.</returns>
-    private async Task<List<ObjectMask>> RequestAsync(SamRequest request, CancellationToken cancellationToken) =>
-        [.. (await RequestWithIndexesAsync(request, cancellationToken)).Select(m => m.Mask)];
+    private async Task<List<ObjectMask>> RequestAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken) =>
+        [.. (await RequestWithIndexesAsync(settings, request, cancellationToken)).Select(m => m.Mask)];
 
     /// <summary>Sends a request and decodes every returned mask with the index SAM 3 gave it.</summary>
+    /// <param name="settings">The endpoint.</param>
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">Cancels it.</param>
     /// <returns>The masks, best first, each with the position of the box it answers when SAM 3 says.</returns>
-    private async Task<List<(ObjectMask Mask, int? Index)>> RequestWithIndexesAsync(SamRequest request, CancellationToken cancellationToken)
+    private async Task<List<(ObjectMask Mask, int? Index)>> RequestWithIndexesAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken)
     {
         CountRequests().Add();
-        using var response = await http.PostAsJsonAsync(options.Value.SegmentationEndpoint, request, cancellationToken);
+        using var response = await http.PostAsJsonAsync(new Uri(settings.SegmentationEndpoint), request, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<SamResponse>(cancellationToken);
 
@@ -215,14 +221,15 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     }
 
     /// <summary>Like <see cref="RequestAsync"/>, but a refused request (4xx) returns no masks.</summary>
+    /// <param name="settings">The endpoint.</param>
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">Cancels it.</param>
     /// <returns>The masks, or none when the request was refused.</returns>
-    private async Task<List<ObjectMask>> TryRequestAsync(SamRequest request, CancellationToken cancellationToken)
+    private async Task<List<ObjectMask>> TryRequestAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            return await RequestAsync(request, cancellationToken);
+            return await RequestAsync(settings, request, cancellationToken);
         }
         catch (HttpRequestException e) when (e.StatusCode is { } status && (int)status is >= 400 and < 500)
         {
@@ -243,8 +250,9 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
     /// </summary>
     /// <param name="masks">The masks SAM 3 returned.</param>
     /// <param name="box">Claude's box for the object.</param>
+    /// <param name="minShareInsideBox">How much of a mask must lie inside the box to count as a piece.</param>
     /// <returns>The best candidate, or <c>null</c> when there are no non-empty masks.</returns>
-    internal static Candidate? Pick(IReadOnlyList<ObjectMask> masks, BoundingBox box)
+    internal static Candidate? Pick(IReadOnlyList<ObjectMask> masks, BoundingBox box, double minShareInsideBox = Constants.Ai.Defaults.MinShareInsideBox)
     {
         Candidate? best = null;
         void Consider(ObjectMask mask, string how)
@@ -256,7 +264,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         for (var i = 0; i < masks.Count; i++)
             Consider(masks[i], $"mask {i + 1} of {masks.Count}");
 
-        var inside = masks.Where(m => ShareInside(m, box) >= Constants.Ai.Fal.MinShareInsideBox).ToList();
+        var inside = masks.Where(m => ShareInside(m, box) >= minShareInsideBox).ToList();
         if (inside.Count > 1)
             Consider(Union(inside), $"{inside.Count} pieces joined");
         return best;
@@ -415,7 +423,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IOptions<
         [property: JsonPropertyName(Constants.Ai.Fal.Json.SyncMode)] bool SyncMode = true,
         [property: JsonPropertyName(Constants.Ai.Fal.Json.OutputFormat)] string OutputFormat = Constants.Ai.Fal.OutputFormat,
         [property: JsonPropertyName(Constants.Ai.Fal.Json.ReturnMultipleMasks)] bool ReturnMultipleMasks = true,
-        [property: JsonPropertyName(Constants.Ai.Fal.Json.MaxMasks)] int MaxMasks = Constants.Ai.Fal.MaxMasks,
+        [property: JsonPropertyName(Constants.Ai.Fal.Json.MaxMasks)] int MaxMasks = Constants.Ai.Defaults.MaxMasks,
         [property: JsonPropertyName(Constants.Ai.Fal.Json.PointPrompts), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<SamPoint>? PointPrompts = null);
 
     /// <summary>A point prompt in pixels.</summary>

@@ -129,7 +129,34 @@ If your Anthropic key belongs to the organization rather than a workspace (it st
 
 To refresh the sample data with real results, set `Ai:RecordSamplesTo` to a folder as well: real analyses of the five sample photos are saved there as `<photo>.sam3.json`. Copied into `src/DesignApp.Infrastructure/Ai/Fakes/Samples/`, a recording replaces the hand-traced outlines of that photo, so the fakes show real SAM 3 edges for free. The current samples were recorded this way.
 
-Outside Development the fakes are off and there is no switch: every photo uses the real AI, and the API refuses to start without both keys. A photo costs about 3 cents: one Claude call and one SAM 3 call, plus a SAM 3 retry for any outline that doesn't fit its box (fewer with the "Skip doors & windows" or "Objects only" choices). Other settings in the `Ai` section: `InventoryModel` (default `claude-sonnet-5-5`; Haiku is cheaper but misplaces boxes and forgets objects), `InventoryEffort` (`Medium`; `Low` measured only about 4% fewer tokens), `SegmentationParallelism` (4) and `MaxConcurrentAnalyses` (2).
+Outside Development the fakes are off and there is no switch: every photo uses the real AI, and the API refuses to start without both keys. A photo costs about 3 cents: one Claude call and one SAM 3 call, plus a SAM 3 retry for any outline that doesn't fit its box (fewer with the "Skip doors & windows" or "Objects only" choices). The `Ai` section also sets `MaxConcurrentAnalyses` (2).
+
+### Tuning the AI (the `ai_settings` table)
+
+How the real AI is tuned lives in the database, in the one-row `ai_settings` table, so it can change without a rebuild or restart: each analysis reads the row when it starts. The migration seeds it with the built-in defaults (`Constants.Ai.Defaults` in the Infrastructure project), so a fresh database behaves exactly like the code.
+
+| Column | Default | What it does |
+|---|---|---|
+| `inventory_model` | `claude-sonnet-5-5` | The Claude model that lists the objects. Haiku is cheaper but misplaces boxes and forgets objects. |
+| `inventory_effort` | `Medium` | `Low`, `Medium` or `High`. `Low` measured only about 4% fewer tokens. |
+| `max_tokens` | 16000 | The longest answer Claude may give. |
+| `instructions` | the prompt | Claude's instructions. `{MaxPoints}` and `{MaxListedObjects}` are replaced by the two columns below. |
+| `user_message` | "List the objects in this room photo." | The text sent with the photo. |
+| `max_listed_objects` | 30 | The most objects Claude is asked for (1 to 40). |
+| `max_points` | 3 | The most points Claude puts on a wall, floor or ceiling. |
+| `segmentation_endpoint` | `https://fal.run/fal-ai/sam-3/image` | The SAM 3 endpoint (https only). |
+| `segmentation_parallelism` | 4 | SAM 3 requests at the same time for one photo. |
+| `max_masks` | 3 | Masks SAM 3 returns per object, to pick the best-fitting one. |
+| `min_fit` | 0.5 | How well (0 to 1) a mask must fit Claude's box before asking again. |
+| `min_share_inside_box` | 0.8 | How much of a mask (0 to 1) must lie inside the box to count as a piece. |
+
+Until there is an admin app, change it in pgAdmin (the Aspire dashboard shows the database's connection details). For example:
+
+```sql
+update ai_settings set inventory_model = 'claude-opus-5-5', inventory_effort = 'High' where id = 1;
+```
+
+The API keys are not in this table; they stay in user secrets. An unusable value (an empty model, a zero limit, a fraction outside 0 to 1, an endpoint that isn't https) fails the analysis with the reason in the log, so a typo never sends a broken request. If the row is deleted, the built-in defaults are used (with a warning in the log) until a row with id 1 is inserted again. To go back to the defaults, set the values from the table above.
 
 ## Tests
 

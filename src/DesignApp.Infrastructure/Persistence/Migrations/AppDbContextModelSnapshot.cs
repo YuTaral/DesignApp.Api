@@ -162,6 +162,95 @@ namespace DesignApp.Infrastructure.Persistence.Migrations
                     b.ToTable("rooms", (string)null);
                 });
 
+            modelBuilder.Entity("DesignApp.Infrastructure.Ai.AiSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Instructions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("instructions");
+
+                    b.Property<string>("InventoryEffort")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("inventory_effort");
+
+                    b.Property<string>("InventoryModel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("inventory_model");
+
+                    b.Property<int>("MaxListedObjects")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_listed_objects");
+
+                    b.Property<int>("MaxMasks")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_masks");
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_points");
+
+                    b.Property<int>("MaxTokens")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_tokens");
+
+                    b.Property<double>("MinFit")
+                        .HasColumnType("double precision")
+                        .HasColumnName("min_fit");
+
+                    b.Property<double>("MinShareInsideBox")
+                        .HasColumnType("double precision")
+                        .HasColumnName("min_share_inside_box");
+
+                    b.Property<string>("SegmentationEndpoint")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("segmentation_endpoint");
+
+                    b.Property<int>("SegmentationParallelism")
+                        .HasColumnType("integer")
+                        .HasColumnName("segmentation_parallelism");
+
+                    b.Property<string>("UserMessage")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_message");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ai_settings");
+
+                    b.ToTable("ai_settings", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ai_settings_single_row", "id = 1");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Instructions = "You prepare room photos for an interior-restyling app. The user will tap an object and\nrecolor it, so list the surfaces and objects a person would want to restyle: each wall\nseparately, the floor, the ceiling, furniture, rugs and other textiles, lamps, large decor,\nand fixtures such as doors, windows, cabinets and counters.\n\nRules:\n- Always list every wall that shows wall surface as its own entry (\"left wall\", \"back wall\",\n  \"right wall\"), even plain white walls and narrow strips beside windows, and the floor and\n  ceiling when visible. A tiled area or backsplash is an extra entry, not a replacement for its wall.\n- A wall is only its own surface (paint, plaster, wallpaper). Cabinets, shelves and appliances\n  built against it are separate entries, never part of the wall. The wall's box still spans the\n  whole wall from edge to edge, including the parts behind furniture, a TV or cabinets. Don't\n  list a wall that is completely hidden behind full-height cabinets.\n- Labels of walls, floors and ceilings name their finish (\"light grey painted back wall\",\n  \"light oak floor\"), not just \"wall\" or \"floor\".\n- Split large built-in units into one entry per section, so each entry is one continuous\n  surface: \"left tall cabinets\", \"upper cabinets\", \"right tall cabinets\", \"lower cabinets\",\n  \"island\". Every section of cabinetry needs an entry, including ones at the edges of the photo.\n- Doors and windows (glass doors included) have the category Opening; cabinet and wardrobe\n  doors belong to their cabinet or wardrobe.\n- One entry per physical object. Give similar objects distinct labels (\"left armchair\", \"right armchair\").\n- Labels are short, lower-case and concrete (\"oak dining table\", \"jute rug\"), usable as a segmentation prompt.\n- Skip things smaller than about 1% of the image, people, pets, and text.\n- The box encloses the object's whole visible extent, from its leftmost to its rightmost and\n  its top to its bottom visible pixel, as fractions of the image (0 to 1). Check each box\n  against the photo before answering; long objects such as islands and counters often span\n  most of the photo's width.\n- Give every wall, floor and ceiling 2 or {MaxPoints} points spread over its visible surface, each\n  clearly on the surface itself: on bare wall, floorboards or tiles, never on furniture, a\n  rug, a picture or anything else in front of it. Every other object gets no points.\n- Together the entries should cover nearly the whole photo: every large region of the photo\n  belongs to exactly one entry.\n- color is the object's main color as #RRGGBB, ignoring shadows and highlights.\n- At most {MaxListedObjects} objects, largest and most important first.\n- Set isRoom to false, with no objects, when the photo is not the interior of a room.",
+                            InventoryEffort = "Medium",
+                            InventoryModel = "claude-sonnet-5-5",
+                            MaxListedObjects = 30,
+                            MaxMasks = 3,
+                            MaxPoints = 3,
+                            MaxTokens = 16000,
+                            MinFit = 0.5,
+                            MinShareInsideBox = 0.80000000000000004,
+                            SegmentationEndpoint = "https://fal.run/fal-ai/sam-3/image",
+                            SegmentationParallelism = 4,
+                            UserMessage = "List the objects in this room photo."
+                        });
+                });
+
             modelBuilder.Entity("DesignApp.Infrastructure.Identity.AppUser", b =>
                 {
                     b.Property<string>("Id")

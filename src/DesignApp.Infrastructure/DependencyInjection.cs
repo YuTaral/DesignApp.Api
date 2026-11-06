@@ -73,6 +73,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<FakeInventoryProvider>();
         builder.Services.AddSingleton<FakeSegmentationProvider>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
+        builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
 
         var configured = builder.Configuration.GetSection(Constants.Config.AiSection).Get<AiOptions>() ?? new AiOptions();
         if (!configured.HasRealKeys)

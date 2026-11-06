@@ -108,7 +108,7 @@ public class AiProviderTests
         Assert.StartsWith("data:image/jpeg;base64,", wall.GetProperty("image_url").GetString(), StringComparison.Ordinal);
         Assert.False(wall.GetProperty("apply_mask").GetBoolean());
         Assert.True(wall.GetProperty("return_multiple_masks").GetBoolean());
-        Assert.Equal(DesignApp.Infrastructure.Constants.Ai.Fal.MaxMasks, wall.GetProperty("max_masks").GetInt32());
+        Assert.Equal(DesignApp.Infrastructure.Constants.Ai.Defaults.MaxMasks, wall.GetProperty("max_masks").GetInt32());
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public class AiProviderTests
     {
         var http = new HttpClient(fal);
         http.DefaultRequestHeaders.Authorization = new("Key", "test-key");
-        return new FalSegmentationProvider(http, Options.Create(new AiOptions()), NullLogger<FalSegmentationProvider>.Instance);
+        return new FalSegmentationProvider(http, new FixedAiSettings(), NullLogger<FalSegmentationProvider>.Instance);
     }
 
     /// <summary>A mask PNG: white on the left half, black on the right.</summary>

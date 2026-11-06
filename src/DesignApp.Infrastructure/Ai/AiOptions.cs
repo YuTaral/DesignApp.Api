@@ -32,23 +32,12 @@ public sealed class AiOptions
     /// </summary>
     public string? AnthropicWorkspaceId { get; set; }
 
-    /// <summary>The Claude model that lists the objects.</summary>
-    public string InventoryModel { get; set; } = Constants.Ai.DefaultInventoryModel;
 
-    /// <summary>
-    /// How much Claude reasons before listing the objects. Lower effort writes fewer output tokens,
-    /// which is most of the call's cost.
-    /// </summary>
-    public InventoryEffort InventoryEffort { get; set; } = InventoryEffort.Medium;
 
     /// <summary>The fal.ai API key (user secrets locally). Required unless <see cref="UseFakes"/> is on.</summary>
     public string FalKey { get; set; } = "";
 
-    /// <summary>fal.ai's synchronous endpoint for SAM 3 image segmentation.</summary>
-    public Uri SegmentationEndpoint { get; set; } = new(Constants.Ai.DefaultSegmentationEndpoint);
 
-    /// <summary>How many SAM 3 requests one analysis sends at once (one request per object).</summary>
-    public int SegmentationParallelism { get; set; } = Constants.Ai.DefaultSegmentationParallelism;
 
     /// <summary>
     /// When set (with the fakes off), real analyses of the sample photos are saved in this folder

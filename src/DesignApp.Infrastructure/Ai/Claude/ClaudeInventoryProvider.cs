@@ -16,11 +16,13 @@ namespace DesignApp.Infrastructure.Ai.Claude;
 /// output, so the answer always matches <see cref="InventoryJson.Schema"/>.
 /// </summary>
 /// <param name="client">The Anthropic client (it retries rate limits and server errors itself).</param>
-/// <param name="options">Supplies the model name and effort.</param>
+/// <param name="options">Says whether to record the usage of sample photos.</param>
+/// <param name="settingsStore">Supplies the model, effort, limits and prompt, read per photo.</param>
 /// <param name="logger">Records the tokens each call used, which is what it costs.</param>
 internal sealed partial class ClaudeInventoryProvider(
     IAnthropicClient client,
     IOptions<AiOptions> options,
+    IAiSettingsStore settingsStore,
     ILogger<ClaudeInventoryProvider> logger) : IObjectInventoryProvider
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
@@ -28,13 +30,13 @@ internal sealed partial class ClaudeInventoryProvider(
     /// <inheritdoc/>
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
-        var settings = options.Value;
+        var settings = await settingsStore.GetAsync(cancellationToken);
         var started = Stopwatch.GetTimestamp();
         var response = await client.Messages.Create(new MessageCreateParams
         {
             Model = settings.InventoryModel,
-            MaxTokens = Constants.Ai.Claude.MaxTokens,
-            System = Constants.Ai.Claude.Instructions,
+            MaxTokens = settings.MaxTokens,
+            System = settings.SystemPrompt(),
             OutputConfig = new OutputConfig
             {
                 Effort = settings.InventoryEffort switch
@@ -43,7 +45,7 @@ internal sealed partial class ClaudeInventoryProvider(
                     InventoryEffort.High => Effort.High,
                     _ => Effort.Medium,
                 },
-                Format = new JsonOutputFormat { Schema = InventoryJson.Schema },
+                Format = new JsonOutputFormat { Schema = InventoryJson.Schema(settings.MaxPoints) },
             },
             Messages =
             [
@@ -55,7 +57,7 @@ internal sealed partial class ClaudeInventoryProvider(
                         {
                             Source = new Base64ImageSource { Data = Convert.ToBase64String(image.Jpeg), MediaType = MediaType.ImageJpeg },
                         },
-                        new TextBlockParam { Text = Constants.Ai.Claude.UserMessage },
+                        new TextBlockParam { Text = settings.UserMessage },
                     },
                 },
             ],
@@ -63,13 +65,13 @@ internal sealed partial class ClaudeInventoryProvider(
 
         var elapsed = Stopwatch.GetElapsedTime(started);
         LogUsage(settings.InventoryModel, settings.InventoryEffort, response.Usage.InputTokens, response.Usage.OutputTokens, elapsed.TotalSeconds);
-        await RecordUsageAsync(image, settings, response.Usage, elapsed, cancellationToken);
+        await RecordUsageAsync(image, options.Value.RecordSamplesTo, settings, response.Usage, elapsed, cancellationToken);
 
         if (response.StopReason != StopReason.EndTurn)
             throw new InvalidOperationException($"Claude stopped early ({response.StopReason}) while listing objects.");
 
         var json = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
-        return InventoryJson.Parse(json);
+        return InventoryJson.Parse(json, settings.MaxPoints);
     }
 
     /// <summary>
@@ -78,14 +80,15 @@ internal sealed partial class ClaudeInventoryProvider(
     /// effort levels can be compared on the same photos. Development use only.
     /// </summary>
     /// <param name="image">The analyzed photo.</param>
+    /// <param name="recordTo">The folder to record into, if recording is on.</param>
     /// <param name="settings">The AI settings the call used.</param>
     /// <param name="usage">The tokens Claude reported.</param>
     /// <param name="elapsed">How long the call took.</param>
     /// <param name="cancellationToken">Cancels the write.</param>
     private static async Task RecordUsageAsync(
-        AnalysisImage image, AiOptions settings, Usage usage, TimeSpan elapsed, CancellationToken cancellationToken)
+        AnalysisImage image, string? recordTo, AiSettings settings, Usage usage, TimeSpan elapsed, CancellationToken cancellationToken)
     {
-        if (settings.RecordSamplesTo is not { Length: > 0 } folder || SampleRooms.Match(image) is not { } sample)
+        if (recordTo is not { Length: > 0 } folder || SampleRooms.Match(image) is not { } sample)
             return;
         var recorded = new
         {

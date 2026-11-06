@@ -1,5 +1,6 @@
 using DesignApp.Domain.Designs;
 using DesignApp.Domain.Rooms;
+using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -16,6 +17,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
 
     /// <summary>The saved designs table.</summary>
     public DbSet<Design> Designs => Set<Design>();
+
+    /// <summary>The one-row table of AI settings (see <see cref="Ai.AiSettings"/>).</summary>
+    public DbSet<AiSettings> AiSettings => Set<AiSettings>();
 
     /// <summary>
     /// Adds Identity's tables, then applies every entity configuration in this assembly, such as

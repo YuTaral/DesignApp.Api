@@ -23,7 +23,9 @@ internal static class InventoryJson
     };
 
     /// <summary>The JSON schema for Claude's structured output.</summary>
-    public static Dictionary<string, JsonElement> Schema { get; } = new()
+    /// <param name="maxPoints">The most points per surface, named in the points description.</param>
+    /// <returns>The schema.</returns>
+    public static Dictionary<string, JsonElement> Schema(int maxPoints) => new()
     {
         ["type"] = JsonSerializer.SerializeToElement("object"),
         ["additionalProperties"] = JsonSerializer.SerializeToElement(false),
@@ -61,7 +63,7 @@ internal static class InventoryJson
                         [F.Points] = new Dictionary<string, object>
                         {
                             ["type"] = "array",
-                            ["description"] = D.Points,
+                            ["description"] = D.Points(maxPoints),
                             ["items"] = new Dictionary<string, object>
                             {
                                 ["type"] = "object",
@@ -82,8 +84,9 @@ internal static class InventoryJson
     /// The usable items (invalid ones are skipped and boxes are clipped to the image), or a
     /// failure when Claude says the photo isn't of a room.
     /// </returns>
+    /// <param name="maxPoints">The most points kept per surface.</param>
     /// <exception cref="JsonException">The text isn't JSON in the expected shape.</exception>
-    public static Result<IReadOnlyList<InventoryItem>> Parse(string json)
+    public static Result<IReadOnlyList<InventoryItem>> Parse(string json, int maxPoints = Constants.Ai.Defaults.MaxPoints)
     {
         var answer = JsonSerializer.Deserialize<Answer>(json, Options)
             ?? throw new JsonException("Claude returned an empty answer.");
@@ -96,15 +99,16 @@ internal static class InventoryJson
             if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box) is not { } box)
                 continue;
             var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse(Domain.Constants.Colors.Fallback);
-            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points)));
+            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points, maxPoints)));
         }
         return items;
     }
 
-    /// <summary>The points inside the image, at most <see cref="Constants.Ai.Claude.MaxPoints"/>.</summary>
+    /// <summary>The points inside the image, at most <paramref name="maxPoints"/>.</summary>
     /// <param name="points">The points as Claude sent them.</param>
-    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points) =>
-        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(Constants.Ai.Claude.MaxPoints).Select(p => new ImagePoint(p.X, p.Y))];
+    /// <param name="maxPoints">The most points kept.</param>
+    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points, int maxPoints) =>
+        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(maxPoints).Select(p => new ImagePoint(p.X, p.Y))];
 
     /// <summary>Clips a box to the image.</summary>
     /// <param name="b">The box as Claude sent it.</param>

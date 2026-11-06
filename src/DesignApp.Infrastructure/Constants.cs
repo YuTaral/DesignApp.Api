@@ -41,47 +41,56 @@ public static class Constants
         /// <summary>The dependency-injection key of the real (paid) providers.</summary>
         public const string RealKey = "real";
 
-        /// <summary>The Claude model that lists the objects (Sonnet: Haiku misplaced boxes and forgot objects).</summary>
-        public const string DefaultInventoryModel = "claude-sonnet-5-5";
-
-        /// <summary>fal.ai's synchronous endpoint for SAM 3 image segmentation.</summary>
-        public const string DefaultSegmentationEndpoint = "https://fal.run/fal-ai/sam-3/image";
-
-        /// <summary>How many SAM 3 requests one analysis sends at once.</summary>
-        public const int DefaultSegmentationParallelism = 4;
-
         /// <summary>How many rooms are analyzed at the same time.</summary>
         public const int DefaultMaxConcurrentAnalyses = 2;
 
-        /// <summary>The header that names the Anthropic workspace to bill (organization-level keys).</summary>
-        public const string WorkspaceHeader = "anthropic-workspace-id";
-
-        /// <summary>The authorization scheme fal.ai expects.</summary>
-        public const string FalAuthScheme = "Key";
-
-        /// <summary>Claude's object listing.</summary>
-        public static class Claude
+        /// <summary>
+        /// The values the <c>ai_settings</c> row is seeded with, and used when the row is missing.
+        /// After seeding, the row is the source: edit it to tune the AI without a rebuild.
+        /// </summary>
+        public static class Defaults
         {
-            /// <summary>The most tokens Claude may write; the listing uses about 1,500.</summary>
+            /// <summary>The Claude model that lists the objects.</summary>
+            public const string InventoryModel = "claude-sonnet-5-5";
+
+            /// <summary>How much Claude reasons while listing.</summary>
+            public const InventoryEffort InventoryEffort = Constants.InventoryEffort.Medium;
+
+            /// <summary>The most tokens Claude may answer with; the list for a busy room is long.</summary>
             public const int MaxTokens = 16000;
 
             /// <summary>
-            /// How many objects the prompt asks for. Kept apart from the analysis limit (40) because
-            /// changing what Claude is told changes what it finds.
+            /// The most objects Claude is asked to list. Kept below the analysis limit (Application
+            /// Constants.Analysis.MaxObjects), so the largest objects survive the cut.
             /// </summary>
             public const int MaxListedObjects = 30;
 
-            /// <summary>The most points kept per wall, floor or ceiling.</summary>
+            /// <summary>The most points Claude puts on a wall, floor or ceiling.</summary>
             public const int MaxPoints = 3;
 
-            /// <summary>The smallest box side kept, as a fraction of the image.</summary>
-            public const double MinBoxSide = 0.001;
-
-            /// <summary>The user message sent with the photo.</summary>
+            /// <summary>The text sent with the photo.</summary>
             public const string UserMessage = "List the objects in this room photo.";
 
-            /// <summary>Tells Claude what to list and how; the schema enforces the shape.</summary>
-            public static readonly string Instructions = $"""
+            /// <summary>The SAM 3 endpoint on fal.ai.</summary>
+            public const string SegmentationEndpoint = "https://fal.run/fal-ai/sam-3/image";
+
+            /// <summary>How many SAM 3 requests run at the same time for one photo.</summary>
+            public const int SegmentationParallelism = 4;
+
+            /// <summary>How many masks SAM 3 returns for one object to pick from.</summary>
+            public const int MaxMasks = 3;
+
+            /// <summary>How well a mask must fit Claude's box to be used without asking again.</summary>
+            public const double MinFit = 0.5;
+
+            /// <summary>How much of a mask must lie inside the box to count as a piece of the object.</summary>
+            public const double MinShareInsideBox = 0.8;
+
+            /// <summary>
+            /// Claude's instructions, with <see cref="Placeholders.MaxPoints"/> and
+            /// <see cref="Placeholders.MaxListedObjects"/> filled from the stored limits.
+            /// </summary>
+            public const string Instructions = """
                 You prepare room photos for an interior-restyling app. The user will tap an object and
                 recolor it, so list the surfaces and objects a person would want to restyle: each wall
                 separately, the floor, the ceiling, furniture, rugs and other textiles, lamps, large decor,
@@ -118,6 +127,54 @@ public static class Constants
                 - At most {MaxListedObjects} objects, largest and most important first.
                 - Set isRoom to false, with no objects, when the photo is not the interior of a room.
                 """;
+        }
+
+        /// <summary>The placeholders in the stored instructions.</summary>
+        public static class Placeholders
+        {
+            /// <summary>Replaced by the most points per surface.</summary>
+            public const string MaxPoints = "{MaxPoints}";
+
+            /// <summary>Replaced by the most objects to list.</summary>
+            public const string MaxListedObjects = "{MaxListedObjects}";
+        }
+
+        /// <summary>The rules a stored setting can break, for the error message.</summary>
+        public static class Rules
+        {
+            /// <summary>Text that must not be empty.</summary>
+            public const string NotEmpty = "must not be empty";
+
+            /// <summary>A number above zero.</summary>
+            public const string Positive = "must be above 0";
+
+            /// <summary>A number of zero or more.</summary>
+            public const string NotNegative = "must be 0 or more";
+
+            /// <summary>A fraction.</summary>
+            public const string Fraction = "must be between 0 and 1";
+
+            /// <summary>An HTTPS address.</summary>
+            public const string HttpsUrl = "must be an https:// address";
+
+            /// <summary>An effort level.</summary>
+            public const string Effort = "must be Low, Medium or High";
+
+            /// <summary>The listed-objects limit.</summary>
+            public static readonly string ListedObjects = $"must be between 1 and {Application.Constants.Analysis.MaxObjects}";
+        }
+
+        /// <summary>The header that names the Anthropic workspace to bill (organization-level keys).</summary>
+        public const string WorkspaceHeader = "anthropic-workspace-id";
+
+        /// <summary>The authorization scheme fal.ai expects.</summary>
+        public const string FalAuthScheme = "Key";
+
+        /// <summary>Claude's object listing.</summary>
+        public static class Claude
+        {
+            /// <summary>The smallest box side kept, as a fraction of the image.</summary>
+            public const double MinBoxSide = 0.001;
 
             /// <summary>The answer's field names (the JSON schema and the parsed records use the same).</summary>
             public static class Fields
@@ -157,24 +214,17 @@ public static class Constants
                 public const string Box = "Bounding box as fractions (0 to 1) of the image width and height, from the top-left corner.";
                 /// <summary>Of <see cref="Fields.Color"/>.</summary>
                 public const string Color = "The object's main color as #RRGGBB.";
-                /// <summary>Of <see cref="Fields.Points"/>.</summary>
-                public static readonly string Points =
-                    $"For walls, floors and ceilings: 2 or {MaxPoints} spots on the visible surface itself, as fractions (0 to 1) of the image. Empty for every other object.";
+                /// <summary>The points field, for walls, floors and ceilings.</summary>
+                /// <param name="maxPoints">The most points per surface.</param>
+                /// <returns>The description.</returns>
+                public static string Points(int maxPoints) =>
+                    $"For walls, floors and ceilings: 2 or {maxPoints} spots on the visible surface itself, as fractions (0 to 1) of the image. Empty for every other object.";
             }
         }
 
         /// <summary>SAM 3 on fal.ai.</summary>
         public static class Fal
         {
-            /// <summary>How many masks one request asks for, to pick the best fit from.</summary>
-            public const int MaxMasks = 3;
-
-            /// <summary>Below this box fit the object is asked for again with its box alone.</summary>
-            public const double MinFit = 0.5;
-
-            /// <summary>A piece joins a union only when at least this share of its pixels lies inside Claude's box.</summary>
-            public const double MinShareInsideBox = 0.8;
-
             /// <summary>The fewest objects worth one shared request; a single object gets its own request.</summary>
             public const int MinShared = 2;
 
@@ -351,6 +401,18 @@ public static class Constants
         /// <summary>How often a save is tried when other writers keep changing the same rooms.</summary>
         public const int MaxSaveAttempts = 3;
 
+        /// <summary>The id of the only AI settings row.</summary>
+        public const int AiSettingsRowId = 1;
+
+        /// <summary>The check that keeps the AI settings to that one row.</summary>
+        public const string AiSettingsSingleRow = "ck_ai_settings_single_row";
+
+        /// <summary>The longest AI model name.</summary>
+        public const int ModelLength = 100;
+
+        /// <summary>The longest stored URL.</summary>
+        public const int UrlLength = 300;
+
         /// <summary>The stored type of a recolor edit.</summary>
         public const string RecolorEdit = "recolor";
 
@@ -373,6 +435,9 @@ public static class Constants
             public const string RoleClaims = "role_claims";
             /// <summary>A design's rooms.</summary>
             public const string DesignRooms = "design_rooms";
+
+            /// <summary>The one-row AI settings table.</summary>
+            public const string AiSettings = "ai_settings";
         }
     }
 
@@ -430,6 +495,12 @@ public static class Constants
         /// <summary>Erasing the whole object.</summary>
         /// <param name="label">The object.</param>
         public static string WouldEraseAll(string label) => $"That would erase the whole {label}. Use Reset to remove its color instead.";
+
+        /// <summary>A stored AI setting that can't be used (logged when an analysis fails).</summary>
+        /// <param name="field">The setting.</param>
+        /// <param name="rule">The rule it breaks.</param>
+        /// <returns>The message.</returns>
+        public static string InvalidAiSetting(string field, string rule) => $"The ai_settings value {field} {rule}.";
     }
 
     /// <summary>Claude's effort levels the object listing can use.</summary>

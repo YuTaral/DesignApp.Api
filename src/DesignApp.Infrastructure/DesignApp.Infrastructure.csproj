@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="DesignApp.UnitTests" />
+    <InternalsVisibleTo Include="DesignApp.IntegrationTests" />
   </ItemGroup>
 
   <ItemGroup>
