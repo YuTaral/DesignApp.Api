@@ -87,6 +87,13 @@ public static class Constants
             public const double MinShareInsideBox = 0.8;
 
             /// <summary>
+            /// How much of Claude's box (0 to 1) a mask must fill before its fit counts in full. A mask that
+            /// spans the box but fills little of it (only a frame, or only an edge) scores lower, so the
+            /// object gets a request of its own. Thin objects such as lamps and plants fill 0.2 to 0.4.
+            /// </summary>
+            public const double MinFill = 0.2;
+
+            /// <summary>
             /// Claude's instructions, with <see cref="Placeholders.MaxPoints"/> and
             /// <see cref="Placeholders.MaxListedObjects"/> filled from the stored limits.
             /// </summary>
@@ -104,6 +111,8 @@ public static class Constants
                   built against it are separate entries, never part of the wall. The wall's box still spans the
                   whole wall from edge to edge, including the parts behind furniture, a TV or cabinets. Don't
                   list a wall that is completely hidden behind full-height cabinets.
+                - Wall panels and cladding (wood slats, boards, wainscoting) and moldings (crown, skirting)
+                  are separate entries, never part of the wall; a slatted panel is one entry for the whole panel.
                 - Labels of walls, floors and ceilings name their finish ("light grey painted back wall",
                   "light oak floor"), not just "wall" or "floor".
                 - Split large built-in units into one entry per section, so each entry is one continuous
@@ -115,7 +124,7 @@ public static class Constants
                 - Labels are short, lower-case and concrete ("oak dining table", "jute rug"), usable as a segmentation prompt.
                 - Skip things smaller than about 1% of the image, people, pets, and text.
                 - The box encloses the object's whole visible extent, from its leftmost to its rightmost and
-                  its top to its bottom visible pixel, as fractions of the image (0 to 1). Check each box
+                  its top to its bottom visible pixel, in the photo's pixels (its size is given with the photo). Check each box
                   against the photo before answering; long objects such as islands and counters often span
                   most of the photo's width.
                 - Give every wall, floor and ceiling 2 or {MaxPoints} points spread over its visible surface, each
@@ -176,6 +185,13 @@ public static class Constants
             /// <summary>The smallest box side kept, as a fraction of the image.</summary>
             public const double MinBoxSide = 0.001;
 
+            /// <summary>Sent with the photo: Claude gives boxes most accurately in the image's own pixels.</summary>
+            /// <param name="width">The photo's width in pixels.</param>
+            /// <param name="height">The photo's height in pixels.</param>
+            /// <returns>The text.</returns>
+            public static string ImageSize(int width, int height) =>
+                $"The photo is {width} x {height} pixels. Give every box and point in these pixels, measured from the top-left corner.";
+
             /// <summary>The answer's field names (the JSON schema and the parsed records use the same).</summary>
             public static class Fields
             {
@@ -211,14 +227,20 @@ public static class Constants
                 /// <summary>Of <see cref="Fields.Label"/>.</summary>
                 public const string Label = "Short name a person would use, such as \"grey sofa\" or \"left wall\".";
                 /// <summary>Of <see cref="Fields.Box"/>.</summary>
-                public const string Box = "Bounding box as fractions (0 to 1) of the image width and height, from the top-left corner.";
+                /// <param name="width">The photo's width in pixels.</param>
+                /// <param name="height">The photo's height in pixels.</param>
+                /// <returns>The description.</returns>
+                public static string Box(int width, int height) =>
+                    $"Bounding box in pixels of this {width} x {height} photo: the left and top edges, then the width and height.";
                 /// <summary>Of <see cref="Fields.Color"/>.</summary>
                 public const string Color = "The object's main color as #RRGGBB.";
                 /// <summary>The points field, for walls, floors and ceilings.</summary>
                 /// <param name="maxPoints">The most points per surface.</param>
+                /// <param name="width">The photo's width in pixels.</param>
+                /// <param name="height">The photo's height in pixels.</param>
                 /// <returns>The description.</returns>
-                public static string Points(int maxPoints) =>
-                    $"For walls, floors and ceilings: 2 or {maxPoints} spots on the visible surface itself, as fractions (0 to 1) of the image. Empty for every other object.";
+                public static string Points(int maxPoints, int width, int height) =>
+                    $"For walls, floors and ceilings: 2 or {maxPoints} spots on the visible surface itself, in pixels of the {width} x {height} photo. Empty for every other object.";
             }
         }
 
@@ -372,6 +394,12 @@ public static class Constants
 
         /// <summary>How far a surface may grow past its mask, as a fraction of the photo's long side.</summary>
         public const double MaxSurfaceGrowthFraction = 0.05;
+
+        /// <summary>
+        /// A gap still left after growing goes to the neighbor whose mean color is closest, when the two
+        /// means differ by at most this much (RGB distance, 0-441); a gap unlike every neighbor stays empty.
+        /// </summary>
+        public const double MaxGapColorDistance = 60;
     }
 
     /// <summary>The database mapping.</summary>

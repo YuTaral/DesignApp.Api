@@ -53,6 +53,9 @@ public sealed class AiSettings
     /// <summary>How much of a mask (0 to 1) must lie inside the box to count as a piece of the object.</summary>
     public double MinShareInsideBox { get; set; } = Constants.Ai.Defaults.MinShareInsideBox;
 
+    /// <summary>How much of Claude's box (0 to 1) a mask must fill before its fit counts in full.</summary>
+    public double MinFill { get; set; } = Constants.Ai.Defaults.MinFill;
+
     /// <summary>The instructions with this row's limits filled in.</summary>
     /// <returns>The system prompt sent to Claude.</returns>
     public string SystemPrompt() => Instructions
@@ -86,6 +89,7 @@ public sealed class AiSettings
         Check(MaxMasks > 0, nameof(MaxMasks), Constants.Ai.Rules.Positive);
         Check(MinFit is >= 0 and <= 1, nameof(MinFit), Constants.Ai.Rules.Fraction);
         Check(MinShareInsideBox is >= 0 and <= 1, nameof(MinShareInsideBox), Constants.Ai.Rules.Fraction);
+        Check(MinFill is >= 0 and <= 1, nameof(MinFill), Constants.Ai.Rules.Fraction);
         return problems;
     }
 }

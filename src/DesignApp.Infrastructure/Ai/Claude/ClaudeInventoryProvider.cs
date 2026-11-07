@@ -45,7 +45,7 @@ internal sealed partial class ClaudeInventoryProvider(
                     InventoryEffort.High => Effort.High,
                     _ => Effort.Medium,
                 },
-                Format = new JsonOutputFormat { Schema = InventoryJson.Schema(settings.MaxPoints) },
+                Format = new JsonOutputFormat { Schema = InventoryJson.Schema(settings.MaxPoints, image.Width, image.Height) },
             },
             Messages =
             [
@@ -58,6 +58,7 @@ internal sealed partial class ClaudeInventoryProvider(
                             Source = new Base64ImageSource { Data = Convert.ToBase64String(image.Jpeg), MediaType = MediaType.ImageJpeg },
                         },
                         new TextBlockParam { Text = settings.UserMessage },
+                        new TextBlockParam { Text = Constants.Ai.Claude.ImageSize(image.Width, image.Height) },
                     },
                 },
             ],
@@ -71,7 +72,7 @@ internal sealed partial class ClaudeInventoryProvider(
             throw new InvalidOperationException($"Claude stopped early ({response.StopReason}) while listing objects.");
 
         var json = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
-        return InventoryJson.Parse(json, settings.MaxPoints);
+        return InventoryJson.Parse(json, settings.MaxPoints, image.Width, image.Height);
     }
 
     /// <summary>

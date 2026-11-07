@@ -153,7 +153,7 @@ How the real AI is tuned lives in the database, in the one-row `ai_settings` tab
 | `inventory_model` | `claude-sonnet-5-5` | The Claude model that lists the objects. Haiku is cheaper but misplaces boxes and forgets objects. |
 | `inventory_effort` | `Medium` | `Low`, `Medium` or `High`. `Low` measured only about 4% fewer tokens. |
 | `max_tokens` | 16000 | The longest answer Claude may give. |
-| `instructions` | the prompt | Claude's instructions. `{MaxPoints}` and `{MaxListedObjects}` are replaced by the two columns below. |
+| `instructions` | the prompt | Claude's instructions. `{MaxPoints}` and `{MaxListedObjects}` are replaced by the two columns below. Claude is also told the photo's size and gives boxes and points in its pixels, which it places far more accurately than fractions. |
 | `user_message` | "List the objects in this room photo." | The text sent with the photo. |
 | `max_listed_objects` | 30 | The most objects Claude is asked for (1 to 40). |
 | `max_points` | 3 | The most points Claude puts on a wall, floor or ceiling. |
@@ -162,6 +162,7 @@ How the real AI is tuned lives in the database, in the one-row `ai_settings` tab
 | `max_masks` | 3 | Masks SAM 3 returns per object, to pick the best-fitting one. |
 | `min_fit` | 0.5 | How well (0 to 1) a mask must fit Claude's box before asking again. |
 | `min_share_inside_box` | 0.8 | How much of a mask (0 to 1) must lie inside the box to count as a piece. |
+| `min_fill` | 0.2 | How much of Claude's box (0 to 1) a mask must fill before its fit counts in full, so a mask that only frames or edges the object gets its own request. |
 
 Until there is an admin app, change it in pgAdmin (the Aspire dashboard shows the database's connection details). For example:
 
@@ -187,6 +188,10 @@ runs them in Firefox against the five sample photos.
 - `tools/docs`: builds the two Word documents next to the repositories (`npm install` once, then
   `npm run docs`). The Class Reference is generated from the code's XML documentation comments, so it
   always matches the commit it follows.
+- `tools/AiLab`: runs the real AI pipeline on one photo outside the API. `record <photo> <folder>` (paid: one
+  Claude call and the SAM 3 requests) saves every answer; `replay <folder>` (free) feeds them back to the same
+  code, so mask picking and label-map cleanup can be tuned without paying. `measure.py` and `draw.py` score
+  and draw a run. Run with `dotnet run --project tools/AiLab -- ...`; keys come from the API's user secrets.
 - `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the
   solution when a turn ends with uncommitted C# changes and sends any errors back.
 

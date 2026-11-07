@@ -65,7 +65,7 @@ public class AiSettingsTests
     [Fact]
     public void The_schema_names_the_stored_points_limit()
     {
-        var schema = InventoryJson.Schema(maxPoints: 4)["properties"].GetRawText();
+        var schema = InventoryJson.Schema(maxPoints: 4, width: 1536, height: 2048)["properties"].GetRawText();
 
         Assert.Contains("2 or 4 spots", schema, StringComparison.Ordinal);
     }

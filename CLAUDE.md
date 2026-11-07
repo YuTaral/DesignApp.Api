@@ -8,9 +8,11 @@ picture; this file is the working agreement.
 
 ```bash
 dotnet build DesignApp.slnx                     # warnings are errors; every public member needs an XML doc
-dotnet test DesignApp.slnx                      # 153 unit + 42 API tests; Docker must run (Testcontainers)
+dotnet test DesignApp.slnx                      # 158 unit + 42 API tests; Docker must run (Testcontainers)
 dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Database/Migrations
 cd tools/docs && npm install && npm run docs    # regenerate both Word files in the parent DesignApp folder
+dotnet run --project tools/AiLab -- record <photo> <folder>   # PAID (ask first): record one real AI run
+dotnet run --project tools/AiLab -- replay <folder>           # free: replay it after changing mask picking/cleanup
 ```
 
 While the user's Visual Studio F5 run is active its `bin` folders are locked: build and test with

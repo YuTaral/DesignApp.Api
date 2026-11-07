@@ -24,8 +24,10 @@ internal static class InventoryJson
 
     /// <summary>The JSON schema for Claude's structured output.</summary>
     /// <param name="maxPoints">The most points per surface, named in the points description.</param>
+    /// <param name="width">The photo's width in pixels, which boxes and points are given in.</param>
+    /// <param name="height">The photo's height in pixels.</param>
     /// <returns>The schema.</returns>
-    public static Dictionary<string, JsonElement> Schema(int maxPoints) => new()
+    public static Dictionary<string, JsonElement> Schema(int maxPoints, int width, int height) => new()
     {
         ["type"] = JsonSerializer.SerializeToElement("object"),
         ["additionalProperties"] = JsonSerializer.SerializeToElement(false),
@@ -50,7 +52,7 @@ internal static class InventoryJson
                             ["type"] = "object",
                             ["additionalProperties"] = false,
                             ["required"] = new[] { F.X, F.Y, F.Width, F.Height },
-                            ["description"] = D.Box,
+                            ["description"] = D.Box(width, height),
                             ["properties"] = new Dictionary<string, object>
                             {
                                 [F.X] = new { type = "number" },
@@ -63,7 +65,7 @@ internal static class InventoryJson
                         [F.Points] = new Dictionary<string, object>
                         {
                             ["type"] = "array",
-                            ["description"] = D.Points(maxPoints),
+                            ["description"] = D.Points(maxPoints, width, height),
                             ["items"] = new Dictionary<string, object>
                             {
                                 ["type"] = "object",
@@ -85,8 +87,10 @@ internal static class InventoryJson
     /// failure when Claude says the photo isn't of a room.
     /// </returns>
     /// <param name="maxPoints">The most points kept per surface.</param>
+    /// <param name="width">The width the boxes and points are measured in (the photo's pixels; 1 when they are already fractions).</param>
+    /// <param name="height">The height they are measured in.</param>
     /// <exception cref="JsonException">The text isn't JSON in the expected shape.</exception>
-    public static Result<IReadOnlyList<InventoryItem>> Parse(string json, int maxPoints = Constants.Ai.Defaults.MaxPoints)
+    public static Result<IReadOnlyList<InventoryItem>> Parse(string json, int maxPoints = Constants.Ai.Defaults.MaxPoints, double width = 1, double height = 1)
     {
         var answer = JsonSerializer.Deserialize<Answer>(json, Options)
             ?? throw new JsonException("Claude returned an empty answer.");
@@ -96,10 +100,10 @@ internal static class InventoryJson
         var items = new List<InventoryItem>();
         foreach (var o in answer.Objects ?? [])
         {
-            if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box) is not { } box)
+            if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box, width, height) is not { } box)
                 continue;
             var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse(Domain.Constants.Colors.Fallback);
-            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points, maxPoints)));
+            items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points, maxPoints, width, height)));
         }
         return items;
     }
@@ -107,17 +111,21 @@ internal static class InventoryJson
     /// <summary>The points inside the image, at most <paramref name="maxPoints"/>.</summary>
     /// <param name="points">The points as Claude sent them.</param>
     /// <param name="maxPoints">The most points kept.</param>
-    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points, int maxPoints) =>
-        [.. (points ?? []).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(maxPoints).Select(p => new ImagePoint(p.X, p.Y))];
+    /// <param name="width">The width they are measured in.</param>
+    /// <param name="height">The height they are measured in.</param>
+    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points, int maxPoints, double width, double height) =>
+        [.. (points ?? []).Select(p => (X: p.X / width, Y: p.Y / height)).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(maxPoints).Select(p => new ImagePoint(p.X, p.Y))];
 
-    /// <summary>Clips a box to the image.</summary>
+    /// <summary>Turns a box into fractions of the image and clips it to the image.</summary>
     /// <param name="b">The box as Claude sent it.</param>
+    /// <param name="width">The width it is measured in.</param>
+    /// <param name="height">The height it is measured in.</param>
     /// <returns>The clipped box, or <c>null</c> when nothing of it is inside the image.</returns>
-    private static BoundingBox? ToBox(AnswerBox b)
+    private static BoundingBox? ToBox(AnswerBox b, double width, double height)
     {
-        var (x, width) = Clip(b.X, b.Width);
-        var (y, height) = Clip(b.Y, b.Height);
-        return width > Constants.Ai.Claude.MinBoxSide && height > Constants.Ai.Claude.MinBoxSide ? new BoundingBox(x, y, width, height) : null;
+        var (x, w) = Clip(b.X / width, b.Width / width);
+        var (y, h) = Clip(b.Y / height, b.Height / height);
+        return w > Constants.Ai.Claude.MinBoxSide && h > Constants.Ai.Claude.MinBoxSide ? new BoundingBox(x, y, w, h) : null;
     }
 
     /// <summary>Clips one axis of a box to 0..1, leaving values that already fit untouched.</summary>

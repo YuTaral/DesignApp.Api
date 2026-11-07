@@ -88,12 +88,17 @@ public class SkiaRoomImagingTests
     [Fact]
     public void Masks_of_another_size_are_scaled_to_fit()
     {
-        // A half-size mask covering the right half. A sofa (not a surface) grows a few pixels at most.
-        var map = _imaging.BuildLabelMap(Image(200, 100), [new(Item("sofa", ObjectCategory.Furniture), Rect(100, 50, 50, 0, 50, 50))]);
+        // A half-size mask covering the right half: it lands on the right half of the label map. Its
+        // neighbor, a wall on the left half, keeps its own half (the two meet at the middle).
+        var map = _imaging.BuildLabelMap(Image(200, 100),
+        [
+            new(Item("wall", ObjectCategory.Wall), Rect(100, 50, 0, 0, 50, 50)),
+            new(Item("sofa", ObjectCategory.Furniture), Rect(100, 50, 50, 0, 50, 50)),
+        ]);
 
         var labels = DecodeLabels(map.Png);
-        Assert.Equal(0, labels[50 * 200 + 50]);
-        Assert.Equal(1, labels[50 * 200 + 150]);
+        Assert.Equal(1, labels[50 * 200 + 50]);
+        Assert.Equal(2, labels[50 * 200 + 150]);
     }
 
     [Fact]
@@ -111,9 +116,9 @@ public class SkiaRoomImagingTests
 
         var labels = DecodeLabels(map.Png);
         Assert.All(Enumerable.Range(100, 30), x => Assert.Equal(1, labels[10 * 200 + x])); // the ragged strip, filled
-        Assert.Equal(1, labels[80 * 200 + 95]);   // blue just past the mask: within reach
-        Assert.Equal(0, labels[80 * 200 + 20]);   // blue far from the mask: too far to claim
-        Assert.Equal(0, labels[25 * 200 + 50]);   // inside the red quadrant: behind a color edge
+        Assert.Equal(1, labels[80 * 200 + 95]);   // blue just past the mask
+        Assert.Equal(1, labels[80 * 200 + 20]);   // blue far from the mask: same color all the way, so the wall's too
+        Assert.Equal(0, labels[25 * 200 + 50]);   // inside the red quadrant: behind a color edge, and unlike the wall
     }
 
     [Fact]

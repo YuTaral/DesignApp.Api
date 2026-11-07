@@ -132,7 +132,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         {
             if (index is not { } k || k < 0 || k >= items.Count || result[k] is not null)
                 continue;
-            if (Pick([mask], items[k].Box, settings.MinShareInsideBox) is { } picked && picked.Fit >= settings.MinFit)
+            if (Pick([mask], items[k].Box, settings.MinShareInsideBox, settings.MinFill) is { } picked && picked.Fit >= settings.MinFit)
             {
                 LogPicked(items[k].Label, picked.Fit, "shared request");
                 result[k] = picked.Mask;
@@ -151,7 +151,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     private async Task<ObjectMask?> SegmentOneAsync(AiSettings settings, string imageUrl, AnalysisImage image, InventoryItem item, CancellationToken cancellationToken)
     {
         var box = PixelBox(item, image);
-        var best = Pick(await RequestAsync(settings, new SamRequest(imageUrl, item.Label, [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox);
+        var best = Pick(await RequestAsync(settings, new SamRequest(imageUrl, item.Label, [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox, settings.MinFill);
         if (best is { } fitting && fitting.Fit >= settings.MinFit)
         {
             LogPicked(item.Label, best.Value.Fit, best.Value.How);
@@ -160,7 +160,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
 
         // Nothing fits the box: ask again with the box alone. Some prompts are refused; then the
         // text answer stands.
-        var boxOnly = Pick(await TryRequestAsync(settings, new SamRequest(imageUrl, "", [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox);
+        var boxOnly = Pick(await TryRequestAsync(settings, new SamRequest(imageUrl, "", [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox, settings.MinFill);
         var chosen = boxOnly is { } b && b.Fit > (best?.Fit ?? -1) ? boxOnly : best;
         LogFallback(item.Label, best?.Fit ?? 0, boxOnly?.Fit ?? 0, chosen == boxOnly && boxOnly is not null ? "box only" : "text");
         return chosen?.Mask;
@@ -240,7 +240,10 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
 
     /// <summary>A candidate outline and how well it fits Claude's box.</summary>
     /// <param name="Mask">The outline.</param>
-    /// <param name="Fit">How well its bounding box fits Claude's box (see <see cref="Fit"/>).</param>
+    /// <param name="Fit">
+    /// How well it fits Claude's box: the fit of its bounding box (see <see cref="Fit"/>), lowered when it fills
+    /// less of the box than the minimum fill, so a frame or an edge that merely spans the box doesn't pass.
+    /// </param>
     /// <param name="How">Which candidate it is, for the log.</param>
     internal readonly record struct Candidate(ObjectMask Mask, double Fit, string How);
 
@@ -251,13 +254,15 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     /// <param name="masks">The masks SAM 3 returned.</param>
     /// <param name="box">Claude's box for the object.</param>
     /// <param name="minShareInsideBox">How much of a mask must lie inside the box to count as a piece.</param>
+    /// <param name="minFill">How much of the box a mask must fill before its fit counts in full.</param>
     /// <returns>The best candidate, or <c>null</c> when there are no non-empty masks.</returns>
-    internal static Candidate? Pick(IReadOnlyList<ObjectMask> masks, BoundingBox box, double minShareInsideBox = Constants.Ai.Defaults.MinShareInsideBox)
+    internal static Candidate? Pick(IReadOnlyList<ObjectMask> masks, BoundingBox box,
+        double minShareInsideBox = Constants.Ai.Defaults.MinShareInsideBox, double minFill = Constants.Ai.Defaults.MinFill)
     {
         Candidate? best = null;
         void Consider(ObjectMask mask, string how)
         {
-            if (Bounds(mask) is { } bounds && Fit(bounds, box) is var fit && (best is null || fit > best.Value.Fit))
+            if (Bounds(mask) is { } bounds && Fit(bounds, box) * FillFactor(Fill(mask, box), minFill) is var fit && (best is null || fit > best.Value.Fit))
                 best = new Candidate(mask, fit, how);
         }
 
@@ -308,6 +313,27 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         var precision = intersection / ((a.X1 - a.X0) * (a.Y1 - a.Y0));
         return 5 * precision * recall / (4 * precision + recall);
     }
+
+    /// <summary>How much of a box (0 to 1) a mask's pixels fill.</summary>
+    /// <param name="mask">The mask.</param>
+    /// <param name="box">The box.</param>
+    internal static double Fill(ObjectMask mask, BoundingBox box)
+    {
+        int x0 = (int)(box.X * mask.Width), x1 = (int)Math.Ceiling((box.X + box.Width) * mask.Width);
+        int y0 = (int)(box.Y * mask.Height), y1 = (int)Math.Ceiling((box.Y + box.Height) * mask.Height);
+        (x0, x1, y0, y1) = (Math.Clamp(x0, 0, mask.Width), Math.Clamp(x1, 0, mask.Width), Math.Clamp(y0, 0, mask.Height), Math.Clamp(y1, 0, mask.Height));
+        long area = (long)(x1 - x0) * (y1 - y0), filled = 0;
+        for (var y = y0; y < y1; y++)
+            for (var x = x0; x < x1; x++)
+                if (mask.Coverage[y * mask.Width + x] >= Constants.Imaging.CoverageThreshold)
+                    filled++;
+        return area == 0 ? 0 : (double)filled / area;
+    }
+
+    /// <summary>1 when a mask fills at least the minimum of its box, less in proportion when it fills less.</summary>
+    /// <param name="fill">How much of the box it fills.</param>
+    /// <param name="minFill">The minimum fill.</param>
+    internal static double FillFactor(double fill, double minFill) => minFill <= 0 ? 1 : Math.Min(1, fill / minFill);
 
     /// <summary>The share of a mask's pixels that lie inside a box.</summary>
     /// <param name="mask">The mask.</param>

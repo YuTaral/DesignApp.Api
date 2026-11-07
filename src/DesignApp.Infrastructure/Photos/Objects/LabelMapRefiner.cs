@@ -22,6 +22,7 @@ internal static class LabelMapRefiner
         RemoveFragments(labels, width, height);
         FillEnclosedHoles(labels, width, height);
         GrowIntoGaps(labels, width, height, rgba, isSurface);
+        FillRemainingGaps(labels, width, height, rgba);
     }
 
     /// <summary>Clears every piece of an object that is small and isn't the object's largest piece.</summary>
@@ -73,13 +74,14 @@ internal static class LabelMapRefiner
     /// <param name="height">Height in pixels.</param>
     /// <param name="rgba">The photo, 4 bytes per pixel.</param>
     /// <param name="isSurface">Whether a label is a surface, with the longer growth limit.</param>
-    internal static void GrowIntoGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface)
+    /// <param name="unlimited">True: labels <paramref name="isSurface"/> accepts have no distance limit; only the color steps stop them.</param>
+    internal static void GrowIntoGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, bool unlimited = false)
     {
         var queue = new PriorityQueue<(int Pixel, byte Label, int Steps), float>();
         var surfaceGrowth = Math.Max(Constants.Refiner.MaxObjectGrowth, (int)(Constants.Refiner.MaxSurfaceGrowthFraction * Math.Max(width, height)));
         var limit = new int[Constants.Imaging.ByteValues];
         for (var label = 1; label < Constants.Imaging.ByteValues; label++)
-            limit[label] = isSurface((byte)label) ? surfaceGrowth : Constants.Refiner.MaxObjectGrowth;
+            limit[label] = isSurface((byte)label) ? (unlimited ? int.MaxValue : surfaceGrowth) : Constants.Refiner.MaxObjectGrowth;
 
         void Offer(int from, int to, int steps, ReadOnlySpan<byte> photo)
         {
@@ -115,6 +117,46 @@ internal static class LabelMapRefiner
             if (x < width - 1) Offer(p, p + 1, steps + 1, rgba);
             if (y > 0) Offer(p, p - width, steps + 1, rgba);
             if (y < height - 1) Offer(p, p + width, steps + 1, rgba);
+        }
+    }
+
+    /// <summary>
+    /// Leaves as few pixels untappable as possible. First every object keeps growing, without a distance
+    /// limit, as long as each step stays within <see cref="Constants.Refiner.MaxStepDistance"/> of color, so it
+    /// stops at real edges; then each gap still left goes to the neighbor whose mean color is closest, when
+    /// that is within <see cref="Constants.Refiner.MaxGapColorDistance"/>. A gap unlike all its neighbors
+    /// (probably an object nobody listed) stays empty.
+    /// </summary>
+    /// <param name="labels">The label map, changed in place.</param>
+    /// <param name="width">Its width.</param>
+    /// <param name="height">Its height.</param>
+    /// <param name="rgba">The photo at the same size.</param>
+    internal static void FillRemainingGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba)
+    {
+        GrowIntoGaps(labels, width, height, rgba, _ => true, unlimited: true);
+
+        var sums = new double[Constants.Imaging.ByteValues, 4];
+        for (var p = 0; p < labels.Length; p++)
+        {
+            var label = labels[p];
+            if (label == 0) continue;
+            sums[label, 0] += rgba[p * 4]; sums[label, 1] += rgba[p * 4 + 1]; sums[label, 2] += rgba[p * 4 + 2]; sums[label, 3]++;
+        }
+        foreach (var gap in Components(labels, width, height, keep: label => label == 0))
+        {
+            if (gap.Neighbors.Count == 0) continue;
+            double r = 0, g = 0, b = 0;
+            foreach (var p in gap.Pixels) { r += rgba[p * 4]; g += rgba[p * 4 + 1]; b += rgba[p * 4 + 2]; }
+            (r, g, b) = (r / gap.Pixels.Count, g / gap.Pixels.Count, b / gap.Pixels.Count);
+            byte owner = 0; var closest = double.MaxValue;
+            foreach (var n in gap.Neighbors)
+            {
+                var count = sums[n, 3];
+                var d = Math.Sqrt(Math.Pow(sums[n, 0] / count - r, 2) + Math.Pow(sums[n, 1] / count - g, 2) + Math.Pow(sums[n, 2] / count - b, 2));
+                if (d < closest) (owner, closest) = (n, d);
+            }
+            if (closest > Constants.Refiner.MaxGapColorDistance) continue;
+            foreach (var p in gap.Pixels) labels[p] = owner;
         }
     }
 
