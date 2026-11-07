@@ -1,6 +1,5 @@
 using DesignApp.Application.Analysis;
 using DesignApp.Application.Common;
-using DesignApp.Application.Photos;
 using DesignApp.Domain.Common;
 using DesignApp.Domain.Rooms;
 using SkiaSharp;

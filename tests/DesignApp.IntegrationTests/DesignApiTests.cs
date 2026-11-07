@@ -191,7 +191,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private async Task AgeAsync(Guid roomId, DateTimeOffset uploaded)
     {
         using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DesignApp.Infrastructure.Persistence.AppDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<DesignApp.Infrastructure.Database.AppDbContext>();
         var room = await db.Rooms.FindAsync(roomId);
         db.Entry(room!).Property(nameof(Room.CreatedAt)).CurrentValue = uploaded;
         await db.SaveChangesAsync();

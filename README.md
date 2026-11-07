@@ -21,7 +21,7 @@ Both AI providers sit behind interfaces, so they can be swapped (another SAM hos
 
 - ASP.NET Core 10 Minimal APIs, OpenAPI with the Scalar docs UI
 - Aspire for local orchestration, OpenTelemetry traces, health checks and resilience
-- PostgreSQL via EF Core (snake_case schema, migrations in `Infrastructure/Persistence/Migrations`)
+- PostgreSQL via EF Core (snake_case schema, migrations in `Infrastructure/Database/Migrations`)
 - S3-compatible storage for photos and masks through the AWS SDK: RustFS locally, any S3 service in the cloud
 - SkiaSharp for photo processing: uploads are validated, turned upright, scaled to at most 4096 px, converted to sRGB JPEG and stripped of metadata (including GPS location)
 - SignalR for live analysis progress
@@ -122,7 +122,7 @@ The EF Core tool is pinned in `dotnet-tools.json`:
 
 ```bash
 dotnet tool restore
-dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Persistence/Migrations
+dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Database/Migrations
 ```
 
 ### AI providers and secrets

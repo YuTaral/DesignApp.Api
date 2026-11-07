@@ -20,5 +20,5 @@ dotnet_sort_system_directives_first = true
 dotnet_diagnostic.CA1707.severity = none
 
 # EF Core writes these; analyzers shouldn't hold generated code to hand-written style.
-[src/DesignApp.Infrastructure/Persistence/Migrations/**.cs]
+[src/DesignApp.Infrastructure/Database/Migrations/**.cs]
 generated_code = true

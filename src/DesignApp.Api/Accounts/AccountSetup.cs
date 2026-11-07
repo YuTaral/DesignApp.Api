@@ -1,6 +1,6 @@
 using DesignApp.Application.Abstractions;
 using DesignApp.Infrastructure.Identity;
-using DesignApp.Infrastructure.Persistence;
+using DesignApp.Infrastructure.Database;
 using Microsoft.AspNetCore.Identity;
 
 namespace DesignApp.Api.Accounts;

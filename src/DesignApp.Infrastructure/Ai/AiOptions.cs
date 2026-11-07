@@ -1,5 +1,3 @@
-using static DesignApp.Infrastructure.Constants;
-
 namespace DesignApp.Infrastructure.Ai;
 
 /// <summary>Settings for the AI pipeline, read from the <c>Ai</c> configuration section.</summary>

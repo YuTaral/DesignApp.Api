@@ -1,4 +1,4 @@
-using DesignApp.Infrastructure.Persistence;
+using DesignApp.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

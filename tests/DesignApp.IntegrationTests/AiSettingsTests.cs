@@ -1,5 +1,5 @@
 using DesignApp.Infrastructure.Ai;
-using DesignApp.Infrastructure.Persistence;
+using DesignApp.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using static DesignApp.Infrastructure.Constants;
