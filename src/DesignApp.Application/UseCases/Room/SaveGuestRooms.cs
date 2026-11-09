@@ -1,6 +1,8 @@
-using DesignApp.Application.Abstractions;
+using DesignApp.Application.Helpers;
+using DesignApp.Application.Interfaces;
 
-namespace DesignApp.Application.Accounts;
+
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>
 /// Moves the rooms a browser made as a guest into the account it just signed in to, so trying the

@@ -1,10 +1,12 @@
 using System.Security.Claims;
-using DesignApp.Api.Accounts;
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Rooms;
+using DesignApp.Api.Helpers;
+using DesignApp.Api.Interfaces;
+using DesignApp.Api.Responses;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Hubs;
 
 /// <summary>
 /// SignalR hub at <c>/api/hubs/rooms</c> for live analysis progress. The browser calls

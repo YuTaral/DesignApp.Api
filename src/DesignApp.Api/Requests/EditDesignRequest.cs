@@ -1,4 +1,4 @@
-namespace DesignApp.Api.Designs;
+namespace DesignApp.Api.Requests;
 
 /// <summary>Body of <c>PUT /api/designs/{id}</c>.</summary>
 /// <param name="Name">The design's new name.</param>

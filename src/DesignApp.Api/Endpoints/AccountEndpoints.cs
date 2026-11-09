@@ -1,9 +1,12 @@
-using DesignApp.Application.Accounts;
+using DesignApp.Api.Helpers;
+using DesignApp.Api.Requests;
+using DesignApp.Api.Responses;
+using DesignApp.Application.UseCases.Room;
 using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
-namespace DesignApp.Api.Accounts;
+namespace DesignApp.Api.Endpoints;
 
 /// <summary>The <c>/api/account</c> endpoints: sign up, sign in, sign out, and who is signed in.</summary>
 internal static class AccountEndpoints

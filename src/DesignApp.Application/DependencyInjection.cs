@@ -1,7 +1,5 @@
-using DesignApp.Application.Accounts;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Designs;
-using DesignApp.Application.Rooms;
+using DesignApp.Application.UseCases.Design;
+using DesignApp.Application.UseCases.Room;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DesignApp.Application;

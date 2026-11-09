@@ -1,9 +1,10 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Infrastructure.Identity;
+using DesignApp.Api.Services;
+using DesignApp.Application.Interfaces;
 using DesignApp.Infrastructure.Database;
+using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
-namespace DesignApp.Api.Accounts;
+namespace DesignApp.Api.Setup;
 
 /// <summary>Wires up accounts: ASP.NET Core Identity with email and password, kept in a cookie.</summary>
 internal static class AccountSetup

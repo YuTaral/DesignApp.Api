@@ -1,6 +1,6 @@
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>Which AI modes this API can use, and which one an upload gets when it doesn't choose.</summary>
 /// <param name="Default">The mode of an upload that doesn't choose.</param>

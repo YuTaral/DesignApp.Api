@@ -1,5 +1,6 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;

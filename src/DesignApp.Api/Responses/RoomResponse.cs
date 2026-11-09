@@ -1,7 +1,8 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Responses;
 
 /// <summary>A room as the API returns it to the frontend.</summary>
 /// <param name="Id">The room's id.</param>

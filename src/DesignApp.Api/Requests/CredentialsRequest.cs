@@ -1,4 +1,4 @@
-namespace DesignApp.Api.Accounts;
+namespace DesignApp.Api.Requests;
 
 /// <summary>Body of <c>POST /api/account/sign-up</c> and <c>/sign-in</c>.</summary>
 /// <param name="Email">The account's email.</param>

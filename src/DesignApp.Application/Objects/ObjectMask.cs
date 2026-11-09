@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>
 /// The outline of one object: how much each pixel belongs to it, from 0 (not at all) to 255 (fully).

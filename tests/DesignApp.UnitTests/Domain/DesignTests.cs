@@ -1,6 +1,7 @@
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
+
 
 namespace DesignApp.UnitTests.Domain;
 

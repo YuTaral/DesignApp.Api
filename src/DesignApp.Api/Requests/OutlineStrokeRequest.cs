@@ -1,7 +1,8 @@
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Objects;
+
 using static DesignApp.Application.Constants;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Requests;
 
 /// <summary>The body of <c>POST /api/rooms/{id}/outline</c>: one brush stroke.</summary>
 /// <param name="BaseRevision">The label map version the editor shows; the stroke is drawn on it.</param>

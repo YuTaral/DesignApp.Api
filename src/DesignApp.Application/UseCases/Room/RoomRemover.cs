@@ -1,8 +1,8 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace DesignApp.Application.Rooms;
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>
 /// Deletes rooms completely: the database rows first, then their files (the photo and every

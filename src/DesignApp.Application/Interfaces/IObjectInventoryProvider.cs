@@ -1,6 +1,7 @@
-using DesignApp.Application.Common;
+using DesignApp.Application.Objects;
 
-namespace DesignApp.Application.Analysis;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Step 1 of the analysis (Claude): lists the objects in the photo.</summary>
 public interface IObjectInventoryProvider

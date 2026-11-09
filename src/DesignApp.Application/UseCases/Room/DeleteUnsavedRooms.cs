@@ -1,6 +1,7 @@
-using DesignApp.Application.Abstractions;
+using DesignApp.Application.Interfaces;
 
-namespace DesignApp.Application.Rooms;
+
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>
 /// Deletes uploads that nobody saved: rooms older than <see cref="Constants.Rooms.UnsavedLifetime"/> that aren't in any

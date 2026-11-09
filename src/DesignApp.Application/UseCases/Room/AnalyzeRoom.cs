@@ -1,10 +1,11 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Extensions;
 using Microsoft.Extensions.Logging;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Rooms;
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>
 /// Use case: run the AI pipeline on an uploaded room. Claude lists the objects, SAM 3 outlines them,

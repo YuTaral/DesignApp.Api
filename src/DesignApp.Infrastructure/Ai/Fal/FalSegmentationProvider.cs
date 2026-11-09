@@ -1,9 +1,10 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Extensions;
+using DesignApp.Domain.Objects;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Ai.Fal;

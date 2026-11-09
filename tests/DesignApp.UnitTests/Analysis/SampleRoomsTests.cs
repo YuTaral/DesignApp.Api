@@ -1,4 +1,4 @@
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Tests;

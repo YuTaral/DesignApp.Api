@@ -1,5 +1,3 @@
-using DesignApp.Domain.Rooms;
-
 namespace DesignApp.Domain;
 
 /// <summary>
@@ -173,7 +171,7 @@ public static class Constants
         Segmenting,
         /// <summary>Analysis finished; the room can be edited.</summary>
         Ready,
-        /// <summary>Analysis stopped; see <see cref="DesignApp.Domain.Rooms.Room.FailureReason"/>.</summary>
+        /// <summary>Analysis stopped; see <see cref="DesignApp.Domain.Entities.Room.FailureReason"/>.</summary>
         Failed,
     }
 

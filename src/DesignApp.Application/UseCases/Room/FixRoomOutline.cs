@@ -1,11 +1,11 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Entities;
+
 using static DesignApp.Application.Constants;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Rooms;
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>
 /// Use case: the user fixes an object's outline by painting or erasing it with a brush. Each stroke

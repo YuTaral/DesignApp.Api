@@ -1,5 +1,7 @@
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
+
 using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests.Domain;

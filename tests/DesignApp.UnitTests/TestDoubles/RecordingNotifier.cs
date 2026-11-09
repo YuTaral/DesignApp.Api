@@ -1,5 +1,6 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
+
 using static DesignApp.Domain.Constants;
 
 namespace DesignApp.UnitTests;

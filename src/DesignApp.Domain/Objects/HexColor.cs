@@ -1,6 +1,7 @@
 using System.Globalization;
+using DesignApp.Domain.Exceptions;
 
-namespace DesignApp.Domain.Common;
+namespace DesignApp.Domain.Objects;
 
 /// <summary>An sRGB color stored as an upper-case "#RRGGBB" string.</summary>
 public readonly record struct HexColor

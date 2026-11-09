@@ -1,7 +1,8 @@
 using System.Security.Claims;
-using DesignApp.Application.Abstractions;
+using DesignApp.Api.Helpers;
+using DesignApp.Application.Interfaces;
 
-namespace DesignApp.Api.Accounts;
+namespace DesignApp.Api.Services;
 
 /// <summary>
 /// The current user of an HTTP request or SignalR connection: the signed-in account, else the

@@ -1,5 +1,5 @@
 using System.Text;
-using DesignApp.Application.Photos.Objects;
+using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Photos;
 using DesignApp.Tests;
 using SkiaSharp;

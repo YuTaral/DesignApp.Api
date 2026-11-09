@@ -1,5 +1,5 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Common;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;

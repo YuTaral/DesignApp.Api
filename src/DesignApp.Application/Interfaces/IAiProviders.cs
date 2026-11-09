@@ -1,6 +1,8 @@
+using DesignApp.Application.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Hands out the AI providers of a mode: the fakes or Claude and SAM 3.</summary>
 public interface IAiProviders

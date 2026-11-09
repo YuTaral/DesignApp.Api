@@ -1,6 +1,8 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Rooms;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Objects;
+using DesignApp.Application.UseCases;
+using DesignApp.Application.UseCases.Room;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Extensions;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Infrastructure.Photos;

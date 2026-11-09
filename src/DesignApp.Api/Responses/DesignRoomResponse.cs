@@ -1,6 +1,9 @@
-using DesignApp.Domain.Designs;
+using DesignApp.Api.Requests;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
 
-namespace DesignApp.Api.Designs;
+
+namespace DesignApp.Api.Responses;
 
 /// <summary>One room of a design.</summary>
 /// <param name="RoomId">The room.</param>

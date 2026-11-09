@@ -53,21 +53,24 @@ Enums are part of it: `RoomStatus`, `ObjectCategory`, `AnalysisScope` and `AiMod
 `Constants`, `OutlineBrushMode` in the Application's and `InventoryEffort` in the Infrastructure's; files that
 use them add `using static DesignApp.<Layer>.Constants;`.
 
-Each use case is its own sealed class in its own file, grouped in a folder per entity:
-`Rooms/RoomUseCases/` (such as `UploadRoom.cs` and `AnalyzeRoom.cs`), `Designs/DesignUseCases/` and
-`Accounts/AccountUseCases/`. A use case takes only the services it needs.
+Domain, Application and Api are grouped by **type**, one folder per kind of class:
+
+| Project | Folders |
+|---|---|
+| Domain | `Entities/` (Room, Design, DesignRoom), `Objects/` (value objects such as `BoundingBox`, `HexColor`), `Extensions/`, `Exceptions/` |
+| Application | `Interfaces/` (every port: repositories, file storage, current user, AI, imaging), `UseCases/` (one sealed class per use case, such as `UploadRoom` and `CreateDesign`), `Objects/` (the records passed between steps), `Helpers/` |
+| Api | `Endpoints/`, `Requests/`, `Responses/`, `Hubs/`, `Interfaces/`, `Services/`, `Middleware/`, `Setup/`, `Helpers/` |
+
+Infrastructure is grouped by **technology** instead (`Ai/`, `Background/`, `Database/`, `FileStorage/`, `Photos/`...),
+because there the code that changes together is the code around one technology. A use case takes only the
+services it needs. Each top-level folder is a namespace, such as `DesignApp.Application.UseCases`.
 
 Every type has its own file named after it, small records and interfaces included (`StoredFile.cs` next to
-`IFileStorage.cs`). The one exception is `Common/Result.cs`, which keeps `Result<T>` with its `Result` helper.
+`IFileStorage.cs`). The one exception is `Objects/Result.cs`, which keeps `Result<T>` with its `Result` helper.
 
-Every interface sits in an `Interfaces/` folder inside the folder it belongs to, in every project: the ports
-shared by every use case in `Application/Abstractions/Interfaces/` (the repositories, `IFileStorage`,
-`ICurrentUser`), a feature's own ports in `Application/Analysis/Interfaces/` and `Application/Photos/Interfaces/`,
-and `Infrastructure/Ai/Interfaces/IAiSettingsStore.cs` and `Api/Rooms/Interfaces/IRoomClient.cs`.
-Records and record structs sit in an `Objects/` folder inside theirs, in every project: for example
-`Domain/Rooms/Objects/BoundingBox.cs`, `Application/Analysis/Objects/InventoryItem.cs` and
-`Api/Designs/Objects/DesignResponse.cs`. Like the `UseCases` folders, the `Interfaces` and `Objects` folders
-don't change the namespace.
+Inside Infrastructure's technology folders, interfaces sit in an `Interfaces/` subfolder (such as
+`Ai/Interfaces/IAiSettingsStore.cs`) and records and static helpers in an `Objects/` subfolder (such as
+`Database/Objects/EditsJson.cs`); those subfolders don't change the namespace.
 
 ## Running locally
 

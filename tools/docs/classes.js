@@ -166,10 +166,10 @@ function webProject() {
 const count = { types: 0 }
 
 const PROJECTS = [
-  ['src/DesignApp.Domain', 'The core rules, with no dependencies.'],
-  ['src/DesignApp.Application', 'Use cases and the interfaces they need. Each use case is its own class in its own file, in a folder per entity.'],
+  ['src/DesignApp.Domain', 'The core rules, with no dependencies, grouped by type: Entities/, Objects/ (value objects), Extensions/, Exceptions/.'],
+  ['src/DesignApp.Application', 'Use cases and the interfaces they need, grouped by type: every port in Interfaces/, one class per use case in UseCases/, the records in Objects/.'],
   ['src/DesignApp.Infrastructure', 'The adapters behind those interfaces: database, storage, imaging and the AI services.'],
-  ['src/DesignApp.Api', 'HTTP endpoints, accounts, SignalR and the composition root.'],
+  ['src/DesignApp.Api', 'HTTP endpoints, accounts, SignalR and the composition root, grouped by type: Endpoints/, Requests/, Responses/, Hubs/, Services/, Middleware/, Setup/.'],
   ['src/DesignApp.AppHost', 'Aspire orchestration for local development.'],
   ['src/DesignApp.ServiceDefaults', 'Telemetry, health checks and HTTP resilience shared by the services.'],
   ['tests/DesignApp.UnitTests', 'Fast tests of the domain, use cases, imaging and AI request handling, with fakes.'],

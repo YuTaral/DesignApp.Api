@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Photos.Objects;
+namespace DesignApp.Application.Objects;
 
 /// <summary>A photo ready to store: a JPEG plus its size.</summary>
 /// <param name="Content">The encoded JPEG bytes.</param>

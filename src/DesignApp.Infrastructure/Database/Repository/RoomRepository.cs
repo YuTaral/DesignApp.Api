@@ -1,5 +1,5 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using static DesignApp.Domain.Constants;

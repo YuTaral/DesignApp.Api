@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>A point of a stroke.</summary>
 /// <param name="X">0..1 of the photo's width.</param>

@@ -2,7 +2,8 @@ using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Util;
-using DesignApp.Application.Abstractions;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
 using Microsoft.Extensions.Options;
 
 namespace DesignApp.Infrastructure.FileStorage;

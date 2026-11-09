@@ -1,5 +1,5 @@
 using System.Threading.Channels;
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Interfaces;
 
 namespace DesignApp.Infrastructure.Analysis;
 

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace DesignApp.Application.Common;
+namespace DesignApp.Application.Objects;
 
 /// <summary>
 /// The outcome of an operation that can be refused for a reason the user should see, such as a bad

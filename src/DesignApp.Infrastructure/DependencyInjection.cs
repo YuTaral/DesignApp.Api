@@ -1,10 +1,8 @@
 using Amazon;
-using Anthropic;
 using Amazon.Runtime;
 using Amazon.S3;
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Photos;
+using Anthropic;
+using DesignApp.Application.Interfaces;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Claude;
 using DesignApp.Infrastructure.Ai.Fakes;

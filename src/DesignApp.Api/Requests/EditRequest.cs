@@ -1,4 +1,4 @@
-namespace DesignApp.Api.Designs;
+namespace DesignApp.Api.Requests;
 
 /// <summary>One recolor, as sent and as returned.</summary>
 /// <param name="ObjectIndex">The object, as in the room's objects and label map.</param>

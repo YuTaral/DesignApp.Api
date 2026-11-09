@@ -1,4 +1,6 @@
-namespace DesignApp.Application.Analysis;
+using DesignApp.Application.Objects;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Step 2 of the analysis (SAM 3): outlines each listed object.</summary>
 public interface ISegmentationProvider

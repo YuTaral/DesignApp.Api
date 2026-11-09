@@ -1,5 +1,6 @@
 using System.Text.Json;
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Ai.Fal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

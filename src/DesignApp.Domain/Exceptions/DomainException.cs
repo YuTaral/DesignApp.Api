@@ -1,4 +1,4 @@
-namespace DesignApp.Domain.Common;
+namespace DesignApp.Domain.Exceptions;
 
 /// <summary>Thrown when an operation would put an entity into an invalid state.</summary>
 /// <param name="message">Which rule was broken, in words safe to show the user.</param>

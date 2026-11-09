@@ -1,6 +1,6 @@
 using static DesignApp.Application.Constants;
 
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>One brush stroke the user drew on an object.</summary>
 /// <param name="ObjectIndex">The object to change.</param>

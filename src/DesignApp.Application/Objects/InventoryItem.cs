@@ -1,8 +1,8 @@
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>One object the inventory step found, before it is outlined.</summary>
 /// <param name="Label">What the object is, such as "velvet sofa".</param>

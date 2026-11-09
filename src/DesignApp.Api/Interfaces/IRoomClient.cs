@@ -1,4 +1,6 @@
-namespace DesignApp.Api.Rooms;
+using DesignApp.Api.Responses;
+
+namespace DesignApp.Api.Interfaces;
 
 /// <summary>Messages the server sends to a browser watching a room.</summary>
 public interface IRoomClient

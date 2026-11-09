@@ -1,6 +1,7 @@
-using DesignApp.Application.Common;
+using DesignApp.Application.Objects;
 
-namespace DesignApp.Application.Analysis;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>The pixel work of the analysis: scaling the photo and building the label map.</summary>
 public interface IRoomImaging

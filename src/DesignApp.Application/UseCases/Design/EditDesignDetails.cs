@@ -1,8 +1,9 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
 
-namespace DesignApp.Application.Designs;
+
+namespace DesignApp.Application.UseCases.Design;
 
 /// <summary>Changes a design's name and description.</summary>
 /// <param name="designs">Loads and saves the design.</param>

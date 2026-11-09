@@ -1,7 +1,7 @@
-using DesignApp.Domain.Common;
+using DesignApp.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace DesignApp.Api;
+namespace DesignApp.Api.Middleware;
 
 /// <summary>
 /// Turns exceptions caused by the request (a broken domain rule, a malformed or oversized body) into

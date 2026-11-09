@@ -1,4 +1,4 @@
-namespace DesignApp.Api;
+namespace DesignApp.Api.Responses;
 
 /// <summary>Body of <c>GET /api/status</c>.</summary>
 /// <param name="Name">The service's display name.</param>

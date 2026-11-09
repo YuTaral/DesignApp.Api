@@ -1,7 +1,7 @@
-using DesignApp.Application.Common;
-using DesignApp.Application.Photos;
-using DesignApp.Application.Photos.Objects;
-using DesignApp.Application.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Application.UseCases.Room;
+
 
 namespace DesignApp.UnitTests.Rooms;
 

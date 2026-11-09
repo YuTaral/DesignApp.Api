@@ -1,14 +1,14 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Application.Photos;
-using DesignApp.Application.Rooms;
-using DesignApp.Domain.Rooms;
+using DesignApp.Api.Requests;
+using DesignApp.Api.Responses;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Application.UseCases.Room;
+using DesignApp.Domain.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Endpoints;
 
 /// <summary>The <c>/api/rooms</c> endpoints: upload a room photo, read a room, its photo and label map, and fix outlines.</summary>
 internal static class RoomEndpoints

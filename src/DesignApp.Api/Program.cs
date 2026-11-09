@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
-using DesignApp.Api;
-using DesignApp.Api.Accounts;
-using DesignApp.Api.Designs;
-using DesignApp.Api.Rooms;
+using DesignApp.Api.Endpoints;
+using DesignApp.Api.Hubs;
+using DesignApp.Api.Middleware;
+using DesignApp.Api.Responses;
+using DesignApp.Api.Services;
+using DesignApp.Api.Setup;
 using DesignApp.Application;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Photos;
+using DesignApp.Application.Interfaces;
 using DesignApp.Infrastructure;
 using Scalar.AspNetCore;
 

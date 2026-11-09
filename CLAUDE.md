@@ -37,14 +37,19 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
   wire names, user-facing messages, and enums) lives in the project's root `Constants` class, in nested
   groups with a `Messages` group. Files using an enum add `using static DesignApp.<Layer>.Constants;`.
   Exception: the real AI's tuning lives in the one-row `ai_settings` table (seeded from `Constants.Ai.Defaults`).
-- **One type per file**, named after it. Only `Common/Result.cs` pairs `Result<T>` with its `Result` helper.
-- **Folders:** use cases in `<Entity>/<Entity>UseCases/` (one sealed class per use case); every interface
-  in an `Interfaces/` subfolder of its folder; every record / record struct in an `Objects/` subfolder, as
-  are the static helpers of `Infrastructure/Photos` and `Infrastructure/Database`. Infrastructure is split into `Ai/`, `Analysis/`,
-  `Background/` (the hosted services), `Database/` (with `Configurations/`, `Objects/`, `Repository/`,
-  `Migrations/`), `FileStorage/`, `Identity/` and `Photos/`.
-- **Namespaces:** a feature folder is a namespace (`DesignApp.Infrastructure.Database`). The organizing
-  subfolders (`UseCases`, `Interfaces`, `Objects`, `Configurations`, `Repository`) never change it: after a
-  Visual Studio move, put the namespace back and drop the usings it added.
+- **One type per file**, named after it. Only `Objects/Result.cs` pairs `Result<T>` with its `Result` helper.
+- **Folders: Domain, Application and Api are grouped by type** (one folder per kind of class, not per entity):
+  - Domain: `Entities/`, `Objects/` (value objects and records), `Extensions/`, `Exceptions/`.
+  - Application: `Interfaces/` (every port), `UseCases/` (one sealed class per use case), `Objects/` (records,
+    `StoredFile`, `Result`), `Helpers/`.
+  - Api: `Endpoints/`, `Requests/`, `Responses/`, `Hubs/`, `Interfaces/`, `Services/`, `Middleware/`, `Setup/`, `Helpers/`.
+  - `Constants`, `DependencyInjection` and `Program` stay at the project roots. A new class goes in the folder of its kind.
+- **Infrastructure is grouped by technology:** `Ai/`, `Analysis/`, `Background/` (the hosted services), `Database/`
+  (with `Configurations/`, `Objects/`, `Repository/`, `Migrations/`), `FileStorage/`, `Identity/` and `Photos/`; inside
+  them, interfaces go in `Interfaces/` and records and static helpers in `Objects/`.
+- **Namespaces:** a top-level folder is a namespace (`DesignApp.Application.UseCases`, `DesignApp.Infrastructure.Database`).
+  Subfolders inside Infrastructure's folders (`Interfaces`, `Objects`, `Configurations`, `Repository`) never change it:
+  after a Visual Studio move, put the namespace back and drop the usings it added. Moving an entity changes its type
+  name in the EF Core migrations and snapshot: update those strings, then check `dotnet ef migrations has-pending-model-changes`.
 - Apply layout rules to the whole solution, not only the folders named in a request; say what was left out.
 - Scripted edits on Windows: keep each file's line endings and byte-order mark as they were.

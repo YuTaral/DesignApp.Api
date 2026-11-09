@@ -1,14 +1,11 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
-using DesignApp.Infrastructure.Ai;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai.Claude;
 using DesignApp.Infrastructure.Ai.Fal;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using SkiaSharp;
 using static DesignApp.Domain.Constants;
 

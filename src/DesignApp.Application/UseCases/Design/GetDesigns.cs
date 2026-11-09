@@ -1,7 +1,8 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Designs;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Application.Designs;
+
+namespace DesignApp.Application.UseCases.Design;
 
 /// <summary>Reads the user's designs.</summary>
 /// <param name="designs">Loads the designs.</param>

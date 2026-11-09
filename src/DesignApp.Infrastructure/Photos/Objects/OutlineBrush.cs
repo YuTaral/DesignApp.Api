@@ -1,5 +1,5 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
+using DesignApp.Application.Objects;
+
 using static DesignApp.Application.Constants;
 
 namespace DesignApp.Infrastructure.Photos;

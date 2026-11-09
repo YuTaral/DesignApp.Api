@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Hands rooms to the background worker that analyzes them.</summary>
 public interface IAnalysisScheduler

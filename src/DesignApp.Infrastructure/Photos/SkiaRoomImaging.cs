@@ -1,7 +1,7 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Extensions;
+using DesignApp.Domain.Objects;
 using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Photos;

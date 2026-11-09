@@ -1,4 +1,4 @@
-namespace DesignApp.Api;
+namespace DesignApp.Api.Middleware;
 
 /// <summary>
 /// Ends a request quietly when the browser has gone away: a page closed or left mid-request, or an

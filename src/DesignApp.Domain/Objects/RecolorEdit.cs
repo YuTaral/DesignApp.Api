@@ -1,6 +1,7 @@
-using DesignApp.Domain.Common;
+using DesignApp.Domain.Exceptions;
 
-namespace DesignApp.Domain.Designs;
+
+namespace DesignApp.Domain.Objects;
 
 /// <summary>Paints an object a new color while keeping its shading and texture.</summary>
 public sealed record RecolorEdit : EditOperation

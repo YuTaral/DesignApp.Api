@@ -1,7 +1,6 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using Microsoft.Extensions.Options;
 using static DesignApp.Domain.Constants;
 

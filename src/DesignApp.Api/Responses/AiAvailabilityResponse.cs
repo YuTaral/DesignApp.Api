@@ -1,8 +1,8 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Responses;
 
 /// <summary>The body of <c>GET /api/ai</c>: which AI uploads use, and whether they may choose.</summary>
 /// <param name="Default">The AI an upload gets when it doesn't choose.</param>

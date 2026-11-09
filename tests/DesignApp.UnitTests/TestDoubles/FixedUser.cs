@@ -1,4 +1,5 @@
-using DesignApp.Application.Abstractions;
+using DesignApp.Application.Interfaces;
+
 
 namespace DesignApp.UnitTests;
 

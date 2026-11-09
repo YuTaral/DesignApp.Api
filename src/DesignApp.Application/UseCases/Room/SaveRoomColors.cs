@@ -1,8 +1,10 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
 
-namespace DesignApp.Application.Designs;
+
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>Saves the colors of one room of a design.</summary>
 /// <param name="rooms">Finds the room, to check the colors against its objects.</param>

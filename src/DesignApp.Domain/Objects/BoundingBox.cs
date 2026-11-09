@@ -1,6 +1,7 @@
-using DesignApp.Domain.Common;
+using DesignApp.Domain.Exceptions;
 
-namespace DesignApp.Domain.Rooms;
+
+namespace DesignApp.Domain.Objects;
 
 /// <summary>A box in normalized image coordinates (0..1), so it is independent of photo resolution.</summary>
 public readonly record struct BoundingBox

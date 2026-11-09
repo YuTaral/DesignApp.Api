@@ -1,5 +1,5 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Claude;
 using DesignApp.Infrastructure.Ai.Fal;

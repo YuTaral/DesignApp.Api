@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Objects;
 using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;

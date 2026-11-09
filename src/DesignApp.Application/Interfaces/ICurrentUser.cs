@@ -1,4 +1,6 @@
-namespace DesignApp.Application.Abstractions;
+using DesignApp.Application.Helpers;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Who is making the request. Every query is scoped to this id so users only see their own data.</summary>
 public interface ICurrentUser

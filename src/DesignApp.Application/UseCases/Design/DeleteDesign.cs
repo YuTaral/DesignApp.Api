@@ -1,7 +1,9 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.UseCases.Room;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Application.Designs;
+
+namespace DesignApp.Application.UseCases.Design;
 
 /// <summary>Deletes a design and its rooms, with their photos and outlines.</summary>
 /// <param name="rooms">Finds the rooms.</param>
@@ -20,7 +22,7 @@ public sealed class DeleteDesign(IRoomRepository rooms, IDesignRepository design
         if (design is null)
             return false;
 
-        var owned = new List<Domain.Rooms.Room>();
+        var owned = new List<Room>();
         foreach (var entry in design.Rooms)
         {
             if (await rooms.FindAsync(entry.RoomId, currentUser.Id, cancellationToken) is { } room)

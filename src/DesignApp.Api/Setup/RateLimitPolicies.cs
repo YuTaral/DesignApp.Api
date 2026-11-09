@@ -1,7 +1,6 @@
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 
-namespace DesignApp.Api;
+namespace DesignApp.Api.Setup;
 
 /// <summary>Named rate-limit policies that endpoints opt into.</summary>
 internal static class RateLimitPolicies

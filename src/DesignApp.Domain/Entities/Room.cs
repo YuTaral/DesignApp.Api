@@ -1,7 +1,9 @@
-using DesignApp.Domain.Common;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Domain.Rooms;
+namespace DesignApp.Domain.Entities;
 
 /// <summary>An uploaded room photo and the objects the AI pipeline found in it.</summary>
 public sealed class Room

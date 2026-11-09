@@ -1,9 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using static DesignApp.Domain.Constants;
 
 using D = DesignApp.Infrastructure.Constants.Ai.Claude.Descriptions;

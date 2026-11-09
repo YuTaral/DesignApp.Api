@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Abstractions;
+namespace DesignApp.Application.Helpers;
 
 /// <summary>
 /// Owner ids of visitors who haven't signed in: <c>guest:</c> and a random UUID, one per browser.

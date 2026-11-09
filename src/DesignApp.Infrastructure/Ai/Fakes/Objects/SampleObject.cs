@@ -1,4 +1,4 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Objects;
 using SkiaSharp;
 using static DesignApp.Domain.Constants;
 

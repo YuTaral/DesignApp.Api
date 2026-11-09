@@ -1,7 +1,8 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Responses;
 
 /// <summary>One detected object as the API returns it.</summary>
 /// <param name="Index">The object's value in the label map.</param>

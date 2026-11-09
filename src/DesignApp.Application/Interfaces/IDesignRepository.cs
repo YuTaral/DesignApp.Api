@@ -1,6 +1,7 @@
-using DesignApp.Domain.Designs;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Application.Abstractions;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Loads and saves designs in the database.</summary>
 public interface IDesignRepository

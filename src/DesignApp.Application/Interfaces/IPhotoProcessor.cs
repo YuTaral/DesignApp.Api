@@ -1,7 +1,7 @@
-using DesignApp.Application.Common;
-using DesignApp.Application.Photos.Objects;
+using DesignApp.Application.Objects;
 
-namespace DesignApp.Application.Photos;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>
 /// Turns an uploaded file into the photo the app works with: a validated, upright sRGB JPEG,

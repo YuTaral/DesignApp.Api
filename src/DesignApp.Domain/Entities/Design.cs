@@ -1,8 +1,9 @@
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Domain.Designs;
+namespace DesignApp.Domain.Entities;
 
 /// <summary>
 /// A saved restyling: a name, a short description and one or more rooms, each with its own edits

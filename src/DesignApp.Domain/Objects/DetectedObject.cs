@@ -1,7 +1,6 @@
-using DesignApp.Domain.Common;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Domain.Rooms;
+namespace DesignApp.Domain.Objects;
 
 /// <summary>
 /// One object found in a room photo. <see cref="Index"/> is the object's value in the label map,

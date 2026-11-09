@@ -1,4 +1,6 @@
-namespace DesignApp.Application.Abstractions;
+using DesignApp.Application.Objects;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Blob storage for photos and, later, masks and thumbnails. Keys are paths like "rooms/{id}/photo.jpg".</summary>
 public interface IFileStorage

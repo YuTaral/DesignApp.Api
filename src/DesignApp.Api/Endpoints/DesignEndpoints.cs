@@ -1,9 +1,13 @@
-using DesignApp.Application.Designs;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
+using DesignApp.Api.Requests;
+using DesignApp.Api.Responses;
+using DesignApp.Application.UseCases.Design;
+using DesignApp.Application.UseCases.Room;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace DesignApp.Api.Designs;
+namespace DesignApp.Api.Endpoints;
 
 /// <summary>
 /// The <c>/api/designs</c> endpoints. A design has a name, a short description and one or more

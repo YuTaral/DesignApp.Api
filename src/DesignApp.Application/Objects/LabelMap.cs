@@ -1,6 +1,7 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Objects;
 
-namespace DesignApp.Application.Analysis;
+
+namespace DesignApp.Application.Objects;
 
 /// <summary>The finished analysis: the label map and the objects that are visible in it.</summary>
 /// <param name="Png">A grayscale PNG the size of the analysis image; each pixel's value is the index of the object it belongs to, 0 for none.</param>

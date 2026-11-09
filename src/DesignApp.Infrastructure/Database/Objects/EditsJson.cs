@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
+using DesignApp.Domain.Objects;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 

@@ -1,6 +1,7 @@
-using DesignApp.Application.Abstractions;
+using DesignApp.Application.Helpers;
 
-namespace DesignApp.Api.Accounts;
+
+namespace DesignApp.Api.Helpers;
 
 /// <summary>
 /// The cookie that gives each browser its own guest id until it signs in, so visitors who haven't

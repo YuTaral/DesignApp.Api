@@ -1,5 +1,4 @@
-using DesignApp.Domain.Designs;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

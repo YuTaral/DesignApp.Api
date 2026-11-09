@@ -1,4 +1,6 @@
-namespace DesignApp.Domain.Designs;
+using DesignApp.Domain.Objects;
+
+namespace DesignApp.Domain.Entities;
 
 /// <summary>One room of a design, with the edits made to it.</summary>
 public sealed class DesignRoom

@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Abstractions;
+namespace DesignApp.Application.Objects;
 
 /// <summary>An open stored file. The caller disposes it.</summary>
 /// <param name="content">The file's bytes, read as a stream.</param>

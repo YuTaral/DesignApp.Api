@@ -1,5 +1,5 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Designs;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesignApp.Infrastructure.Database;

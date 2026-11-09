@@ -1,6 +1,7 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Application.Analysis;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Tells the browser that a room changed (live progress over SignalR).</summary>
 public interface IRoomNotifier

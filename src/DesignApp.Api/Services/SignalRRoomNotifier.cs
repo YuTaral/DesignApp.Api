@@ -1,8 +1,11 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Api.Hubs;
+using DesignApp.Api.Interfaces;
+using DesignApp.Api.Responses;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Services;
 
 /// <summary><see cref="IRoomNotifier"/> that pushes room changes over <see cref="RoomHub"/>.</summary>
 /// <param name="hub">Sends to the room's watchers.</param>

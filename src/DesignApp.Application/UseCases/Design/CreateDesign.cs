@@ -1,8 +1,10 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Domain.Common;
-using DesignApp.Domain.Designs;
+using DesignApp.Application.Interfaces;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Objects;
 
-namespace DesignApp.Application.Designs;
+
+namespace DesignApp.Application.UseCases.Design;
 
 /// <summary>Creates a design from a room and its colors (saving from the editor).</summary>
 /// <param name="rooms">Finds the room, checking it is the user's.</param>

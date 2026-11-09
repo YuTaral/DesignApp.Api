@@ -1,4 +1,4 @@
-namespace DesignApp.Application.Analysis;
+namespace DesignApp.Application.Objects;
 
 /// <summary>An inventory item together with its outline.</summary>
 /// <param name="Item">What the object is.</param>

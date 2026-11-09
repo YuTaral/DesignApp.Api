@@ -1,11 +1,10 @@
-using DesignApp.Application.Abstractions;
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Common;
-using DesignApp.Application.Photos;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
+using DesignApp.Domain.Entities;
+
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.Rooms;
+namespace DesignApp.Application.UseCases.Room;
 
 /// <summary>Use case: turn an uploaded photo into a new room.</summary>
 /// <param name="photoProcessor">Validates and normalizes the photo.</param>

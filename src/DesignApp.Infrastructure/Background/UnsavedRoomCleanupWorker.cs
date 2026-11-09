@@ -1,4 +1,4 @@
-using DesignApp.Application.Rooms;
+using DesignApp.Application.UseCases.Room;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

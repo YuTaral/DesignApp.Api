@@ -1,6 +1,6 @@
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Domain.Rooms;
+namespace DesignApp.Domain.Extensions;
 
 /// <summary>Rules for <see cref="AnalysisScope"/>.</summary>
 public static class AnalysisScopes

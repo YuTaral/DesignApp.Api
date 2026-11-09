@@ -1,7 +1,5 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Application.Rooms;
-using DesignApp.Domain.Rooms;
-using Microsoft.AspNetCore.Hosting;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.UseCases.Room;
 using Microsoft.Extensions.DependencyInjection;
 using static DesignApp.Domain.Constants;
 

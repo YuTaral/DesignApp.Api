@@ -1,5 +1,6 @@
-using DesignApp.Application.Rooms;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.UseCases.Room;
+using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
 using Microsoft.Extensions.Logging.Abstractions;
 using static DesignApp.Domain.Constants;
 
@@ -52,7 +53,7 @@ public class DeleteUnsavedRoomsTests
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 800, 600, uploaded);
         room.StartAnalysis();
         room.StartSegmentation();
-        room.MarkReady([new DetectedObject(1, "wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 1), DesignApp.Domain.Common.HexColor.Parse("#FFFFFF"))],
+        room.MarkReady([new DetectedObject(1, "wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 1), DesignApp.Domain.Objects.HexColor.Parse("#FFFFFF"))],
             DesignApp.Application.Constants.Rooms.LabelMapKey(id));
         for (var i = 0; i < outlineFixes; i++)
             room.AddLabelMapRevision(revision => DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision));

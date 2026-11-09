@@ -1,4 +1,4 @@
-namespace DesignApp.Api.Rooms;
+namespace DesignApp.Api.Responses;
 
 /// <summary>A box in normalized image coordinates (0..1).</summary>
 /// <param name="X">Left edge.</param>

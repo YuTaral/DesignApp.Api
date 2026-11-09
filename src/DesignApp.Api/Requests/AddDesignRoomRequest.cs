@@ -1,4 +1,4 @@
-namespace DesignApp.Api.Designs;
+namespace DesignApp.Api.Requests;
 
 /// <summary>Body of <c>POST /api/designs/{id}/rooms</c>.</summary>
 /// <param name="RoomId">The room to add.</param>

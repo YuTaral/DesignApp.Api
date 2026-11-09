@@ -1,5 +1,5 @@
-using DesignApp.Application.Analysis;
-using DesignApp.Domain.Rooms;
+using DesignApp.Application.Interfaces;
+using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Ai.Fakes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

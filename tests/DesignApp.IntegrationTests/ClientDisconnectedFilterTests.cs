@@ -1,4 +1,5 @@
 using DesignApp.Api;
+using DesignApp.Api.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 

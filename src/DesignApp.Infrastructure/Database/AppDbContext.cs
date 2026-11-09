@@ -1,5 +1,4 @@
-using DesignApp.Domain.Designs;
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;

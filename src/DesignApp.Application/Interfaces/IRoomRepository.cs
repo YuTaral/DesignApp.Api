@@ -1,6 +1,7 @@
-using DesignApp.Domain.Rooms;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Application.Abstractions;
+
+namespace DesignApp.Application.Interfaces;
 
 /// <summary>Loads and saves rooms in the database.</summary>
 public interface IRoomRepository

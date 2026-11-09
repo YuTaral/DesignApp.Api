@@ -1,4 +1,5 @@
-using DesignApp.Application.Analysis;
+using DesignApp.Application.Interfaces;
+
 
 namespace DesignApp.UnitTests;
 

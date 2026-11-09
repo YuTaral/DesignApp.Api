@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace DesignApp.Api.Accounts;
+namespace DesignApp.Api.Responses;
 
 /// <summary>Who is signed in.</summary>
 /// <param name="SignedIn">Whether an account is signed in; otherwise the browser is a guest.</param>

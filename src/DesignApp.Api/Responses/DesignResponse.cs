@@ -1,6 +1,7 @@
-using DesignApp.Domain.Designs;
+using DesignApp.Domain.Entities;
 
-namespace DesignApp.Api.Designs;
+
+namespace DesignApp.Api.Responses;
 
 /// <summary>A design as the API returns it.</summary>
 /// <param name="Id">The design's id.</param>
