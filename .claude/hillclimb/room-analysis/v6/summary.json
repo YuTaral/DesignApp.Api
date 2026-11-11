@@ -1,0 +1,5 @@
+{
+  "description": "Tight confirm on the real API: Haiku 5.5 low, all 40 photos x 2 reps",
+  "target": "code",
+  "decision": "reverted: outline_ok -8.8 +/- 5.9 points on test, outside noise"
+}

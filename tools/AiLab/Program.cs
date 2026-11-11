@@ -1,6 +1,8 @@
 // AiLab: runs the app's real AI pipeline on one photo outside the API.
 //
-//   dotnet run --project tools/AiLab -- record <photo.jpg> <folder>   PAID: one Claude call + the SAM 3 requests
+//   dotnet run --project tools/AiLab -- record <photo.jpg> <folder> [--model <id>] [--effort low|medium|high] [--max-objects <n>]
+//                                         [--via api|claude-code] [--claude <path to claude>]   claude-code: on the Claude subscription
+//                                                                       PAID: one Claude call + the SAM 3 requests
 //   dotnet run --project tools/AiLab -- replay <folder>               free: answers SAM 3 from the recording
 //
 // record saves the analysis image, Claude's objects (inventory.json) and every SAM 3 request and response
@@ -19,6 +21,8 @@ using DesignApp.Domain.Extensions;
 using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Claude;
+using DesignApp.Infrastructure.Ai.ClaudeCode;
+using DesignApp.Application.Interfaces;
 using DesignApp.Infrastructure.Ai.Fal;
 using DesignApp.Infrastructure.Photos;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +32,7 @@ using static DesignApp.Domain.Constants;
 
 if (args.Length < 2 || args[0] is not ("record" or "replay"))
 {
-    Console.Error.WriteLine("Usage: record <photo.jpg> <folder> | replay <folder>");
+    Console.Error.WriteLine("Usage: record <photo.jpg> <folder> [--model <id>] [--effort low|medium|high] [--max-objects <n>] | replay <folder>");
     return 2;
 }
 
@@ -38,7 +42,24 @@ var samFolder = Path.Combine(folder, "sam");
 Directory.CreateDirectory(samFolder);
 var json = new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true };
 using var logs = LoggerFactory.Create(b => b.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Information));
-var settings = new FixedSettings(new AiSettings());
+// The options a recording may override for an eval cell; anything not given keeps the ai_settings defaults.
+var aiSettings = new AiSettings();
+var via = "api";
+var claudePath = DesignApp.Infrastructure.Constants.Ai.ClaudeCode.DefaultPath;
+for (var i = 3; i + 1 < args.Length; i += 2)
+{
+    switch (args[i])
+    {
+        case "--model": aiSettings.InventoryModel = args[i + 1]; break;
+        case "--effort": aiSettings.InventoryEffort = Enum.Parse<DesignApp.Infrastructure.Constants.InventoryEffort>(args[i + 1], ignoreCase: true); break;
+        case "--via": via = args[i + 1]; break;
+        case "--claude": claudePath = args[i + 1]; break;
+        case "--max-objects": aiSettings.MaxListedObjects = int.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture); break;
+        default: Console.Error.WriteLine($"Unknown option {args[i]}"); return 2;
+    }
+}
+var settings = new FixedSettings(aiSettings);
+var started = System.Diagnostics.Stopwatch.GetTimestamp();
 var imaging = new SkiaRoomImaging();
 
 // 1. The analysis image, prepared exactly as the app prepares it (recorded once, so replays use the same bytes).
@@ -63,12 +84,22 @@ var inventoryPath = Path.Combine(folder, "inventory.json");
 IReadOnlyList<InventoryItem> items;
 if (recording)
 {
-    var key = secrets["Ai:AnthropicApiKey"];
-    if (string.IsNullOrWhiteSpace(key)) { Console.Error.WriteLine("Ai:AnthropicApiKey is not in the user secrets."); return 1; }
-    IAnthropicClient client = new AnthropicClient { ApiKey = key };
-    if (secrets["Ai:AnthropicWorkspaceId"] is { Length: > 0 } workspace)
-        client = client.WithOptions(o => o with { ExtraHeaders = new Dictionary<string, string> { [DesignApp.Infrastructure.Constants.Ai.WorkspaceHeader] = workspace.Trim() } });
-    var claude = new ClaudeInventoryProvider(client, Options.Create(new AiOptions()), settings, logs.CreateLogger<ClaudeInventoryProvider>());
+    IObjectInventoryProvider claude;
+    if (via == "claude-code")
+    {
+        // Development route: Claude Code on this PC, billed to the Claude subscription it is signed in with.
+        var runner = new RecordingClaudeCodeRunner(folder, new ClaudeCodeRunner(Options.Create(new AiOptions { ClaudeCodePath = claudePath })));
+        claude = new ClaudeCodeInventoryProvider(runner, settings, logs.CreateLogger<ClaudeCodeInventoryProvider>());
+    }
+    else
+    {
+        var key = secrets["Ai:AnthropicApiKey"];
+        if (string.IsNullOrWhiteSpace(key)) { Console.Error.WriteLine("Ai:AnthropicApiKey is not in the user secrets."); return 1; }
+        IAnthropicClient client = new AnthropicClient { ApiKey = key, HttpClient = new HttpClient(new ClaudeRecordingHandler(folder, new HttpClientHandler())) };
+        if (secrets["Ai:AnthropicWorkspaceId"] is { Length: > 0 } workspace)
+            client = client.WithOptions(o => o with { ExtraHeaders = new Dictionary<string, string> { [DesignApp.Infrastructure.Constants.Ai.WorkspaceHeader] = workspace.Trim() } });
+        claude = new ClaudeInventoryProvider(client, Options.Create(new AiOptions()), settings, logs.CreateLogger<ClaudeInventoryProvider>());
+    }
     var listed = await claude.ListObjectsAsync(image, CancellationToken.None);
     if (!listed.Succeeded) { Console.Error.WriteLine($"Claude: {listed.Error}"); return 1; }
     items = listed.Value;
@@ -94,6 +125,7 @@ if (recording)
     http.DefaultRequestHeaders.Authorization = new(DesignApp.Infrastructure.Constants.Ai.FalAuthScheme, fal);
 }
 var sam = new FalSegmentationProvider(http, settings, logs.CreateLogger<FalSegmentationProvider>());
+var requests = FalSegmentationProvider.CountRequests();
 var masks = await sam.SegmentAsync(image, items, CancellationToken.None);
 
 // 4. The label map, built exactly as the app builds it.
@@ -104,6 +136,19 @@ await File.WriteAllTextAsync(Path.Combine(folder, "objects.json"), JsonSerialize
 {
     o.Index, o.Label, Category = o.Category.ToString(), o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height,
 }), json));
+// What this run did, for the eval runner: the settings it used, its SAM 3 requests and how long it took.
+await File.WriteAllTextAsync(Path.Combine(folder, recording ? "run.json" : "replay.json"), JsonSerializer.Serialize(new
+{
+    mode = args[0],
+    via,
+    model = aiSettings.InventoryModel,
+    effort = aiSettings.InventoryEffort.ToString(),
+    maxListedObjects = aiSettings.MaxListedObjects,
+    listed = items.Count,
+    labelled = map.Objects.Count,
+    samRequests = requests.Value,
+    seconds = Math.Round(System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds, 1),
+}, json));
 Console.WriteLine($"label map: {map.Objects.Count} objects, {outlined.Count} of {items.Count} outlined");
 Console.WriteLine(missing.Count == 0 ? "every SAM 3 request was answered" : $"{missing.Count} SAM 3 request(s) not in the recording: {string.Join("; ", missing)}");
 return 0;
@@ -150,6 +195,79 @@ internal sealed class RecordingHandler(string folder, HttpMessageHandler inner) 
             }), cancellationToken);
         var copy = new HttpResponseMessage(response.StatusCode) { Content = new StringContent(answer, Encoding.UTF8, "application/json") };
         return copy;
+    }
+}
+
+/// <summary>
+/// Saves Claude's request (without the photo) and its raw response as claude.json, so the eval runner reads the
+/// model that served it, the token usage and the stop reason from the response itself, not from our settings.
+/// </summary>
+internal sealed class ClaudeRecordingHandler(string folder, HttpMessageHandler inner) : DelegatingHandler(inner)
+{
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var body = request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken);
+        var answer = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (request.Method == HttpMethod.Post)
+        {
+            var sent = System.Text.Json.Nodes.JsonNode.Parse(body)!;
+            foreach (var message in sent["messages"]!.AsArray())
+                foreach (var block in message!["content"]!.AsArray())
+                    if (block!["source"] is { } source)
+                        source["data"] = "(the analysis image)";
+            await File.WriteAllTextAsync(Path.Combine(folder, "claude.json"), JsonSerializer.Serialize(new
+            {
+                status = (int)response.StatusCode,
+                request = sent.ToJsonString(),
+                response = answer,
+            }), cancellationToken);
+        }
+        var copy = new HttpResponseMessage(response.StatusCode) { Content = new StringContent(answer, Encoding.UTF8, "application/json") };
+        foreach (var header in response.Headers)
+            copy.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        return copy;
+    }
+}
+
+/// <summary>
+/// Saves Claude Code's input (without the photo) and its JSON result as claude-code.json, so the eval runner reads
+/// the model, tokens and outcome from Claude Code's own result.
+/// </summary>
+internal sealed class RecordingClaudeCodeRunner(string folder, IClaudeCodeRunner inner) : IClaudeCodeRunner
+{
+    public async Task<string> RunAsync(IReadOnlyList<string> arguments, string input, CancellationToken cancellationToken)
+    {
+        string printed;
+        try
+        {
+            printed = await inner.RunAsync(arguments, input, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await Save(arguments, input, null, e.Message, cancellationToken);
+            throw;
+        }
+        await Save(arguments, input, printed, null, cancellationToken);
+        return printed;
+    }
+
+    private async Task Save(IReadOnlyList<string> arguments, string input, string? printed, string? error, CancellationToken cancellationToken)
+    {
+        var message = System.Text.Json.Nodes.JsonNode.Parse(input)!;
+        foreach (var block in message["message"]!["content"]!.AsArray())
+            if (block!["source"] is { } source)
+                source["data"] = "(the analysis image)";
+        var systemPrompt = arguments.SkipWhile(a => a != "--system-prompt-file").Skip(1).FirstOrDefault() is { } file && File.Exists(file)
+            ? await File.ReadAllTextAsync(file, cancellationToken) : "";
+        await File.WriteAllTextAsync(Path.Combine(folder, "claude-code.json"), JsonSerializer.Serialize(new
+        {
+            arguments = arguments.Where(a => !a.StartsWith('{') && !a.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)).ToArray(),
+            system = systemPrompt,
+            message = message.ToJsonString(),
+            result = printed,
+            error,
+        }), cancellationToken);
     }
 }
 

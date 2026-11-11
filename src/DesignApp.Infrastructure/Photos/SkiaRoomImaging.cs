@@ -63,7 +63,8 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         using var photo = DecodeRgba(image);
         var pixels = photo.GetPixelSpan();
         var surfaces = objects.Select(o => o.Item.Category.IsSurface()).ToArray();
-        LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1]);
+        var reach = Reach(objects, width, height);
+        LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1], reach);
 
         var stats = Measure(labels, width, height, objects.Count, pixels);
 
@@ -88,6 +89,35 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             labels[p] = renumber[labels[p]];
 
         return new LabelMap(EncodeGrayPng(labels, width, height), detected);
+    }
+
+    /// <summary>
+    /// Per paint id, where the object may still grow in the cleanup's last pass: anywhere for a surface,
+    /// otherwise Claude's box for it widened by <see cref="Constants.Refiner.BoxReachFraction"/> of the long side,
+    /// or by <see cref="Constants.Refiner.BoxReachOwnFraction"/> of the box's own size when that is more.
+    /// </summary>
+    /// <param name="objects">The objects, in paint-id order (id = position + 1).</param>
+    /// <param name="width">Label map width.</param>
+    /// <param name="height">Label map height.</param>
+    private static PixelRect?[] Reach(IReadOnlyList<SegmentedObject> objects, int width, int height)
+    {
+        var minMargin = Constants.Refiner.BoxReachFraction * Math.Max(width, height);
+        var reach = new PixelRect?[objects.Count + 1];
+        for (var i = 0; i < objects.Count; i++)
+        {
+            var item = objects[i].Item;
+            if (item.Category.IsSurface())
+                continue;
+            var box = item.Box;
+            var marginX = (int)Math.Ceiling(Math.Max(minMargin, Constants.Refiner.BoxReachOwnFraction * box.Width * width));
+            var marginY = (int)Math.Ceiling(Math.Max(minMargin, Constants.Refiner.BoxReachOwnFraction * box.Height * height));
+            reach[i + 1] = new PixelRect(
+                Math.Max(0, (int)Math.Floor(box.X * width) - marginX),
+                Math.Max(0, (int)Math.Floor(box.Y * height) - marginY),
+                Math.Min(width, (int)Math.Ceiling((box.X + box.Width) * width) + marginX),
+                Math.Min(height, (int)Math.Ceiling((box.Y + box.Height) * height) + marginY));
+        }
+        return reach;
     }
 
     /// <summary>Counts the mask pixels that belong to the object.</summary>

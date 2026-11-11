@@ -99,6 +99,37 @@ public class AnalysisAccuracyTests
         Assert.Equal(0, labels[10 * width + 45]);  // red gap: unlike both neighbors, left empty
     }
 
+    [Fact]
+    public void A_small_object_does_not_spread_past_its_reach_into_a_gap_of_its_color()
+    {
+        // One white photo: a small "teapot" (object 1) at x 10-14 and a white "wall" (object 2) at x 40+.
+        // The gap left of the teapot is reachable only through it. Without a reach the teapot takes all of
+        // it; with its reach (x 5-19) it stops at x 5 and never passes x 19, where the wall takes over.
+        const int width = 60, height = 10;
+        var rgba = Enumerable.Repeat((byte)240, width * height * 4).ToArray();
+        byte[] Labels()
+        {
+            var labels = new byte[width * height];
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 10; x < 15; x++) labels[y * width + x] = 1;
+                for (var x = 40; x < width; x++) labels[y * width + x] = 2;
+            }
+            return labels;
+        }
+
+        var free = Labels();
+        LabelMapRefiner.FillRemainingGaps(free, width, height, rgba);
+        var limited = Labels();
+        LabelMapRefiner.FillRemainingGaps(limited, width, height, rgba, [null, new PixelRect(5, 0, 20, height), null]);
+
+        Assert.Equal(1, free[5 * width + 0]);       // unlimited: the teapot spread to the photo's edge
+        Assert.Equal(0, limited[5 * width + 0]);    // limited: out of its reach, and no one else touches it
+        Assert.Equal(1, limited[5 * width + 5]);    // the edge of its reach is still its own
+        Assert.DoesNotContain(Enumerable.Range(0, width * height), p => limited[p] == 1 && p % width is < 5 or >= 20);
+        Assert.All(Enumerable.Range(20, 20), x => Assert.Equal(2, limited[5 * width + x])); // the wall took the rest
+    }
+
     /// <summary>A mask whose pixels are set where the rule says.</summary>
     private static ObjectMask Mask(int width, int height, Func<int, int, bool> on)
     {

@@ -1,0 +1,9 @@
+{
+  "name": "designapp-eval",
+  "private": true,
+  "type": "module",
+  "description": "Room-analysis eval runner (see run-eval.mjs). The judge uses the Anthropic SDK.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0"
+  }
+}

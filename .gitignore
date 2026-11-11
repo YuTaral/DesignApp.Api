@@ -485,3 +485,12 @@ $RECYCLE.BIN/
 .env
 .env.*
 *.pfx
+
+# Eval runner: dependencies and generated hillclimb output
+tools/eval/node_modules/
+.claude/hillclimb/**/traces/
+.claude/hillclimb/**/report.html
+.claude/hillclimb/**/trajectory/
+.claude/hillclimb/**/out/
+.claude/hillclimb/**/ref/
+.claude/hillclimb/**/progress.txt

@@ -1,0 +1,143 @@
+{
+  "reps": 2,
+  "goal": {
+    "target": "app_cost_usd",
+    "direction": "lower",
+    "hold": [
+      "outline_ok",
+      "found",
+      "spill",
+      "unassigned",
+      "forbidden"
+    ]
+  },
+  "approve_each_round": false,
+  "train_ids": [
+    "01-white-room-thin-legs",
+    "02-dark-backlit-glass-table",
+    "04-patterned-chairs-arched-windows",
+    "06-open-plan-vaulted",
+    "07-plants-everywhere",
+    "08-floor-mirror-reflection",
+    "09-overhead-wide-angle",
+    "11-six-chairs-thin-legs",
+    "12-white-on-white-tv-wall",
+    "13-cluttered-bookshelves",
+    "15-backlit-hard-shadows-glass",
+    "16-dark-sunset-backlit",
+    "17-night-dark-hallway",
+    "19-chevron-tiles-glass-shower",
+    "20-wallpaper-patterned-sofa-rug",
+    "21-ordinary-bedroom",
+    "22-ordinary-grey-sofa",
+    "24-ordinary-bathroom",
+    "26-ordinary-dining",
+    "27-ordinary-studio-apartment",
+    "28-low-res-bedroom-gallery",
+    "29-tv-on-bookshelf",
+    "30-tv-on-macrame-wall",
+    "31-round-mirror-bathroom",
+    "33-kids-shelves-toys",
+    "34-kids-room-pink",
+    "38-vintage-yellow-crt-room",
+    "39-white-bathroom-oval-mirror"
+  ],
+  "test_ids": [
+    "03-white-sofa-light-walls",
+    "05-tv-showing-image-clutter",
+    "10-cluttered-kitchen",
+    "14-fisheye-lens",
+    "18-open-plan-kitchen-tv",
+    "23-ordinary-l-kitchen",
+    "25-ordinary-home-office",
+    "32-glass-shower-big-mirror",
+    "35-bunk-beds",
+    "36-dark-living-room",
+    "37-entry-stairs-railing",
+    "40-sunlit-wallpaper-living"
+  ],
+  "harness_paths": [
+    "tools/eval/grade_outlines.py",
+    "../rooms-eval/expected.json"
+  ],
+  "metrics": [
+    {
+      "id": "outline_ok",
+      "kind": "float",
+      "label": "Outlines OK"
+    },
+    {
+      "id": "found",
+      "kind": "float",
+      "label": "Found"
+    },
+    {
+      "id": "spill",
+      "kind": "float",
+      "label": "Spill",
+      "better": "lower"
+    },
+    {
+      "id": "unassigned",
+      "kind": "float",
+      "label": "Unassigned",
+      "better": "lower"
+    },
+    {
+      "id": "forbidden",
+      "kind": "float",
+      "label": "Forbidden",
+      "better": "lower"
+    },
+    {
+      "id": "counts_ok",
+      "kind": "float",
+      "label": "Counts OK"
+    },
+    {
+      "id": "not_real",
+      "kind": "float",
+      "label": "Not real",
+      "better": "lower"
+    }
+  ],
+  "perf_fields": [
+    {
+      "id": "app_cost_usd",
+      "label": "App cost",
+      "unit": "$"
+    },
+    {
+      "id": "claude_usd",
+      "label": "Claude",
+      "unit": "$"
+    },
+    {
+      "id": "sam_requests",
+      "label": "SAM reqs"
+    },
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    }
+  ],
+  "prices": {
+    "claude-sonnet-5-5": {
+      "in": 2,
+      "out": 10,
+      "cache_read": 0.2
+    },
+    "claude-haiku-5-5": {
+      "in": 0.1,
+      "out": 0.5
+    },
+    "claude-opus-5-5": {
+      "in": 4,
+      "out": 20,
+      "cache_read": 0.2
+    }
+  },
+  "sam_request_usd": 0.005,
+  "harness_sha": "6406240eb918753f7f4290c857f9f2c91434a45a854ba45a9e0fd4dd6106ed8f"
+}

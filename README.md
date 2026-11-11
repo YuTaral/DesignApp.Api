@@ -196,6 +196,9 @@ runs them in Firefox against the five sample photos.
   Claude call and the SAM 3 requests) saves every answer; `replay <folder>` (free) feeds them back to the same
   code, so mask picking and label-map cleanup can be tuned without paying. `measure.py` and `draw.py` score
   and draw a run. Run with `dotnet run --project tools/AiLab -- ...`; keys come from the API's user secrets.
+  `eval.py <set folder>` scores a whole photo test set (`expected.json` plus one run per photo in `runs/`): the
+  expected objects found, how well Claude's boxes and SAM 3's outlines agree, loose outlines and unassigned pixels,
+  per photo and per scenario. The set of 20 hard photos lives in `../rooms-eval` (outside the repos).
 - `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the
   solution when a turn ends with uncommitted C# changes and sends any errors back.
 

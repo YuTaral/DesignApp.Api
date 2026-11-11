@@ -1,0 +1,99 @@
+{
+  "reps": 1,
+  "goal": {
+    "target": "app_cost_usd",
+    "direction": "lower",
+    "hold": [
+      "outline_ok",
+      "found",
+      "spill",
+      "unassigned",
+      "forbidden"
+    ]
+  },
+  "approve_each_round": false,
+  "harness_paths": [
+    "tools/eval/grade_outlines.py",
+    "../rooms-eval/expected.json"
+  ],
+  "metrics": [
+    {
+      "id": "outline_ok",
+      "kind": "float",
+      "label": "Outlines OK"
+    },
+    {
+      "id": "found",
+      "kind": "float",
+      "label": "Found"
+    },
+    {
+      "id": "spill",
+      "kind": "float",
+      "label": "Spill",
+      "better": "lower"
+    },
+    {
+      "id": "unassigned",
+      "kind": "float",
+      "label": "Unassigned",
+      "better": "lower"
+    },
+    {
+      "id": "forbidden",
+      "kind": "float",
+      "label": "Forbidden",
+      "better": "lower"
+    },
+    {
+      "id": "counts_ok",
+      "kind": "float",
+      "label": "Counts OK"
+    },
+    {
+      "id": "not_real",
+      "kind": "float",
+      "label": "Not real",
+      "better": "lower"
+    }
+  ],
+  "perf_fields": [
+    {
+      "id": "app_cost_usd",
+      "label": "App cost",
+      "unit": "$"
+    },
+    {
+      "id": "claude_usd",
+      "label": "Claude",
+      "unit": "$"
+    },
+    {
+      "id": "sam_requests",
+      "label": "SAM reqs"
+    },
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    }
+  ],
+  "prices": {
+    "claude-sonnet-5-5": {
+      "in": 2,
+      "out": 10,
+      "cache_read": 0.2
+    },
+    "claude-haiku-5-5": {
+      "in": 0.1,
+      "out": 0.5
+    },
+    "claude-opus-5-5": {
+      "in": 4,
+      "out": 20,
+      "cache_read": 0.2
+    }
+  },
+  "sam_request_usd": 0.005,
+  "harness_sha": "858cab7f0e7722456069e1b2fcb0f2b74d431a809cafed11d5f0e452ce067efc"
+}

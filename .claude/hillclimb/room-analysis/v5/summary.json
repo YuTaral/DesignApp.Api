@@ -1,0 +1,5 @@
+{
+  "description": "Confirm on the real API: Haiku 5.5 low on the 12 test photos",
+  "target": "code",
+  "suspicious": "outline_ok point estimate -5 points, consistent across rounds; within noise at n=12"
+}

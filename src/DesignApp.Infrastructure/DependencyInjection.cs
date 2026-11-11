@@ -5,6 +5,7 @@ using Anthropic;
 using DesignApp.Application.Interfaces;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Claude;
+using DesignApp.Infrastructure.Ai.ClaudeCode;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Infrastructure.Ai.Fal;
 using DesignApp.Infrastructure.Analysis;
@@ -52,16 +53,17 @@ public static class DependencyInjection
 
     /// <summary>
     /// Adds the analysis queue, the background worker and the AI providers. The fakes are always
-    /// there; Claude and SAM 3 on fal.ai whenever both keys are set (required unless
-    /// <c>Ai:UseFakes</c> is on). Each room uses the mode it was uploaded with.
+    /// there; Claude and SAM 3 on fal.ai whenever they are set up (required unless <c>Ai:UseFakes</c> is on):
+    /// SAM 3 needs the fal.ai key, Claude the Anthropic key or, in Development only, <c>Ai:UseClaudeSubscription</c>
+    /// (Claude Code on the developer's PC). Each room uses the mode it was uploaded with.
     /// </summary>
     /// <param name="builder">The host builder.</param>
     private static void AddAiPipeline(IHostApplicationBuilder builder)
     {
         builder.Services.AddOptions<AiOptions>()
             .Bind(builder.Configuration.GetSection(Constants.Config.AiSection))
-            .Validate(o => o.UseFakes || (o.AnthropicApiKey.Length > 0 && o.FalKey.Length > 0),
-                Constants.Config.AiKeysRequired)
+            .Validate(o => o.UseFakes || o.HasRealKeys, Constants.Config.AiKeysRequired)
+            .Validate(o => !o.UseClaudeSubscription || builder.Environment.IsDevelopment(), Constants.Config.ClaudeSubscriptionDevelopmentOnly)
             .ValidateOnStart();
 
         builder.Services.AddSingleton<AnalysisScheduler>();
@@ -78,6 +80,22 @@ public static class DependencyInjection
         if (!configured.HasRealKeys)
             return;
 
+        if (configured.UseClaudeSubscription)
+        {
+            builder.Services.AddSingleton<IClaudeCodeRunner, ClaudeCodeRunner>();
+            builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeCodeInventoryProvider>(Constants.Ai.RealKey);
+        }
+        else
+        {
+            AddClaudeApi(builder);
+        }
+        AddSam3(builder);
+    }
+
+    /// <summary>Claude through the API key: the production route.</summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddClaudeApi(IHostApplicationBuilder builder)
+    {
         builder.Services.AddSingleton<IAnthropicClient>(sp =>
         {
             var ai = sp.GetRequiredService<IOptions<AiOptions>>().Value;
@@ -90,7 +108,12 @@ public static class DependencyInjection
                 });
         });
         builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(Constants.Ai.RealKey);
+    }
 
+    /// <summary>SAM 3 on fal.ai, with the fal.ai key.</summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddSam3(IHostApplicationBuilder builder)
+    {
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
         builder.Services.AddHttpClient<FalSegmentationProvider>((sp, http) =>
                 http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))

@@ -1,0 +1,12 @@
+{
+  "description": "baseline: origin/main 3e90c39 (no spill fix), Sonnet 5.5 medium effort, ai_settings defaults; AiLab from that commit plus the eval flags",
+  "label": "baseline",
+  "target": "code",
+  "fingerprint": {
+    "commit": "3e90c39",
+    "ailab": "da-ailab-baseline (HEAD + tools/AiLab/Program.cs eval flags)",
+    "model": "claude-sonnet-5-5",
+    "effort": "medium",
+    "judge": "claude-opus-5-5 effort medium"
+  }
+}

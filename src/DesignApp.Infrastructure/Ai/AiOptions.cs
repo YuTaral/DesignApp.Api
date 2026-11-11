@@ -15,8 +15,21 @@ public sealed class AiOptions
     /// </summary>
     public bool AllowAiSwitch { get; set; }
 
-    /// <summary>Whether both keys of the real AI are set.</summary>
-    public bool HasRealKeys => !string.IsNullOrWhiteSpace(AnthropicApiKey) && !string.IsNullOrWhiteSpace(FalKey);
+    /// <summary>
+    /// Whether the real AI can run: the fal.ai key, plus Claude through either the API key or (in Development)
+    /// the Claude subscription.
+    /// </summary>
+    public bool HasRealKeys => !string.IsNullOrWhiteSpace(FalKey) && (UseClaudeSubscription || !string.IsNullOrWhiteSpace(AnthropicApiKey));
+
+    /// <summary>
+    /// Development only: Claude's object listing runs through Claude Code on this PC (<c>claude -p</c>), signed
+    /// in with the developer's Claude subscription, instead of the API key, so local real-AI runs don't bill the
+    /// Console. Production refuses to start with it on. SAM 3 still uses <see cref="FalKey"/>.
+    /// </summary>
+    public bool UseClaudeSubscription { get; set; }
+
+    /// <summary>The Claude Code command for <see cref="UseClaudeSubscription"/>; <c>claude</c> on PATH by default.</summary>
+    public string ClaudeCodePath { get; set; } = Constants.Ai.ClaudeCode.DefaultPath;
 
     /// <summary>How long each fake step waits, so the progress UI can be seen. Ignored by the real providers.</summary>
     public TimeSpan FakeStepDelay { get; set; } = TimeSpan.Zero;
@@ -30,12 +43,8 @@ public sealed class AiOptions
     /// </summary>
     public string? AnthropicWorkspaceId { get; set; }
 
-
-
     /// <summary>The fal.ai API key (user secrets locally). Required unless <see cref="UseFakes"/> is on.</summary>
     public string FalKey { get; set; } = "";
-
-
 
     /// <summary>
     /// When set (with the fakes off), real analyses of the sample photos are saved in this folder

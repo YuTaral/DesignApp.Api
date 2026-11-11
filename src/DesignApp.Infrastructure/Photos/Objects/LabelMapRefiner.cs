@@ -7,7 +7,9 @@ namespace DesignApp.Infrastructure.Photos;
 /// the remaining gaps through pixels of similar color, stopping at the photo's real edges. Surfaces
 /// (walls, floors, ceilings) may grow a short way to close the ragged gaps along their edges, but
 /// not so far that a white ceiling takes over an unlisted white wall; other objects only move their
-/// edges a few pixels onto the photo's edges, so a white vase can't spread over a white wall.
+/// edges a few pixels onto the photo's edges, so a white vase can't spread over a white wall. A last
+/// pass fills what is still empty; there, an object that isn't a surface stays inside the area it is given
+/// (Claude's box for it), so a small object can't take over a gap far from it.
 /// </summary>
 internal static class LabelMapRefiner
 {
@@ -17,12 +19,17 @@ internal static class LabelMapRefiner
     /// <param name="height">Height in pixels.</param>
     /// <param name="rgba">The photo at the same size, 4 bytes per pixel.</param>
     /// <param name="isSurface">Whether a label is a wall, floor or ceiling, which may grow further.</param>
-    public static void Refine(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface)
+    /// <param name="reach">
+    /// Per label, the area it may take in the last pass (<c>null</c> for anywhere); see
+    /// <see cref="FillRemainingGaps"/>. Omitted, every label may reach anywhere.
+    /// </param>
+    public static void Refine(
+        byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, PixelRect?[]? reach = null)
     {
         RemoveFragments(labels, width, height);
         FillEnclosedHoles(labels, width, height);
         GrowIntoGaps(labels, width, height, rgba, isSurface);
-        FillRemainingGaps(labels, width, height, rgba);
+        FillRemainingGaps(labels, width, height, rgba, reach);
     }
 
     /// <summary>Clears every piece of an object that is small and isn't the object's largest piece.</summary>
@@ -75,7 +82,10 @@ internal static class LabelMapRefiner
     /// <param name="rgba">The photo, 4 bytes per pixel.</param>
     /// <param name="isSurface">Whether a label is a surface, with the longer growth limit.</param>
     /// <param name="unlimited">True: labels <paramref name="isSurface"/> accepts have no distance limit; only the color steps stop them.</param>
-    internal static void GrowIntoGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, bool unlimited = false)
+    /// <param name="reach">Per label, the only area it may grow into (<c>null</c>, or no array: anywhere).</param>
+    internal static void GrowIntoGaps(
+        byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, bool unlimited = false,
+        PixelRect?[]? reach = null)
     {
         var queue = new PriorityQueue<(int Pixel, byte Label, int Steps), float>();
         var surfaceGrowth = Math.Max(Constants.Refiner.MaxObjectGrowth, (int)(Constants.Refiner.MaxSurfaceGrowthFraction * Math.Max(width, height)));
@@ -85,7 +95,7 @@ internal static class LabelMapRefiner
 
         void Offer(int from, int to, int steps, ReadOnlySpan<byte> photo)
         {
-            if (labels[to] != 0 || steps > limit[labels[from]])
+            if (labels[to] != 0 || steps > limit[labels[from]] || !CanReach(reach, labels[from], to, width))
                 return;
             var step = Distance(photo, from, to);
             if (step <= Constants.Refiner.MaxStepDistance)
@@ -125,15 +135,17 @@ internal static class LabelMapRefiner
     /// limit, as long as each step stays within <see cref="Constants.Refiner.MaxStepDistance"/> of color, so it
     /// stops at real edges; then each gap still left goes to the neighbor whose mean color is closest, when
     /// that is within <see cref="Constants.Refiner.MaxGapColorDistance"/>. A gap unlike all its neighbors
-    /// (probably an object nobody listed) stays empty.
+    /// (probably an object nobody listed) stays empty. A label with a <paramref name="reach"/> takes no pixel
+    /// outside it in either step, so a small object next to a surface of its color can't spread over it.
     /// </summary>
     /// <param name="labels">The label map, changed in place.</param>
     /// <param name="width">Its width.</param>
     /// <param name="height">Its height.</param>
     /// <param name="rgba">The photo at the same size.</param>
-    internal static void FillRemainingGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba)
+    /// <param name="reach">Per label, the only area it may take (<c>null</c>, or no array: anywhere).</param>
+    internal static void FillRemainingGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, PixelRect?[]? reach = null)
     {
-        GrowIntoGaps(labels, width, height, rgba, _ => true, unlimited: true);
+        GrowIntoGaps(labels, width, height, rgba, _ => true, unlimited: true, reach: reach);
 
         var sums = new double[Constants.Imaging.ByteValues, 4];
         for (var p = 0; p < labels.Length; p++)
@@ -151,6 +163,8 @@ internal static class LabelMapRefiner
             byte owner = 0; var closest = double.MaxValue;
             foreach (var n in gap.Neighbors)
             {
+                if (!gap.Pixels.TrueForAll(p => CanReach(reach, n, p, width)))
+                    continue;
                 var count = sums[n, 3];
                 var d = Math.Sqrt(Math.Pow(sums[n, 0] / count - r, 2) + Math.Pow(sums[n, 1] / count - g, 2) + Math.Pow(sums[n, 2] / count - b, 2));
                 if (d < closest) (owner, closest) = (n, d);
@@ -158,6 +172,18 @@ internal static class LabelMapRefiner
             if (closest > Constants.Refiner.MaxGapColorDistance) continue;
             foreach (var p in gap.Pixels) labels[p] = owner;
         }
+    }
+
+    /// <summary>Whether a label may take a pixel: always, unless its reach leaves the pixel out.</summary>
+    /// <param name="reach">Per label, the area it may take; <c>null</c> for anywhere.</param>
+    /// <param name="label">The label.</param>
+    /// <param name="pixel">The pixel's index.</param>
+    /// <param name="width">The label map's width.</param>
+    private static bool CanReach(PixelRect?[]? reach, byte label, int pixel, int width)
+    {
+        if (reach is null || label >= reach.Length || reach[label] is not { } area)
+            return true;
+        return area.Contains(pixel % width, pixel / width);
     }
 
     /// <summary>The RGB distance between two pixels.</summary>

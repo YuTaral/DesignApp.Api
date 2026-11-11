@@ -29,10 +29,16 @@ public static class Constants
         public const string StorageKeysRequired = "Storage:AccessKey and Storage:SecretKey are required.";
 
         /// <summary>Shown at startup when the real AI's keys are missing outside Development.</summary>
-        public const string AiKeysRequired = "Ai:AnthropicApiKey and Ai:FalKey are required unless Ai:UseFakes is true.";
+        public const string AiKeysRequired =
+            "Ai:FalKey and either Ai:AnthropicApiKey or (in Development) Ai:UseClaudeSubscription are required unless Ai:UseFakes is true.";
+
+        /// <summary>Shown at startup when the Claude subscription is switched on outside Development.</summary>
+        public const string ClaudeSubscriptionDevelopmentOnly =
+            "Ai:UseClaudeSubscription is for local development only; production uses Ai:AnthropicApiKey.";
 
         /// <summary>Shown when a real-AI room is analyzed but the keys aren't set.</summary>
-        public const string RealAiNotSetUp = "The real AI isn't set up: Ai:AnthropicApiKey and Ai:FalKey are needed.";
+        public const string RealAiNotSetUp =
+            "The real AI isn't set up: Ai:FalKey and either Ai:AnthropicApiKey or (in Development) Ai:UseClaudeSubscription are needed.";
     }
 
     /// <summary>The AI services: Claude lists the objects, SAM 3 on fal.ai outlines them.</summary>
@@ -179,7 +185,151 @@ public static class Constants
         /// <summary>The authorization scheme fal.ai expects.</summary>
         public const string FalAuthScheme = "Key";
 
-        /// <summary>Claude's object listing.</summary>
+        /// <summary>
+        /// Development only: Claude reached through Claude Code on the developer's PC (<c>claude -p</c>), signed in
+        /// with their Claude subscription, so local real-AI runs don't bill the API key.
+        /// </summary>
+        public static class ClaudeCode
+        {
+            /// <summary>The Claude Code command when <c>Ai:ClaudeCodePath</c> isn't set (it must be on PATH).</summary>
+            public const string DefaultPath = "claude";
+
+            /// <summary>
+            /// The empty folder Claude Code runs in (under the temp folder), so no project's CLAUDE.md,
+            /// settings, hooks or MCP servers load into the call.
+            /// </summary>
+            public const string WorkingFolder = "designapp-claude-code";
+
+            /// <summary>Removed from Claude Code's environment: when set, it would bill the API instead of the subscription.</summary>
+            public const string ApiKeyVariable = "ANTHROPIC_API_KEY";
+
+            /// <summary>The longest one call may take before it is stopped.</summary>
+            public static readonly TimeSpan Timeout = TimeSpan.FromMinutes(5);
+
+            /// <summary>
+            /// Turns allowed: the answer plus the structured-output step. With no tools there is nothing
+            /// else for Claude to do.
+            /// </summary>
+            public const int MaxTurns = 3;
+
+            /// <summary>Settings for the call: no hooks from the user's own Claude Code setup.</summary>
+            public const string HookFreeSettings = """{"disableAllHooks":true}""";
+
+            /// <summary>The <c>claude</c> command-line flags and values the call uses.</summary>
+            public static class Flags
+            {
+                /// <summary>Headless: answer and exit.</summary>
+                public const string Print = "-p";
+                /// <summary>How the message is sent.</summary>
+                public const string InputFormat = "--input-format";
+                /// <summary>How the result is printed.</summary>
+                public const string OutputFormat = "--output-format";
+                /// <summary>One JSON message per line.</summary>
+                public const string StreamJson = "stream-json";
+                /// <summary>Print every message (stream-json output requires it); the last line is the result.</summary>
+                public const string Verbose = "--verbose";
+                /// <summary>The model.</summary>
+                public const string Model = "--model";
+                /// <summary>The effort level.</summary>
+                public const string Effort = "--effort";
+                /// <summary>A file that replaces Claude Code's whole system prompt.</summary>
+                public const string SystemPromptFile = "--system-prompt-file";
+                /// <summary>The JSON schema the answer must match.</summary>
+                public const string JsonSchema = "--json-schema";
+                /// <summary>Which tools Claude may use.</summary>
+                public const string Tools = "--tools";
+                /// <summary>No tools at all.</summary>
+                public const string NoTools = "";
+                /// <summary>The most turns.</summary>
+                public const string MaxTurns = "--max-turns";
+                /// <summary>Don't save the session.</summary>
+                public const string NoSessionPersistence = "--no-session-persistence";
+                /// <summary>Only MCP servers given on the command line (none).</summary>
+                public const string StrictMcpConfig = "--strict-mcp-config";
+                /// <summary>Extra settings.</summary>
+                public const string Settings = "--settings";
+            }
+
+            /// <summary>The stream-json user message's field names and values.</summary>
+            public static class Wire
+            {
+                /// <summary>A message's kind.</summary>
+                public const string Type = "type";
+                /// <summary>A user message.</summary>
+                public const string User = "user";
+                /// <summary>The message itself.</summary>
+                public const string Message = "message";
+                /// <summary>Who wrote it.</summary>
+                public const string Role = "role";
+                /// <summary>Its blocks.</summary>
+                public const string Content = "content";
+                /// <summary>An image block.</summary>
+                public const string Image = "image";
+                /// <summary>An image's source.</summary>
+                public const string Source = "source";
+                /// <summary>Inline image data.</summary>
+                public const string Base64 = "base64";
+                /// <summary>The image's MIME type.</summary>
+                public const string MediaType = "media_type";
+                /// <summary>The image bytes.</summary>
+                public const string Data = "data";
+                /// <summary>A text block, and its text.</summary>
+                public const string Text = "text";
+            }
+
+            /// <summary>The fields of Claude Code's result line (the last stream-json line, of type <c>result</c>).</summary>
+            public static class Fields
+            {
+                /// <summary>A line's kind.</summary>
+                public const string Type = "type";
+                /// <summary>The kind of the result line.</summary>
+                public const string ResultType = "result";
+                /// <summary>Whether the run failed.</summary>
+                public const string IsError = "is_error";
+                /// <summary>The final text, or the failure.</summary>
+                public const string Result = "result";
+                /// <summary>The answer that matched the JSON schema.</summary>
+                public const string StructuredOutput = "structured_output";
+                /// <summary>Tokens per model.</summary>
+                public const string ModelUsage = "modelUsage";
+                /// <summary>A model's input tokens.</summary>
+                public const string InputTokens = "inputTokens";
+                /// <summary>A model's output tokens.</summary>
+                public const string OutputTokens = "outputTokens";
+                /// <summary>A model's tokens read from the prompt cache.</summary>
+                public const string CacheReadTokens = "cacheReadInputTokens";
+                /// <summary>A model's tokens written to the prompt cache.</summary>
+                public const string CacheWriteTokens = "cacheCreationInputTokens";
+                /// <summary>Claude Code's own estimate of the run's API price.</summary>
+                public const string CostUsd = "total_cost_usd";
+            }
+
+            /// <summary>Messages for a failed call (developer-facing; the user sees the analysis failure).</summary>
+            public static class Messages
+            {
+                /// <summary>Claude Code couldn't be started.</summary>
+                /// <param name="path">The command tried.</param>
+                /// <param name="reason">Why it failed.</param>
+                /// <returns>The text.</returns>
+                public static string NotStarted(string path, string reason)
+                {
+                    return $"Claude Code ('{path}') couldn't be started: {reason}. Install it and sign in with your Claude subscription (run 'claude', then /login).";
+                }
+
+                /// <summary>Claude Code ran but gave no usable answer.</summary>
+                /// <param name="reason">What it said.</param>
+                /// <returns>The text.</returns>
+                public static string Failed(string reason)
+                {
+                    return $"Claude Code didn't list the objects: {reason}";
+                }
+
+                /// <summary>Claude Code took longer than <see cref="Timeout"/>.</summary>
+                public const string TimedOut = "Claude Code took too long to list the objects.";
+            }
+        }
+
+        /// <summary>Claude's object listing (the API and the Claude Code route share it).</summary>
         public static class Claude
         {
             /// <summary>The smallest box side kept, as a fraction of the image.</summary>
@@ -406,6 +556,19 @@ public static class Constants
         /// means differ by at most this much (RGB distance, 0-441); a gap unlike every neighbor stays empty.
         /// </summary>
         public const double MaxGapColorDistance = 60;
+
+        /// <summary>
+        /// In the last pass, an object that isn't a surface may only take pixels inside Claude's box for it,
+        /// widened by this fraction of the photo's long side on every side: so a white teapot can't spread
+        /// over a white tablecloth.
+        /// </summary>
+        public const double BoxReachFraction = 0.02;
+
+        /// <summary>
+        /// A large object's reach is widened by at least this fraction of its own box's width (sideways) and
+        /// height (up and down), so a big counter whose box is a little tight still closes the gaps along its edges.
+        /// </summary>
+        public const double BoxReachOwnFraction = 0.25;
     }
 
     /// <summary>The database mapping.</summary>
