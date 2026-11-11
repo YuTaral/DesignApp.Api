@@ -41,6 +41,16 @@ public static class Constants
         public const double MaxPoint = 2;
     }
 
+    /// <summary>Limits for an object the user marks by hand.</summary>
+    public static class Marks
+    {
+        /// <summary>The most strokes one mark may have.</summary>
+        public const int MaxStrokes = 100;
+
+        /// <summary>The longest name a hand-marked object may have.</summary>
+        public const int MaxLabelLength = 60;
+    }
+
     /// <summary>Limits that every uploaded photo must meet, and how it is stored.</summary>
     public static class Photos
     {
@@ -140,6 +150,18 @@ public static class Constants
 
         /// <summary>A stroke far outside the photo.</summary>
         public const string StrokeOutside = "The stroke has points far outside the photo.";
+
+        /// <summary>A new object with too few or too many strokes.</summary>
+        public static readonly string MarkStrokes = $"Mark the object with between 1 and {Marks.MaxStrokes} strokes.";
+
+        /// <summary>A new object without a usable name.</summary>
+        public static readonly string ObjectName = $"Give the object a name of up to {Marks.MaxLabelLength} characters.";
+
+        /// <summary>A new object with a type that doesn't exist.</summary>
+        public const string UnknownObjectType = "Pick the object's type from the list.";
+
+        /// <summary>A room that has used up its object numbers.</summary>
+        public const string TooManyObjects = "This room can't hold any more objects.";
 
         /// <summary>A room that is in a design already (a room belongs to one design).</summary>
         public const string RoomInADesign = "This room is already in a design.";

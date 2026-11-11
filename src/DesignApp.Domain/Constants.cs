@@ -103,6 +103,14 @@ public static class Constants
         /// <summary>An object index outside 1..255.</summary>
         public static readonly string ObjectIndexRange = $"Detected object indexes must be between 1 and {Rooms.MaxObjectIndex}.";
 
+        /// <summary>A hand-marked object whose index isn't the room's next one.</summary>
+        /// <param name="index">The index given.</param>
+        /// <param name="next">The room's next index.</param>
+        public static string NotNextObjectIndex(int index, int next)
+        {
+            return $"A new object must get index {next}, not {index}.";
+        }
+
         /// <summary>An edit for an object the room doesn't have.</summary>
         /// <param name="index">The object index.</param>
         public static string UnknownObject(int index)

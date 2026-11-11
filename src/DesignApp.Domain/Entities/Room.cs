@@ -28,6 +28,8 @@ public sealed class Room
     public DateTimeOffset CreatedAt { get; private set; }
     /// <summary>The objects found in the photo, ordered by index; empty until ready.</summary>
     public IReadOnlyList<DetectedObject> Objects => _objects;
+    /// <summary>The index a new object gets: one past the highest so far, so an index is never reused.</summary>
+    public int NextObjectIndex => _objects.Count == 0 ? 1 : _objects.Max(o => o.Index) + 1;
     /// <summary>Storage key of the label map (a PNG whose pixel values are object indexes); <c>null</c> until ready.</summary>
     public string? LabelMapKey { get; private set; }
     /// <summary>How many times analysis has started, counting restarts after an interruption.</summary>
@@ -136,6 +138,28 @@ public sealed class Room
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
         LabelMapKey = labelMapKey;
+    }
+
+    /// <summary>
+    /// Adds an object the user marked by hand, with the label map version that holds its pixels, and makes that
+    /// version current. The caller saves the file under <paramref name="keyFor"/> of the next revision first.
+    /// </summary>
+    /// <param name="detected">The new object; its index must be <see cref="NextObjectIndex"/>.</param>
+    /// <param name="keyFor">The storage key of a revision.</param>
+    /// <returns>The new revision's number.</returns>
+    /// <exception cref="DomainException">The room isn't ready, or the index is taken or out of range.</exception>
+    public int AddObject(DetectedObject detected, Func<int, string> keyFor)
+    {
+        ArgumentNullException.ThrowIfNull(detected);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        if (detected.Index is < 1 or > Constants.Rooms.MaxObjectIndex)
+            throw new DomainException(Constants.Messages.ObjectIndexRange);
+        if (detected.Index != NextObjectIndex)
+            throw new DomainException(Constants.Messages.NotNextObjectIndex(detected.Index, NextObjectIndex));
+        var revision = AddLabelMapRevision(keyFor);
+        _objects = _objects.Append(detected).ToArray();
+        return revision;
     }
 
     /// <summary>

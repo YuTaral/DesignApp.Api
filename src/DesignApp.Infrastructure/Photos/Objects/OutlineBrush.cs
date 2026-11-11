@@ -23,46 +23,20 @@ internal static class OutlineBrush
         var target = (byte)stroke.ObjectIndex;
         var before = stroke.Mode is OutlineBrushMode.Erase ? labels.Count(l => l == target) : 0;
         var changed = 0;
-        var r = stroke.Radius;
-        var spacing = Math.Max(0.5, r * 0.5);
-
-        void Stamp(double cx, double cy)
-        {
-            var (x0, x1) = (Math.Max(0, (int)Math.Floor(cx - r)), Math.Min(width - 1, (int)Math.Ceiling(cx + r)));
-            var (y0, y1) = (Math.Max(0, (int)Math.Floor(cy - r)), Math.Min(height - 1, (int)Math.Ceiling(cy + r)));
-            for (var y = y0; y <= y1; y++)
-            {
-                for (var x = x0; x <= x1; x++)
-                {
-                    double dx = x + 0.5 - cx, dy = y + 0.5 - cy;
-                    if (dx * dx + dy * dy > r * r)
-                        continue;
-                    var p = y * width + x;
-                    if (stroke.Mode is OutlineBrushMode.Paint && labels[p] != target)
-                    {
-                        labels[p] = target;
-                        changed++;
-                    }
-                    else if (stroke.Mode is OutlineBrushMode.Erase && labels[p] == target)
-                    {
-                        labels[p] = 0;
-                        changed++;
-                    }
-                }
-            }
-        }
-
         var copy = stroke.Mode is OutlineBrushMode.Erase ? (byte[])labels.Clone() : null;
-        var points = stroke.Points;
-        Stamp(points[0].X * width, points[0].Y * height);
-        for (var i = 1; i < points.Count; i++)
+        BrushStamp.Walk(width, height, stroke.Radius, stroke.Points, p =>
         {
-            double ax = points[i - 1].X * width, ay = points[i - 1].Y * height;
-            double bx = points[i].X * width, by = points[i].Y * height;
-            var steps = Math.Max(1, (int)Math.Ceiling(Math.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay)) / spacing));
-            for (var s = 1; s <= steps; s++)
-                Stamp(ax + (bx - ax) * s / steps, ay + (by - ay) * s / steps);
-        }
+            if (stroke.Mode is OutlineBrushMode.Paint && labels[p] != target)
+            {
+                labels[p] = target;
+                changed++;
+            }
+            else if (stroke.Mode is OutlineBrushMode.Erase && labels[p] == target)
+            {
+                labels[p] = 0;
+                changed++;
+            }
+        });
 
         if (changed == 0)
             return Result.Failure<int>(stroke.Mode is OutlineBrushMode.Paint

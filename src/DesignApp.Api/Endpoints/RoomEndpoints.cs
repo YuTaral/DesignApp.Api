@@ -52,6 +52,11 @@ internal static class RoomEndpoints
             .WithSummary("Paints or erases one object's outline with a brush stroke: a round brush of `radius` label-map pixels stamped along `points`.")
             .WithDescription("Starts from `baseRevision`, the label map version the editor shows, and stores the result as a new version that becomes current.");
 
+        rooms.MapPost(Constants.Routes.RoomObjects, AddObjectAsync)
+            .WithName("AddRoomObject")
+            .WithSummary("Adds an object the user marked by hand: `strokes` (Paint marks, Erase unmarks, in order), each a round brush of `radius` label-map pixels stamped along `points`.")
+            .WithDescription("Starts from `baseRevision`; the marked pixels get the new object's index on top of whatever was there, and the result is stored as a new label map version that becomes current. The box and main color are measured from the photo.");
+
         rooms.MapPut(Constants.Routes.RoomCurrentLabels, UseLabelMapRevisionAsync)
             .WithName("UseRoomLabelMapRevision")
             .WithSummary("Makes a stored label map version current again (undo or redo of an outline fix).");
@@ -183,6 +188,20 @@ internal static class RoomEndpoints
         var outcome = await fixOutline.FixAsync(
             id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius, request.Points ?? [], cancellationToken);
         return ToResponse(outcome, Constants.Titles.OutlineFixFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/objects</c>: adds an object the user marked by hand.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="request">The name, type and strokes.</param>
+    /// <param name="addObject">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room and its new label map version, 400 when the object can't be added, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> AddObjectAsync(
+        Guid id, NewObjectRequest request, AddRoomObject addObject, CancellationToken cancellationToken)
+    {
+        var outcome = await addObject.AddAsync(
+            id, request.BaseRevision, request.Label, request.Category, request.Strokes ?? [], cancellationToken);
+        return ToResponse(outcome, Constants.Titles.NewObjectFailed);
     }
 
     /// <summary><c>PUT /api/rooms/{id}/labels/current</c>: makes a stored label map version current.</summary>

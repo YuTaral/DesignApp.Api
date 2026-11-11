@@ -26,4 +26,14 @@ public interface IRoomImaging
     /// <param name="stroke">The stroke.</param>
     /// <returns>The changed label map, or a failure the user can read (such as a stroke that changes nothing).</returns>
     Result<byte[]> PaintOutline(byte[] labelMapPng, OutlineStroke stroke);
+
+    /// <summary>
+    /// Turns the pixels the user marked into a new object, on top of whatever was there, and measures its box and
+    /// main color from the photo.
+    /// </summary>
+    /// <param name="labelMapPng">The label map the user marked on.</param>
+    /// <param name="photo">The stored room photo (JPEG).</param>
+    /// <param name="mark">The strokes and the new object's index.</param>
+    /// <returns>The new label map with the object's box and color, or a failure the user can read (nothing marked).</returns>
+    Result<MarkedObject> MarkObject(byte[] labelMapPng, Stream photo, NewObjectMark mark);
 }

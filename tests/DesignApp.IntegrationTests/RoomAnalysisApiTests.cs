@@ -133,6 +133,41 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     [Fact]
+    public async Task A_hand_marked_object_is_added_as_a_new_label_map_version()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var next = room.Objects.Max(o => o.GetProperty("index").GetInt32()) + 1;
+        var (x, y) = ((300 + 0.5) / 1200, (200 + 0.5) / 800);
+
+        using var add = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
+        {
+            baseRevision = 0, label = "side lamp", category = "Lighting",
+            strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
+        });
+        add.EnsureSuccessStatusCode();
+        var withLamp = (await add.Content.ReadFromJsonAsync<RoomDto>())!;
+
+        Assert.Equal(1, withLamp.LabelMapRevision);
+        var lamp = withLamp.Objects.Single(o => o.GetProperty("index").GetInt32() == next);
+        Assert.Equal(("side lamp", "Lighting"), (lamp.GetProperty("label").GetString(), lamp.GetProperty("category").GetString()));
+        Assert.Matches("^#[0-9A-F]{6}$", lamp.GetProperty("dominantColor").GetString());
+        Assert.Equal(next, (await LabelsAsync(withLamp.LabelMapUrl!))[200 * 1200 + 300]);
+
+        using var unnamed = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
+        {
+            baseRevision = 1, label = " ", category = "Other",
+            strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, unnamed.StatusCode);
+        using var unknown = await Client.PostAsJsonAsync($"/api/rooms/{Guid.NewGuid()}/objects", new
+        {
+            baseRevision = 0, label = "lamp", category = "Other",
+            strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
+        });
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+    }
+
+    [Fact]
     public async Task Progress_arrives_live_over_signalr()
     {
         var statuses = new List<string>();

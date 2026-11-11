@@ -207,6 +207,41 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         return changed.Succeeded ? EncodeGrayPng(labels, width, height) : Result.Failure<byte[]>(changed.Error);
     }
 
+    /// <inheritdoc/>
+    public Result<MarkedObject> MarkObject(byte[] labelMapPng, Stream photo, NewObjectMark mark)
+    {
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var marked = ObjectMarker.Apply(labels, width, height, mark);
+        if (!marked.Succeeded)
+            return Result.Failure<MarkedObject>(marked.Error);
+
+        using var pixels = PhotoAtMapSize(photo, width, height);
+        var colors = pixels.GetPixelSpan();
+        var stats = new ObjectStats();
+        for (var p = 0; p < labels.Length; p++)
+        {
+            if (labels[p] == mark.Index)
+                stats.Add(p % width, p / width, colors[p * 4], colors[p * 4 + 1], colors[p * 4 + 2]);
+        }
+        var box = new BoundingBox(
+            stats.MinX / (double)width, stats.MinY / (double)height,
+            (stats.MaxX - stats.MinX + 1) / (double)width, (stats.MaxY - stats.MinY + 1) / (double)height);
+        return new MarkedObject(EncodeGrayPng(labels, width, height), box, stats.MedianColor());
+    }
+
+    /// <summary>Decodes the stored photo to sRGB RGBA at the label map's size, one 4-byte pixel per label.</summary>
+    /// <param name="photo">The stored room photo (JPEG).</param>
+    /// <param name="width">Label map width.</param>
+    /// <param name="height">Label map height.</param>
+    /// <exception cref="InvalidOperationException">The photo can't be decoded.</exception>
+    private static SKBitmap PhotoAtMapSize(Stream photo, int width, int height)
+    {
+        using var source = SKBitmap.Decode(photo) ?? throw new InvalidOperationException("The stored photo can't be decoded.");
+        var info = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
+        return source.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
+            ?? throw new InvalidOperationException("The stored photo can't be scaled.");
+    }
+
     /// <summary>Reads a label map PNG back into one byte per pixel.</summary>
     /// <param name="png">The label map file.</param>
     /// <returns>The labels and the map's size.</returns>

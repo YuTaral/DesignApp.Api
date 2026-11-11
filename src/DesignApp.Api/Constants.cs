@@ -60,6 +60,9 @@ public static class Constants
         /// <summary>The brush-stroke outline fix of a room.</summary>
         public const string RoomOutline = "/{id:guid}/outline";
 
+        /// <summary>The objects of a room, where a hand-marked object is added.</summary>
+        public const string RoomObjects = "/{id:guid}/objects";
+
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
 
@@ -267,6 +270,9 @@ public static class Constants
 
         /// <summary>An outline fix failed.</summary>
         public const string OutlineFixFailed = "Can't fix the outline";
+
+        /// <summary>A hand-marked object couldn't be added.</summary>
+        public const string NewObjectFailed = "Can't add the object";
 
         /// <summary>An unknown label map version was chosen.</summary>
         public const string UnknownOutlineVersion = "Unknown outline version";

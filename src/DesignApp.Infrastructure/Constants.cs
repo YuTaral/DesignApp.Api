@@ -681,6 +681,9 @@ public static class Constants
         /// <summary>A photo that can't be decoded.</summary>
         public const string DamagedPhoto = "This photo is damaged and can't be read.";
 
+        /// <summary>A hand-marked object whose strokes leave nothing marked.</summary>
+        public const string EmptyMark = "Mark at least part of the object first.";
+
         /// <summary>Painting where the object already is.</summary>
         /// <param name="label">The object.</param>
         public static string AlreadyThere(string label)
