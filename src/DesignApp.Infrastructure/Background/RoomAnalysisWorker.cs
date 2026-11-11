@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using DesignApp.Application.Interfaces;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Analysis;
 using Microsoft.Extensions.DependencyInjection;

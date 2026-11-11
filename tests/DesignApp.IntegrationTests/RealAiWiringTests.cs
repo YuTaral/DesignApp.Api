@@ -1,5 +1,5 @@
 using DesignApp.Application.Interfaces;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using Microsoft.Extensions.DependencyInjection;
 using static DesignApp.Domain.Constants;
 

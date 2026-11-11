@@ -2,7 +2,7 @@ using DesignApp.Application.Interfaces;
 using DesignApp.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.Helpers;
 
 /// <summary>
 /// Deletes rooms completely: the database rows first, then their files (the photo and every

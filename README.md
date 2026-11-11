@@ -58,12 +58,13 @@ Domain, Application and Api are grouped by **type**, one folder per kind of clas
 | Project | Folders |
 |---|---|
 | Domain | `Entities/` (Room, Design, DesignRoom), `Objects/` (value objects such as `BoundingBox`, `HexColor`), `Extensions/`, `Exceptions/` |
-| Application | `Interfaces/` (every port: repositories, file storage, current user, AI, imaging), `UseCases/` (one sealed class per use case, such as `UploadRoom` and `CreateDesign`), `Objects/` (the records passed between steps), `Helpers/` |
+| Application | `Interfaces/` (every port: repositories, file storage, current user, AI, imaging), `UseCases/` (one sealed class per use case, in `Designs/` or `Rooms/` by the entity it changes, such as `UploadRoom` and `CreateDesign`), `Objects/` (the records passed between steps), `Helpers/` (`GuestIds`, and `RoomRemover`, which several use cases share) |
 | Api | `Endpoints/`, `Requests/`, `Responses/`, `Hubs/`, `Interfaces/`, `Services/`, `Middleware/`, `Setup/`, `Helpers/` |
 
 Infrastructure is grouped by **technology** instead (`Ai/`, `Background/`, `Database/`, `FileStorage/`, `Photos/`...),
 because there the code that changes together is the code around one technology. A use case takes only the
-services it needs. Each top-level folder is a namespace, such as `DesignApp.Application.UseCases`.
+services it needs. Each top-level folder is a namespace, such as `DesignApp.Application.UseCases`; subfolders such as
+`UseCases/Designs` don't add to it.
 
 Every type has its own file named after it, small records and interfaces included (`StoredFile.cs` next to
 `IFileStorage.cs`). The one exception is `Objects/Result.cs`, which keeps `Result<T>` with its `Result` helper.

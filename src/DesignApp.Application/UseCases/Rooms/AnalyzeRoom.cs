@@ -5,7 +5,7 @@ using DesignApp.Domain.Extensions;
 using Microsoft.Extensions.Logging;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>
 /// Use case: run the AI pipeline on an uploaded room. Claude lists the objects, SAM 3 outlines them,

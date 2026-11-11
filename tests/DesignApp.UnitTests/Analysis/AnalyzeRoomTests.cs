@@ -1,6 +1,6 @@
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;

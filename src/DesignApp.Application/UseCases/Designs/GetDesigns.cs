@@ -2,7 +2,7 @@ using DesignApp.Application.Interfaces;
 using DesignApp.Domain.Entities;
 
 
-namespace DesignApp.Application.UseCases.Design;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Reads the user's designs.</summary>
 /// <param name="designs">Loads the designs.</param>

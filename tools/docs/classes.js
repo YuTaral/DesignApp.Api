@@ -167,7 +167,7 @@ const count = { types: 0 }
 
 const PROJECTS = [
   ['src/DesignApp.Domain', 'The core rules, with no dependencies, grouped by type: Entities/, Objects/ (value objects), Extensions/, Exceptions/.'],
-  ['src/DesignApp.Application', 'Use cases and the interfaces they need, grouped by type: every port in Interfaces/, one class per use case in UseCases/, the records in Objects/.'],
+  ['src/DesignApp.Application', 'Use cases and the interfaces they need, grouped by type: every port in Interfaces/, one class per use case in UseCases/ (split into Designs/ and Rooms/), the records in Objects/.'],
   ['src/DesignApp.Infrastructure', 'The adapters behind those interfaces: database, storage, imaging and the AI services.'],
   ['src/DesignApp.Api', 'HTTP endpoints, accounts, SignalR and the composition root, grouped by type: Endpoints/, Requests/, Responses/, Hubs/, Services/, Middleware/, Setup/.'],
   ['src/DesignApp.AppHost', 'Aspire orchestration for local development.'],

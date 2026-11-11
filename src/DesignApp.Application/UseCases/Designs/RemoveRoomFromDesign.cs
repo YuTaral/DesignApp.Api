@@ -1,10 +1,10 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
-using DesignApp.Application.UseCases.Room;
 using DesignApp.Domain.Entities;
 using DesignApp.Domain.Exceptions;
 
 
-namespace DesignApp.Application.UseCases.Design;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Takes a room out of a design and deletes it: rooms are only kept inside a design.</summary>
 /// <param name="rooms">Finds the room.</param>

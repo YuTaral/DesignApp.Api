@@ -4,7 +4,7 @@ using DesignApp.Domain.Exceptions;
 using DesignApp.Domain.Objects;
 
 
-namespace DesignApp.Application.UseCases.Design;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Creates a design from a room and its colors (saving from the editor).</summary>
 /// <param name="rooms">Finds the room, checking it is the user's.</param>

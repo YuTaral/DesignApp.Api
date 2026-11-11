@@ -4,7 +4,7 @@ using DesignApp.Domain.Exceptions;
 using DesignApp.Domain.Objects;
 
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Saves the colors of one room of a design.</summary>
 /// <param name="rooms">Finds the room, to check the colors against its objects.</param>

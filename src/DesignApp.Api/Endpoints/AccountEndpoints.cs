@@ -1,7 +1,7 @@
 using DesignApp.Api.Helpers;
 using DesignApp.Api.Requests;
 using DesignApp.Api.Responses;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;

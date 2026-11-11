@@ -33,7 +33,7 @@ const children = [
   p('The API is split into four layers. Each layer may only depend on the layers inside it, so the core rules never know about databases, HTTP or AI vendors.'),
   table(['Layer', 'Contains', 'Depends on'], [
     ['Domain (center)', 'The business rules: a Room and its lifecycle, detected objects, colors, boxes. Pure C#.', 'Nothing'],
-    ['Application', 'One class per use case, each in its own file in the UseCases folder, next to Interfaces (the ports) and Objects (the records) (upload, analyze, fix outline, get a room, save a guest\'s rooms to the account, create and edit designs, add, color and remove their rooms, delete unsaved uploads) and the interfaces they need: "something that lists objects", "something that stores files", "who is the current user".', 'Domain'],
+    ['Application', 'One class per use case, each in its own file in the UseCases folder (Designs or Rooms, by the entity it changes), next to Interfaces (the ports) and Objects (the records) (upload, analyze, fix outline, get a room, save a guest\'s rooms to the account, create and edit designs, add, color and remove their rooms, delete unsaved uploads) and the interfaces they need: "something that lists objects", "something that stores files", "who is the current user".', 'Domain'],
     ['Infrastructure', 'The real implementations of those interfaces: Claude, SAM 3, the fake AI, Postgres (with Identity\'s account tables), S3 storage, image processing, the background worker.', 'Application, Domain'],
     ['Api (outside)', 'HTTP endpoints, JSON shapes, sign-in and guest cookies, SignalR hub, error handling, rate limits, wiring everything together.', 'All of the above'],
   ], [2200, 5600, 1838]),

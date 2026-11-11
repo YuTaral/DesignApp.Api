@@ -4,7 +4,7 @@ using DesignApp.Domain.Exceptions;
 using DesignApp.Domain.Objects;
 
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Adds one of the user's rooms to a design (saved from the editor, or just uploaded from the design's page).</summary>
 /// <param name="rooms">Finds the room.</param>

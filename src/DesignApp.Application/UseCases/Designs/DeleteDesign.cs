@@ -1,9 +1,9 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
-using DesignApp.Application.UseCases.Room;
 using DesignApp.Domain.Entities;
 
 
-namespace DesignApp.Application.UseCases.Design;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Deletes a design and its rooms, with their photos and outlines.</summary>
 /// <param name="rooms">Finds the rooms.</param>

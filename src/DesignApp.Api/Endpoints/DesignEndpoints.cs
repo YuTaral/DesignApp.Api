@@ -1,7 +1,6 @@
 using DesignApp.Api.Requests;
 using DesignApp.Api.Responses;
-using DesignApp.Application.UseCases.Design;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
 using DesignApp.Domain.Exceptions;
 using DesignApp.Domain.Objects;

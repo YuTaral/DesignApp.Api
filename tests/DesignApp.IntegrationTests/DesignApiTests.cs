@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
 using DesignApp.Tests;
 using Microsoft.Extensions.DependencyInjection;

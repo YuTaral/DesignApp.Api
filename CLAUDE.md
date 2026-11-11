@@ -40,15 +40,18 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
 - **One type per file**, named after it. Only `Objects/Result.cs` pairs `Result<T>` with its `Result` helper.
 - **Folders: Domain, Application and Api are grouped by type** (one folder per kind of class, not per entity):
   - Domain: `Entities/`, `Objects/` (value objects and records), `Extensions/`, `Exceptions/`.
-  - Application: `Interfaces/` (every port), `UseCases/` (one sealed class per use case), `Objects/` (records,
-    `StoredFile`, `Result`), `Helpers/`.
+  - Application: `Interfaces/` (every port), `UseCases/` (one sealed class per use case, in `Designs/` or
+    `Rooms/` by the entity it changes), `Objects/` (records, `StoredFile`, `Result`), `Helpers/` (shared pieces that aren't
+    use cases, such as `RoomRemover`).
   - Api: `Endpoints/`, `Requests/`, `Responses/`, `Hubs/`, `Interfaces/`, `Services/`, `Middleware/`, `Setup/`, `Helpers/`.
   - `Constants`, `DependencyInjection` and `Program` stay at the project roots. A new class goes in the folder of its kind.
 - **Infrastructure is grouped by technology:** `Ai/`, `Analysis/`, `Background/` (the hosted services), `Database/`
   (with `Configurations/`, `Objects/`, `Repository/`, `Migrations/`), `FileStorage/`, `Identity/` and `Photos/`; inside
   them, interfaces go in `Interfaces/` and records and static helpers in `Objects/`.
 - **Namespaces:** a top-level folder is a namespace (`DesignApp.Application.UseCases`, `DesignApp.Infrastructure.Database`).
-  Subfolders inside Infrastructure's folders (`Interfaces`, `Objects`, `Configurations`, `Repository`) never change it:
+  Subfolders never change it: `UseCases/Designs` and `UseCases/Rooms` are both `DesignApp.Application.UseCases` (a
+  `Design` or `Room` namespace would hide the entities), and so are Infrastructure's `Interfaces`, `Objects`,
+  `Configurations` and `Repository`:
   after a Visual Studio move, put the namespace back and drop the usings it added. Moving an entity changes its type
   name in the EF Core migrations and snapshot: update those strings, then check `dotnet ef migrations has-pending-model-changes`.
 - Apply layout rules to the whole solution, not only the folders named in a request; say what was left out.

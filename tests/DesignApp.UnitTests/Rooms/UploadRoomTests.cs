@@ -1,6 +1,6 @@
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 
 
 namespace DesignApp.UnitTests.Rooms;

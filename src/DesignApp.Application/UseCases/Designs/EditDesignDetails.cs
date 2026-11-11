@@ -3,7 +3,7 @@ using DesignApp.Domain.Entities;
 using DesignApp.Domain.Exceptions;
 
 
-namespace DesignApp.Application.UseCases.Design;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Changes a design's name and description.</summary>
 /// <param name="designs">Loads and saves the design.</param>

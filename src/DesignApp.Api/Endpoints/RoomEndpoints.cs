@@ -2,7 +2,7 @@ using DesignApp.Api.Requests;
 using DesignApp.Api.Responses;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
-using DesignApp.Application.UseCases.Room;
+using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

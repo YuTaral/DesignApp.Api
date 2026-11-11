@@ -5,7 +5,7 @@ using DesignApp.Domain.Entities;
 using static DesignApp.Application.Constants;
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>
 /// Use case: the user fixes an object's outline by painting or erasing it with a brush. Each stroke

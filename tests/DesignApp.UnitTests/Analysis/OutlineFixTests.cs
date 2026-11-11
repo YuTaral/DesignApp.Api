@@ -1,6 +1,5 @@
 using DesignApp.Application.Objects;
 using DesignApp.Application.UseCases;
-using DesignApp.Application.UseCases.Room;
 using DesignApp.Domain.Entities;
 using DesignApp.Domain.Extensions;
 using DesignApp.Infrastructure.Ai;

@@ -2,7 +2,7 @@ using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>
 /// Moves the rooms a browser made as a guest into the account it just signed in to, so trying the

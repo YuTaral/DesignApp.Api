@@ -4,7 +4,7 @@ using DesignApp.Domain.Entities;
 
 using static DesignApp.Domain.Constants;
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Use case: turn an uploaded photo into a new room.</summary>
 /// <param name="photoProcessor">Validates and normalizes the photo.</param>

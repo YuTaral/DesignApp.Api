@@ -2,7 +2,7 @@ using DesignApp.Application.Interfaces;
 using DesignApp.Domain.Entities;
 
 
-namespace DesignApp.Application.UseCases.Room;
+namespace DesignApp.Application.UseCases;
 
 /// <summary>Use case: load one of the current user's rooms.</summary>
 /// <param name="rooms">The room database.</param>
