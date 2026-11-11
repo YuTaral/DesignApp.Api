@@ -9,7 +9,10 @@ public readonly record struct HexColor
     /// <summary>The color as "#RRGGBB", upper case.</summary>
     public string Value { get; }
 
-    private HexColor(string value) => Value = value;
+    private HexColor(string value)
+    {
+        Value = value;
+    }
 
     /// <summary>Parses a "#RRGGBB" string (any case).</summary>
     /// <param name="input">The text to parse.</param>
@@ -37,5 +40,8 @@ public readonly record struct HexColor
     }
 
     /// <summary>Returns <see cref="Value"/>.</summary>
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }

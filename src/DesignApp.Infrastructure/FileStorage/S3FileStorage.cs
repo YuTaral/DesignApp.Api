@@ -16,7 +16,8 @@ internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<StorageOptions> optio
     private readonly string _bucket = options.Value.Bucket;
 
     /// <inheritdoc/>
-    public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken) =>
+    public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken)
+    {
         await s3.PutObjectAsync(new PutObjectRequest
         {
             BucketName = _bucket,
@@ -25,6 +26,7 @@ internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<StorageOptions> optio
             ContentType = contentType,
             AutoCloseStream = false,
         }, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public async Task<StoredFile?> OpenReadAsync(string key, CancellationToken cancellationToken)
@@ -41,8 +43,10 @@ internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<StorageOptions> optio
     }
 
     /// <inheritdoc/>
-    public async Task DeleteAsync(string key, CancellationToken cancellationToken) =>
+    public async Task DeleteAsync(string key, CancellationToken cancellationToken)
+    {
         await s3.DeleteObjectAsync(_bucket, key, cancellationToken);
+    }
 
     /// <summary>Creates the bucket on first run.</summary>
     /// <param name="cancellationToken">Cancels the request.</param>

@@ -15,11 +15,14 @@ internal sealed record DesignResponse(
 {
     /// <summary>The response for a design.</summary>
     /// <param name="design">The design.</param>
-    public static DesignResponse From(Design design) => new(
-        design.Id,
-        design.Name,
-        design.Description,
-        design.CreatedAt,
-        design.UpdatedAt,
-        [.. design.Rooms.OrderBy(r => r.Position).Select(DesignRoomResponse.From)]);
+    public static DesignResponse From(Design design)
+    {
+        return new(
+            design.Id,
+            design.Name,
+            design.Description,
+            design.CreatedAt,
+            design.UpdatedAt,
+            [.. design.Rooms.OrderBy(r => r.Position).Select(DesignRoomResponse.From)]);
+    }
 }

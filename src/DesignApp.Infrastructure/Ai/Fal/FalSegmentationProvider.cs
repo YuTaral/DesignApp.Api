@@ -64,10 +64,16 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         LogRequests(items.Count, requests.Value - before);
         return masks;
 
-        Task SegmentEachAsync(List<int> indexes) => Parallel.ForEachAsync(
-            indexes,
-            new ParallelOptions { MaxDegreeOfParallelism = settings.SegmentationParallelism, CancellationToken = cancellationToken },
-            async (i, ct) => masks[i] = await SegmentOneAsync(settings, imageUrl, image, items[i], ct));
+        Task SegmentEachAsync(List<int> indexes)
+        {
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = settings.SegmentationParallelism,
+                CancellationToken = cancellationToken,
+            };
+            return Parallel.ForEachAsync(
+                indexes, options, async (i, ct) => masks[i] = await SegmentOneAsync(settings, imageUrl, image, items[i], ct));
+        }
     }
 
     /// <summary>The requests sent in the current analysis; fal.ai charges per request.</summary>
@@ -79,7 +85,10 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         public int Value => Volatile.Read(ref _value);
 
         /// <summary>Counts one more request.</summary>
-        public void Add() => Interlocked.Increment(ref _value);
+        public void Add()
+        {
+            Interlocked.Increment(ref _value);
+        }
     }
 
     /// <summary>The count of the analysis running in this async flow, shared with its parallel requests.</summary>
@@ -89,7 +98,10 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     /// The request count for this async flow, starting one when there is none. A caller that calls
     /// this before <see cref="SegmentAsync"/> reads afterwards how many requests the analysis sent.
     /// </summary>
-    internal static RequestCount CountRequests() => CurrentCount.Value ??= new RequestCount();
+    internal static RequestCount CountRequests()
+    {
+        return CurrentCount.Value ??= new RequestCount();
+    }
 
     /// <summary>
     /// Outlines several objects in one request from their boxes (and surfaces' points), with no
@@ -170,29 +182,38 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     /// <summary>Claude's box for an object in the analysis image's pixels.</summary>
     /// <param name="item">The object.</param>
     /// <param name="image">The analysis image.</param>
-    private static SamBox PixelBox(InventoryItem item, AnalysisImage image) => new(
-        (int)Math.Floor(item.Box.X * image.Width),
-        (int)Math.Floor(item.Box.Y * image.Height),
-        (int)Math.Ceiling((item.Box.X + item.Box.Width) * image.Width),
-        (int)Math.Ceiling((item.Box.Y + item.Box.Height) * image.Height));
+    private static SamBox PixelBox(InventoryItem item, AnalysisImage image)
+    {
+        return new(
+            (int)Math.Floor(item.Box.X * image.Width),
+            (int)Math.Floor(item.Box.Y * image.Height),
+            (int)Math.Ceiling((item.Box.X + item.Box.Width) * image.Width),
+            (int)Math.Ceiling((item.Box.Y + item.Box.Height) * image.Height));
+    }
 
     /// <summary>A spot on an object in the analysis image's pixels, marked as part of it.</summary>
     /// <param name="point">The spot, as fractions of the image.</param>
     /// <param name="image">The analysis image.</param>
     /// <param name="objectId">The object it belongs to.</param>
-    private static SamPoint PixelPoint(ImagePoint point, AnalysisImage image, int objectId) => new(
-        Math.Clamp((int)(point.X * image.Width), 0, image.Width - 1),
-        Math.Clamp((int)(point.Y * image.Height), 0, image.Height - 1),
-        Label: Constants.Ai.Fal.ForegroundPoint,
-        ObjectId: objectId);
+    private static SamPoint PixelPoint(ImagePoint point, AnalysisImage image, int objectId)
+    {
+        return new(
+            Math.Clamp((int)(point.X * image.Width), 0, image.Width - 1),
+            Math.Clamp((int)(point.Y * image.Height), 0, image.Height - 1),
+            Label: Constants.Ai.Fal.ForegroundPoint,
+            ObjectId: objectId);
+    }
 
     /// <summary>Sends a request and decodes every returned mask.</summary>
     /// <param name="settings">The endpoint.</param>
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">Cancels it.</param>
     /// <returns>The masks SAM 3 returned, best first by its own score.</returns>
-    private async Task<List<ObjectMask>> RequestAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken) =>
-        [.. (await RequestWithIndexesAsync(settings, request, cancellationToken)).Select(m => m.Mask)];
+    private async Task<List<ObjectMask>> RequestAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken)
+    {
+        var answers = await RequestWithIndexesAsync(settings, request, cancellationToken);
+        return [.. answers.Select(a => a.Mask)];
+    }
 
     /// <summary>Sends a request and decodes every returned mask with the index SAM 3 gave it.</summary>
     /// <param name="settings">The endpoint.</param>
@@ -334,7 +355,10 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     /// <summary>1 when a mask fills at least the minimum of its box, less in proportion when it fills less.</summary>
     /// <param name="fill">How much of the box it fills.</param>
     /// <param name="minFill">The minimum fill.</param>
-    internal static double FillFactor(double fill, double minFill) => minFill <= 0 ? 1 : Math.Min(1, fill / minFill);
+    internal static double FillFactor(double fill, double minFill)
+    {
+        return minFill <= 0 ? 1 : Math.Min(1, fill / minFill);
+    }
 
     /// <summary>The share of a mask's pixels that lie inside a box.</summary>
     /// <param name="mask">The mask.</param>

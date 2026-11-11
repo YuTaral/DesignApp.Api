@@ -33,17 +33,20 @@ public sealed record RoomResponse(
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
-    public static RoomResponse From(Room room) => new(
-        room.Id,
-        room.Status,
-        room.Width,
-        room.Height,
-        Constants.Routes.RoomPhotoUrl(room.Id),
-        room.CreatedAt,
-        room.FailureReason,
-        [.. room.Objects.Select(DetectedObjectResponse.From)],
-        room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision),
-        room.LabelMapRevision,
-        room.Scope,
-        room.AiMode);
+    public static RoomResponse From(Room room)
+    {
+        return new(
+            room.Id,
+            room.Status,
+            room.Width,
+            room.Height,
+            Constants.Routes.RoomPhotoUrl(room.Id),
+            room.CreatedAt,
+            room.FailureReason,
+            [.. room.Objects.Select(DetectedObjectResponse.From)],
+            room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision),
+            room.LabelMapRevision,
+            room.Scope,
+            room.AiMode);
+    }
 }

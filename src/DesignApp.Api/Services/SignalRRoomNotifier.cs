@@ -12,6 +12,8 @@ namespace DesignApp.Api.Services;
 internal sealed class SignalRRoomNotifier(IHubContext<RoomHub, IRoomClient> hub) : IRoomNotifier
 {
     /// <inheritdoc/>
-    public Task RoomChangedAsync(Room room, CancellationToken cancellationToken) =>
-        hub.Clients.Group(Constants.Hub.Group(room.Id)).RoomChanged(RoomResponse.From(room));
+    public Task RoomChangedAsync(Room room, CancellationToken cancellationToken)
+    {
+        return hub.Clients.Group(Constants.Hub.Group(room.Id)).RoomChanged(RoomResponse.From(room));
+    }
 }

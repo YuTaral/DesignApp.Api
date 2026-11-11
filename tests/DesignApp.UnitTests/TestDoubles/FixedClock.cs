@@ -5,5 +5,8 @@ namespace DesignApp.UnitTests;
 internal sealed class FixedClock(DateTimeOffset now) : TimeProvider
 {
     /// <inheritdoc/>
-    public override DateTimeOffset GetUtcNow() => now;
+    public override DateTimeOffset GetUtcNow()
+    {
+        return now;
+    }
 }

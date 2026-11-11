@@ -11,41 +11,57 @@ namespace DesignApp.Infrastructure.Database;
 internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
 {
     /// <inheritdoc/>
-    public void Add(Room room) => db.Rooms.Add(room);
+    public void Add(Room room)
+    {
+        db.Rooms.Add(room);
+    }
 
     /// <inheritdoc/>
-    public void Remove(Room room) => db.Rooms.Remove(room);
+    public void Remove(Room room)
+    {
+        db.Rooms.Remove(room);
+    }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken) =>
-        await db.Rooms
+    public async Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken)
+    {
+        return await db.Rooms
             .Where(r => r.CreatedAt < cutoff && !db.Designs.Any(d => d.Rooms.Any(x => x.RoomId == r.Id)))
             .OrderBy(r => r.CreatedAt)
             .Take(max)
             .ToListAsync(cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        db.Rooms.SingleOrDefaultAsync(r => r.Id == id && r.OwnerId == ownerId, cancellationToken);
+    public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken)
+    {
+        return db.Rooms.SingleOrDefaultAsync(r => r.Id == id && r.OwnerId == ownerId, cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
-        await db.Rooms
+    public async Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken)
+    {
+        return await db.Rooms
             .Where(r => r.OwnerId == ownerId)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync(cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken) =>
-        db.Rooms.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+    public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return db.Rooms.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken) =>
-        await db.Rooms
+    public async Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken)
+    {
+        return await db.Rooms
             .Where(r => r.Status != RoomStatus.Ready && r.Status != RoomStatus.Failed)
             .OrderBy(r => r.CreatedAt)
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);
+    }
 
     /// <inheritdoc/>
     /// <remarks>

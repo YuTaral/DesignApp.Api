@@ -24,5 +24,8 @@ internal sealed class FixedAiProviders(IObjectInventoryProvider inventory, ISegm
     }
 
     /// <inheritdoc/>
-    public ISegmentationProvider Segmentation(AiMode mode) => segmentation;
+    public ISegmentationProvider Segmentation(AiMode mode)
+    {
+        return segmentation;
+    }
 }

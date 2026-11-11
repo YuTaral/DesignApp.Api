@@ -15,7 +15,10 @@ public sealed class Result<T>
     /// <summary>Use <see cref="Result.Success{T}"/> or <see cref="Result.Failure{T}"/> instead.</summary>
     /// <param name="value">The value on success.</param>
     /// <param name="error">The refusal reason on failure; <c>null</c> on success.</param>
-    internal Result(T? value, string? error) => (_value, Error) = (value, error);
+    internal Result(T? value, string? error)
+    {
+        (_value, Error) = (value, error);
+    }
 
     /// <summary>Why the operation was refused, in words safe to show the user; <c>null</c> on success.</summary>
     public string? Error { get; }
@@ -30,7 +33,10 @@ public sealed class Result<T>
 
     /// <summary>Lets a method return a plain value as a success.</summary>
     /// <param name="value">The successful value.</param>
-    public static implicit operator Result<T>(T value) => Result.Success(value);
+    public static implicit operator Result<T>(T value)
+    {
+        return Result.Success(value);
+    }
 }
 
 /// <summary>Creates <see cref="Result{T}"/> values.</summary>
@@ -39,10 +45,16 @@ public static class Result
     /// <summary>A successful result.</summary>
     /// <typeparam name="T">The value's type.</typeparam>
     /// <param name="value">The value to return.</param>
-    public static Result<T> Success<T>(T value) => new(value, null);
+    public static Result<T> Success<T>(T value)
+    {
+        return new(value, null);
+    }
 
     /// <summary>A refused result.</summary>
     /// <typeparam name="T">The value the operation would have returned.</typeparam>
     /// <param name="error">Why it was refused, in words safe to show the user.</param>
-    public static Result<T> Failure<T>(string error) => new(default, error);
+    public static Result<T> Failure<T>(string error)
+    {
+        return new(default, error);
+    }
 }

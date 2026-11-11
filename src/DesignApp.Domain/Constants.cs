@@ -105,59 +105,94 @@ public static class Constants
 
         /// <summary>An edit for an object the room doesn't have.</summary>
         /// <param name="index">The object index.</param>
-        public static string UnknownObject(int index) => $"Object {index} does not exist in this room.";
+        public static string UnknownObject(int index)
+        {
+            return $"Object {index} does not exist in this room.";
+        }
 
         /// <summary>Two edits for one object.</summary>
         /// <param name="index">The object index.</param>
-        public static string DuplicateEdit(int index) => $"Object {index} has more than one edit.";
+        public static string DuplicateEdit(int index)
+        {
+            return $"Object {index} has more than one edit.";
+        }
 
         /// <summary>Text that isn't a #RRGGBB color.</summary>
         /// <param name="input">The text.</param>
-        public static string NotAColor(string? input) => $"'{input}' is not a #RRGGBB color.";
+        public static string NotAColor(string? input)
+        {
+            return $"'{input}' is not a #RRGGBB color.";
+        }
 
         /// <summary>A box that reaches outside the image.</summary>
         /// <param name="x">Left edge.</param>
         /// <param name="y">Top edge.</param>
         /// <param name="width">Width.</param>
         /// <param name="height">Height.</param>
-        public static string BoxOutside(double x, double y, double width, double height) =>
-            $"Bounding box ({x}, {y}, {width}, {height}) is outside the image.";
+        public static string BoxOutside(double x, double y, double width, double height)
+        {
+            return $"Bounding box ({x}, {y}, {width}, {height}) is outside the image.";
+        }
 
         /// <summary>An analysis scope that doesn't exist.</summary>
         /// <param name="scope">The scope.</param>
-        public static string UnknownScope(AnalysisScope scope) => $"Unknown analysis scope {scope}.";
+        public static string UnknownScope(AnalysisScope scope)
+        {
+            return $"Unknown analysis scope {scope}.";
+        }
 
         /// <summary>An AI mode that doesn't exist.</summary>
         /// <param name="mode">The mode.</param>
-        public static string UnknownAiMode(AiMode mode) => $"Unknown AI mode {mode}.";
+        public static string UnknownAiMode(AiMode mode)
+        {
+            return $"Unknown AI mode {mode}.";
+        }
 
         /// <summary>An analysis started more often than allowed.</summary>
         public static readonly string TooManyAttempts = $"Analysis has already been tried {Rooms.MaxAnalysisAttempts} times.";
 
         /// <summary>Restarting the analysis of a room that isn't analyzing.</summary>
         /// <param name="status">The room's status.</param>
-        public static string CannotRestart(RoomStatus status) => $"Cannot restart the analysis of a room that is {status}.";
+        public static string CannotRestart(RoomStatus status)
+        {
+            return $"Cannot restart the analysis of a room that is {status}.";
+        }
 
         /// <summary>Fixing the outlines of a room that isn't ready.</summary>
         /// <param name="status">The room's status.</param>
-        public static string CannotFixOutlines(RoomStatus status) => $"Cannot fix the outlines of a room that is {status}.";
+        public static string CannotFixOutlines(RoomStatus status)
+        {
+            return $"Cannot fix the outlines of a room that is {status}.";
+        }
 
         /// <summary>Switching the outlines of a room that isn't ready.</summary>
         /// <param name="status">The room's status.</param>
-        public static string CannotChangeOutlines(RoomStatus status) => $"Cannot change the outlines of a room that is {status}.";
+        public static string CannotChangeOutlines(RoomStatus status)
+        {
+            return $"Cannot change the outlines of a room that is {status}.";
+        }
 
         /// <summary>A label map version that doesn't exist.</summary>
         /// <param name="revision">The version.</param>
-        public static string NoLabelMapRevision(int revision) => $"The room has no label map version {revision}.";
+        public static string NoLabelMapRevision(int revision)
+        {
+            return $"The room has no label map version {revision}.";
+        }
 
         /// <summary>Failing a room that already finished.</summary>
         /// <param name="status">The room's status.</param>
-        public static string CannotFail(RoomStatus status) => $"Cannot fail a room that is already {status}.";
+        public static string CannotFail(RoomStatus status)
+        {
+            return $"Cannot fail a room that is already {status}.";
+        }
 
         /// <summary>A status change that isn't allowed.</summary>
         /// <param name="from">The current status.</param>
         /// <param name="to">The requested status.</param>
-        public static string CannotMove(RoomStatus from, RoomStatus to) => $"Cannot move a room from {from} to {to}.";
+        public static string CannotMove(RoomStatus from, RoomStatus to)
+        {
+            return $"Cannot move a room from {from} to {to}.";
+        }
     }
 
     /// <summary>The steps a room goes through, from upload to editable.</summary>

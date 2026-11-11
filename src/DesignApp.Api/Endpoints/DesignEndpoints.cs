@@ -60,8 +60,11 @@ internal static class DesignEndpoints
     /// <summary><c>GET /api/designs</c>.</summary>
     /// <param name="getDesigns">Reads the designs.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
-    private static async Task<Ok<List<DesignResponse>>> ListAsync(GetDesigns getDesigns, CancellationToken cancellationToken) =>
-        TypedResults.Ok((await getDesigns.AllAsync(cancellationToken)).Select(DesignResponse.From).ToList());
+    private static async Task<Ok<List<DesignResponse>>> ListAsync(GetDesigns getDesigns, CancellationToken cancellationToken)
+    {
+        var designs = await getDesigns.AllAsync(cancellationToken);
+        return TypedResults.Ok(designs.Select(DesignResponse.From).ToList());
+    }
 
     /// <summary><c>POST /api/designs</c>.</summary>
     /// <param name="request">The first room, its colors, and the design's name and description.</param>
@@ -82,8 +85,11 @@ internal static class DesignEndpoints
     /// <param name="id">The design.</param>
     /// <param name="getDesigns">Reads the design.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
-    private static async Task<Results<Ok<DesignResponse>, NotFound>> GetAsync(Guid id, GetDesigns getDesigns, CancellationToken cancellationToken) =>
-        Found(await getDesigns.OneAsync(id, cancellationToken));
+    private static async Task<Results<Ok<DesignResponse>, NotFound>> GetAsync(Guid id, GetDesigns getDesigns, CancellationToken cancellationToken)
+    {
+        var design = await getDesigns.OneAsync(id, cancellationToken);
+        return Found(design);
+    }
 
     /// <summary><c>PUT /api/designs/{id}</c>.</summary>
     /// <param name="id">The design.</param>
@@ -91,15 +97,21 @@ internal static class DesignEndpoints
     /// <param name="editDesign">Saves them.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> EditAsync(
-        Guid id, EditDesignRequest request, EditDesignDetails editDesign, CancellationToken cancellationToken) =>
-        Found(await editDesign.HandleAsync(id, request.Name ?? "", request.Description, cancellationToken));
+        Guid id, EditDesignRequest request, EditDesignDetails editDesign, CancellationToken cancellationToken)
+    {
+        var design = await editDesign.HandleAsync(id, request.Name ?? "", request.Description, cancellationToken);
+        return Found(design);
+    }
 
     /// <summary><c>DELETE /api/designs/{id}</c>.</summary>
     /// <param name="id">The design.</param>
     /// <param name="deleteDesign">Deletes it with its rooms.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
-    private static async Task<Results<NoContent, NotFound>> DeleteAsync(Guid id, DeleteDesign deleteDesign, CancellationToken cancellationToken) =>
-        await deleteDesign.HandleAsync(id, cancellationToken) ? TypedResults.NoContent() : TypedResults.NotFound();
+    private static async Task<Results<NoContent, NotFound>> DeleteAsync(Guid id, DeleteDesign deleteDesign, CancellationToken cancellationToken)
+    {
+        var deleted = await deleteDesign.HandleAsync(id, cancellationToken);
+        return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
+    }
 
     /// <summary><c>POST /api/designs/{id}/rooms</c>.</summary>
     /// <param name="id">The design.</param>
@@ -107,8 +119,11 @@ internal static class DesignEndpoints
     /// <param name="addRoom">Adds it.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> AddRoomAsync(
-        Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, CancellationToken cancellationToken) =>
-        Found(await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), cancellationToken));
+        Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, CancellationToken cancellationToken)
+    {
+        var design = await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), cancellationToken);
+        return Found(design);
+    }
 
     /// <summary><c>PUT /api/designs/{id}/rooms/{roomId}</c>.</summary>
     /// <param name="id">The design.</param>
@@ -117,8 +132,11 @@ internal static class DesignEndpoints
     /// <param name="saveColors">Saves them.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> SaveRoomColorsAsync(
-        Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, CancellationToken cancellationToken) =>
-        Found(await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), cancellationToken));
+        Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, CancellationToken cancellationToken)
+    {
+        var design = await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), cancellationToken);
+        return Found(design);
+    }
 
     /// <summary><c>DELETE /api/designs/{id}/rooms/{roomId}</c>.</summary>
     /// <param name="id">The design.</param>
@@ -126,17 +144,25 @@ internal static class DesignEndpoints
     /// <param name="removeRoom">Removes and deletes it.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> RemoveRoomAsync(
-        Guid id, Guid roomId, RemoveRoomFromDesign removeRoom, CancellationToken cancellationToken) =>
-        Found(await removeRoom.HandleAsync(id, roomId, cancellationToken));
+        Guid id, Guid roomId, RemoveRoomFromDesign removeRoom, CancellationToken cancellationToken)
+    {
+        var design = await removeRoom.HandleAsync(id, roomId, cancellationToken);
+        return Found(design);
+    }
 
     /// <summary>200 with the design, or 404 when there is none.</summary>
     /// <param name="design">The design, if found.</param>
-    private static Results<Ok<DesignResponse>, NotFound> Found(Design? design) =>
-        design is null ? TypedResults.NotFound() : TypedResults.Ok(DesignResponse.From(design));
+    private static Results<Ok<DesignResponse>, NotFound> Found(Design? design)
+    {
+        return design is null ? TypedResults.NotFound() : TypedResults.Ok(DesignResponse.From(design));
+    }
 
     /// <summary>The colors of a request as domain edits; an invalid color or strength is a 400.</summary>
     /// <param name="edits">The colors as sent.</param>
     /// <exception cref="DomainException">A color isn't #RRGGBB or a strength isn't between 0 and 1.</exception>
-    private static List<EditOperation> ToEdits(List<EditRequest>? edits) =>
-        [.. (edits ?? []).Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength))];
+    private static List<EditOperation> ToEdits(List<EditRequest>? edits)
+    {
+        var sent = edits ?? [];
+        return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength))];
+    }
 }

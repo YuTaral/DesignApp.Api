@@ -10,5 +10,8 @@ public sealed record AiAvailability(AiMode Default, bool CanChoose, bool RealAva
 {
     /// <summary>Whether an upload may use a mode.</summary>
     /// <param name="mode">The mode asked for.</param>
-    public bool Allows(AiMode mode) => mode == Default || (CanChoose && (mode is AiMode.Fake || RealAvailable));
+    public bool Allows(AiMode mode)
+    {
+        return mode == Default || (CanChoose && (mode is AiMode.Fake || RealAvailable));
+    }
 }

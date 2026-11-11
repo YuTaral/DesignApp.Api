@@ -111,17 +111,26 @@ return 0;
 /// <summary>AI settings that don't come from a database.</summary>
 internal sealed class FixedSettings(AiSettings settings) : IAiSettingsStore
 {
-    public Task<AiSettings> GetAsync(CancellationToken cancellationToken) => Task.FromResult(settings);
+    public Task<AiSettings> GetAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(settings);
+    }
 }
 
 /// <summary>An inventory item as saved to inventory.json.</summary>
 internal sealed record Saved(string Label, string Category, double X, double Y, double Width, double Height, string Color, List<double[]>? Points)
 {
-    public static Saved From(InventoryItem i) => new(i.Label, i.Category.ToString(), i.Box.X, i.Box.Y, i.Box.Width, i.Box.Height, i.Color.Value,
-        i.Points?.Select(p => new[] { p.X, p.Y }).ToList());
+    public static Saved From(InventoryItem i)
+    {
+        return new(i.Label, i.Category.ToString(), i.Box.X, i.Box.Y, i.Box.Width, i.Box.Height, i.Color.Value,
+            i.Points?.Select(p => new[] { p.X, p.Y }).ToList());
+    }
 
-    public InventoryItem ToItem() => new(Label, Enum.Parse<ObjectCategory>(Category), new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color),
-        Points?.Select(p => new ImagePoint(p[0], p[1])).ToList());
+    public InventoryItem ToItem()
+    {
+        return new(Label, Enum.Parse<ObjectCategory>(Category), new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color),
+            Points?.Select(p => new ImagePoint(p[0], p[1])).ToList());
+    }
 }
 
 /// <summary>Sends SAM 3 requests and saves each request with its response.</summary>
@@ -167,7 +176,10 @@ internal sealed class ReplayHandler(string folder, List<string> missing) : HttpM
 /// <summary>Keys and short descriptions of SAM 3 request bodies.</summary>
 internal static class Hash
 {
-    public static string Of(string body) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(body)))[..16].ToLowerInvariant();
+    public static string Of(string body)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(body)))[..16].ToLowerInvariant();
+    }
 
     /// <summary>The body without the base64 photo, to keep the recording readable.</summary>
     public static string WithoutImage(string body)

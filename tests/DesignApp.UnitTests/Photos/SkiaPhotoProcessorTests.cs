@@ -86,20 +86,28 @@ public class SkiaPhotoProcessorTests
     }
 
     [Fact]
-    public void Gif_files_are_rejected() =>
+    public void Gif_files_are_rejected()
+    {
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(TestImages.Gif()));
+    }
 
     [Fact]
-    public void Bmp_files_are_rejected() =>
+    public void Bmp_files_are_rejected()
+    {
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(TestImages.Bmp(400, 300)));
+    }
 
     [Fact]
-    public void Files_that_are_not_images_are_rejected() =>
+    public void Files_that_are_not_images_are_rejected()
+    {
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, Reject(Encoding.UTF8.GetBytes("definitely not a photo")));
+    }
 
     [Fact]
-    public void Empty_files_are_rejected() =>
+    public void Empty_files_are_rejected()
+    {
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.EmptyFile, Reject([]));
+    }
 
     [Fact]
     public void Truncated_photos_are_rejected()

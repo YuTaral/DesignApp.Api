@@ -52,7 +52,10 @@ public class RoomConcurrencyTests(ApiFactoryWithoutAnalysis factory) : IClassFix
 
     /// <summary>The room repository of a scope.</summary>
     /// <param name="scope">The scope, like one request or one analysis.</param>
-    private static IRoomRepository Rooms(IServiceScope scope) => scope.ServiceProvider.GetRequiredService<IRoomRepository>();
+    private static IRoomRepository Rooms(IServiceScope scope)
+    {
+        return scope.ServiceProvider.GetRequiredService<IRoomRepository>();
+    }
 
     /// <summary>Stores an uploaded room straight in the database, without scheduling its analysis.</summary>
     private async Task<Guid> AddRoomAsync()

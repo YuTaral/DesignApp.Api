@@ -169,14 +169,17 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     /// <summary>A SignalR connection to the test server's room hub.</summary>
-    private HubConnection ConnectToHub() => new HubConnectionBuilder()
-        .WithUrl(new Uri(factory.ClientOptions.BaseAddress, "/api/hubs/rooms"), options =>
-        {
-            // The browser's cookies go along, so the hub knows whose rooms it may show.
-            options.HttpMessageHandlerFactory = _ => new CookieContainerHandler(_cookies) { InnerHandler = factory.Server.CreateHandler() };
-            options.Transports = HttpTransportType.LongPolling; // the test server has no WebSockets
-        })
-        .Build();
+    private HubConnection ConnectToHub()
+    {
+        return new HubConnectionBuilder()
+            .WithUrl(new Uri(factory.ClientOptions.BaseAddress, "/api/hubs/rooms"), options =>
+            {
+                // The browser's cookies go along, so the hub knows whose rooms it may show.
+                options.HttpMessageHandlerFactory = _ => new CookieContainerHandler(_cookies) { InnerHandler = factory.Server.CreateHandler() };
+                options.Transports = HttpTransportType.LongPolling; // the test server has no WebSockets
+            })
+            .Build();
+    }
 
     /// <summary>Uploads a 1200x800 test photo.</summary>
     /// <param name="scope">The optional scope form field.</param>

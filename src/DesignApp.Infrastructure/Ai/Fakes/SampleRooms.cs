@@ -66,7 +66,10 @@ internal static class SampleRooms
                     {
                         var p = (y * w + x) * 4;
                         var a = pixels[p + 3] / 255.0;
-                        double Over(byte c) => c * a + 255 * (1 - a);
+                        double Over(byte c)
+                        {
+                            return c * a + 255 * (1 - a);
+                        }
                         total += 0.299 * Over(pixels[p]) + 0.587 * Over(pixels[p + 1]) + 0.114 * Over(pixels[p + 2]);
                     }
                 }
@@ -79,7 +82,10 @@ internal static class SampleRooms
     /// <summary>The mean absolute difference between two fingerprints.</summary>
     /// <param name="a">One fingerprint.</param>
     /// <param name="b">The other.</param>
-    internal static double Difference(byte[] a, byte[] b) => a.Zip(b, (x, y) => Math.Abs(x - y)).Average();
+    internal static double Difference(byte[] a, byte[] b)
+    {
+        return a.Zip(b, (x, y) => Math.Abs(x - y)).Average();
+    }
 
     /// <summary>
     /// Reads the embedded sample files. A recorded SAM 3 analysis (<c>name.sam3.json</c>) takes

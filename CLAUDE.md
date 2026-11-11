@@ -37,6 +37,9 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
   wire names, user-facing messages, and enums) lives in the project's root `Constants` class, in nested
   groups with a `Messages` group. Files using an enum add `using static DesignApp.<Layer>.Constants;`.
   Exception: the real AI's tuning lives in the one-row `ai_settings` table (seeded from `Constants.Ai.Defaults`).
+- **Block bodies for methods:** a method, local function or constructor uses `{ return ...; }`, never `=>`. Name an
+  awaited or nested step in a local variable (`var outcome = await ...; return ToResponse(outcome, ...);`) so no
+  line mixes an `await` with a mapping. Properties and lambdas may keep `=>`.
 - **One type per file**, named after it. Only `Objects/Result.cs` pairs `Result<T>` with its `Result` helper.
 - **Folders: Domain, Application and Api are grouped by type** (one folder per kind of class, not per entity):
   - Domain: `Entities/`, `Objects/` (value objects and records), `Extensions/`, `Exceptions/`.

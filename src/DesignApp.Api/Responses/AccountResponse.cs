@@ -9,8 +9,10 @@ internal sealed record AccountResponse(bool SignedIn, string? Email)
 {
     /// <summary>Reads the signed-in account from the request's user.</summary>
     /// <param name="user">The request's user.</param>
-    public static AccountResponse From(ClaimsPrincipal user) =>
-        user.Identity?.IsAuthenticated == true
+    public static AccountResponse From(ClaimsPrincipal user)
+    {
+        return user.Identity?.IsAuthenticated == true
             ? new AccountResponse(true, user.FindFirstValue(ClaimTypes.Email) ?? user.Identity.Name)
             : new AccountResponse(false, null);
+    }
 }

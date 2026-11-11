@@ -22,16 +22,24 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
         options.Value.HasRealKeys);
 
     /// <inheritdoc/>
-    public IObjectInventoryProvider Inventory(AiMode mode) => mode is AiMode.Fake
-        ? services.GetRequiredService<FakeInventoryProvider>()
-        : services.GetKeyedService<IObjectInventoryProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    public IObjectInventoryProvider Inventory(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeInventoryProvider>()
+            : services.GetKeyedService<IObjectInventoryProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
 
     /// <inheritdoc/>
-    public ISegmentationProvider Segmentation(AiMode mode) => mode is AiMode.Fake
-        ? services.GetRequiredService<FakeSegmentationProvider>()
-        : services.GetKeyedService<ISegmentationProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    public ISegmentationProvider Segmentation(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeSegmentationProvider>()
+            : services.GetKeyedService<ISegmentationProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
 
     /// <summary>The error for a real analysis without keys (uploads are refused before this can happen).</summary>
-    private static InvalidOperationException NotSetUp() =>
-        new(Constants.Config.RealAiNotSetUp);
+    private static InvalidOperationException NotSetUp()
+    {
+        return new(Constants.Config.RealAiNotSetUp);
+    }
 }

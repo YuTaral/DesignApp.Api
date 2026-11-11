@@ -14,7 +14,10 @@ public class SampleRoomsTests
     private static readonly System.Text.Json.JsonSerializerOptions SampleJson =
         new(System.Text.Json.JsonSerializerDefaults.Web) { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
 
-    public static TheoryData<string> SampleNames() => [.. SampleRooms.All.Select(s => s.Name)];
+    public static TheoryData<string> SampleNames()
+    {
+        return [.. SampleRooms.All.Select(s => s.Name)];
+    }
 
     [Fact]
     public void All_five_samples_are_embedded()
@@ -175,9 +178,14 @@ public class SampleRoomsTests
     /// <param name="tolerance">The allowed difference.</param>
     private sealed class ToleranceComparer(double tolerance) : IEqualityComparer<(double, double)>
     {
-        public bool Equals((double, double) x, (double, double) y) =>
-            Math.Abs(x.Item1 - y.Item1) <= tolerance && Math.Abs(x.Item2 - y.Item2) <= tolerance;
+        public bool Equals((double, double) x, (double, double) y)
+        {
+            return Math.Abs(x.Item1 - y.Item1) <= tolerance && Math.Abs(x.Item2 - y.Item2) <= tolerance;
+        }
 
-        public int GetHashCode((double, double) obj) => 0;
+        public int GetHashCode((double, double) obj)
+        {
+            return 0;
+        }
     }
 }

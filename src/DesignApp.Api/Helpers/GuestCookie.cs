@@ -25,10 +25,12 @@ internal static class GuestCookie
 
     /// <summary>The browser's guest id, or <c>null</c> when it has none (or sent something we didn't issue).</summary>
     /// <param name="http">The request.</param>
-    public static string? Read(HttpContext http) =>
+    public static string? Read(HttpContext http)
+    {
         // TryGetValue: a SignalR connection's copy of the request throws for a missing key.
-        (http.Items.TryGetValue(Constants.Cookies.GuestIssuedItem, out var issued) ? issued as string : null)
-        ?? GuestIds.FromToken(http.Request.Cookies[Constants.Cookies.Guest]);
+        var issued = http.Items.TryGetValue(Constants.Cookies.GuestIssuedItem, out var value) ? value as string : null;
+        return issued ?? GuestIds.FromToken(http.Request.Cookies[Constants.Cookies.Guest]);
+    }
 
     /// <summary>The browser's guest id, giving it a new one when it has none.</summary>
     /// <param name="http">The request. Once its response has started (a SignalR connection), no cookie can be set.</param>

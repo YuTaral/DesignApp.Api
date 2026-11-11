@@ -66,23 +66,35 @@ public static class Constants
         /// <summary>The URL of a design.</summary>
         /// <param name="id">The design's id.</param>
         /// <returns>The path of the design.</returns>
-        public static string DesignUrl(Guid id) => $"{Api}{Designs}/{id}";
+        public static string DesignUrl(Guid id)
+        {
+            return $"{Api}{Designs}/{id}";
+        }
 
         /// <summary>The URL of a room.</summary>
         /// <param name="id">The room's id.</param>
         /// <returns>The path of the room.</returns>
-        public static string RoomUrl(Guid id) => $"{Api}{Rooms}/{id}";
+        public static string RoomUrl(Guid id)
+        {
+            return $"{Api}{Rooms}/{id}";
+        }
 
         /// <summary>The URL of a room's photo.</summary>
         /// <param name="id">The room's id.</param>
         /// <returns>The path of the photo.</returns>
-        public static string RoomPhotoUrl(Guid id) => $"{RoomUrl(id)}/photo";
+        public static string RoomPhotoUrl(Guid id)
+        {
+            return $"{RoomUrl(id)}/photo";
+        }
 
         /// <summary>The URL of one version of a room's label map.</summary>
         /// <param name="id">The room's id.</param>
         /// <param name="revision">The version.</param>
         /// <returns>The path of that label map.</returns>
-        public static string RoomLabelMapUrl(Guid id, int revision) => $"{RoomUrl(id)}/labels/{revision}";
+        public static string RoomLabelMapUrl(Guid id, int revision)
+        {
+            return $"{RoomUrl(id)}/labels/{revision}";
+        }
     }
 
     /// <summary>The SignalR hub that reports room changes.</summary>
@@ -94,7 +106,10 @@ public static class Constants
         /// <summary>The group of the connections watching one room.</summary>
         /// <param name="roomId">The room.</param>
         /// <returns>The group name.</returns>
-        public static string Group(Guid roomId) => $"rooms:{roomId}";
+        public static string Group(Guid roomId)
+        {
+            return $"rooms:{roomId}";
+        }
     }
 
     /// <summary>The cookies the API sets.</summary>
@@ -298,17 +313,26 @@ public static class Constants
         /// <summary>An unknown AI was chosen.</summary>
         /// <param name="ai">What was sent.</param>
         /// <returns>The message.</returns>
-        public static string UnknownAi(string ai) => $"Unknown AI \"{ai}\". Use Fake or Real.";
+        public static string UnknownAi(string ai)
+        {
+            return $"Unknown AI \"{ai}\". Use Fake or Real.";
+        }
 
         /// <summary>The server uses one AI only.</summary>
         /// <param name="only">The AI it uses.</param>
         /// <returns>The message.</returns>
-        public static string OnlyAi(string only) => $"This server only uses the {only.ToLowerInvariant()} AI.";
+        public static string OnlyAi(string only)
+        {
+            return $"This server only uses the {only.ToLowerInvariant()} AI.";
+        }
 
         /// <summary>An unknown scope was chosen.</summary>
         /// <param name="scope">What was sent.</param>
         /// <param name="known">The scopes that exist.</param>
         /// <returns>The message.</returns>
-        public static string UnknownScope(string scope, IEnumerable<string> known) => $"Unknown scope \"{scope}\". Use {string.Join(", ", known)}.";
+        public static string UnknownScope(string scope, IEnumerable<string> known)
+        {
+            return $"Unknown scope \"{scope}\". Use {string.Join(", ", known)}.";
+        }
     }
 }

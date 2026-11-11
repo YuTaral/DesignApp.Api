@@ -15,5 +15,8 @@ internal sealed class AnalysisScheduler : IAnalysisScheduler
     public ChannelReader<Guid> Reader => _channel.Reader;
 
     /// <inheritdoc/>
-    public void Schedule(Guid roomId) => _channel.Writer.TryWrite(roomId);
+    public void Schedule(Guid roomId)
+    {
+        _channel.Writer.TryWrite(roomId);
+    }
 }

@@ -38,8 +38,10 @@ public class OutlineFixTests
     }
 
     /// <summary>A stroke on object 1 through label-map pixel centers.</summary>
-    private static OutlineStroke Stroke(OutlineBrushMode mode, double radius, params (double X, double Y)[] pixels) =>
-        new(1, "wall", mode, radius, [.. pixels.Select(p => new StrokePoint((p.X + 0.5) / W, (p.Y + 0.5) / H))]);
+    private static OutlineStroke Stroke(OutlineBrushMode mode, double radius, params (double X, double Y)[] pixels)
+    {
+        return new(1, "wall", mode, radius, [.. pixels.Select(p => new StrokePoint((p.X + 0.5) / W, (p.Y + 0.5) / H))]);
+    }
 
     [Fact]
     public void A_click_paints_a_round_dab()
@@ -169,8 +171,10 @@ public class OutlineFixTests
     [InlineData(AiMode.Fake, true, true, AiMode.Real, true)]
     [InlineData(AiMode.Real, false, true, AiMode.Fake, false)]   // production: never the fakes
     public void Uploads_may_use_the_default_ai_or_choose_where_the_switch_is_on(
-        AiMode defaultMode, bool canChoose, bool realAvailable, AiMode asked, bool allowed) =>
+        AiMode defaultMode, bool canChoose, bool realAvailable, AiMode asked, bool allowed)
+    {
         Assert.Equal(allowed, new AiAvailability(defaultMode, canChoose, realAvailable).Allows(asked));
+    }
 
     [Theory]
     [InlineData(AnalysisScope.WholeRoom, ObjectCategory.Opening, true)]
@@ -178,8 +182,10 @@ public class OutlineFixTests
     [InlineData(AnalysisScope.NoDoorsOrWindows, ObjectCategory.Wall, true)]
     [InlineData(AnalysisScope.ObjectsOnly, ObjectCategory.Ceiling, false)]
     [InlineData(AnalysisScope.ObjectsOnly, ObjectCategory.Fixture, true)]
-    public void Scopes_include_the_right_categories(AnalysisScope scope, ObjectCategory category, bool included) =>
+    public void Scopes_include_the_right_categories(AnalysisScope scope, ObjectCategory category, bool included)
+    {
         Assert.Equal(included, scope.Includes(category));
+    }
 
     /// <summary>Uploads and analyzes a room with the fake AI and a real photo.</summary>
     /// <param name="scope">What the analysis looks for.</param>

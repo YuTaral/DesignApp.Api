@@ -29,8 +29,10 @@ public class AnalyzeRoomTests
     private ISegmentationProvider _segmentation = new FakeSegmentationProvider(NoDelay);
 
     /// <summary>The use case wired to this test's fakes.</summary>
-    private AnalyzeRoom CreateHandler() =>
-        new(_rooms, _storage, new SkiaRoomImaging(), new FixedAiProviders(_inventory, _segmentation), _notifier, NullLogger<AnalyzeRoom>.Instance);
+    private AnalyzeRoom CreateHandler()
+    {
+        return new(_rooms, _storage, new SkiaRoomImaging(), new FixedAiProviders(_inventory, _segmentation), _notifier, NullLogger<AnalyzeRoom>.Instance);
+    }
 
     /// <summary>Saves a freshly uploaded room with a real photo in storage.</summary>
     private async Task<Room> UploadedRoomAsync()
@@ -153,8 +155,10 @@ public class AnalyzeRoomTests
     /// <param name="result">What to return.</param>
     private sealed class StubInventory(Result<IReadOnlyList<InventoryItem>> result) : IObjectInventoryProvider
     {
-        public Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken) =>
-            Task.FromResult(result);
+        public Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(result);
+        }
     }
 
     /// <summary>Cancels the analysis as if the API were shutting down.</summary>
@@ -172,14 +176,18 @@ public class AnalyzeRoomTests
     /// <summary>Fails like a provider outage.</summary>
     private sealed class ThrowingSegmentation : ISegmentationProvider
     {
-        public Task<IReadOnlyList<ObjectMask?>> SegmentAsync(AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken) =>
+        public Task<IReadOnlyList<ObjectMask?>> SegmentAsync(AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
+        {
             throw new HttpRequestException("fal.ai is down");
+        }
     }
 
     /// <summary>Finds nothing for any item.</summary>
     private sealed class EmptySegmentation : ISegmentationProvider
     {
-        public Task<IReadOnlyList<ObjectMask?>> SegmentAsync(AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<ObjectMask?>>([.. items.Select(_ => (ObjectMask?)null)]);
+        public Task<IReadOnlyList<ObjectMask?>> SegmentAsync(AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<IReadOnlyList<ObjectMask?>>([.. items.Select(_ => (ObjectMask?)null)]);
+        }
     }
 }

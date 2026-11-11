@@ -21,30 +21,46 @@ internal sealed class FakeRooms : IRoomRepository
     public HashSet<Guid> InDesigns { get; } = [];
 
     /// <inheritdoc/>
-    public void Add(Room room) => _pending.Add(room);
+    public void Add(Room room)
+    {
+        _pending.Add(room);
+    }
 
     /// <inheritdoc/>
-    public void Remove(Room room) => _removed.Add(room);
+    public void Remove(Room room)
+    {
+        _removed.Add(room);
+    }
 
     /// <inheritdoc/>
-    public Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.CreatedAt < cutoff && !InDesigns.Contains(r.Id)).OrderBy(r => r.CreatedAt).Take(max)]);
+    public Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.CreatedAt < cutoff && !InDesigns.Contains(r.Id)).OrderBy(r => r.CreatedAt).Take(max)]);
+    }
 
     /// <inheritdoc/>
-    public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        Task.FromResult(Saved.SingleOrDefault(r => r.Id == id && r.OwnerId == ownerId));
+    public Task<Room?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Saved.SingleOrDefault(r => r.Id == id && r.OwnerId == ownerId));
+    }
 
     /// <inheritdoc/>
-    public Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.OwnerId == ownerId).OrderByDescending(r => r.CreatedAt)]);
+    public Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.OwnerId == ownerId).OrderByDescending(r => r.CreatedAt)]);
+    }
 
     /// <inheritdoc/>
-    public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken) =>
-        Task.FromResult(Saved.SingleOrDefault(r => r.Id == id));
+    public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Saved.SingleOrDefault(r => r.Id == id));
+    }
 
     /// <inheritdoc/>
-    public Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<Guid>>([.. Saved.Where(r => r.Status is not (RoomStatus.Ready or RoomStatus.Failed)).Select(r => r.Id)]);
+    public Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<Guid>>([.. Saved.Where(r => r.Status is not (RoomStatus.Ready or RoomStatus.Failed)).Select(r => r.Id)]);
+    }
 
     /// <inheritdoc/>
     public Task SaveChangesAsync(CancellationToken cancellationToken)

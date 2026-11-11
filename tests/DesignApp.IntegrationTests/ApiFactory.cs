@@ -31,10 +31,16 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     /// Clients talk https, like browsers do: the guest and sign-in cookies are Secure, and a client
     /// doesn't send those back over plain http.
     /// </summary>
-    public ApiFactory() => ClientOptions.BaseAddress = new Uri("https://localhost");
+    public ApiFactory()
+    {
+        ClientOptions.BaseAddress = new Uri("https://localhost");
+    }
 
     /// <summary>Starts both containers before the first test.</summary>
-    public Task InitializeAsync() => Task.WhenAll(_postgres.StartAsync(), _storage.StartAsync());
+    public Task InitializeAsync()
+    {
+        return Task.WhenAll(_postgres.StartAsync(), _storage.StartAsync());
+    }
 
     /// <summary>Points the API at the test containers.</summary>
     /// <param name="builder">The test host's builder.</param>

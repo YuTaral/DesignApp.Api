@@ -30,8 +30,10 @@ internal sealed record SampleRoom(string Name, int Width, int Height, string Fin
     }
 
     /// <summary>The objects as the inventory step reports them, with boxes from their outlines.</summary>
-    public IReadOnlyList<InventoryItem> Inventory() =>
-        [.. Objects.Select(o => new InventoryItem(o.Label, o.Category, o.Box(Width, Height), HexColor.Parse(Domain.Constants.Colors.Fallback)))];
+    public IReadOnlyList<InventoryItem> Inventory()
+    {
+        return [.. Objects.Select(o => new InventoryItem(o.Label, o.Category, o.Box(Width, Height), HexColor.Parse(Domain.Constants.Colors.Fallback)))];
+    }
 
     /// <summary>Draws one object's outline at the analysis image's size.</summary>
     /// <param name="label">The object's label.</param>

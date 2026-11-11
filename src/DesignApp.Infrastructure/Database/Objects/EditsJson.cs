@@ -24,13 +24,17 @@ internal static class EditsJson
 
     /// <summary>The edits as JSON.</summary>
     /// <param name="edits">The edits.</param>
-    private static string Serialize(IReadOnlyList<EditOperation> edits) =>
-        JsonSerializer.Serialize(edits.Select(StoredEdit.From), Options);
+    private static string Serialize(IReadOnlyList<EditOperation> edits)
+    {
+        return JsonSerializer.Serialize(edits.Select(StoredEdit.From), Options);
+    }
 
     /// <summary>The edits stored in the JSON.</summary>
     /// <param name="json">The column's value.</param>
-    private static ReadOnlyCollection<EditOperation> Deserialize(string json) =>
-        (JsonSerializer.Deserialize<List<StoredEdit>>(json, Options) ?? []).Select(e => e.ToDomain()).ToList().AsReadOnly();
+    private static ReadOnlyCollection<EditOperation> Deserialize(string json)
+    {
+        return (JsonSerializer.Deserialize<List<StoredEdit>>(json, Options) ?? []).Select(e => e.ToDomain()).ToList().AsReadOnly();
+    }
 
     /// <summary>One edit as stored.</summary>
     /// <param name="Type">The kind of edit; only "recolor" so far.</param>
@@ -41,19 +45,25 @@ internal static class EditsJson
     {
         /// <summary>The stored form of an edit.</summary>
         /// <param name="edit">The edit.</param>
-        public static StoredEdit From(EditOperation edit) => edit switch
+        public static StoredEdit From(EditOperation edit)
         {
-            RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength),
-            _ => throw new NotSupportedException($"Edits of type {edit.GetType().Name} can't be stored yet."),
-        };
+            return edit switch
+            {
+                RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength),
+                _ => throw new NotSupportedException($"Edits of type {edit.GetType().Name} can't be stored yet."),
+            };
+        }
 
         /// <summary>The edit this stored form describes.</summary>
 #pragma warning disable CA1859 // more kinds of edits will come; callers only need EditOperation
-        public EditOperation ToDomain() => Type switch
+        public EditOperation ToDomain()
         {
-            Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength),
-            _ => throw new NotSupportedException($"Unknown stored edit type '{Type}'."),
-        };
+            return Type switch
+            {
+                Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength),
+                _ => throw new NotSupportedException($"Unknown stored edit type '{Type}'."),
+            };
+        }
 #pragma warning restore CA1859
     }
 }

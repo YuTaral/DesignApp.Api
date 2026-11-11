@@ -10,5 +10,8 @@ internal sealed class RecordingScheduler : IAnalysisScheduler
     public List<Guid> Scheduled { get; } = [];
 
     /// <inheritdoc/>
-    public void Schedule(Guid roomId) => Scheduled.Add(roomId);
+    public void Schedule(Guid roomId)
+    {
+        Scheduled.Add(roomId);
+    }
 }

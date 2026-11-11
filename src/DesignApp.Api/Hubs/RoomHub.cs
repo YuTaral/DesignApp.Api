@@ -45,8 +45,10 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
     /// it sent. Read from the connection, not the current request: a hub method runs long after the
     /// request that opened the connection, and no cookie can be issued then.
     /// </summary>
-    private string? Owner() =>
-        Context.User?.Identity?.IsAuthenticated == true
+    private string? Owner()
+    {
+        return Context.User?.Identity?.IsAuthenticated == true
             ? Context.User.FindFirstValue(ClaimTypes.NameIdentifier)
             : Context.GetHttpContext() is { } http ? GuestCookie.Read(http) : null;
+    }
 }

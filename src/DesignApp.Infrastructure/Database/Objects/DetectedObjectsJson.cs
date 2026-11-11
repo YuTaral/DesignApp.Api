@@ -29,13 +29,17 @@ internal static class DetectedObjectsJson
 
     /// <summary>Writes the objects as JSON.</summary>
     /// <param name="objects">The objects to write.</param>
-    private static string Serialize(IReadOnlyList<DetectedObject> objects) =>
-        JsonSerializer.Serialize(objects.Select(StoredObject.From), Options);
+    private static string Serialize(IReadOnlyList<DetectedObject> objects)
+    {
+        return JsonSerializer.Serialize(objects.Select(StoredObject.From), Options);
+    }
 
     /// <summary>Reads the objects back from JSON.</summary>
     /// <param name="json">The stored column value.</param>
-    private static ReadOnlyCollection<DetectedObject> Deserialize(string json) =>
-        (JsonSerializer.Deserialize<List<StoredObject>>(json, Options) ?? []).Select(o => o.ToDomain()).ToList().AsReadOnly();
+    private static ReadOnlyCollection<DetectedObject> Deserialize(string json)
+    {
+        return (JsonSerializer.Deserialize<List<StoredObject>>(json, Options) ?? []).Select(o => o.ToDomain()).ToList().AsReadOnly();
+    }
 
     /// <summary>The stored JSON shape of one object, kept separate from the domain type.</summary>
     /// <param name="Index">Label-map value.</param>
@@ -50,11 +54,15 @@ internal static class DetectedObjectsJson
     {
         /// <summary>Flattens a domain object for storage.</summary>
         /// <param name="o">The object to store.</param>
-        public static StoredObject From(DetectedObject o) =>
-            new(o.Index, o.Label, o.Category, o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height, o.DominantColor.Value);
+        public static StoredObject From(DetectedObject o)
+        {
+            return new(o.Index, o.Label, o.Category, o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height, o.DominantColor.Value);
+        }
 
         /// <summary>Rebuilds the domain object, re-checking its rules.</summary>
-        public DetectedObject ToDomain() =>
-            new(Index, Label, Category, new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color));
+        public DetectedObject ToDomain()
+        {
+            return new(Index, Label, Category, new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color));
+        }
     }
 }

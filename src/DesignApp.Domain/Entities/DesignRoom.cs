@@ -19,9 +19,15 @@ public sealed class DesignRoom
     /// <summary>A room with no edits.</summary>
     /// <param name="roomId">The room.</param>
     /// <param name="position">Its place in the design.</param>
-    internal DesignRoom(Guid roomId, int position) => (RoomId, Position) = (roomId, position);
+    internal DesignRoom(Guid roomId, int position)
+    {
+        (RoomId, Position) = (roomId, position);
+    }
 
     /// <summary>Replaces the edits; <see cref="Design.SetRoomEdits"/> checks them first.</summary>
     /// <param name="edits">The new edits.</param>
-    internal void SetEdits(IReadOnlyList<EditOperation> edits) => _edits = edits;
+    internal void SetEdits(IReadOnlyList<EditOperation> edits)
+    {
+        _edits = edits;
+    }
 }

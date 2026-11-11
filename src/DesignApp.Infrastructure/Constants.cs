@@ -189,8 +189,10 @@ public static class Constants
             /// <param name="width">The photo's width in pixels.</param>
             /// <param name="height">The photo's height in pixels.</param>
             /// <returns>The text.</returns>
-            public static string ImageSize(int width, int height) =>
-                $"The photo is {width} x {height} pixels. Give every box and point in these pixels, measured from the top-left corner.";
+            public static string ImageSize(int width, int height)
+            {
+                return $"The photo is {width} x {height} pixels. Give every box and point in these pixels, measured from the top-left corner.";
+            }
 
             /// <summary>The answer's field names (the JSON schema and the parsed records use the same).</summary>
             public static class Fields
@@ -230,8 +232,10 @@ public static class Constants
                 /// <param name="width">The photo's width in pixels.</param>
                 /// <param name="height">The photo's height in pixels.</param>
                 /// <returns>The description.</returns>
-                public static string Box(int width, int height) =>
-                    $"Bounding box in pixels of this {width} x {height} photo: the left and top edges, then the width and height.";
+                public static string Box(int width, int height)
+                {
+                    return $"Bounding box in pixels of this {width} x {height} photo: the left and top edges, then the width and height.";
+                }
                 /// <summary>Of <see cref="Fields.Color"/>.</summary>
                 public const string Color = "The object's main color as #RRGGBB.";
                 /// <summary>The points field, for walls, floors and ceilings.</summary>
@@ -239,8 +243,10 @@ public static class Constants
                 /// <param name="width">The photo's width in pixels.</param>
                 /// <param name="height">The photo's height in pixels.</param>
                 /// <returns>The description.</returns>
-                public static string Points(int maxPoints, int width, int height) =>
-                    $"For walls, floors and ceilings: 2 or {maxPoints} spots on the visible surface itself, in pixels of the {width} x {height} photo. Empty for every other object.";
+                public static string Points(int maxPoints, int width, int height)
+                {
+                    return $"For walls, floors and ceilings: 2 or {maxPoints} spots on the visible surface itself, in pixels of the {width} x {height} photo. Empty for every other object.";
+                }
             }
         }
 
@@ -514,21 +520,33 @@ public static class Constants
 
         /// <summary>Painting where the object already is.</summary>
         /// <param name="label">The object.</param>
-        public static string AlreadyThere(string label) => $"That part is already the {label}.";
+        public static string AlreadyThere(string label)
+        {
+            return $"That part is already the {label}.";
+        }
 
         /// <summary>Erasing where the object isn't.</summary>
         /// <param name="label">The object.</param>
-        public static string NothingToErase(string label) => $"There's no {label} there to erase.";
+        public static string NothingToErase(string label)
+        {
+            return $"There's no {label} there to erase.";
+        }
 
         /// <summary>Erasing the whole object.</summary>
         /// <param name="label">The object.</param>
-        public static string WouldEraseAll(string label) => $"That would erase the whole {label}. Use Reset to remove its color instead.";
+        public static string WouldEraseAll(string label)
+        {
+            return $"That would erase the whole {label}. Use Reset to remove its color instead.";
+        }
 
         /// <summary>A stored AI setting that can't be used (logged when an analysis fails).</summary>
         /// <param name="field">The setting.</param>
         /// <param name="rule">The rule it breaks.</param>
         /// <returns>The message.</returns>
-        public static string InvalidAiSetting(string field, string rule) => $"The ai_settings value {field} {rule}.";
+        public static string InvalidAiSetting(string field, string rule)
+        {
+            return $"The ai_settings value {field} {rule}.";
+        }
     }
 
     /// <summary>Claude's effort levels the object listing can use.</summary>

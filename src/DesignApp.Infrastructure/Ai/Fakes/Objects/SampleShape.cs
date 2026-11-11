@@ -94,6 +94,8 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
 
     /// <summary>Turns x, y pairs into points.</summary>
     /// <param name="coordinates">x0, y0, x1, y1, ...</param>
-    private static SKPoint[] Points(float[] coordinates) =>
-        [.. Enumerable.Range(0, coordinates.Length / 2).Select(i => new SKPoint(coordinates[i * 2], coordinates[i * 2 + 1]))];
+    private static SKPoint[] Points(float[] coordinates)
+    {
+        return [.. Enumerable.Range(0, coordinates.Length / 2).Select(i => new SKPoint(coordinates[i * 2], coordinates[i * 2 + 1]))];
+    }
 }

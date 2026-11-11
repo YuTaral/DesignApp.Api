@@ -113,7 +113,10 @@ public sealed class Room
     }
 
     /// <summary>Analyzing → Segmenting: the objects are being outlined.</summary>
-    public void StartSegmentation() => MoveTo(RoomStatus.Segmenting, from: RoomStatus.Analyzing);
+    public void StartSegmentation()
+    {
+        MoveTo(RoomStatus.Segmenting, from: RoomStatus.Analyzing);
+    }
 
     /// <summary>Segmenting → Ready: stores the detected objects and where their label map is.</summary>
     /// <param name="objects">At least one object, with unique indexes from 1 to <see cref="Constants.Rooms.MaxObjectIndex"/>.</param>
@@ -170,7 +173,10 @@ public sealed class Room
 
     /// <summary>Whether a label map version is stored.</summary>
     /// <param name="revision">The version.</param>
-    public bool HasLabelMapRevision(int revision) => Status is RoomStatus.Ready && revision >= 0 && revision <= LatestLabelMapRevision;
+    public bool HasLabelMapRevision(int revision)
+    {
+        return Status is RoomStatus.Ready && revision >= 0 && revision <= LatestLabelMapRevision;
+    }
 
     /// <summary>Stops the analysis with a reason the user can see.</summary>
     /// <param name="reason">Why the analysis failed.</param>

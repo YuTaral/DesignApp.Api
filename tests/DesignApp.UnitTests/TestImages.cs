@@ -54,7 +54,10 @@ internal static class TestImages
     }
 
     /// <summary>A valid 1x1 GIF. Skia can read GIFs but not write them.</summary>
-    public static byte[] Gif() => Convert.FromBase64String("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
+    public static byte[] Gif()
+    {
+        return Convert.FromBase64String("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
+    }
 
     /// <summary>A valid uncompressed 24-bit BMP. Skia can read BMPs but not write them.</summary>
     /// <param name="width">Width in pixels.</param>
@@ -88,5 +91,8 @@ internal static class TestImages
 
     /// <summary>Decodes an encoded image so tests can read its pixels.</summary>
     /// <param name="encoded">The image file's bytes.</param>
-    public static SKBitmap Decode(byte[] encoded) => SKBitmap.Decode(encoded);
+    public static SKBitmap Decode(byte[] encoded)
+    {
+        return SKBitmap.Decode(encoded);
+    }
 }

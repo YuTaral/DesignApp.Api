@@ -14,8 +14,14 @@ public sealed class StoredFile(Stream content, string contentType, long? length)
     public long? Length { get; } = length;
 
     /// <summary>Closes the content stream.</summary>
-    public ValueTask DisposeAsync() => Content.DisposeAsync();
+    public ValueTask DisposeAsync()
+    {
+        return Content.DisposeAsync();
+    }
 
     /// <summary>Closes the content stream.</summary>
-    public void Dispose() => Content.Dispose();
+    public void Dispose()
+    {
+        Content.Dispose();
+    }
 }

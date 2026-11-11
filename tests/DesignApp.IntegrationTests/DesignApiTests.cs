@@ -151,7 +151,11 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var room = await ReadyRoomAsync(browser);
         var index = room.Objects[0];
 
-        async Task<string?> Refused(object body) => await ProblemAsync(await browser.PostAsJsonAsync("/api/designs", body));
+        async Task<string?> Refused(object body)
+        {
+            var response = await browser.PostAsJsonAsync("/api/designs", body);
+            return await ProblemAsync(response);
+        }
 
         Assert.Equal(DesignApp.Domain.Constants.Messages.NameLength, await Refused(new { roomId = room.Id, name = "  " }));
         Assert.Equal(DesignApp.Domain.Constants.Messages.DescriptionLength, await Refused(new { roomId = room.Id, name = "x", description = new string('d', DesignApp.Domain.Constants.Designs.MaxDescriptionLength + 1) }));
@@ -198,7 +202,10 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     /// <summary>A fresh email, so tests sharing the database don't collide.</summary>
-    private static string NewEmail() => $"designer-{Guid.NewGuid():N}@example.com";
+    private static string NewEmail()
+    {
+        return $"designer-{Guid.NewGuid():N}@example.com";
+    }
 
     /// <summary>A browser signed in to a new account.</summary>
     private async Task<HttpClient> SignedUpAsync()

@@ -14,6 +14,8 @@ public sealed record DetectedObjectResponse(int Index, string Label, ObjectCateg
 {
     /// <summary>Maps a domain object to its API shape.</summary>
     /// <param name="o">The object to map.</param>
-    public static DetectedObjectResponse From(DetectedObject o) =>
-        new(o.Index, o.Label, o.Category, new(o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height), o.DominantColor.Value);
+    public static DetectedObjectResponse From(DetectedObject o)
+    {
+        return new(o.Index, o.Label, o.Category, new(o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height), o.DominantColor.Value);
+    }
 }

@@ -108,7 +108,10 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     /// <summary>A fresh email, so tests sharing the database don't collide.</summary>
-    private static string NewEmail() => $"user-{Guid.NewGuid():N}@example.com";
+    private static string NewEmail()
+    {
+        return $"user-{Guid.NewGuid():N}@example.com";
+    }
 
     /// <summary>Uploads a small photo as the browser and returns the new room's id.</summary>
     /// <param name="browser">The client, with its own cookies.</param>
@@ -124,8 +127,10 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
     /// <summary>Who the browser is signed in as.</summary>
     /// <param name="browser">The client.</param>
-    private static async Task<AccountDto> AccountAsync(HttpClient browser) =>
-        (await browser.GetFromJsonAsync<AccountDto>("/api/account"))!;
+    private static async Task<AccountDto> AccountAsync(HttpClient browser)
+    {
+        return (await browser.GetFromJsonAsync<AccountDto>("/api/account"))!;
+    }
 
     /// <summary>The detail of a refused request, checking it was refused with 400.</summary>
     /// <param name="response">The response; disposed here.</param>

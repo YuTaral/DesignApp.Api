@@ -44,8 +44,10 @@ public class DeleteUnsavedRoomsTests
     }
 
     /// <summary>The use case at <see cref="Now"/>.</summary>
-    private static DeleteUnsavedRooms UseCase(FakeRooms rooms, FakeStorage storage) =>
-        new(rooms, new RoomRemover(rooms, storage, NullLogger<RoomRemover>.Instance), new FixedClock(Now));
+    private static DeleteUnsavedRooms UseCase(FakeRooms rooms, FakeStorage storage)
+    {
+        return new(rooms, new RoomRemover(rooms, storage, NullLogger<RoomRemover>.Instance), new FixedClock(Now));
+    }
 
     /// <summary>Saves a ready room uploaded at <paramref name="uploaded"/>, with its photo and label maps in storage.</summary>
     private static async Task<Room> AddAsync(FakeRooms rooms, FakeStorage storage, DateTimeOffset uploaded, int outlineFixes = 0)

@@ -8,9 +8,11 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<A
 {
     /// <summary>Creates a context with a placeholder connection string; EF tools never connect with it.</summary>
     /// <param name="args">Arguments from the EF tools (unused).</param>
-    public AppDbContext CreateDbContext(string[] args) =>
-        new(new DbContextOptionsBuilder<AppDbContext>()
+    public AppDbContext CreateDbContext(string[] args)
+    {
+        return new(new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(Constants.Config.DesignTimeConnection)
             .UseSnakeCaseNamingConvention()
             .Options);
+    }
 }

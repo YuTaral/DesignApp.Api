@@ -10,5 +10,8 @@ internal sealed class FixedAiSettings(AiSettings? settings = null) : IAiSettings
     public AiSettings Settings { get; } = settings ?? new AiSettings();
 
     /// <inheritdoc/>
-    public Task<AiSettings> GetAsync(CancellationToken cancellationToken) => Task.FromResult(Settings);
+    public Task<AiSettings> GetAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Settings);
+    }
 }

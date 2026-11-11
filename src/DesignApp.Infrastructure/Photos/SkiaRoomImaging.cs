@@ -92,7 +92,10 @@ internal sealed class SkiaRoomImaging : IRoomImaging
 
     /// <summary>Counts the mask pixels that belong to the object.</summary>
     /// <param name="mask">The mask.</param>
-    private static int CountCovered(ObjectMask mask) => mask.Coverage.Count(c => c >= Constants.Imaging.CoverageThreshold);
+    private static int CountCovered(ObjectMask mask)
+    {
+        return mask.Coverage.Count(c => c >= Constants.Imaging.CoverageThreshold);
+    }
 
     /// <summary>Writes <paramref name="paintId"/> into every label pixel the mask covers, scaling the mask to fit.</summary>
     /// <param name="labels">The label map being built.</param>
@@ -235,7 +238,10 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         }
 
         /// <summary>The median of each channel: the object's color, unswayed by highlights and shadows.</summary>
-        public HexColor MedianColor() => HexColor.Parse($"#{Median(_red):X2}{Median(_green):X2}{Median(_blue):X2}");
+        public HexColor MedianColor()
+        {
+            return HexColor.Parse($"#{Median(_red):X2}{Median(_green):X2}{Median(_blue):X2}");
+        }
 
         /// <summary>The middle value of a histogram.</summary>
         /// <param name="histogram">Counts per value 0..255.</param>

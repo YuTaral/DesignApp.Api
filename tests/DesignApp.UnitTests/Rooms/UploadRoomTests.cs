@@ -16,8 +16,10 @@ public class UploadRoomTests
     private readonly RecordingScheduler _scheduler = new();
 
     /// <summary>The use case wired to this test's fakes.</summary>
-    private UploadRoom CreateHandler() =>
-        new(_photos, _storage, _rooms, new FixedUser("user-1"), new FixedClock(Now), _scheduler);
+    private UploadRoom CreateHandler()
+    {
+        return new(_photos, _storage, _rooms, new FixedUser("user-1"), new FixedClock(Now), _scheduler);
+    }
 
     [Fact]
     public async Task Stores_the_photo_under_the_room_and_saves_the_room()
@@ -72,7 +74,9 @@ public class UploadRoomTests
         /// <summary>When set, every file is refused with this message.</summary>
         public string? Refusal { get; set; }
 
-        public Result<ProcessedPhoto> Process(Stream upload) =>
-            Refusal is null ? new ProcessedPhoto([0xFF, 0xD8], 1600, 1200) : Result.Failure<ProcessedPhoto>(Refusal);
+        public Result<ProcessedPhoto> Process(Stream upload)
+        {
+            return Refusal is null ? new ProcessedPhoto([0xFF, 0xD8], 1600, 1200) : Result.Failure<ProcessedPhoto>(Refusal);
+        }
     }
 }

@@ -42,7 +42,10 @@ internal static class AccountEndpoints
 
     /// <summary><c>GET /api/account</c>.</summary>
     /// <param name="http">The request.</param>
-    private static Ok<AccountResponse> GetAsync(HttpContext http) => TypedResults.Ok(AccountResponse.From(http.User));
+    private static Ok<AccountResponse> GetAsync(HttpContext http)
+    {
+        return TypedResults.Ok(AccountResponse.From(http.User));
+    }
 
     /// <summary><c>POST /api/account/sign-up</c>.</summary>
     /// <param name="request">The email and password.</param>
@@ -124,20 +127,25 @@ internal static class AccountEndpoints
 
     /// <summary>What's missing from the form, or <c>null</c> when both fields are filled in.</summary>
     /// <param name="request">The form.</param>
-    private static string? Missing(CredentialsRequest request) =>
-        string.IsNullOrWhiteSpace(request.Email) ? Constants.Messages.EnterEmail
+    private static string? Missing(CredentialsRequest request)
+    {
+        return string.IsNullOrWhiteSpace(request.Email) ? Constants.Messages.EnterEmail
         : string.IsNullOrEmpty(request.Password) ? Constants.Messages.EnterPassword
         : null;
+    }
 
     /// <summary>Identity's errors in the app's words.</summary>
     /// <param name="errors">Why the account couldn't be created.</param>
-    private static string Describe(IEnumerable<IdentityError> errors) => string.Join(" ", errors
-        .Select(e => e.Code switch
-        {
-            Constants.Accounts.ErrorCodes.DuplicateUserName or Constants.Accounts.ErrorCodes.DuplicateEmail => Constants.Messages.EmailTaken,
-            Constants.Accounts.ErrorCodes.InvalidEmail or Constants.Accounts.ErrorCodes.InvalidUserName => Constants.Messages.InvalidEmail,
-            Constants.Accounts.ErrorCodes.PasswordTooShort => Constants.Messages.PasswordTooShort,
-            _ => e.Description,
-        })
-        .Distinct());
+    private static string Describe(IEnumerable<IdentityError> errors)
+    {
+        return string.Join(" ", errors
+            .Select(e => e.Code switch
+            {
+                Constants.Accounts.ErrorCodes.DuplicateUserName or Constants.Accounts.ErrorCodes.DuplicateEmail => Constants.Messages.EmailTaken,
+                Constants.Accounts.ErrorCodes.InvalidEmail or Constants.Accounts.ErrorCodes.InvalidUserName => Constants.Messages.InvalidEmail,
+                Constants.Accounts.ErrorCodes.PasswordTooShort => Constants.Messages.PasswordTooShort,
+                _ => e.Description,
+            })
+            .Distinct());
+    }
 }

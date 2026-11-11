@@ -46,7 +46,10 @@ public class SaveGuestRoomsTests
     [InlineData("not-a-uuid")]
     [InlineData("00000000000000000000000000000000")]
     [InlineData("user-1")]
-    public void Tokens_we_did_not_hand_out_give_no_guest_id(string token) => Assert.Null(GuestIds.FromToken(token));
+    public void Tokens_we_did_not_hand_out_give_no_guest_id(string token)
+    {
+        Assert.Null(GuestIds.FromToken(token));
+    }
 
     [Fact]
     public void A_guest_id_round_trips_through_its_token_and_never_looks_like_an_account()

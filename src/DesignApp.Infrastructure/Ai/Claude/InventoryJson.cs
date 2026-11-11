@@ -25,58 +25,61 @@ internal static class InventoryJson
     /// <param name="width">The photo's width in pixels, which boxes and points are given in.</param>
     /// <param name="height">The photo's height in pixels.</param>
     /// <returns>The schema.</returns>
-    public static Dictionary<string, JsonElement> Schema(int maxPoints, int width, int height) => new()
+    public static Dictionary<string, JsonElement> Schema(int maxPoints, int width, int height)
     {
-        ["type"] = JsonSerializer.SerializeToElement("object"),
-        ["additionalProperties"] = JsonSerializer.SerializeToElement(false),
-        ["required"] = JsonSerializer.SerializeToElement(new[] { F.IsRoom, F.Objects }),
-        ["properties"] = JsonSerializer.SerializeToElement(new Dictionary<string, object>
+        return new()
         {
-            [F.IsRoom] = new { type = "boolean", description = D.IsRoom },
-            [F.Objects] = new
+            ["type"] = JsonSerializer.SerializeToElement("object"),
+            ["additionalProperties"] = JsonSerializer.SerializeToElement(false),
+            ["required"] = JsonSerializer.SerializeToElement(new[] { F.IsRoom, F.Objects }),
+            ["properties"] = JsonSerializer.SerializeToElement(new Dictionary<string, object>
             {
-                type = "array",
-                items = new Dictionary<string, object>
+                [F.IsRoom] = new { type = "boolean", description = D.IsRoom },
+                [F.Objects] = new
                 {
-                    ["type"] = "object",
-                    ["additionalProperties"] = false,
-                    ["required"] = new[] { F.Label, F.Category, F.Box, F.Color, F.Points },
-                    ["properties"] = new Dictionary<string, object>
+                    type = "array",
+                    items = new Dictionary<string, object>
                     {
-                        [F.Label] = new { type = "string", description = D.Label },
-                        [F.Category] = new { type = "string", @enum = Enum.GetNames<ObjectCategory>() },
-                        [F.Box] = new Dictionary<string, object>
+                        ["type"] = "object",
+                        ["additionalProperties"] = false,
+                        ["required"] = new[] { F.Label, F.Category, F.Box, F.Color, F.Points },
+                        ["properties"] = new Dictionary<string, object>
                         {
-                            ["type"] = "object",
-                            ["additionalProperties"] = false,
-                            ["required"] = new[] { F.X, F.Y, F.Width, F.Height },
-                            ["description"] = D.Box(width, height),
-                            ["properties"] = new Dictionary<string, object>
-                            {
-                                [F.X] = new { type = "number" },
-                                [F.Y] = new { type = "number" },
-                                [F.Width] = new { type = "number" },
-                                [F.Height] = new { type = "number" },
-                            },
-                        },
-                        [F.Color] = new { type = "string", description = D.Color },
-                        [F.Points] = new Dictionary<string, object>
-                        {
-                            ["type"] = "array",
-                            ["description"] = D.Points(maxPoints, width, height),
-                            ["items"] = new Dictionary<string, object>
+                            [F.Label] = new { type = "string", description = D.Label },
+                            [F.Category] = new { type = "string", @enum = Enum.GetNames<ObjectCategory>() },
+                            [F.Box] = new Dictionary<string, object>
                             {
                                 ["type"] = "object",
                                 ["additionalProperties"] = false,
-                                ["required"] = new[] { F.X, F.Y },
-                                ["properties"] = new Dictionary<string, object> { [F.X] = new { type = "number" }, [F.Y] = new { type = "number" } },
+                                ["required"] = new[] { F.X, F.Y, F.Width, F.Height },
+                                ["description"] = D.Box(width, height),
+                                ["properties"] = new Dictionary<string, object>
+                                {
+                                    [F.X] = new { type = "number" },
+                                    [F.Y] = new { type = "number" },
+                                    [F.Width] = new { type = "number" },
+                                    [F.Height] = new { type = "number" },
+                                },
+                            },
+                            [F.Color] = new { type = "string", description = D.Color },
+                            [F.Points] = new Dictionary<string, object>
+                            {
+                                ["type"] = "array",
+                                ["description"] = D.Points(maxPoints, width, height),
+                                ["items"] = new Dictionary<string, object>
+                                {
+                                    ["type"] = "object",
+                                    ["additionalProperties"] = false,
+                                    ["required"] = new[] { F.X, F.Y },
+                                    ["properties"] = new Dictionary<string, object> { [F.X] = new { type = "number" }, [F.Y] = new { type = "number" } },
+                                },
                             },
                         },
                     },
                 },
-            },
-        }),
-    };
+            }),
+        };
+    }
 
     /// <summary>Reads Claude's answer.</summary>
     /// <param name="json">The JSON text Claude returned.</param>
@@ -111,8 +114,10 @@ internal static class InventoryJson
     /// <param name="maxPoints">The most points kept.</param>
     /// <param name="width">The width they are measured in.</param>
     /// <param name="height">The height they are measured in.</param>
-    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points, int maxPoints, double width, double height) =>
-        [.. (points ?? []).Select(p => (X: p.X / width, Y: p.Y / height)).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(maxPoints).Select(p => new ImagePoint(p.X, p.Y))];
+    private static IReadOnlyList<ImagePoint> ToPoints(List<AnswerPoint>? points, int maxPoints, double width, double height)
+    {
+        return [.. (points ?? []).Select(p => (X: p.X / width, Y: p.Y / height)).Where(p => p.X is >= 0 and <= 1 && p.Y is >= 0 and <= 1).Take(maxPoints).Select(p => new ImagePoint(p.X, p.Y))];
+    }
 
     /// <summary>Turns a box into fractions of the image and clips it to the image.</summary>
     /// <param name="b">The box as Claude sent it.</param>

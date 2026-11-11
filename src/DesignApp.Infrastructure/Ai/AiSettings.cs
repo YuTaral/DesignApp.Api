@@ -58,9 +58,12 @@ public sealed class AiSettings
 
     /// <summary>The instructions with this row's limits filled in.</summary>
     /// <returns>The system prompt sent to Claude.</returns>
-    public string SystemPrompt() => Instructions
-        .Replace(Constants.Ai.Placeholders.MaxPoints, MaxPoints.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal)
-        .Replace(Constants.Ai.Placeholders.MaxListedObjects, MaxListedObjects.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal);
+    public string SystemPrompt()
+    {
+        return Instructions
+            .Replace(Constants.Ai.Placeholders.MaxPoints, MaxPoints.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal)
+            .Replace(Constants.Ai.Placeholders.MaxListedObjects, MaxListedObjects.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal);
+    }
 
     /// <summary>
     /// What is wrong with the values, if anything. The row is edited by hand for now, so a typo must

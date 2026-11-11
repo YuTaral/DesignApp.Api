@@ -13,6 +13,8 @@ public sealed class GetRoom(IRoomRepository rooms, ICurrentUser currentUser)
     /// <param name="id">The room's id.</param>
     /// <param name="cancellationToken">Cancels the query.</param>
     /// <returns>The current user's room, or <c>null</c> if they have no room with that id.</returns>
-    public Task<Room?> HandleAsync(Guid id, CancellationToken cancellationToken) =>
-        rooms.FindAsync(id, currentUser.Id, cancellationToken);
+    public Task<Room?> HandleAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return rooms.FindAsync(id, currentUser.Id, cancellationToken);
+    }
 }

@@ -90,13 +90,18 @@ public static class Constants
 
         /// <summary>Storage key of a room's photo. One folder per room keeps its files together.</summary>
         /// <param name="roomId">The room's id.</param>
-        public static string PhotoKey(Guid roomId) => $"rooms/{roomId}/photo.jpg";
+        public static string PhotoKey(Guid roomId)
+        {
+            return $"rooms/{roomId}/photo.jpg";
+        }
 
         /// <summary>Storage key of a room's label map, as the analysis made it or after outline fixes.</summary>
         /// <param name="roomId">The room's id.</param>
         /// <param name="revision">The label map version: 0 from the analysis, then one per fix.</param>
-        public static string LabelMapKey(Guid roomId, int revision = 0) =>
-            revision == 0 ? $"rooms/{roomId}/labels.png" : $"rooms/{roomId}/labels-{revision}.png";
+        public static string LabelMapKey(Guid roomId, int revision = 0)
+        {
+            return revision == 0 ? $"rooms/{roomId}/labels.png" : $"rooms/{roomId}/labels-{revision}.png";
+        }
     }
 
     /// <summary>Owner ids of visitors who haven't signed in.</summary>

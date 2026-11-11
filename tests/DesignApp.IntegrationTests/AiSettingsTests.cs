@@ -77,8 +77,10 @@ public class AiSettingsTests(ApiFactoryWithoutAnalysis factory) : IClassFixture<
     }
 
     /// <summary>Reads the settings the way the AI providers do.</summary>
-    private Task<AiSettings> StoreAsync() =>
-        factory.Services.GetRequiredService<IAiSettingsStore>().GetAsync(CancellationToken.None);
+    private Task<AiSettings> StoreAsync()
+    {
+        return factory.Services.GetRequiredService<IAiSettingsStore>().GetAsync(CancellationToken.None);
+    }
 
     /// <summary>Changes the row the way someone in pgAdmin would.</summary>
     /// <param name="sql">The update.</param>

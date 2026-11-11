@@ -166,8 +166,10 @@ public class SkiaRoomImagingTests
     /// <summary>An inventory item; its box doesn't matter to the label map.</summary>
     /// <param name="label">The item's label.</param>
     /// <param name="category">The item's category.</param>
-    private static InventoryItem Item(string label, ObjectCategory category) =>
-        new(label, category, new BoundingBox(0, 0, 1, 1), HexColor.Parse("#808080"));
+    private static InventoryItem Item(string label, ObjectCategory category)
+    {
+        return new(label, category, new BoundingBox(0, 0, 1, 1), HexColor.Parse("#808080"));
+    }
 
     /// <summary>A mask with one filled rectangle.</summary>
     /// <param name="width">Mask width.</param>

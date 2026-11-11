@@ -14,8 +14,10 @@ public class RoomTests
 
     /// <summary>A valid detected sofa.</summary>
     /// <param name="index">Its label-map index.</param>
-    internal static DetectedObject Sofa(int index = 1) =>
-        new(index, "sofa", ObjectCategory.Furniture, new BoundingBox(0.1, 0.4, 0.5, 0.4), HexColor.Parse("#8a7f72"));
+    internal static DetectedObject Sofa(int index = 1)
+    {
+        return new(index, "sofa", ObjectCategory.Furniture, new BoundingBox(0.1, 0.4, 0.5, 0.4), HexColor.Parse("#8a7f72"));
+    }
 
     /// <summary>A room that has gone through every step to Ready, with two objects.</summary>
     /// <param name="ownerId">Who owns the room.</param>
@@ -39,8 +41,10 @@ public class RoomTests
     }
 
     [Fact]
-    public void Upload_rejects_an_empty_id() =>
+    public void Upload_rejects_an_empty_id()
+    {
         Assert.Throws<DomainException>(() => Room.Upload(Guid.Empty, "user-1", "rooms/photo.jpg", 1600, 1200, Now));
+    }
 
     [Fact]
     public void Analysis_pipeline_moves_through_each_stage_to_ready()

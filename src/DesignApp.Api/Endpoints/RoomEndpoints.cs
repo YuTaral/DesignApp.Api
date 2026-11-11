@@ -178,9 +178,12 @@ internal static class RoomEndpoints
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the room and its new label map version, 400 when the fix can't be made, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> FixOutlineAsync(
-        Guid id, OutlineStrokeRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken) =>
-        ToResponse(await fixOutline.FixAsync(id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius,
-            request.Points ?? [], cancellationToken), Constants.Titles.OutlineFixFailed);
+        Guid id, OutlineStrokeRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken)
+    {
+        var outcome = await fixOutline.FixAsync(
+            id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius, request.Points ?? [], cancellationToken);
+        return ToResponse(outcome, Constants.Titles.OutlineFixFailed);
+    }
 
     /// <summary><c>PUT /api/rooms/{id}/labels/current</c>: makes a stored label map version current.</summary>
     /// <param name="id">The room's id.</param>
@@ -189,16 +192,24 @@ internal static class RoomEndpoints
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the room, 400 for an unknown version, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> UseLabelMapRevisionAsync(
-        Guid id, LabelMapRevisionRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken) =>
-        ToResponse(await fixOutline.UseRevisionAsync(id, request.Revision, cancellationToken), Constants.Titles.UnknownOutlineVersion);
+        Guid id, LabelMapRevisionRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken)
+    {
+        var outcome = await fixOutline.UseRevisionAsync(id, request.Revision, cancellationToken);
+        return ToResponse(outcome, Constants.Titles.UnknownOutlineVersion);
+    }
 
     /// <summary>Turns a use case's outcome into a response.</summary>
     /// <param name="result">The outcome; <c>null</c> when the room wasn't found.</param>
     /// <param name="title">The problem title for a refusal.</param>
-    private static Results<Ok<RoomResponse>, ProblemHttpResult, NotFound> ToResponse(Result<Room>? result, string title) =>
-        result is null ? TypedResults.NotFound()
-        : result.Succeeded ? TypedResults.Ok(RoomResponse.From(result.Value))
-        : TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: title);
+    private static Results<Ok<RoomResponse>, ProblemHttpResult, NotFound> ToResponse(Result<Room>? result, string title)
+    {
+        if (result is null)
+            return TypedResults.NotFound();
+
+        return result.Succeeded
+            ? TypedResults.Ok(RoomResponse.From(result.Value))
+            : TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: title);
+    }
 
     /// <summary>Streams a stored file that never changes once written.</summary>
     /// <param name="key">The file's storage key.</param>

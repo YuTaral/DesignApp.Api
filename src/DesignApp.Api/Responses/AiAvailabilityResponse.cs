@@ -12,6 +12,8 @@ public sealed record AiAvailabilityResponse(AiMode Default, bool CanChoose, bool
 {
     /// <summary>Maps the availability to its API shape.</summary>
     /// <param name="availability">What the API can use.</param>
-    public static AiAvailabilityResponse From(AiAvailability availability) =>
-        new(availability.Default, availability.CanChoose, availability.RealAvailable);
+    public static AiAvailabilityResponse From(AiAvailability availability)
+    {
+        return new(availability.Default, availability.CanChoose, availability.RealAvailable);
+    }
 }

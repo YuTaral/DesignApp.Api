@@ -24,8 +24,10 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor accessor) : ICurrentU
         accessor.HttpContext ?? throw new InvalidOperationException("There is no current request to take the user from.");
 
     /// <summary>The account's id from the sign-in cookie, else the guest id.</summary>
-    private string Resolve() =>
-        IsSignedIn && Http.User.FindFirstValue(ClaimTypes.NameIdentifier) is { Length: > 0 } userId
+    private string Resolve()
+    {
+        return IsSignedIn && Http.User.FindFirstValue(ClaimTypes.NameIdentifier) is { Length: > 0 } userId
             ? userId
             : GuestCookie.GetOrIssue(Http);
+    }
 }
