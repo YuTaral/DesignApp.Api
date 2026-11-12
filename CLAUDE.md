@@ -24,8 +24,9 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
 - **After every commit, regenerate the Word files** (`npm run docs` above). If a file is open in Word the
   script says so: ask the user to close it.
 - **Test like the user:** on their own Visual Studio F5 run (DesignApp.AppHost, https profile) at
-  http://localhost:5173, never a separate CLI AppHost. Ask them to restart after backend changes, then run
-  the Firefox passes (`npm run e2e` in DesignApp.Web) and check Visual Studio didn't pause.
+  http://localhost:5173, never a separate CLI AppHost. After backend changes, restart that run yourself
+  (allowed for testing: Restart, or Stop and https, in Visual Studio by computer use), then run the Firefox
+  passes (`npm run e2e` in DesignApp.Web) and check Visual Studio didn't pause.
 - **Secrets:** API keys live only in user secrets (`dotnet user-secrets --project src/DesignApp.Api`). Never
   print their values, never commit them; check presence by key name only.
 - **Paid AI:** real Claude / SAM 3 runs cost money; get the user's OK first. Development uses the fakes.

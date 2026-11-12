@@ -179,6 +179,9 @@ public static class Constants
     /// <summary>Rate limits per IP address.</summary>
     public static class RateLimits
     {
+        /// <summary>The setting that turns the limits off (false in development, so test runs aren't rejected).</summary>
+        public const string EnabledKey = "RateLimits:Enabled";
+
         /// <summary>The policy for photo uploads.</summary>
         public const string UploadsPolicy = "uploads";
 
