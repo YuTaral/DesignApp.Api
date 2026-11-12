@@ -37,6 +37,11 @@ internal static class RoomEndpoints
             .WithName("GetRoomPhoto")
             .WithSummary($"Returns the room's photo as stored: upright, at most {Application.Constants.Photos.MaxLongEdge} px, without metadata.");
 
+        rooms.MapGet(Constants.Routes.RoomPhotoVersion, GetPhotoVersionAsync)
+            .WithName("GetRoomPhotoVersion")
+            .WithSummary("Returns one stored version of the room's photo: 1 and up are made by removing objects (0 is `photo`).")
+            .WithDescription("Each version never changes, so it can be cached for good.");
+
         rooms.MapGet(Constants.Routes.RoomLabels, GetLabelMapAsync)
             .WithName("GetRoomLabelMap")
             .WithSummary("Returns the room's label map: a grayscale PNG where each pixel's value is the index of the object it belongs to (0 = none).")
@@ -56,6 +61,12 @@ internal static class RoomEndpoints
             .WithName("AddRoomObject")
             .WithSummary("Adds an object the user marked by hand: `strokes` (Paint marks, Erase unmarks, in order), each a round brush of `radius` label-map pixels stamped along `points`.")
             .WithDescription("Starts from `baseRevision`; the marked pixels get the new object's index on top of whatever was there, and the result is stored as a new label map version that becomes current. The box and main color are measured from the photo.");
+
+        rooms.MapPost(Constants.Routes.RoomRemovals, RemoveObjectsAsync)
+            .WithName("RemoveRoomObjects")
+            .WithSummary("Removes objects from the photo together (`objectIndexes`): the room's AI fills their pixels with what is behind them in one call.")
+            .WithDescription("Starts from `baseRevision`; the new photo and a label map where the object's pixels belong to the objects around it are stored as a new version that becomes current (photo version in `photoVersions`). With the real AI each removal is a paid call, so it is rate-limited.")
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
         rooms.MapPut(Constants.Routes.RoomCurrentLabels, UseLabelMapRevisionAsync)
             .WithName("UseRoomLabelMapRevision")
@@ -145,6 +156,23 @@ internal static class RoomEndpoints
         return room is null ? TypedResults.NotFound() : await StreamImmutableAsync(room.PhotoKey, storage, response, cancellationToken);
     }
 
+    /// <summary><c>GET /api/rooms/{id}/photo/{version}</c>: streams one stored version of the photo.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="version">The photo version (1 and up).</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the photos are stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the JPEG, or 404 when the room or that version is missing.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetPhotoVersionAsync(
+        Guid id, int version, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var room = await getRoom.HandleAsync(id, cancellationToken);
+        return room is not null && version >= 0 && version <= room.LatestPhotoVersion
+            ? await StreamImmutableAsync(Application.Constants.Rooms.PhotoKey(room.Id, version), storage, response, cancellationToken)
+            : TypedResults.NotFound();
+    }
+
     /// <summary><c>GET /api/rooms/{id}/labels</c>: streams the room's label map.</summary>
     /// <param name="id">The room's id.</param>
     /// <param name="getRoom">The use case that loads the room.</param>
@@ -202,6 +230,19 @@ internal static class RoomEndpoints
         var outcome = await addObject.AddAsync(
             id, request.BaseRevision, request.Label, request.Category, request.Strokes ?? [], cancellationToken);
         return ToResponse(outcome, Constants.Titles.NewObjectFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/removals</c>: removes objects from the photo together.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="request">The label map version the editor shows and the objects to remove.</param>
+    /// <param name="removeObject">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room and its new version, 400 when the objects can't be removed, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> RemoveObjectsAsync(
+        Guid id, RemoveObjectsRequest request, RemoveRoomObject removeObject, CancellationToken cancellationToken)
+    {
+        var outcome = await removeObject.RemoveAsync(id, request.BaseRevision, request.ObjectIndexes ?? [], cancellationToken);
+        return ToResponse(outcome, Constants.Titles.RemovalFailed);
     }
 
     /// <summary><c>PUT /api/rooms/{id}/labels/current</c>: makes a stored label map version current.</summary>

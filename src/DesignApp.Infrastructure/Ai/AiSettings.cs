@@ -56,6 +56,18 @@ public sealed class AiSettings
     /// <summary>How much of Claude's box (0 to 1) a mask must fill before its fit counts in full.</summary>
     public double MinFill { get; set; } = Constants.Ai.Defaults.MinFill;
 
+    /// <summary>The object eraser's endpoint on fal.ai.</summary>
+    public string RemovalEndpoint { get; set; } = Constants.Ai.Defaults.RemovalEndpoint;
+
+    /// <summary>The quality tier (its price per removal) of fal's own eraser; other erasers ignore it.</summary>
+    public RemovalQuality RemovalQuality { get; set; } = Constants.Ai.Defaults.RemovalQuality;
+
+    /// <summary>How many pixels fal's own eraser grows the object's mask by; other erasers ignore it.</summary>
+    public int RemovalMaskExpansion { get; set; } = Constants.Ai.Defaults.RemovalMaskExpansion;
+
+    /// <summary>How many pixels the mask of an object marked by hand is grown before any eraser gets it.</summary>
+    public int RemovalHandMaskGrowth { get; set; } = Constants.Ai.Defaults.RemovalHandMaskGrowth;
+
     /// <summary>The instructions with this row's limits filled in.</summary>
     /// <returns>The system prompt sent to Claude.</returns>
     public string SystemPrompt()
@@ -93,6 +105,11 @@ public sealed class AiSettings
         Check(MinFit is >= 0 and <= 1, nameof(MinFit), Constants.Ai.Rules.Fraction);
         Check(MinShareInsideBox is >= 0 and <= 1, nameof(MinShareInsideBox), Constants.Ai.Rules.Fraction);
         Check(MinFill is >= 0 and <= 1, nameof(MinFill), Constants.Ai.Rules.Fraction);
+        Check(Uri.TryCreate(RemovalEndpoint, UriKind.Absolute, out var removal) && removal.Scheme == Uri.UriSchemeHttps,
+            nameof(RemovalEndpoint), Constants.Ai.Rules.HttpsUrl);
+        Check(Enum.IsDefined(RemovalQuality), nameof(RemovalQuality), Constants.Ai.Rules.RemovalQuality);
+        Check(RemovalMaskExpansion is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalMaskExpansion), Constants.Ai.Rules.MaskExpansion);
+        Check(RemovalHandMaskGrowth is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalHandMaskGrowth), Constants.Ai.Rules.MaskExpansion);
         return problems;
     }
 }

@@ -36,4 +36,23 @@ public interface IRoomImaging
     /// <param name="mark">The strokes and the new object's index.</param>
     /// <returns>The new label map with the object's box and color, or a failure the user can read (nothing marked).</returns>
     Result<MarkedObject> MarkObject(byte[] labelMapPng, Stream photo, NewObjectMark mark);
+
+    /// <summary>The mask of the objects to remove, at the photo's size: white where any of them is, black elsewhere.</summary>
+    /// <param name="labelMapPng">The label map they are removed from.</param>
+    /// <param name="indexes">The objects.</param>
+    /// <param name="photoWidth">The stored photo's width.</param>
+    /// <param name="photoHeight">The stored photo's height.</param>
+    /// <returns>The mask PNG, or <c>null</c> when none of them has pixels in this label map.</returns>
+    byte[]? RemovalMask(byte[] labelMapPng, IReadOnlyCollection<int> indexes, int photoWidth, int photoHeight);
+
+    /// <summary>
+    /// The files of the room after objects were removed: the new photo as a JPEG at the stored size, and the label
+    /// map with their pixels given to the objects around them (matched by color in the new photo).
+    /// </summary>
+    /// <param name="labelMapPng">The label map they were removed from.</param>
+    /// <param name="indexes">The removed objects.</param>
+    /// <param name="newPhoto">The photo with the object removed, as the provider returned it.</param>
+    /// <param name="photoWidth">The stored photo's width.</param>
+    /// <param name="photoHeight">The stored photo's height.</param>
+    RemovedObject AfterRemoval(byte[] labelMapPng, IReadOnlyCollection<int> indexes, byte[] newPhoto, int photoWidth, int photoHeight);
 }

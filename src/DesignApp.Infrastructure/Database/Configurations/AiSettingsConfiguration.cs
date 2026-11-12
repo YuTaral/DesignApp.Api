@@ -20,6 +20,8 @@ internal sealed class AiSettingsConfiguration : IEntityTypeConfiguration<AiSetti
         builder.Property(s => s.InventoryModel).HasMaxLength(Constants.Persistence.ModelLength);
         builder.Property(s => s.InventoryEffort).HasConversion<string>().HasMaxLength(Constants.Persistence.EnumNameLength);
         builder.Property(s => s.SegmentationEndpoint).HasMaxLength(Constants.Persistence.UrlLength);
+        builder.Property(s => s.RemovalEndpoint).HasMaxLength(Constants.Persistence.UrlLength);
+        builder.Property(s => s.RemovalQuality).HasConversion<string>().HasMaxLength(Constants.Persistence.EnumNameLength);
         builder.HasData(new AiSettings());
     }
 }

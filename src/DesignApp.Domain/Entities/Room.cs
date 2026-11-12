@@ -9,6 +9,7 @@ namespace DesignApp.Domain.Entities;
 public sealed class Room
 {
     private IReadOnlyList<DetectedObject> _objects = [];
+    private IReadOnlyList<int> _photoVersions = [];
 
     /// <summary>The room's id (a time-ordered UUID v7).</summary>
     public Guid Id { get; private set; }
@@ -45,6 +46,15 @@ public sealed class Room
     public int LabelMapRevision { get; private set; }
     /// <summary>The newest label map version stored; fixes made after an undo get numbers above it.</summary>
     public int LatestLabelMapRevision { get; private set; }
+    /// <summary>
+    /// For each label map version (by its number), which photo version goes with it: 0 is the uploaded photo, each
+    /// object removed from the photo adds one. Versions not listed (rooms from before removal) use photo 0.
+    /// </summary>
+    public IReadOnlyList<int> PhotoVersions => _photoVersions;
+    /// <summary>The photo version that goes with the current label map version.</summary>
+    public int PhotoVersion => PhotoVersionOf(LabelMapRevision);
+    /// <summary>The newest photo version stored.</summary>
+    public int LatestPhotoVersion => _photoVersions.Count == 0 ? 0 : _photoVersions.Max();
 
     private Room() { } // for EF Core
 
@@ -145,10 +155,11 @@ public sealed class Room
     /// version current. The caller saves the file under <paramref name="keyFor"/> of the next revision first.
     /// </summary>
     /// <param name="detected">The new object; its index must be <see cref="NextObjectIndex"/>.</param>
+    /// <param name="baseRevision">The version the object was marked on; the new one keeps its photo.</param>
     /// <param name="keyFor">The storage key of a revision.</param>
     /// <returns>The new revision's number.</returns>
     /// <exception cref="DomainException">The room isn't ready, or the index is taken or out of range.</exception>
-    public int AddObject(DetectedObject detected, Func<int, string> keyFor)
+    public int AddObject(DetectedObject detected, int baseRevision, Func<int, string> keyFor)
     {
         ArgumentNullException.ThrowIfNull(detected);
         if (Status is not RoomStatus.Ready)
@@ -157,24 +168,60 @@ public sealed class Room
             throw new DomainException(Constants.Messages.ObjectIndexRange);
         if (detected.Index != NextObjectIndex)
             throw new DomainException(Constants.Messages.NotNextObjectIndex(detected.Index, NextObjectIndex));
-        var revision = AddLabelMapRevision(keyFor);
+        var revision = AddLabelMapRevision(baseRevision, keyFor);
         _objects = _objects.Append(detected).ToArray();
         return revision;
+    }
+
+    /// <summary>
+    /// Records that objects were removed from the photo together: a new photo version with a new label map version
+    /// (where they have no pixels), both current. The objects stay listed, so undo brings them back. The caller saves
+    /// both files first, under <paramref name="keyFor"/> of the next revision and the next photo version.
+    /// </summary>
+    /// <param name="indexes">The removed objects, at least one.</param>
+    /// <param name="baseRevision">The version they were removed from.</param>
+    /// <param name="keyFor">The storage key of a label map revision.</param>
+    /// <returns>The new label map revision and photo version.</returns>
+    /// <exception cref="DomainException">The room isn't ready, no object is given, or the room has no such object.</exception>
+    public (int Revision, int PhotoVersion) RemoveObjects(IReadOnlyCollection<int> indexes, int baseRevision, Func<int, string> keyFor)
+    {
+        ArgumentNullException.ThrowIfNull(indexes);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        if (indexes.Count == 0)
+            throw new DomainException(Constants.Messages.NothingToRemove);
+        if (indexes.FirstOrDefault(i => _objects.All(o => o.Index != i), -1) is var unknown and >= 0)
+            throw new DomainException(Constants.Messages.UnknownObject(unknown));
+        var photo = LatestPhotoVersion + 1;
+        var revision = AddLabelMapRevision(baseRevision, keyFor, photo);
+        return (revision, photo);
+    }
+
+    /// <summary>The photo version that goes with a label map version (0 for one stored before photo versions).</summary>
+    /// <param name="revision">The label map version.</param>
+    public int PhotoVersionOf(int revision)
+    {
+        return revision >= 0 && revision < _photoVersions.Count ? _photoVersions[revision] : 0;
     }
 
     /// <summary>
     /// Stores a fixed label map as a new version and makes it current. The caller saves the file
     /// under <paramref name="keyFor"/> of the returned revision first.
     /// </summary>
+    /// <param name="baseRevision">The version the fix was made on; the new one keeps its photo.</param>
     /// <param name="keyFor">The storage key of a revision.</param>
+    /// <param name="photoVersion">A new photo for this version (an object removed), or <c>null</c> to keep the base's.</param>
     /// <returns>The new revision's number.</returns>
     /// <exception cref="DomainException">The room isn't ready.</exception>
-    public int AddLabelMapRevision(Func<int, string> keyFor)
+    public int AddLabelMapRevision(int baseRevision, Func<int, string> keyFor, int? photoVersion = null)
     {
         ArgumentNullException.ThrowIfNull(keyFor);
         if (Status is not RoomStatus.Ready)
             throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        var photo = photoVersion ?? PhotoVersionOf(baseRevision);
         LatestLabelMapRevision++;
+        // One entry per revision; revisions from before photo versions are filled in as photo 0.
+        _photoVersions = [.. Enumerable.Range(0, LatestLabelMapRevision).Select(PhotoVersionOf), photo];
         LabelMapRevision = LatestLabelMapRevision;
         LabelMapKey = keyFor(LabelMapRevision);
         return LabelMapRevision;

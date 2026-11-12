@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace DesignApp.Infrastructure;
 
@@ -73,6 +74,7 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<FakeInventoryProvider>();
         builder.Services.AddSingleton<FakeSegmentationProvider>();
+        builder.Services.AddSingleton<FakeObjectRemovalProvider>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
         builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
 
@@ -110,15 +112,45 @@ public static class DependencyInjection
         builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(Constants.Ai.RealKey);
     }
 
-    /// <summary>SAM 3 on fal.ai, with the fal.ai key.</summary>
+    /// <summary>SAM 3 and the object eraser on fal.ai, with the fal.ai key.</summary>
     /// <param name="builder">The host builder.</param>
     private static void AddSam3(IHostApplicationBuilder builder)
     {
+        AddFalClient<FalSegmentationProvider>(builder);
+        AddFalEraserClient(builder);
+        builder.Services.AddKeyedSingleton<IObjectRemovalProvider>(Constants.Ai.RealKey, (sp, _) => sp.GetRequiredService<FalObjectRemovalProvider>());
+        builder.Services.AddKeyedSingleton<ISegmentationProvider>(Constants.Ai.RealKey, (sp, _) => new RecordingSegmentationProvider(
+            sp.GetRequiredService<FalSegmentationProvider>(),
+            sp.GetRequiredService<IOptions<AiOptions>>(),
+            sp.GetRequiredService<ILogger<RecordingSegmentationProvider>>()));
+    }
+
+    /// <summary>
+    /// The eraser's HTTP client: the fal.ai key and a timeout per call, but no retries. Each submit is a paid job, so a
+    /// slow answer must never send it again; the provider follows the queued job itself.
+    /// </summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddFalEraserClient(IHostApplicationBuilder builder)
+    {
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
-        builder.Services.AddHttpClient<FalSegmentationProvider>((sp, http) =>
+        builder.Services.AddHttpClient<FalObjectRemovalProvider>((sp, http) =>
                 http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
-            // SAM 3 on a large photo can take well over the default 10 s per attempt, so replace the
-            // shared resilience handler from ServiceDefaults.
+            .RemoveAllResilienceHandlers()
+            .AddResilienceHandler(Constants.Ai.Removal.ResilienceName, resilience => resilience.AddTimeout(Constants.Ai.Removal.CallTimeout));
+#pragma warning restore EXTEXP0001
+    }
+
+    /// <summary>A typed HTTP client for a fal.ai model, with the fal.ai key.</summary>
+    /// <typeparam name="TClient">The provider that uses it.</typeparam>
+    /// <param name="builder">The host builder.</param>
+    private static void AddFalClient<TClient>(IHostApplicationBuilder builder)
+        where TClient : class
+    {
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
+        builder.Services.AddHttpClient<TClient>((sp, http) =>
+                http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
+            // SAM 3 on a large photo, or the eraser, can take well over the default 10 s per attempt, so replace
+            // the shared resilience handler from ServiceDefaults.
             .RemoveAllResilienceHandlers()
             .AddStandardResilienceHandler(resilience =>
             {
@@ -127,10 +159,6 @@ public static class DependencyInjection
                 resilience.TotalRequestTimeout.Timeout = Constants.Ai.Resilience.TotalTimeout;
             });
 #pragma warning restore EXTEXP0001
-        builder.Services.AddKeyedSingleton<ISegmentationProvider>(Constants.Ai.RealKey, (sp, _) => new RecordingSegmentationProvider(
-            sp.GetRequiredService<FalSegmentationProvider>(),
-            sp.GetRequiredService<IOptions<AiOptions>>(),
-            sp.GetRequiredService<ILogger<RecordingSegmentationProvider>>()));
     }
 
     /// <summary>

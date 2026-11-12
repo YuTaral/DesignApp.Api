@@ -19,4 +19,8 @@ public interface IAiProviders
     /// <param name="mode">Fake or real.</param>
     /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
     ISegmentationProvider Segmentation(AiMode mode);
+
+    /// <summary>Removes objects from photos with the given AI: the free fake or the real eraser.</summary>
+    /// <param name="mode">The room's AI mode.</param>
+    IObjectRemovalProvider Removal(AiMode mode);
 }

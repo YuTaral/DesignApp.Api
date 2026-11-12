@@ -59,7 +59,7 @@ public class DeleteUnsavedRoomsTests
         room.MarkReady([new DetectedObject(1, "wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 1), DesignApp.Domain.Objects.HexColor.Parse("#FFFFFF"))],
             DesignApp.Application.Constants.Rooms.LabelMapKey(id));
         for (var i = 0; i < outlineFixes; i++)
-            room.AddLabelMapRevision(revision => DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision));
+            room.AddLabelMapRevision(room.LabelMapRevision, revision => DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision));
         rooms.Add(room);
         await rooms.SaveChangesAsync(CancellationToken.None);
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)

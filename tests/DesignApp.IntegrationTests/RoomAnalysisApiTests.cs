@@ -133,6 +133,39 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     [Fact]
+    public async Task Removing_an_object_makes_a_new_photo_version_and_undo_switches_back()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var target = room.Objects.First(o => o.GetProperty("category").GetString() is not ("Wall" or "Floor" or "Ceiling"));
+        var index = target.GetProperty("index").GetInt32();
+        Assert.Contains((byte)index, await LabelsAsync(room.LabelMapUrl!));
+
+        using var remove = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/removals", new { baseRevision = 0, objectIndexes = new[] { index } });
+        remove.EnsureSuccessStatusCode();
+        var removed = (await remove.Content.ReadFromJsonAsync<RoomDto>())!;
+
+        Assert.Equal(1, removed.LabelMapRevision);
+        Assert.Equal($"/api/rooms/{room.Id}/photo/1", removed.PhotoUrl);
+        Assert.Equal([0, 1], removed.PhotoVersions);
+        Assert.DoesNotContain((byte)index, await LabelsAsync(removed.LabelMapUrl!));
+        using var photo = await Client.GetAsync(removed.PhotoUrl);
+        Assert.Equal(("image/jpeg", true), (photo.Content.Headers.ContentType?.MediaType, (await photo.Content.ReadAsByteArrayAsync()).Length > 0));
+
+        using var undo = await Client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
+        undo.EnsureSuccessStatusCode();
+        Assert.Equal($"/api/rooms/{room.Id}/photo", (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.PhotoUrl);
+
+        using var wall = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/removals", new
+        {
+            baseRevision = 0,
+            objectIndexes = new[] { room.Objects.First(o => o.GetProperty("category").GetString() == "Wall").GetProperty("index").GetInt32() },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, wall.StatusCode);
+        using var missing = await Client.GetAsync($"/api/rooms/{room.Id}/photo/5");
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+    }
+
+    [Fact]
     public async Task A_hand_marked_object_is_added_as_a_new_label_map_version()
     {
         var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
@@ -276,5 +309,5 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     /// <param name="LabelMapRevision">The current label map version.</param>
     /// <param name="Scope">What the analysis looked for.</param>
     private sealed record RoomDto(Guid Id, string Status, string? FailureReason, List<JsonElement> Objects, string? LabelMapUrl,
-        int LabelMapRevision, string Scope, string AiMode);
+        int LabelMapRevision, string Scope, string AiMode, string PhotoUrl = "", List<int>? PhotoVersions = null);
 }

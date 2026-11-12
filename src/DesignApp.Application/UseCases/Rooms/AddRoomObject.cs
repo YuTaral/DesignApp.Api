@@ -40,7 +40,7 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
 
         var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         Result<MarkedObject> marked;
-        await using (var photo = await storage.OpenReadAsync(room.PhotoKey, cancellationToken)
+        await using (var photo = await storage.OpenReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken)
             ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
         {
             marked = imaging.MarkObject(labelMap, photo.Content, new NewObjectMark(room.NextObjectIndex, strokes));
@@ -52,8 +52,8 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         var revision = room.LatestLabelMapRevision + 1;
         using (var content = new MemoryStream(marked.Value.LabelMapPng, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
-        var detected = new DetectedObject(room.NextObjectIndex, label!.Trim(), category, marked.Value.Box, marked.Value.DominantColor);
-        room.AddObject(detected, r => Constants.Rooms.LabelMapKey(room.Id, r));
+        var detected = new DetectedObject(room.NextObjectIndex, label!.Trim(), category, marked.Value.Box, marked.Value.DominantColor, MarkedByHand: true);
+        room.AddObject(detected, baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
         return room;
     }

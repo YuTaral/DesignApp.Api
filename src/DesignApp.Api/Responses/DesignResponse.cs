@@ -15,7 +15,8 @@ internal sealed record DesignResponse(
 {
     /// <summary>The response for a design.</summary>
     /// <param name="design">The design.</param>
-    public static DesignResponse From(Design design)
+    /// <param name="photoVersions">The photo version each room is on, by room id (missing: the uploaded photo).</param>
+    public static DesignResponse From(Design design, IReadOnlyDictionary<Guid, int> photoVersions)
     {
         return new(
             design.Id,
@@ -23,6 +24,6 @@ internal sealed record DesignResponse(
             design.Description,
             design.CreatedAt,
             design.UpdatedAt,
-            [.. design.Rooms.OrderBy(r => r.Position).Select(DesignRoomResponse.From)]);
+            [.. design.Rooms.OrderBy(r => r.Position).Select(r => DesignRoomResponse.From(r, photoVersions.GetValueOrDefault(r.RoomId)))]);
     }
 }

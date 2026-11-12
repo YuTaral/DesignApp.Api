@@ -15,6 +15,7 @@ internal static class RateLimitPolicies
     {
         var uploadsPerHour = configuration.GetValue(Constants.RateLimits.UploadsPerHourKey, Constants.RateLimits.DefaultUploadsPerHour);
         var accountAttempts = configuration.GetValue(Constants.RateLimits.AccountAttemptsKey, Constants.RateLimits.DefaultAccountAttempts);
+        var removalsPerHour = configuration.GetValue(Constants.RateLimits.RemovalsPerHourKey, Constants.RateLimits.DefaultRemovalsPerHour);
 
         return services.AddRateLimiter(options =>
         {
@@ -25,6 +26,9 @@ internal static class RateLimitPolicies
             options.AddPolicy(Constants.RateLimits.AccountsPolicy, context => RateLimitPartition.GetFixedWindowLimiter(
                 context.Connection.RemoteIpAddress?.ToString() ?? Constants.RateLimits.UnknownAddress,
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = accountAttempts, Window = Constants.RateLimits.AccountsWindow }));
+            options.AddPolicy(Constants.RateLimits.RemovalsPolicy, context => RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? Constants.RateLimits.UnknownAddress,
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = removalsPerHour, Window = Constants.RateLimits.RemovalsWindow }));
         });
     }
 }

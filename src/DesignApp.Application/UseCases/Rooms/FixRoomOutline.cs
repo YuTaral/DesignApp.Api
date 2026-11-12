@@ -64,7 +64,7 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
         var revision = room.LatestLabelMapRevision + 1;
         using (var content = new MemoryStream(painted.Value, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
-        room.AddLabelMapRevision(r => Constants.Rooms.LabelMapKey(room.Id, r));
+        room.AddLabelMapRevision(baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
         return room;
     }

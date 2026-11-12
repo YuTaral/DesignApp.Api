@@ -229,6 +229,49 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         return new MarkedObject(EncodeGrayPng(labels, width, height), box, stats.MedianColor());
     }
 
+    /// <inheritdoc/>
+    public byte[]? RemovalMask(byte[] labelMapPng, IReadOnlyCollection<int> indexes, int photoWidth, int photoHeight)
+    {
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var gone = new bool[Constants.Imaging.ByteValues];
+        foreach (var index in indexes)
+            gone[index] = true;
+        if (!labels.Any(l => gone[l]))
+            return null;
+        // The label map can be smaller than the photo (the analysis size): each photo pixel takes the label under it.
+        var mask = new byte[photoWidth * photoHeight];
+        for (var y = 0; y < photoHeight; y++)
+        {
+            var row = Math.Min(height - 1, y * height / photoHeight) * width;
+            for (var x = 0; x < photoWidth; x++)
+            {
+                if (gone[labels[row + Math.Min(width - 1, x * width / photoWidth)]])
+                    mask[y * photoWidth + x] = Constants.Imaging.FullCoverage;
+            }
+        }
+        return EncodeGrayPng(mask, photoWidth, photoHeight);
+    }
+
+    /// <inheritdoc/>
+    public RemovedObject AfterRemoval(byte[] labelMapPng, IReadOnlyCollection<int> indexes, byte[] newPhoto, int photoWidth, int photoHeight)
+    {
+        using var decoded = SKBitmap.Decode(newPhoto) ?? throw new InvalidOperationException("The new photo can't be decoded.");
+        // The stored photo keeps its size, whatever size the eraser answered with.
+        var photoInfo = new SKImageInfo(photoWidth, photoHeight, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
+        using var photo = decoded.Width == photoWidth && decoded.Height == photoHeight
+            ? decoded.Copy(SKColorType.Rgba8888)
+            : decoded.Resize(photoInfo, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+        using var image = SKImage.FromBitmap(photo);
+        using var jpeg = image.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
+
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var mapInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
+        using var atMapSize = photo.Resize(mapInfo, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
+            ?? throw new InvalidOperationException("The new photo can't be scaled.");
+        RemovalRefill.Apply(labels, width, height, atMapSize.GetPixelSpan(), indexes);
+        return new RemovedObject(jpeg.ToArray(), EncodeGrayPng(labels, width, height));
+    }
+
     /// <summary>Decodes the stored photo to sRGB RGBA at the label map's size, one 4-byte pixel per label.</summary>
     /// <param name="photo">The stored room photo (JPEG).</param>
     /// <param name="width">Label map width.</param>

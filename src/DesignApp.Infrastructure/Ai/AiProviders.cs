@@ -38,6 +38,14 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
     }
 
     /// <summary>The error for a real analysis without keys (uploads are refused before this can happen).</summary>
+    /// <inheritdoc/>
+    public IObjectRemovalProvider Removal(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeObjectRemovalProvider>()
+            : services.GetKeyedService<IObjectRemovalProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
+
     private static InvalidOperationException NotSetUp()
     {
         return new(Constants.Config.RealAiNotSetUp);

@@ -33,6 +33,14 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
             .HasColumnType(Constants.Persistence.Json)
             .HasConversion(DetectedObjectsJson.Converter, DetectedObjectsJson.Comparer);
 
+        // Which photo goes with each label map version; read and written with the room, like its objects.
+        builder.Property(r => r.PhotoVersions)
+            .HasField("_photoVersions")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .HasColumnType(Constants.Persistence.Json)
+            .HasDefaultValueSql(Constants.Persistence.EmptyJsonArray)
+            .HasConversion(PhotoVersionsJson.Converter, PhotoVersionsJson.Comparer);
+
         builder.HasIndex(r => new { r.OwnerId, r.CreatedAt });
         builder.HasIndex(r => r.Status); // finding unfinished rooms on startup
     }

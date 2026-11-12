@@ -11,4 +11,5 @@ namespace DesignApp.Domain.Objects;
 /// <param name="Category">The kind of object.</param>
 /// <param name="Box">Where the object is in the photo.</param>
 /// <param name="DominantColor">The object's main color, used as the editor's starting color.</param>
-public sealed record DetectedObject(int Index, string Label, ObjectCategory Category, BoundingBox Box, HexColor DominantColor);
+/// <param name="MarkedByHand">Whether the user marked it with a brush (the AI missed it), rather than the AI finding it.</param>
+public sealed record DetectedObject(int Index, string Label, ObjectCategory Category, BoundingBox Box, HexColor DominantColor, bool MarkedByHand = false);

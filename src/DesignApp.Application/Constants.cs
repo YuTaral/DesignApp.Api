@@ -41,6 +41,13 @@ public static class Constants
         public const double MaxPoint = 2;
     }
 
+    /// <summary>Limits for removing objects from a photo.</summary>
+    public static class Removals
+    {
+        /// <summary>The most objects one removal may take out together (a sofa with its cushions and throw).</summary>
+        public const int MaxObjects = 20;
+    }
+
     /// <summary>Limits for an object the user marks by hand.</summary>
     public static class Marks
     {
@@ -100,9 +107,10 @@ public static class Constants
 
         /// <summary>Storage key of a room's photo. One folder per room keeps its files together.</summary>
         /// <param name="roomId">The room's id.</param>
-        public static string PhotoKey(Guid roomId)
+        /// <param name="version">The photo version: 0 is the uploaded photo, then one per object removed from it.</param>
+        public static string PhotoKey(Guid roomId, int version = 0)
         {
-            return $"rooms/{roomId}/photo.jpg";
+            return version == 0 ? $"rooms/{roomId}/photo.jpg" : $"rooms/{roomId}/photo-{version}.jpg";
         }
 
         /// <summary>Storage key of a room's label map, as the analysis made it or after outline fixes.</summary>
@@ -159,6 +167,15 @@ public static class Constants
 
         /// <summary>A new object with a type that doesn't exist.</summary>
         public const string UnknownObjectType = "Pick the object's type from the list.";
+
+        /// <summary>A removal with no objects or too many.</summary>
+        public static readonly string RemovalCount = $"Pick between 1 and {Removals.MaxObjects} objects to remove.";
+
+        /// <summary>Removing an object that has no pixels in the outlines shown.</summary>
+        public const string ObjectNotInPhoto = "That object isn't in this version of the photo.";
+
+        /// <summary>Removing a wall, floor or ceiling, which can only be recolored.</summary>
+        public const string SurfaceRemoval = "Walls, floors and ceilings can't be removed. Recolor them instead.";
 
         /// <summary>A room that has used up its object numbers.</summary>
         public const string TooManyObjects = "This room can't hold any more objects.";

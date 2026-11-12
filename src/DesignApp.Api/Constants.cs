@@ -51,6 +51,9 @@ public static class Constants
         /// <summary>A room's photo.</summary>
         public const string RoomPhoto = "/{id:guid}/photo";
 
+        /// <summary>One version of a room's photo (1 and up: after objects were removed).</summary>
+        public const string RoomPhotoVersion = "/{id:guid}/photo/{version:int}";
+
         /// <summary>A room's current label map.</summary>
         public const string RoomLabels = "/{id:guid}/labels";
 
@@ -62,6 +65,9 @@ public static class Constants
 
         /// <summary>The objects of a room, where a hand-marked object is added.</summary>
         public const string RoomObjects = "/{id:guid}/objects";
+
+        /// <summary>Removing objects from a room's photo, one or several together.</summary>
+        public const string RoomRemovals = "/{id:guid}/removals";
 
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
@@ -85,9 +91,10 @@ public static class Constants
         /// <summary>The URL of a room's photo.</summary>
         /// <param name="id">The room's id.</param>
         /// <returns>The path of the photo.</returns>
-        public static string RoomPhotoUrl(Guid id)
+        /// <param name="version">The photo version: 0 is the uploaded photo.</param>
+        public static string RoomPhotoUrl(Guid id, int version = 0)
         {
-            return $"{RoomUrl(id)}/photo";
+            return version == 0 ? $"{RoomUrl(id)}/photo" : $"{RoomUrl(id)}/photo/{version}";
         }
 
         /// <summary>The URL of one version of a room's label map.</summary>
@@ -177,6 +184,18 @@ public static class Constants
 
         /// <summary>The policy for sign-up and sign-in.</summary>
         public const string AccountsPolicy = "accounts";
+
+        /// <summary>The policy for removing objects from photos (each one a paid AI call with the real AI).</summary>
+        public const string RemovalsPolicy = "removals";
+
+        /// <summary>The configuration key for removals per hour per address.</summary>
+        public const string RemovalsPerHourKey = "RateLimits:RemovalsPerHour";
+
+        /// <summary>Removals per hour per address when not configured.</summary>
+        public const int DefaultRemovalsPerHour = 30;
+
+        /// <summary>The removals window.</summary>
+        public static readonly TimeSpan RemovalsWindow = TimeSpan.FromHours(1);
 
         /// <summary>The setting for uploads per hour.</summary>
         public const string UploadsPerHourKey = "RateLimits:UploadsPerHour";
@@ -273,6 +292,9 @@ public static class Constants
 
         /// <summary>A hand-marked object couldn't be added.</summary>
         public const string NewObjectFailed = "Can't add the object";
+
+        /// <summary>An object couldn't be removed from the photo.</summary>
+        public const string RemovalFailed = "Can't remove the object";
 
         /// <summary>An unknown label map version was chosen.</summary>
         public const string UnknownOutlineVersion = "Unknown outline version";

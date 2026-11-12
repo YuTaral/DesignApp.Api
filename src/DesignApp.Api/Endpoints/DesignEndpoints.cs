@@ -63,22 +63,25 @@ internal static class DesignEndpoints
     private static async Task<Ok<List<DesignResponse>>> ListAsync(GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var designs = await getDesigns.AllAsync(cancellationToken);
-        return TypedResults.Ok(designs.Select(DesignResponse.From).ToList());
+        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        return TypedResults.Ok(designs.Select(d => DesignResponse.From(d, photoVersions)).ToList());
     }
 
     /// <summary><c>POST /api/designs</c>.</summary>
     /// <param name="request">The first room, its colors, and the design's name and description.</param>
     /// <param name="createDesign">Creates the design.</param>
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>201 with the design, 404 when the account has no such room, or 400 for invalid input.</returns>
     private static async Task<Results<Created<DesignResponse>, NotFound>> CreateAsync(
-        CreateDesignRequest request, CreateDesign createDesign, CancellationToken cancellationToken)
+        CreateDesignRequest request, CreateDesign createDesign, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await createDesign.HandleAsync(
             request.RoomId, request.Name ?? "", request.Description, ToEdits(request.Edits), cancellationToken);
-        return design is null
-            ? TypedResults.NotFound()
-            : TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design));
+        if (design is null)
+            return TypedResults.NotFound();
+        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, photoVersions));
     }
 
     /// <summary><c>GET /api/designs/{id}</c>.</summary>
@@ -88,19 +91,20 @@ internal static class DesignEndpoints
     private static async Task<Results<Ok<DesignResponse>, NotFound>> GetAsync(Guid id, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await getDesigns.OneAsync(id, cancellationToken);
-        return Found(design);
+        return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
     /// <summary><c>PUT /api/designs/{id}</c>.</summary>
     /// <param name="id">The design.</param>
     /// <param name="request">The new name and description.</param>
     /// <param name="editDesign">Saves them.</param>
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> EditAsync(
-        Guid id, EditDesignRequest request, EditDesignDetails editDesign, CancellationToken cancellationToken)
+        Guid id, EditDesignRequest request, EditDesignDetails editDesign, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await editDesign.HandleAsync(id, request.Name ?? "", request.Description, cancellationToken);
-        return Found(design);
+        return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
     /// <summary><c>DELETE /api/designs/{id}</c>.</summary>
@@ -117,12 +121,13 @@ internal static class DesignEndpoints
     /// <param name="id">The design.</param>
     /// <param name="request">The room and its colors.</param>
     /// <param name="addRoom">Adds it.</param>
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> AddRoomAsync(
-        Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, CancellationToken cancellationToken)
+        Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), cancellationToken);
-        return Found(design);
+        return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
     /// <summary><c>PUT /api/designs/{id}/rooms/{roomId}</c>.</summary>
@@ -130,31 +135,38 @@ internal static class DesignEndpoints
     /// <param name="roomId">The room.</param>
     /// <param name="request">Its new colors.</param>
     /// <param name="saveColors">Saves them.</param>
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> SaveRoomColorsAsync(
-        Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, CancellationToken cancellationToken)
+        Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), cancellationToken);
-        return Found(design);
+        return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
     /// <summary><c>DELETE /api/designs/{id}/rooms/{roomId}</c>.</summary>
     /// <param name="id">The design.</param>
     /// <param name="roomId">The room.</param>
     /// <param name="removeRoom">Removes and deletes it.</param>
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     private static async Task<Results<Ok<DesignResponse>, NotFound>> RemoveRoomAsync(
-        Guid id, Guid roomId, RemoveRoomFromDesign removeRoom, CancellationToken cancellationToken)
+        Guid id, Guid roomId, RemoveRoomFromDesign removeRoom, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await removeRoom.HandleAsync(id, roomId, cancellationToken);
-        return Found(design);
+        return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
-    /// <summary>200 with the design, or 404 when there is none.</summary>
+    /// <summary>200 with the design (its rooms with the photo version each is on), or 404 when there is none.</summary>
     /// <param name="design">The design, if found.</param>
-    private static Results<Ok<DesignResponse>, NotFound> Found(Design? design)
+    /// <param name="getDesigns">Reads the rooms' photo versions.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    private static async Task<Results<Ok<DesignResponse>, NotFound>> FoundAsync(Design? design, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
-        return design is null ? TypedResults.NotFound() : TypedResults.Ok(DesignResponse.From(design));
+        if (design is null)
+            return TypedResults.NotFound();
+        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        return TypedResults.Ok(DesignResponse.From(design, photoVersions));
     }
 
     /// <summary>The colors of a request as domain edits; an invalid color or strength is a 400.</summary>

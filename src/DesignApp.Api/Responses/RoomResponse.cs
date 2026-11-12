@@ -9,7 +9,7 @@ namespace DesignApp.Api.Responses;
 /// <param name="Status">Where the room is in the AI analysis.</param>
 /// <param name="Width">Width of the stored photo, in pixels.</param>
 /// <param name="Height">Height of the stored photo, in pixels.</param>
-/// <param name="PhotoUrl">Where to load the photo, relative to the API's base URL.</param>
+/// <param name="PhotoUrl">Where to load the current photo version, relative to the API's base URL.</param>
 /// <param name="CreatedAt">When the photo was uploaded.</param>
 /// <param name="FailureReason">Why the analysis failed; <c>null</c> unless <paramref name="Status"/> is Failed.</param>
 /// <param name="Objects">The objects found in the photo; empty until the analysis is ready.</param>
@@ -17,6 +17,10 @@ namespace DesignApp.Api.Responses;
 /// <param name="LabelMapRevision">The current label map version: 0 from the analysis, higher after outline fixes.</param>
 /// <param name="Scope">Which objects the analysis looked for.</param>
 /// <param name="AiMode">Which AI analyzed the photo.</param>
+/// <param name="PhotoVersions">
+/// For each label map version (by its number), which photo version goes with it: 0 is the uploaded photo
+/// (<c>photo</c>), a higher one is <c>photo/{version}</c>, after an object was removed.
+/// </param>
 public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
@@ -29,7 +33,8 @@ public sealed record RoomResponse(
     string? LabelMapUrl,
     int LabelMapRevision,
     AnalysisScope Scope,
-    AiMode AiMode)
+    AiMode AiMode,
+    IReadOnlyList<int> PhotoVersions)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -40,13 +45,14 @@ public sealed record RoomResponse(
             room.Status,
             room.Width,
             room.Height,
-            Constants.Routes.RoomPhotoUrl(room.Id),
+            Constants.Routes.RoomPhotoUrl(room.Id, room.PhotoVersion),
             room.CreatedAt,
             room.FailureReason,
             [.. room.Objects.Select(DetectedObjectResponse.From)],
             room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision),
             room.LabelMapRevision,
             room.Scope,
-            room.AiMode);
+            room.AiMode,
+            [.. Enumerable.Range(0, room.LatestLabelMapRevision + 1).Select(room.PhotoVersionOf)]);
     }
 }

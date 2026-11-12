@@ -83,13 +83,34 @@ public class NewObjectTests
     }
 
     [Fact]
+    public void Being_marked_by_hand_is_stored_and_older_objects_read_as_found_by_the_ai()
+    {
+        var box = new BoundingBox(0.1, 0.1, 0.2, 0.2);
+        IReadOnlyList<DetectedObject> objects =
+        [
+            new(1, "sofa", ObjectCategory.Furniture, box, HexColor.Parse("#EEEEEE")),
+            new(2, "soap bottle", ObjectCategory.Decor, box, HexColor.Parse("#AA5500"), MarkedByHand: true),
+        ];
+
+        var json = (string)DesignApp.Infrastructure.Database.DetectedObjectsJson.Converter.ConvertToProvider(objects)!;
+        var back = (IReadOnlyList<DetectedObject>)DesignApp.Infrastructure.Database.DetectedObjectsJson.Converter.ConvertFromProvider(json)!;
+        // A room stored before the flag existed has no "hand" field at all.
+        var stored = System.Text.RegularExpressions.Regex.Replace(json, ",\"hand\":(true|false)", "");
+        var old = (IReadOnlyList<DetectedObject>)DesignApp.Infrastructure.Database.DetectedObjectsJson.Converter.ConvertFromProvider(stored)!;
+
+        Assert.Equal([false, true], back.Select(o => o.MarkedByHand));
+        Assert.DoesNotContain("hand", stored, StringComparison.Ordinal);
+        Assert.Equal([false, false], old.Select(o => o.MarkedByHand));
+    }
+
+    [Fact]
     public void A_room_only_takes_its_next_index_and_only_when_ready()
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", "photo", 600, 400, Now);
         var lamp = new DetectedObject(1, "lamp", ObjectCategory.Lighting, new BoundingBox(0, 0, 0.1, 0.1), HexColor.Parse("#FFFFFF"));
 
-        Assert.Throws<DomainException>(() => room.AddObject(lamp, r => $"labels/{r}"));
+        Assert.Throws<DomainException>(() => room.AddObject(lamp, 0, r => $"labels/{r}"));
         Assert.Equal(1, room.NextObjectIndex);
     }
 
@@ -108,7 +129,7 @@ public class NewObjectTests
 
         Assert.True(result!.Succeeded, result.Error);
         var added = room.Objects[^1];
-        Assert.Equal((count + 1, next, "side lamp", ObjectCategory.Lighting), (room.Objects.Count, added.Index, added.Label, added.Category));
+        Assert.Equal((count + 1, next, "side lamp", ObjectCategory.Lighting, true), (room.Objects.Count, added.Index, added.Label, added.Category, added.MarkedByHand));
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
         Assert.InRange(added.Box.X, 94.0 / width, 96.0 / width);
         Assert.InRange(added.Box.Width, 9.0 / width, 11.0 / width);

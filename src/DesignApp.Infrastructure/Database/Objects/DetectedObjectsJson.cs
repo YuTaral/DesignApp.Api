@@ -50,19 +50,20 @@ internal static class DetectedObjectsJson
     /// <param name="Width">Box width.</param>
     /// <param name="Height">Box height.</param>
     /// <param name="Color">Dominant color as "#RRGGBB".</param>
-    private sealed record StoredObject(int Index, string Label, ObjectCategory Category, double X, double Y, double Width, double Height, string Color)
+    /// <param name="Hand">Whether the user marked it by hand; absent (false) for objects stored before that existed.</param>
+    private sealed record StoredObject(int Index, string Label, ObjectCategory Category, double X, double Y, double Width, double Height, string Color, bool Hand = false)
     {
         /// <summary>Flattens a domain object for storage.</summary>
         /// <param name="o">The object to store.</param>
         public static StoredObject From(DetectedObject o)
         {
-            return new(o.Index, o.Label, o.Category, o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height, o.DominantColor.Value);
+            return new(o.Index, o.Label, o.Category, o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height, o.DominantColor.Value, o.MarkedByHand);
         }
 
         /// <summary>Rebuilds the domain object, re-checking its rules.</summary>
         public DetectedObject ToDomain()
         {
-            return new(Index, Label, Category, new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color));
+            return new(Index, Label, Category, new BoundingBox(X, Y, Width, Height), HexColor.Parse(Color), Hand);
         }
     }
 }

@@ -44,6 +44,8 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     private static IEnumerable<string> FilesOf(Room room)
     {
         yield return room.PhotoKey;
+        for (var version = 1; version <= room.LatestPhotoVersion; version++)
+            yield return Constants.Rooms.PhotoKey(room.Id, version);
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
             yield return Constants.Rooms.LabelMapKey(room.Id, revision);
     }

@@ -70,6 +70,28 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task A_design_shows_its_room_as_it_looks_after_an_object_was_removed()
+    {
+        using var browser = await SignedUpAsync();
+        var kitchen = await ReadyRoomAsync(browser);
+        var design = await CreateAsync(browser, kitchen.Id, "Without the chair");
+        var room = await browser.GetFromJsonAsync<JsonElement>($"/api/rooms/{kitchen.Id}");
+        var removable = room.GetProperty("objects").EnumerateArray()
+            .First(o => o.GetProperty("category").GetString() is not ("Wall" or "Floor" or "Ceiling")).GetProperty("index").GetInt32();
+
+        using var remove = await browser.PostAsJsonAsync($"/api/rooms/{kitchen.Id}/removals", new { baseRevision = 0, objectIndexes = new[] { removable } });
+        remove.EnsureSuccessStatusCode();
+
+        var withoutIt = DesignApp.Api.Constants.Routes.RoomPhotoUrl(kitchen.Id, 1);
+        Assert.Equal(withoutIt, (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!.Rooms[0].PhotoUrl);
+        Assert.Equal(withoutIt, Assert.Single((await browser.GetFromJsonAsync<List<DesignDto>>("/api/designs"))!).Rooms[0].PhotoUrl);
+
+        // Undo shows the photo with it again, in the design too.
+        (await browser.PutAsJsonAsync($"/api/rooms/{kitchen.Id}/labels/current", new { revision = 0 })).EnsureSuccessStatusCode();
+        Assert.Equal(DesignApp.Api.Constants.Routes.RoomPhotoUrl(kitchen.Id), (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!.Rooms[0].PhotoUrl);
+    }
+
+    [Fact]
     public async Task Removing_a_room_deletes_it_and_the_last_room_stays()
     {
         using var browser = await SignedUpAsync();

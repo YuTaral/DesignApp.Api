@@ -80,6 +80,32 @@ public static class Constants
             /// <summary>The SAM 3 endpoint on fal.ai.</summary>
             public const string SegmentationEndpoint = "https://fal.run/fal-ai/sam-3/image";
 
+            /// <summary>
+            /// The object eraser on fal.ai's queue: Bria's eraser, $0.04 a removal. Chosen over fal's own eraser
+            /// (<c>fal-ai/object-removal/mask</c>), which left a dark smear over patterns such as a radiator's rails,
+            /// and Ideogram's (<c>fal-ai/ideogram/object-removal</c>, $0.03, slower). The queue answers at once with a
+            /// request to follow, so a slow job takes longer instead of failing.
+            /// </summary>
+            public const string RemovalEndpoint = "https://queue.fal.run/fal-ai/bria/eraser";
+
+            /// <summary>
+            /// The quality tier of fal's own eraser (Best $0.024 a removal, Low $0.006); Bria's and Ideogram's ignore it.
+            /// </summary>
+            public const RemovalQuality RemovalQuality = Constants.RemovalQuality.Best;
+
+            /// <summary>
+            /// How many pixels fal's own eraser grows the mask by, to take the object's edge and shadow too; Bria's and
+            /// Ideogram's ignore it.
+            /// </summary>
+            public const int RemovalMaskExpansion = 15;
+
+            /// <summary>
+            /// How many pixels we grow the mask of an object marked by hand before any eraser gets it; 0, as tried on
+            /// a small bottle on a sink: brushed as it is, Bria left a faint outline; grown 12 px, it painted a new jar
+            /// in the larger hole. Kept as a setting to tune.
+            /// </summary>
+            public const int RemovalHandMaskGrowth = 0;
+
             /// <summary>How many SAM 3 requests run at the same time for one photo.</summary>
             public const int SegmentationParallelism = 4;
 
@@ -174,6 +200,12 @@ public static class Constants
 
             /// <summary>An effort level.</summary>
             public const string Effort = "must be Low, Medium or High";
+
+            /// <summary>An eraser quality tier.</summary>
+            public const string RemovalQuality = "must be Low, Medium, High or Best";
+
+            /// <summary>The eraser's mask growth.</summary>
+            public static readonly string MaskExpansion = $"must be between 0 and {Removal.MaxMaskExpansion}";
 
             /// <summary>The listed-objects limit.</summary>
             public static readonly string ListedObjects = $"must be between 1 and {Application.Constants.Analysis.MaxObjects}";
@@ -466,6 +498,89 @@ public static class Constants
             }
         }
 
+        /// <summary>Removing an object from a photo with fal.ai's eraser.</summary>
+        public static class Removal
+        {
+            /// <summary>The most the eraser grows a mask by, in pixels.</summary>
+            public const int MaxMaskExpansion = 50;
+
+            /// <summary>How the mask is sent: a PNG data URI.</summary>
+            public const string PngDataUri = "data:image/png;base64,";
+
+            /// <summary>How often the queued job's status is checked.</summary>
+            public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
+
+            /// <summary>How long a removal may take in all before the user is told it failed.</summary>
+            public static readonly TimeSpan MaxWait = TimeSpan.FromMinutes(3);
+
+            /// <summary>How long one call to the queue (submit, status or result) may take.</summary>
+            public static readonly TimeSpan CallTimeout = TimeSpan.FromSeconds(30);
+
+            /// <summary>The name of the eraser client's resilience pipeline (a timeout, no retries).</summary>
+            public const string ResilienceName = "fal-eraser";
+
+            /// <summary>Failed status checks in a row before giving up (a status check is free to repeat).</summary>
+            public const int MaxStatusErrors = 5;
+
+            /// <summary>The mask type of an object the AI outlined (SAM 3).</summary>
+            public const string AutomaticMask = "automatic";
+
+            /// <summary>The mask type of an object the user marked with a brush.</summary>
+            public const string ManualMask = "manual";
+
+            /// <summary>The queue status of a finished job.</summary>
+            public const string Completed = "COMPLETED";
+
+            /// <summary>The wire name of each quality tier.</summary>
+            /// <param name="quality">The tier.</param>
+            public static string WireQuality(RemovalQuality quality)
+            {
+                return quality switch
+                {
+                    RemovalQuality.Low => "low_quality",
+                    RemovalQuality.Medium => "medium_quality",
+                    RemovalQuality.High => "high_quality",
+                    _ => "best_quality",
+                };
+            }
+
+            /// <summary>The request and response field names.</summary>
+            public static class Json
+            {
+                /// <summary>The photo.</summary>
+                public const string ImageUrl = "image_url";
+                /// <summary>The mask (white = remove).</summary>
+                public const string MaskUrl = "mask_url";
+                /// <summary>The quality tier.</summary>
+                public const string Model = "model";
+                /// <summary>How far to grow the mask.</summary>
+                public const string MaskExpansion = "mask_expansion";
+                /// <summary>Where to check a queued job's status.</summary>
+                public const string StatusUrl = "status_url";
+                /// <summary>Where to fetch a queued job's result.</summary>
+                public const string ResponseUrl = "response_url";
+                /// <summary>A queued job's status.</summary>
+                public const string Status = "status";
+                /// <summary>Why a queued job failed.</summary>
+                public const string Error = "error";
+                /// <summary>What made the mask.</summary>
+                public const string MaskType = "mask_type";
+                /// <summary>The returned images.</summary>
+                public const string Images = "images";
+                /// <summary>The returned image (erasers that answer with one).</summary>
+                public const string Image = "image";
+                /// <summary>An image's URL.</summary>
+                public const string Url = "url";
+            }
+
+            /// <summary>What the user is told.</summary>
+            public static class Messages
+            {
+                /// <summary>The eraser failed or returned nothing.</summary>
+                public const string Failed = "We couldn't remove that object. Try again in a moment.";
+            }
+        }
+
         /// <summary>How long SAM 3 requests may take: one photo can take well over the default 10 s per attempt.</summary>
         public static class Resilience
         {
@@ -592,6 +707,9 @@ public static class Constants
         /// <summary>The column type for objects and edits kept with their row.</summary>
         public const string Json = "jsonb";
 
+        /// <summary>An empty jsonb array, the default for rooms stored before photo versions.</summary>
+        public const string EmptyJsonArray = "'[]'::jsonb";
+
         /// <summary>The shadow property mapped to Postgres's xmin row version.</summary>
         public const string Version = "Version";
 
@@ -713,6 +831,22 @@ public static class Constants
         {
             return $"The ai_settings value {field} {rule}.";
         }
+    }
+
+    /// <summary>The quality tiers of fal.ai's object eraser, cheapest first.</summary>
+    public enum RemovalQuality
+    {
+        /// <summary>$0.006 a removal.</summary>
+        Low,
+
+        /// <summary>$0.012 a removal.</summary>
+        Medium,
+
+        /// <summary>$0.018 a removal.</summary>
+        High,
+
+        /// <summary>$0.024 a removal; the default.</summary>
+        Best,
     }
 
     /// <summary>Claude's effort levels the object listing can use.</summary>
