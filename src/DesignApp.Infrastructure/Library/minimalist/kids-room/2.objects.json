@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.111328125,
+      "y": 0.15304120340091562,
+      "width": 0.583984375,
+      "height": 0.5415304120340092,
+      "color": "#D4CBC3",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.11767578125,
+      "height": 0.8122956180510137,
+      "color": "#D5CDC6",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0.06201171875,
+      "y": 0,
+      "width": 0.93798828125,
+      "height": 0.24395029431000653,
+      "color": "#D0C6BD",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.5441465009810333,
+      "width": 1,
+      "height": 0.45585349901896666,
+      "color": "#C5AE9E",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "large window",
+      "category": "Opening",
+      "x": 0.7001953125,
+      "y": 0.19097449313276652,
+      "width": 0.23046875,
+      "height": 0.5637671680837149,
+      "color": "#DBD5C7",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "sheer white curtain",
+      "category": "Textile",
+      "x": 0.6318359375,
+      "y": 0.04316546762589928,
+      "width": 0.3681640625,
+      "height": 0.8051013734466972,
+      "color": "#CDC3BA",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "single bed with oak frame",
+      "category": "Furniture",
+      "x": 0,
+      "y": 0.5578809679529104,
+      "width": 0.365234375,
+      "height": 0.43623283191628515,
+      "color": "#6C4C31",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "patterned duvet",
+      "category": "Textile",
+      "x": 0,
+      "y": 0.6200130804447351,
+      "width": 0.38916015625,
+      "height": 0.26095487246566385,
+      "color": "#AA9E96",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "grey throw blanket",
+      "category": "Textile",
+      "x": 0.14453125,
+      "y": 0.6677567037279267,
+      "width": 0.23388671875,
+      "height": 0.18508829300196206,
+      "color": "#796E66",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "white pillow",
+      "category": "Textile",
+      "x": 0.13427734375,
+      "y": 0.5474166121648136,
+      "width": 0.1669921875,
+      "height": 0.08960104643557881,
+      "color": "#D5D0D2",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "round grey rug",
+      "category": "Textile",
+      "x": 0.40869140625,
+      "y": 0.7383911052975801,
+      "width": 0.38818359375,
+      "height": 0.2184434270765206,
+      "color": "#CDC4C2",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "oak cube shelf",
+      "category": "Furniture",
+      "x": 0.34716796875,
+      "y": 0.5336821451929366,
+      "width": 0.12548828125,
+      "height": 0.18378024852844996,
+      "color": "#684A32",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "beige storage bin",
+      "category": "Decor",
+      "x": 0.359375,
+      "y": 0.6396337475474166,
+      "width": 0.0517578125,
+      "height": 0.07194244604316546,
+      "color": "#C3AC9C",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "grey storage bin",
+      "category": "Decor",
+      "x": 0.41796875,
+      "y": 0.6337475474166122,
+      "width": 0.048828125,
+      "height": 0.06867233485938522,
+      "color": "#908788",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "oak desk",
+      "category": "Furniture",
+      "x": 0.5009765625,
+      "y": 0.5578809679529104,
+      "width": 0.16259765625,
+      "height": 0.15958142576847612,
+      "color": "#AE9380",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "black desk chair",
+      "category": "Furniture",
+      "x": 0.55029296875,
+      "y": 0.5611510791366906,
+      "width": 0.10107421875,
+      "height": 0.16742969260954874,
+      "color": "#66554A",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "oak toy chest",
+      "category": "Furniture",
+      "x": 0.73046875,
+      "y": 0.6481360366252452,
+      "width": 0.18994140625,
+      "height": 0.16677567037279267,
+      "color": "#9B7657",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "framed bear print",
+      "category": "Decor",
+      "x": 0.17236328125,
+      "y": 0.32308698495748855,
+      "width": 0.10107421875,
+      "height": 0.17985611510791366,
+      "color": "#C5BDB9",
+      "hand": false
+    }
+  ]
+}

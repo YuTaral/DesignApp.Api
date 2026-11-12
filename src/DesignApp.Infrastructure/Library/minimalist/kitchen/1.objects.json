@@ -1,0 +1,303 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.07979071288423806,
+      "width": 0.287109375,
+      "height": 0.8436886854153042,
+      "color": "#D7CFC9",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.4349247874427731,
+      "color": "#D3CAC0",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6226291693917593,
+      "width": 1,
+      "height": 0.37737083060824067,
+      "color": "#B79C89",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.29052734375,
+      "y": 0.2302158273381295,
+      "width": 0.42041015625,
+      "height": 0.3243950294310007,
+      "color": "#DAD1C8",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "grey backsplash wall",
+      "category": "Wall",
+      "x": 0.26904296875,
+      "y": 0.4375408763897973,
+      "width": 0.123046875,
+      "height": 0.25049051667756705,
+      "color": "#827364",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "sheer white curtains",
+      "category": "Textile",
+      "x": 0.837890625,
+      "y": 0.06801831262262917,
+      "width": 0.162109375,
+      "height": 0.7750163505559189,
+      "color": "#DED7D2",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "window",
+      "category": "Opening",
+      "x": 0.716796875,
+      "y": 0.25833878351863965,
+      "width": 0.1767578125,
+      "height": 0.34532374100719426,
+      "color": "#F6F4F3",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "left tall oak cabinets",
+      "category": "Furniture",
+      "x": 0.3896484375,
+      "y": 0.28776978417266186,
+      "width": 0.0849609375,
+      "height": 0.40091563113145845,
+      "color": "#B18E6E",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "middle tall oak cabinet",
+      "category": "Furniture",
+      "x": 0.46044921875,
+      "y": 0.28776978417266186,
+      "width": 0.0908203125,
+      "height": 0.29103989535644215,
+      "color": "#C09E7F",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "integrated fridge panel",
+      "category": "Furniture",
+      "x": 0.54541015625,
+      "y": 0.2864617396991498,
+      "width": 0.12646484375,
+      "height": 0.2995421844342708,
+      "color": "#CDAE91",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "oak upper cabinets",
+      "category": "Furniture",
+      "x": 0.29541015625,
+      "y": 0.2838456507521256,
+      "width": 0.09423828125,
+      "height": 0.16350555918901244,
+      "color": "#77593E",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "glass wall cabinet",
+      "category": "Furniture",
+      "x": 0.18798828125,
+      "y": 0.2289077828646174,
+      "width": 0.1083984375,
+      "height": 0.21255722694571616,
+      "color": "#AEA692",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "oak base cabinets",
+      "category": "Furniture",
+      "x": 0.03369140625,
+      "y": 0.5650752125572269,
+      "width": 0.30908203125,
+      "height": 0.34793982995421846,
+      "color": "#8C6E54",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "corner base cabinet",
+      "category": "Furniture",
+      "x": 0.3427734375,
+      "y": 0.5598430346631785,
+      "width": 0.0673828125,
+      "height": 0.1340745585349902,
+      "color": "#AB8464",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "grey left countertop",
+      "category": "Fixture",
+      "x": 0.0322265625,
+      "y": 0.5212557226945717,
+      "width": 0.357421875,
+      "height": 0.1066056245912361,
+      "color": "#B5ABA4",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "black built-in oven",
+      "category": "Fixture",
+      "x": 0.3916015625,
+      "y": 0.4512753433616743,
+      "width": 0.0830078125,
+      "height": 0.11379986919555266,
+      "color": "#121011",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "white kitchen island",
+      "category": "Furniture",
+      "x": 0.45556640625,
+      "y": 0.6115107913669064,
+      "width": 0.44970703125,
+      "height": 0.29627207325049054,
+      "color": "#B1A49B",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "island countertop",
+      "category": "Fixture",
+      "x": 0.4521484375,
+      "y": 0.5493786788750817,
+      "width": 0.4541015625,
+      "height": 0.07586657946370176,
+      "color": "#C7BDB7",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left bar stool",
+      "category": "Furniture",
+      "x": 0.49267578125,
+      "y": 0.671026814911707,
+      "width": 0.1103515625,
+      "height": 0.26357096141268804,
+      "color": "#9D8676",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "middle bar stool",
+      "category": "Furniture",
+      "x": 0.61962890625,
+      "y": 0.6749509483322433,
+      "width": 0.12353515625,
+      "height": 0.26095487246566385,
+      "color": "#AF9C8F",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "right bar stool",
+      "category": "Furniture",
+      "x": 0.7451171875,
+      "y": 0.6762589928057554,
+      "width": 0.146484375,
+      "height": 0.2603008502289078,
+      "color": "#938072",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "left pendant lamp",
+      "category": "Lighting",
+      "x": 0.5341796875,
+      "y": 0.061478090255068674,
+      "width": 0.05126953125,
+      "height": 0.28973185088293,
+      "color": "#312B26",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "right pendant lamp",
+      "category": "Lighting",
+      "x": 0.69921875,
+      "y": 0.060824068018312624,
+      "width": 0.0703125,
+      "height": 0.35251798561151076,
+      "color": "#DFD8D3",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.70703125,
+      "y": 0.3564421190320471,
+      "width": 0.11328125,
+      "height": 0.22171353826030085,
+      "color": "#B7BE95",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "eucalyptus vase",
+      "category": "Decor",
+      "x": 0.576171875,
+      "y": 0.41922825376062783,
+      "width": 0.1181640625,
+      "height": 0.17396991497710923,
+      "color": "#D4C1AE",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "linen napkins",
+      "category": "Textile",
+      "x": 0.53466796875,
+      "y": 0.5971223021582733,
+      "width": 0.1689453125,
+      "height": 0.06474820143884892,
+      "color": "#AEA19F",
+      "hand": false
+    },
+    {
+      "index": 27,
+      "label": "plates",
+      "category": "Decor",
+      "x": 0.52392578125,
+      "y": 0.5735775016350556,
+      "width": 0.3056640625,
+      "height": 0.03531720078482668,
+      "color": "#C3B9B1",
+      "hand": false
+    }
+  ]
+}

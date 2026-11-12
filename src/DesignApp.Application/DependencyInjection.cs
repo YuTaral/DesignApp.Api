@@ -29,6 +29,10 @@ public static class DependencyInjection
         services.AddScoped<DeleteDesign>();
         services.AddScoped<RoomRemover>();
         services.AddScoped<DeleteUnsavedRooms>();
+        services.AddScoped<LibraryCopier>();
+        services.AddScoped<CopyLibraryRoom>();
+        services.AddScoped<CopyLibraryDesign>();
+        services.AddScoped<ExportLibraryRoom>();
         return services;
     }
 }

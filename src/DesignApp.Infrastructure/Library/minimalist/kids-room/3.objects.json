@@ -1,0 +1,215 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.644865925441465,
+      "width": 1,
+      "height": 0.355134074558535,
+      "color": "#C5AE9E",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.011772400261608895,
+      "width": 0.27783203125,
+      "height": 0.8711576193590582,
+      "color": "#DCD5D0",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.25439453125,
+      "y": 0.21648136036625246,
+      "width": 0.3603515625,
+      "height": 0.45192936559843033,
+      "color": "#D6CEC6",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white painted right wall",
+      "category": "Wall",
+      "x": 0.76806640625,
+      "y": 0.051667756703727925,
+      "width": 0.23193359375,
+      "height": 0.8175277959450621,
+      "color": "#C3B7AD",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2616088947024199,
+      "color": "#D2C8BF",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "oak single bed",
+      "category": "Furniture",
+      "x": 0.048828125,
+      "y": 0.5317200784826684,
+      "width": 0.3505859375,
+      "height": 0.33355134074558535,
+      "color": "#6C4C33",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "geometric duvet",
+      "category": "Textile",
+      "x": 0.0283203125,
+      "y": 0.5984303466317855,
+      "width": 0.3740234375,
+      "height": 0.22302158273381295,
+      "color": "#ADA39B",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "white pillow",
+      "category": "Textile",
+      "x": 0.25146484375,
+      "y": 0.5297580117724002,
+      "width": 0.1279296875,
+      "height": 0.08240680183126227,
+      "color": "#D3CBC7",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "low open shelf",
+      "category": "Furniture",
+      "x": 0.42236328125,
+      "y": 0.539568345323741,
+      "width": 0.18603515625,
+      "height": 0.13865271419228253,
+      "color": "#9C8677",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden toy chest",
+      "category": "Furniture",
+      "x": 0.64111328125,
+      "y": 0.604970568999346,
+      "width": 0.12158203125,
+      "height": 0.10595160235448005,
+      "color": "#A27650",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "round shaggy rug",
+      "category": "Textile",
+      "x": 0.37890625,
+      "y": 0.7181164159581426,
+      "width": 0.3544921875,
+      "height": 0.16219751471550034,
+      "color": "#CFC3BD",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.78466796875,
+      "y": 0.6461739699149771,
+      "width": 0.20654296875,
+      "height": 0.21648136036625246,
+      "color": "#8D6C51",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "small wooden chair",
+      "category": "Furniture",
+      "x": 0.7548828125,
+      "y": 0.657946370176586,
+      "width": 0.1005859375,
+      "height": 0.17920209287115763,
+      "color": "#7D5D43",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "black desk lamp",
+      "category": "Lighting",
+      "x": 0.89794921875,
+      "y": 0.539568345323741,
+      "width": 0.0771484375,
+      "height": 0.1510791366906475,
+      "color": "#161313",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "framed fox print",
+      "category": "Decor",
+      "x": 0.896484375,
+      "y": 0.27665140614780903,
+      "width": 0.07373046875,
+      "height": 0.2132112491824722,
+      "color": "#CAC1BC",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "corner window right",
+      "category": "Opening",
+      "x": 0.775390625,
+      "y": 0.17331589274035317,
+      "width": 0.09814453125,
+      "height": 0.49836494440810986,
+      "color": "#E7E4E1",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.6650390625,
+      "y": 0.2616088947024199,
+      "width": 0.0732421875,
+      "height": 0.3544800523217789,
+      "color": "#E2DBD2",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0.6044921875,
+      "y": 0.2132112491824722,
+      "width": 0.08544921875,
+      "height": 0.45585349901896666,
+      "color": "#E7E4E2",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.71728515625,
+      "y": 0.17135382603008503,
+      "width": 0.064453125,
+      "height": 0.4944408109875736,
+      "color": "#F0EFF1",
+      "hand": false
+    }
+  ]
+}

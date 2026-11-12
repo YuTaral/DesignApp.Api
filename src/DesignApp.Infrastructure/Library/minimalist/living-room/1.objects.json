@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.658600392413342,
+      "width": 1,
+      "height": 0.34139960758665794,
+      "color": "#C0AE9E",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.171875,
+      "y": 0.1988227599738391,
+      "width": 0.50146484375,
+      "height": 0.48201438848920863,
+      "color": "#C9C1B5",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.66943359375,
+      "y": 0.001962066710268149,
+      "width": 0.33056640625,
+      "height": 0.8384565075212557,
+      "color": "#C8C0B2",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0.04541015625,
+      "y": 0,
+      "width": 0.134765625,
+      "height": 0.8051013734466972,
+      "color": "#BBAFA3",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white textured ceiling",
+      "category": "Ceiling",
+      "x": 0.05908203125,
+      "y": 0,
+      "width": 0.94091796875,
+      "height": 0.23675604970569,
+      "color": "#C4BBB1",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "beige sofa",
+      "category": "Furniture",
+      "x": 0.265625,
+      "y": 0.5304120340091563,
+      "width": 0.34228515625,
+      "height": 0.18508829300196206,
+      "color": "#AD9C8C",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "woven beige rug",
+      "category": "Textile",
+      "x": 0.09765625,
+      "y": 0.6880313930673643,
+      "width": 0.7275390625,
+      "height": 0.20732504905166776,
+      "color": "#C3B7AD",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "window",
+      "category": "Opening",
+      "x": 0.04541015625,
+      "y": 0.16088947024198821,
+      "width": 0.072265625,
+      "height": 0.4682799215173316,
+      "color": "#F2EFEB",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0,
+      "y": 0,
+      "width": 0.05908203125,
+      "height": 0.8848920863309353,
+      "color": "#C5BDB3",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.13134765625,
+      "y": 0.15761935905820798,
+      "width": 0.05517578125,
+      "height": 0.5232177894048398,
+      "color": "#D2CCC3",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "round oak coffee table",
+      "category": "Furniture",
+      "x": 0.07275390625,
+      "y": 0.6664486592544147,
+      "width": 0.177734375,
+      "height": 0.16481360366252454,
+      "color": "#E3CEB5",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.1689453125,
+      "y": 0.42053629823413996,
+      "width": 0.107421875,
+      "height": 0.223675604970569,
+      "color": "#4D5E2B",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "television",
+      "category": "Other",
+      "x": 0.7119140625,
+      "y": 0.4708960104643558,
+      "width": 0.09228515625,
+      "height": 0.14650098103335513,
+      "color": "#2C2A27",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "black and oak tv stand",
+      "category": "Furniture",
+      "x": 0.658203125,
+      "y": 0.5892740353172008,
+      "width": 0.22119140625,
+      "height": 0.12426422498364945,
+      "color": "#1B1715",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "floor lamp",
+      "category": "Lighting",
+      "x": 0.83544921875,
+      "y": 0.3701765860039241,
+      "width": 0.0869140625,
+      "height": 0.2871157619359058,
+      "color": "#A69582",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "grey armchair",
+      "category": "Furniture",
+      "x": 0.759765625,
+      "y": 0.5801177240026161,
+      "width": 0.21826171875,
+      "height": 0.2668410725964683,
+      "color": "#817268",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "round oak side table",
+      "category": "Furniture",
+      "x": 0.810546875,
+      "y": 0.723348593852191,
+      "width": 0.13671875,
+      "height": 0.23217789404839764,
+      "color": "#826344",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "framed abstract print",
+      "category": "Decor",
+      "x": 0.33837890625,
+      "y": 0.3342053629823414,
+      "width": 0.0791015625,
+      "height": 0.14519293655984303,
+      "color": "#C9C3C0",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "grey cushion",
+      "category": "Textile",
+      "x": 0.2734375,
+      "y": 0.5317200784826684,
+      "width": 0.07080078125,
+      "height": 0.09025506867233486,
+      "color": "#8C8784",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "white cushion",
+      "category": "Textile",
+      "x": 0.3310546875,
+      "y": 0.5421844342707652,
+      "width": 0.07568359375,
+      "height": 0.07521255722694571,
+      "color": "#D3CCC7",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "knit throw blanket",
+      "category": "Textile",
+      "x": 0.5078125,
+      "y": 0.5546108567691301,
+      "width": 0.10546875,
+      "height": 0.1013734466971877,
+      "color": "#B8A89B",
+      "hand": false
+    }
+  ]
+}

@@ -626,6 +626,25 @@ public static class Constants
         public const string ClaudeUsageSuffix = ".claude-usage.json";
     }
 
+    /// <summary>The built-in library's files, embedded in this assembly under <c>Library/&lt;design&gt;/</c>.</summary>
+    public static class Library
+    {
+        /// <summary>Starts the resource name of every library file (set as LogicalName in the project file).</summary>
+        public const string ResourcePrefix = "DesignApp.Library/";
+
+        /// <summary>A design's details and room list, in its folder.</summary>
+        public const string DesignFile = "design.json";
+
+        /// <summary>A layout's photo: <c>&lt;room&gt;/&lt;layout&gt;.jpg</c>.</summary>
+        public const string PhotoSuffix = ".jpg";
+
+        /// <summary>A layout's label map: <c>&lt;room&gt;/&lt;layout&gt;.labels.png</c>.</summary>
+        public const string LabelMapSuffix = ".labels.png";
+
+        /// <summary>A layout's size and objects: <c>&lt;room&gt;/&lt;layout&gt;.objects.json</c>.</summary>
+        public const string ObjectsSuffix = ".objects.json";
+    }
+
     /// <summary>Pixel work: masks, label maps and encoding.</summary>
     public static class Imaging
     {
@@ -703,6 +722,9 @@ public static class Constants
 
         /// <summary>The longest AI mode name stored as text.</summary>
         public const int AiModeLength = 10;
+
+        /// <summary>The longest library layout name, such as <c>minimalist/kitchen/2</c>.</summary>
+        public const int LibraryRoomLength = 100;
 
         /// <summary>The column type for objects and edits kept with their row.</summary>
         public const string Json = "jsonb";

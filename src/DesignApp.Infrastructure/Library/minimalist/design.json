@@ -1,0 +1,16 @@
+{
+  "id": "minimalist",
+  "name": "Minimalist house",
+  "style": "Minimalist",
+  "description": "A light Scandinavian home: white-oak floors, warm white walls, linen and oak. Seven rooms, three layouts each.",
+  "order": 1,
+  "rooms": [
+    { "id": "living-room", "title": "Living room", "layouts": ["2", "1", "3"] },
+    { "id": "kitchen", "title": "Kitchen", "layouts": ["1", "2", "3"] },
+    { "id": "dining-room", "title": "Dining room", "layouts": ["2", "1", "3"] },
+    { "id": "bedroom", "title": "Bedroom", "layouts": ["2", "1", "3"] },
+    { "id": "bathroom", "title": "Bathroom", "layouts": ["2", "1", "3"] },
+    { "id": "home-office", "title": "Home office", "layouts": ["2", "1", "3"] },
+    { "id": "kids-room", "title": "Kid's room", "layouts": ["1", "2", "3"] }
+  ]
+}

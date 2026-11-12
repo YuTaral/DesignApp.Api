@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "beige stone tiled back wall",
+      "category": "Wall",
+      "x": 0.275390625,
+      "y": 0.21909744931327665,
+      "width": 0.47021484375,
+      "height": 0.4924787442773054,
+      "color": "#B5A494",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.28564453125,
+      "height": 0.9653368214519293,
+      "color": "#D3CAC3",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "tiled right wall",
+      "category": "Wall",
+      "x": 0.7431640625,
+      "y": 0.15500327011118378,
+      "width": 0.08935546875,
+      "height": 0.5009810333551341,
+      "color": "#9F8E7F",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7050359712230215,
+      "width": 1,
+      "height": 0.2949640287769784,
+      "color": "#C3AB9A",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0.08447265625,
+      "y": 0,
+      "width": 0.830078125,
+      "height": 0.2197514715500327,
+      "color": "#CFC5BC",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "oak floating vanity",
+      "category": "Furniture",
+      "x": 0.056640625,
+      "y": 0.6075866579463701,
+      "width": 0.22802734375,
+      "height": 0.17331589274035317,
+      "color": "#947256",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white vanity countertop",
+      "category": "Fixture",
+      "x": 0.05517578125,
+      "y": 0.5827338129496403,
+      "width": 0.23193359375,
+      "height": 0.07390451275343361,
+      "color": "#D0BDAC",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "white vessel sink",
+      "category": "Fixture",
+      "x": 0.13134765625,
+      "y": 0.5716154349247874,
+      "width": 0.1083984375,
+      "height": 0.03727926749509483,
+      "color": "#CDC8C5",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "round black mirror",
+      "category": "Decor",
+      "x": 0.0751953125,
+      "y": 0.2459123610202747,
+      "width": 0.115234375,
+      "height": 0.2786134728580772,
+      "color": "#A39786",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "framed art print",
+      "category": "Decor",
+      "x": 0.2255859375,
+      "y": 0.32177894048397643,
+      "width": 0.0380859375,
+      "height": 0.17266187050359713,
+      "color": "#BAB2A8",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.35546875,
+      "y": 0.631785480706344,
+      "width": 0.0654296875,
+      "height": 0.0987573577501635,
+      "color": "#CEC6C3",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "beige towel",
+      "category": "Textile",
+      "x": 0.45751953125,
+      "y": 0.5382603008502289,
+      "width": 0.05419921875,
+      "height": 0.131458469587966,
+      "color": "#B3A195",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "grey towel",
+      "category": "Textile",
+      "x": 0.50830078125,
+      "y": 0.5382603008502289,
+      "width": 0.05126953125,
+      "height": 0.131458469587966,
+      "color": "#817672",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "glass shower enclosure",
+      "category": "Fixture",
+      "x": 0.5859375,
+      "y": 0.28973185088293,
+      "width": 0.21337890625,
+      "height": 0.4728580771746239,
+      "color": "#B2ADA3",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "black shower fixture",
+      "category": "Fixture",
+      "x": 0.65185546875,
+      "y": 0.30935251798561153,
+      "width": 0.04296875,
+      "height": 0.26618705035971224,
+      "color": "#474642",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "freestanding white bathtub",
+      "category": "Fixture",
+      "x": 0.6787109375,
+      "y": 0.6487900588620014,
+      "width": 0.224609375,
+      "height": 0.2648790058862001,
+      "color": "#B3A297",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "black framed window",
+      "category": "Opening",
+      "x": 0.802734375,
+      "y": 0.1406147809025507,
+      "width": 0.09814453125,
+      "height": 0.538914323086985,
+      "color": "#E1DCD6",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "sheer white curtain",
+      "category": "Textile",
+      "x": 0.87451171875,
+      "y": 0,
+      "width": 0.12548828125,
+      "height": 0.9640287769784173,
+      "color": "#D1C9C5",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.84521484375,
+      "y": 0.6095487246566383,
+      "width": 0.15478515625,
+      "height": 0.27141922825376064,
+      "color": "#3E4220",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "white plant pot",
+      "category": "Decor",
+      "x": 0.875,
+      "y": 0.8476128188358404,
+      "width": 0.08984375,
+      "height": 0.13734466971877043,
+      "color": "#AA988A",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "woven beige bath rug",
+      "category": "Textile",
+      "x": 0.19482421875,
+      "y": 0.7756703727926749,
+      "width": 0.2109375,
+      "height": 0.12034009156311315,
+      "color": "#BEB0A8",
+      "hand": false
+    }
+  ]
+}

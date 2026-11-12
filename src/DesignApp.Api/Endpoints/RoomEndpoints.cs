@@ -1,3 +1,4 @@
+using DesignApp.Api.Helpers;
 using DesignApp.Api.Requests;
 using DesignApp.Api.Responses;
 using DesignApp.Application.Interfaces;
@@ -92,17 +93,8 @@ internal static class RoomEndpoints
         IFormFile photo, [FromForm] string? scope, [FromForm] string? ai, UploadRoom uploadRoom, IAiProviders aiProviders,
         CancellationToken cancellationToken)
     {
-        var availability = aiProviders.Availability;
-        var aiMode = availability.Default;
-        if (!string.IsNullOrWhiteSpace(ai) && (!Enum.TryParse(ai, ignoreCase: true, out aiMode) || !Enum.IsDefined(aiMode)))
-            return TypedResults.Problem(Constants.Messages.UnknownAi(ai), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidAi);
-        if (!availability.Allows(aiMode))
-        {
-            var why = aiMode is AiMode.Real && !availability.RealAvailable
-                ? Constants.Messages.RealAiNotSetUp
-                : Constants.Messages.OnlyAi(availability.Default.ToString());
-            return TypedResults.Problem(why, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.AiNotAvailable);
-        }
+        if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
+            return problem;
 
         var analysisScope = AnalysisScope.WholeRoom;
         if (!string.IsNullOrWhiteSpace(scope) && (!Enum.TryParse(scope, ignoreCase: true, out analysisScope) || !Enum.IsDefined(analysisScope)))

@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.2783203125,
+      "height": 0.882275997383911,
+      "color": "#D9D1CB",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.275390625,
+      "y": 0.21648136036625246,
+      "width": 0.3486328125,
+      "height": 0.4486592544146501,
+      "color": "#D5CCC4",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.0830078125,
+      "y": 0,
+      "width": 0.833984375,
+      "height": 0.27403531720078483,
+      "color": "#D2C8BF",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6069326357096141,
+      "width": 1,
+      "height": 0.39306736429038586,
+      "color": "#BFA693",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "wooden single bed",
+      "category": "Furniture",
+      "x": 0.0322265625,
+      "y": 0.5336821451929366,
+      "width": 0.35400390625,
+      "height": 0.3263570961412688,
+      "color": "#705035",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "wolf print duvet",
+      "category": "Textile",
+      "x": 0.0205078125,
+      "y": 0.5990843688685416,
+      "width": 0.36181640625,
+      "height": 0.2001308044473512,
+      "color": "#9C897D",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "wolf print pillow",
+      "category": "Textile",
+      "x": 0.2431640625,
+      "y": 0.5336821451929366,
+      "width": 0.134765625,
+      "height": 0.07194244604316546,
+      "color": "#B4A193",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "grey knit blanket",
+      "category": "Textile",
+      "x": 0.1044921875,
+      "y": 0.631785480706344,
+      "width": 0.24365234375,
+      "height": 0.17789404839764553,
+      "color": "#897D79",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "framed fox print",
+      "category": "Decor",
+      "x": 0.14306640625,
+      "y": 0.2517985611510791,
+      "width": 0.0634765625,
+      "height": 0.24264224983649443,
+      "color": "#D7D0CB",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "round grey rug",
+      "category": "Textile",
+      "x": 0.3349609375,
+      "y": 0.724002616088947,
+      "width": 0.43603515625,
+      "height": 0.210595160235448,
+      "color": "#B9B2B3",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "wooden cube shelf",
+      "category": "Furniture",
+      "x": 0.39404296875,
+      "y": 0.538914323086985,
+      "width": 0.1337890625,
+      "height": 0.13865271419228253,
+      "color": "#543B27",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.54443359375,
+      "y": 0.5565729234793984,
+      "width": 0.13037109375,
+      "height": 0.1340745585349902,
+      "color": "#CAA689",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wooden chair",
+      "category": "Furniture",
+      "x": 0.5712890625,
+      "y": 0.5637671680837149,
+      "width": 0.07763671875,
+      "height": 0.1432308698495749,
+      "color": "#D3BCA8",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.64990234375,
+      "y": 0.37671680837148463,
+      "width": 0.1123046875,
+      "height": 0.24656638325703073,
+      "color": "#6B7643",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "white plant pot",
+      "category": "Decor",
+      "x": 0.6728515625,
+      "y": 0.6147809025506867,
+      "width": 0.060546875,
+      "height": 0.06998037933289732,
+      "color": "#E4DDDA",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden toy chest",
+      "category": "Furniture",
+      "x": 0.7646484375,
+      "y": 0.6160889470241988,
+      "width": 0.185546875,
+      "height": 0.2446043165467626,
+      "color": "#947254",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.83740234375,
+      "y": 0,
+      "width": 0.16259765625,
+      "height": 0.8521909744931327,
+      "color": "#B4A79E",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "middle sheer curtain",
+      "category": "Textile",
+      "x": 0.71728515625,
+      "y": 0.15042511445389142,
+      "width": 0.0830078125,
+      "height": 0.5349901896664486,
+      "color": "#F0EDEE",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "back sheer curtain",
+      "category": "Textile",
+      "x": 0.60595703125,
+      "y": 0.21255722694571616,
+      "width": 0.083984375,
+      "height": 0.3603662524525834,
+      "color": "#DED7D4",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "large right window",
+      "category": "Opening",
+      "x": 0.7802734375,
+      "y": 0.1066056245912361,
+      "width": 0.0947265625,
+      "height": 0.5670372792674951,
+      "color": "#E7E4E0",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "corner back window",
+      "category": "Opening",
+      "x": 0.666015625,
+      "y": 0.27403531720078483,
+      "width": 0.0703125,
+      "height": 0.3603662524525834,
+      "color": "#EAE4DB",
+      "hand": false
+    }
+  ]
+}

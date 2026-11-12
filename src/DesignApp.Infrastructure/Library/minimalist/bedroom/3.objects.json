@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04643557880967953,
+      "width": 0.46630859375,
+      "height": 0.8214519293655984,
+      "color": "#CDC3B8",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6801831262262917,
+      "width": 1,
+      "height": 0.3198168737737083,
+      "color": "#C2AFA3",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2701111837802485,
+      "color": "#D2C8BE",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.45947265625,
+      "y": 0.2354480052321779,
+      "width": 0.12939453125,
+      "height": 0.12034009156311315,
+      "color": "#B6A696",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.962890625,
+      "y": 0.09025506867233486,
+      "width": 0.037109375,
+      "height": 0.7547416612164813,
+      "color": "#D8D2CF",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "beige bed with linen bedding",
+      "category": "Furniture",
+      "x": 0.126953125,
+      "y": 0.5696533682145193,
+      "width": 0.515625,
+      "height": 0.3544800523217789,
+      "color": "#948070",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "grey throw blanket",
+      "category": "Textile",
+      "x": 0.31884765625,
+      "y": 0.6219751471550032,
+      "width": 0.26513671875,
+      "height": 0.17854807063440156,
+      "color": "#756A62",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "beige woven rug",
+      "category": "Textile",
+      "x": 0.12451171875,
+      "y": 0.7338129496402878,
+      "width": 0.62255859375,
+      "height": 0.26618705035971224,
+      "color": "#827266",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "oak wardrobe",
+      "category": "Furniture",
+      "x": 0.44140625,
+      "y": 0.3263570961412688,
+      "width": 0.13916015625,
+      "height": 0.30608240680183124,
+      "color": "#9C7956",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "glass window",
+      "category": "Opening",
+      "x": 0.64501953125,
+      "y": 0.23741007194244604,
+      "width": 0.21630859375,
+      "height": 0.46108567691301505,
+      "color": "#E7E2D3",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0.57861328125,
+      "y": 0.223675604970569,
+      "width": 0.08740234375,
+      "height": 0.4722040549378679,
+      "color": "#DFD9D5",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.826171875,
+      "y": 0.1406147809025507,
+      "width": 0.14404296875,
+      "height": 0.4682799215173316,
+      "color": "#D1C9C4",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "framed abstract art",
+      "category": "Decor",
+      "x": 0.16943359375,
+      "y": 0.30739045127534337,
+      "width": 0.1484375,
+      "height": 0.2053629823413996,
+      "color": "#D0CBC7",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "left oak nightstand",
+      "category": "Furniture",
+      "x": 0.03173828125,
+      "y": 0.6749509483322433,
+      "width": 0.1513671875,
+      "height": 0.20340091563113147,
+      "color": "#6B4E35",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "left black lamp",
+      "category": "Lighting",
+      "x": 0.068359375,
+      "y": 0.5493786788750817,
+      "width": 0.05908203125,
+      "height": 0.15304120340091562,
+      "color": "#38302A",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "grey armchair",
+      "category": "Furniture",
+      "x": 0.7763671875,
+      "y": 0.5977763243950295,
+      "width": 0.19970703125,
+      "height": 0.2262916939175932,
+      "color": "#776257",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.7763671875,
+      "y": 0.5565729234793984,
+      "width": 0.1103515625,
+      "height": 0.1236102027468934,
+      "color": "#82864E",
+      "hand": false
+    }
+  ]
+}

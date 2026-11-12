@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana-2",
+  "editModel": "fal-ai/nano-banana-2/edit",
+  "resolution": "2K",
+  "aspectRatio": "4:3",
+  "pricePerImage": 0.12,
+  "style": "Minimalist Scandinavian style: light white-oak floor, warm white walls, white ceiling, matte black and natural wood accents, linen and wool textiles in white, beige and soft grey, a few green plants. Soft natural daylight from a large window. Photorealistic real-estate interior photograph, eye-level wide-angle shot from a corner of the room, showing the floor, two walls and the ceiling. Uncluttered: every piece of furniture stands on its own with clear space around it, nothing overlapping. No people, no text, no logos, no watermark.",
+  "sameHouse": "The reference photo shows another room of the same house. Keep exactly the same floor, wall and ceiling finishes, window style, light, colour palette and furniture style, and the same camera height and lens.",
+  "rooms": [
+    { "id": "living-room", "title": "Living room", "prompt": "A three-seat sofa with cushions, an armchair, a low round coffee table, a large rug, a floor lamp, a low TV console with a TV on it, a small side table, a potted plant, curtains at the window and one framed print on the wall." },
+    { "id": "kitchen", "title": "Kitchen", "prompt": "Handleless base and wall cabinets, a stone countertop, a sink with a black faucet, a cooktop under a range hood, a built-in oven, a tall refrigerator, a kitchen island with three bar stools and two pendant lights above it." },
+    { "id": "dining-room", "title": "Dining room", "prompt": "A rectangular wooden dining table with six chairs, a pendant lamp above the table, a low sideboard against the wall with a vase on it, a rug under the table, a framed print, a potted plant and curtains at the window." },
+    { "id": "bedroom", "title": "Bedroom", "prompt": "A double bed with a duvet, pillows and a throw, two bedside tables with a lamp on each, a tall wardrobe, a rug beside the bed, an armchair in the corner, curtains at the window and a framed print above the bed." },
+    { "id": "bathroom", "title": "Bathroom", "prompt": "A floating vanity with a basin and a round mirror above it, a wall-hung toilet, a walk-in shower with a glass screen, a freestanding bathtub, a towel rail with towels, large-format wall tiles and a small plant." },
+    { "id": "home-office", "title": "Home office", "prompt": "A wooden desk with a computer monitor and a desk lamp, an office chair, a tall bookshelf with books and boxes, a rug under the desk, a potted plant, a pinboard on the wall and curtains at the window." },
+    { "id": "kids-room", "title": "Kid's room", "prompt": "A single bed with a patterned duvet, a low shelf with toy boxes, a small desk with a chair, a soft round rug, a toy chest, a reading lamp, a framed animal print on the wall and curtains at the window." }
+  ]
+}

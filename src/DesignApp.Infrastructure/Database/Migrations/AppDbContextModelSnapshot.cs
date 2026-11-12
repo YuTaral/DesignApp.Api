@@ -111,6 +111,11 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("latest_label_map_revision");
 
+                    b.Property<string>("LibraryRoom")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("library_room");
+
                     b.Property<string>("Objects")
                         .IsRequired()
                         .HasColumnType("jsonb")

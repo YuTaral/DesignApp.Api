@@ -21,6 +21,7 @@ namespace DesignApp.Api.Responses;
 /// For each label map version (by its number), which photo version goes with it: 0 is the uploaded photo
 /// (<c>photo</c>), a higher one is <c>photo/{version}</c>, after an object was removed.
 /// </param>
+/// <param name="LibraryRoom">The built-in library layout it was copied from, such as <c>minimalist/kitchen/2</c>; <c>null</c> for an upload.</param>
 public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
@@ -34,7 +35,8 @@ public sealed record RoomResponse(
     int LabelMapRevision,
     AnalysisScope Scope,
     AiMode AiMode,
-    IReadOnlyList<int> PhotoVersions)
+    IReadOnlyList<int> PhotoVersions,
+    string? LibraryRoom)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -53,6 +55,7 @@ public sealed record RoomResponse(
             room.LabelMapRevision,
             room.Scope,
             room.AiMode,
-            [.. Enumerable.Range(0, room.LatestLabelMapRevision + 1).Select(room.PhotoVersionOf)]);
+            [.. Enumerable.Range(0, room.LatestLabelMapRevision + 1).Select(room.PhotoVersionOf)],
+            room.LibraryRoom);
     }
 }

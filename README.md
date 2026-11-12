@@ -104,6 +104,11 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
 | `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
+| `GET` | `/api/library` | The built-in sample houses with their rooms |
+| `GET` | `/api/library/{design}/{room}/{layout}/photo` | The photo of one layout of a library room |
+| `POST` | `/api/library/{design}/{room}/{layout}/copy` | Copy a layout into a new room of the visitor, already analyzed (no AI runs) |
+| `POST` | `/api/library/{design}/copy` | Copy a whole sample house (each room's first layout) into a new design of the account |
+| `GET` | `/api/dev/library-export/{id}?name=` | Development only: pack one of your rooms as library files (a zip) |
 | `GET` `POST` | `/api/designs` | List the account's designs, or create one from a room and its colors |
 | `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open a design, change its name and description, or delete it with its rooms |
 | `POST` | `/api/designs/{id}/rooms` | Add one of the account's rooms to a design |
@@ -113,6 +118,29 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 ### Designs and rooms
 
 A design has a name, an optional description (up to 300 characters) and 1 to 20 rooms, each with its own colors. A room belongs to at most one design. Rooms are only kept inside a design: removing a room from its design deletes it (photo, outlines and all), deleting a design deletes its rooms, and an upload that isn't added to a design within 24 hours is deleted by a background job that runs every hour. A design always keeps at least one room; to remove the last one, delete the design.
+
+### The built-in library
+
+Visitors can start without a photo: the library holds ready-made **sample houses**, one style each. Every room
+has one or more **layouts** (different photos of it, such as three kitchens), all analyzed ahead of time. The
+first is the **Minimalist house**: seven rooms with three layouts each. The files ship inside the API as embedded
+resources, in `src/DesignApp.Infrastructure/Library/<design>/`:
+
+- `design.json`: the id (the folder's name), name, style, description, list order and the rooms (id, title and
+  layout ids, the first being the default);
+- per layout, in the room's folder: `<layout>.jpg` (the processed photo), `<layout>.labels.png` (its label map)
+  and `<layout>.objects.json` (the photo's size and the objects).
+
+Opening a layout **copies** it into an ordinary room of the visitor, Ready at once, so Claude and SAM 3 never run
+for it; from there it is like any upload (editing, removing objects with the room's AI, saving to a design,
+deleted after 24 hours if not saved). A signed-in account can copy a whole house (each room's first layout) into
+a new design.
+
+To add a style or a layout: make the photos (`AiLab generate`, below), upload each in Development with the real
+AI, fix the outlines in the editor if needed, then open `/api/dev/library-export/{roomId}?name=<layout id>`
+while signed in as the room's owner. Unzip the three files into the room's folder and list the layout in
+`design.json`. Objects removed from the photo are left out. A new style is a new folder; no code changes. The
+unit tests check that every listed layout has its files and that its label map and objects match.
 
 ### Accounts and guests
 
@@ -199,6 +227,11 @@ runs them in Firefox against the five sample photos.
   `eval.py <set folder>` scores a whole photo test set (`expected.json` plus one run per photo in `runs/`): the
   expected objects found, how well Claude's boxes and SAM 3's outlines agree, loose outlines and unassigned pixels,
   per photo and per scenario. The set of 20 hard photos lives in `../rooms-eval` (outside the repos).
+- `tools/AiLab generate <prompts.json> <folder> [--rooms a,b] [--candidates n] [--reference <photo>] [--yes]`:
+  makes library photos with an image model on fal (the prompts file sets the model, size, price per image and the
+  house's shared style; `library/minimalist/prompts.json` made the Minimalist house). Without `--yes` it only prints
+  what it would make and the cost; with it, it is **paid**. The first room is made from text; `--reference` makes
+  the others from the chosen photo so the whole house matches.
 - `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the
   solution when a turn ends with uncommitted C# changes and sends any errors back.
 

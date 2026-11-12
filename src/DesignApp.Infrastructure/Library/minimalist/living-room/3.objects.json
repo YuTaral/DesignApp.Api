@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6298234139960759,
+      "width": 1,
+      "height": 0.3701765860039241,
+      "color": "#CAB3A3",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.056640625,
+      "y": 0,
+      "width": 0.943359375,
+      "height": 0.2943100065402224,
+      "color": "#B9AEA2",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.29736328125,
+      "y": 0.2916939175931982,
+      "width": 0.40234375,
+      "height": 0.35840418574231525,
+      "color": "#C1B7AB",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.68310546875,
+      "y": 0.05624591236102027,
+      "width": 0.31689453125,
+      "height": 0.7972531066056245,
+      "color": "#C2B9A8",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0.05615234375,
+      "y": 0.017004578155657292,
+      "width": 0.2158203125,
+      "height": 0.7998691955526488,
+      "color": "#B6AB9E",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "ceiling beams",
+      "category": "Decor",
+      "x": 0.08447265625,
+      "y": 0.05624591236102027,
+      "width": 0.8505859375,
+      "height": 0.17854807063440156,
+      "color": "#BCB1A5",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0.0556640625,
+      "y": 0.18835840418574232,
+      "width": 0.0654296875,
+      "height": 0.4722040549378679,
+      "color": "#E8EEE2",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.1982421875,
+      "y": 0.289077828646174,
+      "width": 0.05322265625,
+      "height": 0.13080444735120994,
+      "color": "#E4E8DF",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0,
+      "y": 0,
+      "width": 0.06298828125,
+      "height": 0.8901242642249837,
+      "color": "#DFDEDF",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "middle sheer curtain",
+      "category": "Textile",
+      "x": 0.125,
+      "y": 0.1118378024852845,
+      "width": 0.09765625,
+      "height": 0.6500981033355134,
+      "color": "#D5D2CC",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "back sheer curtain",
+      "category": "Textile",
+      "x": 0.255859375,
+      "y": 0.2622629169391759,
+      "width": 0.04638671875,
+      "height": 0.394375408763898,
+      "color": "#C2B8AE",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.27783203125,
+      "y": 0.6455199476782211,
+      "width": 0.5283203125,
+      "height": 0.2053629823413996,
+      "color": "#BDB2AD",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "beige sofa",
+      "category": "Furniture",
+      "x": 0.60546875,
+      "y": 0.5356442119032047,
+      "width": 0.26904296875,
+      "height": 0.2289077828646174,
+      "color": "#897A6D",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "grey armchair",
+      "category": "Furniture",
+      "x": 0.74951171875,
+      "y": 0.5886200130804448,
+      "width": 0.2158203125,
+      "height": 0.22694571615434925,
+      "color": "#5F5650",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "round oak coffee table",
+      "category": "Furniture",
+      "x": 0.45068359375,
+      "y": 0.6200130804447351,
+      "width": 0.15625,
+      "height": 0.1105297580117724,
+      "color": "#A27B5C",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "oak tv unit",
+      "category": "Furniture",
+      "x": 0.3935546875,
+      "y": 0.5716154349247874,
+      "width": 0.18115234375,
+      "height": 0.07652060170045781,
+      "color": "#AD8667",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "television",
+      "category": "Furniture",
+      "x": 0.43408203125,
+      "y": 0.4898626553302812,
+      "width": 0.10009765625,
+      "height": 0.08371484630477437,
+      "color": "#151210",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "oak side table",
+      "category": "Furniture",
+      "x": 0.77978515625,
+      "y": 0.7024198822759974,
+      "width": 0.15234375,
+      "height": 0.2707652060170046,
+      "color": "#8D6C4F",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.1640625,
+      "y": 0.34532374100719426,
+      "width": 0.12841796875,
+      "height": 0.34009156311314587,
+      "color": "#708053",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "left white planter",
+      "category": "Decor",
+      "x": 0.20166015625,
+      "y": 0.6592544146500982,
+      "width": 0.05810546875,
+      "height": 0.0987573577501635,
+      "color": "#BFB1A6",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "right fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.29150390625,
+      "y": 0.43623283191628515,
+      "width": 0.0712890625,
+      "height": 0.16350555918901244,
+      "color": "#4E582D",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "framed botanical print",
+      "category": "Decor",
+      "x": 0.73779296875,
+      "y": 0.3263570961412688,
+      "width": 0.044921875,
+      "height": 0.16873773708306083,
+      "color": "#B6AB9D",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "grey throw pillow",
+      "category": "Textile",
+      "x": 0.6435546875,
+      "y": 0.540876389797253,
+      "width": 0.07177734375,
+      "height": 0.06998037933289732,
+      "color": "#878486",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "dried grass vase",
+      "category": "Decor",
+      "x": 0.4873046875,
+      "y": 0.52648790058862,
+      "width": 0.0615234375,
+      "height": 0.1066056245912361,
+      "color": "#8E755E",
+      "hand": false
+    }
+  ]
+}

@@ -291,7 +291,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     /// <param name="png">The label map file.</param>
     /// <returns>The labels and the map's size.</returns>
     /// <exception cref="InvalidOperationException">The file can't be read.</exception>
-    private static (byte[] Labels, int Width, int Height) DecodeGrayPng(byte[] png)
+    internal static (byte[] Labels, int Width, int Height) DecodeGrayPng(byte[] png)
     {
         using var codec = SKCodec.Create(new MemoryStream(png)) ?? throw new InvalidOperationException("The label map can't be decoded.");
         var (width, height) = (codec.Info.Width, codec.Info.Height);

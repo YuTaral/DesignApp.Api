@@ -4,6 +4,7 @@
 //                                         [--via api|claude-code] [--claude <path to claude>]   claude-code: on the Claude subscription
 //                                                                       PAID: one Claude call + the SAM 3 requests
 //   dotnet run --project tools/AiLab -- replay <folder>               free: answers SAM 3 from the recording
+//   dotnet run --project tools/AiLab -- generate <prompts.json> <folder> [...]   PAID with --yes: library photos (Generator.cs)
 //
 // record saves the analysis image, Claude's objects (inventory.json) and every SAM 3 request and response
 // (sam/<hash>.json). replay feeds those back to the same FalSegmentationProvider, so changes to the mask
@@ -29,6 +30,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using static DesignApp.Domain.Constants;
+
+if (args.Length > 0 && args[0] == "generate")
+    return await AiLab.Generator.RunAsync(args);
 
 if (args.Length < 2 || args[0] is not ("record" or "replay"))
 {

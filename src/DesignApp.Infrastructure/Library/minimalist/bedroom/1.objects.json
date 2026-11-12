@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.5441465009810333,
+      "width": 1,
+      "height": 0.45585349901896666,
+      "color": "#B59B88",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.259765625,
+      "y": 0.21517331589274036,
+      "width": 0.3740234375,
+      "height": 0.4048397645519948,
+      "color": "#D2CAC2",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0.080078125,
+      "y": 0.07521255722694571,
+      "width": 0.21044921875,
+      "height": 0.7141922825376062,
+      "color": "#DAD3CE",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 0.91845703125,
+      "height": 0.5742315238718116,
+      "color": "#D1C8BF",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "oak wardrobe",
+      "category": "Furniture",
+      "x": 0,
+      "y": 0.05493786788750817,
+      "width": 0.11328125,
+      "height": 0.8136036625245259,
+      "color": "#B39173",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "upholstered bed",
+      "category": "Furniture",
+      "x": 0.23876953125,
+      "y": 0.5434924787442773,
+      "width": 0.40576171875,
+      "height": 0.29561805101373445,
+      "color": "#C5BAB9",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "knit throw blanket",
+      "category": "Textile",
+      "x": 0.26416015625,
+      "y": 0.6200130804447351,
+      "width": 0.3623046875,
+      "height": 0.09417920209287116,
+      "color": "#B6A69A",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "pillows",
+      "category": "Textile",
+      "x": 0.36376953125,
+      "y": 0.5094833224329627,
+      "width": 0.2138671875,
+      "height": 0.10725964682799215,
+      "color": "#C9C1BF",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left nightstand",
+      "category": "Furniture",
+      "x": 0.26416015625,
+      "y": 0.578155657292348,
+      "width": 0.09716796875,
+      "height": 0.11510791366906475,
+      "color": "#7C5B40",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "right nightstand",
+      "category": "Furniture",
+      "x": 0.583984375,
+      "y": 0.5853499018966645,
+      "width": 0.08349609375,
+      "height": 0.12164813603662525,
+      "color": "#D8AD89",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "framed art",
+      "category": "Decor",
+      "x": 0.42724609375,
+      "y": 0.32831916285153695,
+      "width": 0.08447265625,
+      "height": 0.14780902550686723,
+      "color": "#C8C1BB",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "corner window",
+      "category": "Opening",
+      "x": 0.654296875,
+      "y": 0.2563767168083715,
+      "width": 0.10498046875,
+      "height": 0.42838456507521255,
+      "color": "#EAE5E0",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "sheer curtains",
+      "category": "Textile",
+      "x": 0.73828125,
+      "y": 0,
+      "width": 0.26171875,
+      "height": 0.855461085676913,
+      "color": "#CDC5BC",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "wooden armchair",
+      "category": "Furniture",
+      "x": 0.7236328125,
+      "y": 0.5696533682145193,
+      "width": 0.24951171875,
+      "height": 0.368214519293656,
+      "color": "#6E5546",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.5283203125,
+      "y": 0.7174623937213865,
+      "width": 0.37451171875,
+      "height": 0.197514715500327,
+      "color": "#A1928A",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "potted plant on chair side",
+      "category": "Decor",
+      "x": 0.771484375,
+      "y": 0.5552648790058862,
+      "width": 0.07568359375,
+      "height": 0.10725964682799215,
+      "color": "#C7C4B6",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "white skirting board",
+      "category": "Other",
+      "x": 0.09423828125,
+      "y": 0.6795291039895357,
+      "width": 0.17333984375,
+      "height": 0.13603662524525834,
+      "color": "#948274",
+      "hand": false
+    }
+  ]
+}

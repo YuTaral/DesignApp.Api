@@ -1,0 +1,171 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.27783203125,
+      "height": 0.9555264879005886,
+      "color": "#CBC2B6",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.275390625,
+      "y": 0.2171353826030085,
+      "width": 0.46240234375,
+      "height": 0.48201438848920863,
+      "color": "#D5CDC6",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0.0859375,
+      "y": 0,
+      "width": 0.83251953125,
+      "height": 0.22302158273381295,
+      "color": "#D2C8BF",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6991497710922171,
+      "width": 1,
+      "height": 0.30085022890778285,
+      "color": "#C1A997",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "oak bookshelf",
+      "category": "Furniture",
+      "x": 0.05810546875,
+      "y": 0.2537606278613473,
+      "width": 0.23388671875,
+      "height": 0.6481360366252452,
+      "color": "#8D6C50",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "woven wool rug",
+      "category": "Textile",
+      "x": 0.48388671875,
+      "y": 0.7024198822759974,
+      "width": 0.45166015625,
+      "height": 0.2380640941792021,
+      "color": "#B9ACA4",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "oak desk",
+      "category": "Furniture",
+      "x": 0.62744140625,
+      "y": 0.5650752125572269,
+      "width": 0.22705078125,
+      "height": 0.315892740353172,
+      "color": "#A07E64",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "upholstered office chair",
+      "category": "Furniture",
+      "x": 0.51513671875,
+      "y": 0.5703073904512753,
+      "width": 0.16552734375,
+      "height": 0.26095487246566385,
+      "color": "#968271",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.83447265625,
+      "y": 0,
+      "width": 0.16552734375,
+      "height": 0.9444081098757358,
+      "color": "#B6A9A0",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0.607421875,
+      "y": 0.2132112491824722,
+      "width": 0.08251953125,
+      "height": 0.40876389797253104,
+      "color": "#EAE6E2",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "inner sheer curtain",
+      "category": "Textile",
+      "x": 0.7177734375,
+      "y": 0.14388489208633093,
+      "width": 0.08251953125,
+      "height": 0.5827338129496403,
+      "color": "#EBE8E7",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "corner window",
+      "category": "Opening",
+      "x": 0.77587890625,
+      "y": 0.1497710922171354,
+      "width": 0.0966796875,
+      "height": 0.6500981033355134,
+      "color": "#E9E6E3",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.298828125,
+      "y": 0.3917593198168738,
+      "width": 0.11767578125,
+      "height": 0.3302812295618051,
+      "color": "#545837",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "bulletin board",
+      "category": "Decor",
+      "x": 0.44287109375,
+      "y": 0.3897972531066056,
+      "width": 0.1357421875,
+      "height": 0.1131458469587966,
+      "color": "#CCC1B9",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "desktop monitor",
+      "category": "Other",
+      "x": 0.70751953125,
+      "y": 0.4375408763897973,
+      "width": 0.07080078125,
+      "height": 0.16939175931981687,
+      "color": "#A79C96",
+      "hand": false
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.81621975147155,
+      "color": "#CFC4B9",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.5964682799215173,
+      "width": 1,
+      "height": 0.40353172007848265,
+      "color": "#C7B5AA",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.11474609375,
+      "y": 0.17789404839764553,
+      "width": 0.3974609375,
+      "height": 0.38194898626553303,
+      "color": "#D0CCC9",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "left white wall strip",
+      "category": "Wall",
+      "x": 0.083984375,
+      "y": 0.18508829300196206,
+      "width": 0.05615234375,
+      "height": 0.5768476128188358,
+      "color": "#CFC5BB",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "upper black cabinets",
+      "category": "Furniture",
+      "x": 0.126953125,
+      "y": 0.24002616088947024,
+      "width": 0.42626953125,
+      "height": 0.2603008502289078,
+      "color": "#262322",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "right tall black cabinets",
+      "category": "Furniture",
+      "x": 0.533203125,
+      "y": 0.2975801177240026,
+      "width": 0.20458984375,
+      "height": 0.13342053629823414,
+      "color": "#22201F",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "lower black cabinets",
+      "category": "Furniture",
+      "x": 0.1279296875,
+      "y": 0.5624591236102028,
+      "width": 0.42529296875,
+      "height": 0.22825376062786135,
+      "color": "#181618",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "oak and black island",
+      "category": "Furniture",
+      "x": 0.31494140625,
+      "y": 0.5689993459777632,
+      "width": 0.40771484375,
+      "height": 0.3623283191628515,
+      "color": "#5E4136",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "grey stone countertop",
+      "category": "Fixture",
+      "x": 0.12451171875,
+      "y": 0.5068672334859385,
+      "width": 0.43115234375,
+      "height": 0.08567691301504252,
+      "color": "#B4AEAB",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "black fridge",
+      "category": "Fixture",
+      "x": 0.62353515625,
+      "y": 0.4048397645519948,
+      "width": 0.11328125,
+      "height": 0.2969260954872466,
+      "color": "#3F3D3D",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "built-in ovens",
+      "category": "Fixture",
+      "x": 0.5537109375,
+      "y": 0.41661216481360364,
+      "width": 0.072265625,
+      "height": 0.15827338129496402,
+      "color": "#1A1715",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "large right window",
+      "category": "Opening",
+      "x": 0.7763671875,
+      "y": 0.17789404839764553,
+      "width": 0.13720703125,
+      "height": 0.5990843688685416,
+      "color": "#E7E5DD",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.7333984375,
+      "y": 0.028122956180510136,
+      "width": 0.2666015625,
+      "height": 0.8508829300196207,
+      "color": "#B7A9A0",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0,
+      "y": 0.275997383911053,
+      "width": 0.09326171875,
+      "height": 0.40614780902550685,
+      "color": "#EAE7E6",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0.0234375,
+      "y": 0.33093525179856115,
+      "width": 0.0625,
+      "height": 0.3355134074558535,
+      "color": "#E9E1D5",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "left black pendant lamp",
+      "category": "Lighting",
+      "x": 0.42626953125,
+      "y": 0.08175277959450622,
+      "width": 0.0712890625,
+      "height": 0.2923479398299542,
+      "color": "#403B37",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "right black pendant lamp",
+      "category": "Lighting",
+      "x": 0.560546875,
+      "y": 0.1340745585349902,
+      "width": 0.06298828125,
+      "height": 0.25506867233485936,
+      "color": "#4F4945",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "left bar stool",
+      "category": "Furniture",
+      "x": 0.41796875,
+      "y": 0.6723348593852191,
+      "width": 0.1337890625,
+      "height": 0.2674950948332243,
+      "color": "#272526",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "middle bar stool",
+      "category": "Furniture",
+      "x": 0.53515625,
+      "y": 0.6540222367560498,
+      "width": 0.11474609375,
+      "height": 0.2328319162851537,
+      "color": "#353131",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right bar stool",
+      "category": "Furniture",
+      "x": 0.6298828125,
+      "y": 0.6389797253106606,
+      "width": 0.10009765625,
+      "height": 0.20732504905166776,
+      "color": "#3D352A",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.4185742315238718,
+      "width": 0.09814453125,
+      "height": 0.16677567037279267,
+      "color": "#8B9561",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "eucalyptus vase",
+      "category": "Decor",
+      "x": 0.56689453125,
+      "y": 0.46108567691301505,
+      "width": 0.09375,
+      "height": 0.1406147809025507,
+      "color": "#787762",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "beige hand towel",
+      "category": "Textile",
+      "x": 0.19482421875,
+      "y": 0.5637671680837149,
+      "width": 0.0615234375,
+      "height": 0.08109875735775017,
+      "color": "#AB998C",
+      "hand": false
+    }
+  ]
+}

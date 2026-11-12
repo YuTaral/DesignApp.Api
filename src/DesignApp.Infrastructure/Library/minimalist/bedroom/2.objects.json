@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6795291039895357,
+      "width": 1,
+      "height": 0.32047089601046436,
+      "color": "#C3AD9D",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.18505859375,
+      "y": 0.2066710268149117,
+      "width": 0.4833984375,
+      "height": 0.4950948332243296,
+      "color": "#CAC0B7",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.02877697841726619,
+      "width": 0.1875,
+      "height": 0.8129496402877698,
+      "color": "#C5B9AE",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 0.95361328125,
+      "height": 0.21648136036625246,
+      "color": "#CEC4BB",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "oak wardrobe",
+      "category": "Furniture",
+      "x": 0.0595703125,
+      "y": 0.2648790058862001,
+      "width": 0.1884765625,
+      "height": 0.5336821451929366,
+      "color": "#8D6B4E",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "oak bed frame",
+      "category": "Furniture",
+      "x": 0.33544921875,
+      "y": 0.5474166121648136,
+      "width": 0.34375,
+      "height": 0.2916939175931982,
+      "color": "#76553B",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white linen bedding",
+      "category": "Textile",
+      "x": 0.3095703125,
+      "y": 0.6121648136036625,
+      "width": 0.3916015625,
+      "height": 0.2079790712884238,
+      "color": "#CCC3C1",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "knit throw blanket",
+      "category": "Textile",
+      "x": 0.32373046875,
+      "y": 0.6357096141268803,
+      "width": 0.35791015625,
+      "height": 0.08371484630477437,
+      "color": "#B8AAA0",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "bed pillows",
+      "category": "Textile",
+      "x": 0.4013671875,
+      "y": 0.5245258338783518,
+      "width": 0.2001953125,
+      "height": 0.09417920209287116,
+      "color": "#BBAEA7",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "left nightstand",
+      "category": "Furniture",
+      "x": 0.3076171875,
+      "y": 0.6200130804447351,
+      "width": 0.078125,
+      "height": 0.10202746893394375,
+      "color": "#61422B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "right nightstand",
+      "category": "Furniture",
+      "x": 0.6220703125,
+      "y": 0.5912361020274689,
+      "width": 0.09375,
+      "height": 0.1301504251144539,
+      "color": "#DEC0A5",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "framed art print",
+      "category": "Decor",
+      "x": 0.45947265625,
+      "y": 0.33747547416612167,
+      "width": 0.0849609375,
+      "height": 0.15827338129496402,
+      "color": "#D0CAC6",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "grey wool rug",
+      "category": "Textile",
+      "x": 0.06396484375,
+      "y": 0.7298888162197514,
+      "width": 0.42822265625,
+      "height": 0.20078482668410727,
+      "color": "#8B7A6E",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.67724609375,
+      "y": 0.37148463047743624,
+      "width": 0.1240234375,
+      "height": 0.2805755395683453,
+      "color": "#868F60",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "white plant pot",
+      "category": "Decor",
+      "x": 0.70654296875,
+      "y": 0.6435578809679529,
+      "width": 0.0615234375,
+      "height": 0.07455853499018966,
+      "color": "#E5DEDB",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "taupe armchair",
+      "category": "Furniture",
+      "x": 0.76220703125,
+      "y": 0.6017004578155657,
+      "width": 0.23779296875,
+      "height": 0.3603662524525834,
+      "color": "#765C4F",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "sheer curtains",
+      "category": "Textile",
+      "x": 0.62109375,
+      "y": 0,
+      "width": 0.37890625,
+      "height": 0.7063440156965337,
+      "color": "#DDD8D3",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "corner glass window",
+      "category": "Opening",
+      "x": 0.806640625,
+      "y": 0.12426422498364945,
+      "width": 0.125,
+      "height": 0.5559189012426422,
+      "color": "#E9E5E2",
+      "hand": false
+    }
+  ]
+}

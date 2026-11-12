@@ -51,6 +51,11 @@ public sealed class Room
     /// object removed from the photo adds one. Versions not listed (rooms from before removal) use photo 0.
     /// </summary>
     public IReadOnlyList<int> PhotoVersions => _photoVersions;
+    /// <summary>
+    /// The built-in library layout this room was copied from (such as <c>minimalist/kitchen/2</c>), or <c>null</c> for
+    /// an uploaded photo.
+    /// </summary>
+    public string? LibraryRoom { get; private set; }
     /// <summary>The photo version that goes with the current label map version.</summary>
     public int PhotoVersion => PhotoVersionOf(LabelMapRevision);
     /// <summary>The newest photo version stored.</summary>
@@ -90,6 +95,32 @@ public sealed class Room
             Scope = Enum.IsDefined(scope) ? scope : throw new DomainException(Constants.Messages.UnknownScope(scope)),
             AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException(Constants.Messages.UnknownAiMode(aiMode)),
         };
+    }
+
+    /// <summary>
+    /// Creates a room from a built-in library room: the photo was analyzed ahead of time, so the room starts Ready
+    /// with the library's objects and label map, and no AI runs for it.
+    /// </summary>
+    /// <param name="id">The new room's id.</param>
+    /// <param name="ownerId">The user who opened the library room.</param>
+    /// <param name="photoKey">Storage key of the copied photo.</param>
+    /// <param name="width">Photo width in pixels.</param>
+    /// <param name="height">Photo height in pixels.</param>
+    /// <param name="now">The copy time.</param>
+    /// <param name="objects">The library room's objects, with the rules of <see cref="MarkReady"/>.</param>
+    /// <param name="labelMapKey">Storage key of the copied label map.</param>
+    /// <param name="libraryRoom">Which library layout it is, such as <c>minimalist/kitchen/2</c>.</param>
+    /// <param name="aiMode">The AI later steps use (removing an object), chosen like an upload's.</param>
+    /// <exception cref="DomainException">The id, size or objects are invalid.</exception>
+    public static Room FromLibrary(Guid id, string ownerId, string photoKey, int width, int height, DateTimeOffset now,
+        IEnumerable<DetectedObject> objects, string labelMapKey, string libraryRoom, AiMode aiMode)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(libraryRoom);
+        var room = Upload(id, ownerId, photoKey, width, height, now, AnalysisScope.WholeRoom, aiMode);
+        room.Status = RoomStatus.Segmenting; // the analysis was done ahead of time
+        room.MarkReady(objects, labelMapKey);
+        room.LibraryRoom = libraryRoom;
+        return room;
     }
 
     /// <summary>

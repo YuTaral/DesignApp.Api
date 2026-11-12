@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.29638671875,
+      "height": 0.882275997383911,
+      "color": "#D5CDC5",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.263671875,
+      "y": 0.21648136036625246,
+      "width": 0.34814453125,
+      "height": 0.44800523217789406,
+      "color": "#D8D0C9",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.08349609375,
+      "y": 0,
+      "width": 0.8349609375,
+      "height": 0.2733812949640288,
+      "color": "#D2C9BF",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6494440810987574,
+      "width": 1,
+      "height": 0.35055591890124266,
+      "color": "#C2A997",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "jute rug",
+      "category": "Textile",
+      "x": 0.1650390625,
+      "y": 0.6926095487246566,
+      "width": 0.67822265625,
+      "height": 0.2446043165467626,
+      "color": "#937864",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "oak dining table",
+      "category": "Furniture",
+      "x": 0.3720703125,
+      "y": 0.5683453237410072,
+      "width": 0.2607421875,
+      "height": 0.30150425114453894,
+      "color": "#957253",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "oak sideboard",
+      "category": "Furniture",
+      "x": 0.06591796875,
+      "y": 0.5833878351863964,
+      "width": 0.23046875,
+      "height": 0.24787442773054283,
+      "color": "#89684D",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "left front chair",
+      "category": "Furniture",
+      "x": 0.3125,
+      "y": 0.5846958796599084,
+      "width": 0.13037109375,
+      "height": 0.2544146500981033,
+      "color": "#785F4C",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left back chair",
+      "category": "Furniture",
+      "x": 0.35205078125,
+      "y": 0.5676913015042512,
+      "width": 0.09765625,
+      "height": 0.18312622629169392,
+      "color": "#7D6553",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "far chair",
+      "category": "Furniture",
+      "x": 0.45947265625,
+      "y": 0.5546108567691301,
+      "width": 0.08935546875,
+      "height": 0.17658600392413343,
+      "color": "#AF917A",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "right back chair",
+      "category": "Furniture",
+      "x": 0.5458984375,
+      "y": 0.5676913015042512,
+      "width": 0.1171875,
+      "height": 0.2027468933943754,
+      "color": "#A48B7D",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right front chair",
+      "category": "Furniture",
+      "x": 0.57568359375,
+      "y": 0.5689993459777632,
+      "width": 0.1279296875,
+      "height": 0.26880313930673644,
+      "color": "#A18777",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "black pendant lamp",
+      "category": "Lighting",
+      "x": 0.4580078125,
+      "y": 0.06671026814911707,
+      "width": 0.08935546875,
+      "height": 0.3224329627207325,
+      "color": "#48413C",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "framed artwork",
+      "category": "Decor",
+      "x": 0.14306640625,
+      "y": 0.2517985611510791,
+      "width": 0.0634765625,
+      "height": 0.24264224983649443,
+      "color": "#D1CBC5",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "right sheer curtain",
+      "category": "Textile",
+      "x": 0.849609375,
+      "y": 0,
+      "width": 0.150390625,
+      "height": 0.8521909744931327,
+      "color": "#B3A59C",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "middle sheer curtain",
+      "category": "Textile",
+      "x": 0.71630859375,
+      "y": 0.15631131458469588,
+      "width": 0.078125,
+      "height": 0.5310660562459124,
+      "color": "#F0EEEF",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "back sheer curtain",
+      "category": "Textile",
+      "x": 0.6064453125,
+      "y": 0.2132112491824722,
+      "width": 0.0810546875,
+      "height": 0.4277305428384565,
+      "color": "#E3DEDA",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "large corner window",
+      "category": "Opening",
+      "x": 0.77880859375,
+      "y": 0.09156311314584696,
+      "width": 0.10498046875,
+      "height": 0.6592544146500982,
+      "color": "#E8E5DF",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.6494140625,
+      "y": 0.30085022890778285,
+      "width": 0.11279296875,
+      "height": 0.38260300850228907,
+      "color": "#C6C1B4",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "ceramic vase",
+      "category": "Decor",
+      "x": 0.12451171875,
+      "y": 0.5565729234793984,
+      "width": 0.04638671875,
+      "height": 0.07128842380640942,
+      "color": "#978A7F",
+      "hand": false
+    }
+  ]
+}

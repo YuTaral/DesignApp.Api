@@ -122,6 +122,19 @@ public static class Constants
         }
     }
 
+    /// <summary>The built-in library of ready-made designs.</summary>
+    public static class Library
+    {
+        /// <summary>How a copied room names the library layout it came from, such as <c>minimalist/kitchen/2</c>.</summary>
+        /// <param name="designId">The library design's id.</param>
+        /// <param name="roomId">The library room's id.</param>
+        /// <param name="layoutId">The layout's id.</param>
+        public static string RoomName(string designId, string roomId, string layoutId)
+        {
+            return $"{designId}/{roomId}/{layoutId}";
+        }
+    }
+
     /// <summary>Owner ids of visitors who haven't signed in.</summary>
     public static class Guests
     {

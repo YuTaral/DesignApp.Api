@@ -77,6 +77,9 @@ api.MapGet(DesignApp.Api.Constants.Routes.Status, (IHostEnvironment env) => new 
 api.MapAccountEndpoints();
 api.MapDesignEndpoints();
 api.MapRoomEndpoints();
+api.MapLibraryEndpoints();
+if (app.Environment.IsDevelopment())
+    api.MapDevEndpoints();
 app.MapHub<RoomHub>(DesignApp.Api.Constants.Hub.Path);
 
 app.Run();

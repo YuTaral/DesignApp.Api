@@ -1,0 +1,171 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.026814911706998037,
+      "width": 0.27783203125,
+      "height": 0.9123610202746893,
+      "color": "#D4CCC5",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.2529296875,
+      "y": 0.21648136036625246,
+      "width": 0.49658203125,
+      "height": 0.4630477436232832,
+      "color": "#CFC5BC",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 0.91845703125,
+      "height": 0.22498364944408109,
+      "color": "#D0C6BD",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6455199476782211,
+      "width": 1,
+      "height": 0.3544800523217789,
+      "color": "#D3C3B9",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "sheer white curtain",
+      "category": "Textile",
+      "x": 0.7373046875,
+      "y": 0,
+      "width": 0.2626953125,
+      "height": 0.8574231523871811,
+      "color": "#BEB2A9",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "large window",
+      "category": "Opening",
+      "x": 0.77734375,
+      "y": 0.16285153695225638,
+      "width": 0.09716796875,
+      "height": 0.5703073904512753,
+      "color": "#E9E6E3",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "oak bookshelf",
+      "category": "Furniture",
+      "x": 0.42822265625,
+      "y": 0.3381294964028777,
+      "width": 0.166015625,
+      "height": 0.3459777632439503,
+      "color": "#654730",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "oak desk",
+      "category": "Furniture",
+      "x": 0.08154296875,
+      "y": 0.5742315238718116,
+      "width": 0.27783203125,
+      "height": 0.29888816219751474,
+      "color": "#977960",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "wooden swivel chair",
+      "category": "Furniture",
+      "x": 0.296875,
+      "y": 0.5761935905820798,
+      "width": 0.134765625,
+      "height": 0.24395029431000653,
+      "color": "#A58367",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "woven beige rug",
+      "category": "Textile",
+      "x": 0.08935546875,
+      "y": 0.7024198822759974,
+      "width": 0.4365234375,
+      "height": 0.2302158273381295,
+      "color": "#B2A6A0",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "cork board",
+      "category": "Decor",
+      "x": 0.10302734375,
+      "y": 0.2668410725964683,
+      "width": 0.10791015625,
+      "height": 0.21124918247220406,
+      "color": "#B58866",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "computer monitor",
+      "category": "Other",
+      "x": 0.1845703125,
+      "y": 0.4551994767822106,
+      "width": 0.064453125,
+      "height": 0.1458469587965991,
+      "color": "#1D1513",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "potted rubber plant",
+      "category": "Decor",
+      "x": 0.6455078125,
+      "y": 0.5068672334859385,
+      "width": 0.10009765625,
+      "height": 0.18705035971223022,
+      "color": "#BAB0A1",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "left grey storage box",
+      "category": "Decor",
+      "x": 0.4482421875,
+      "y": 0.6298234139960759,
+      "width": 0.04736328125,
+      "height": 0.04578155657292348,
+      "color": "#938A8B",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "right grey storage box",
+      "category": "Decor",
+      "x": 0.52587890625,
+      "y": 0.6291693917593199,
+      "width": 0.04833984375,
+      "height": 0.04643557880967953,
+      "color": "#A69FA4",
+      "hand": false
+    }
+  ]
+}

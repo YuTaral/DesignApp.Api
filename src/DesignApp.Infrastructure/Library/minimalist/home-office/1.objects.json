@@ -1,0 +1,182 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6677567037279267,
+      "width": 1,
+      "height": 0.3322432962720733,
+      "color": "#BCA592",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.25927734375,
+      "y": 0.2092871157619359,
+      "width": 0.48681640625,
+      "height": 0.49117069980379335,
+      "color": "#CFC5B9",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted right wall",
+      "category": "Wall",
+      "x": 0.70947265625,
+      "y": 0,
+      "width": 0.29052734375,
+      "height": 0.9156311314584696,
+      "color": "#D1CAC0",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.0888671875,
+      "y": 0,
+      "width": 0.84130859375,
+      "height": 0.4754741661216481,
+      "color": "#D1C8BE",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "large corner window",
+      "category": "Opening",
+      "x": 0.1044921875,
+      "y": 0.15827338129496402,
+      "width": 0.12255859375,
+      "height": 0.6187050359712231,
+      "color": "#EBEBE1",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.26806640625,
+      "y": 0.27665140614780903,
+      "width": 0.07177734375,
+      "height": 0.4185742315238718,
+      "color": "#EEECE4",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "left sheer curtain",
+      "category": "Textile",
+      "x": 0,
+      "y": 0,
+      "width": 0.130859375,
+      "height": 0.9032047089601046,
+      "color": "#AD9F93",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "corner sheer curtain",
+      "category": "Textile",
+      "x": 0.26806640625,
+      "y": 0.21255722694571616,
+      "width": 0.12939453125,
+      "height": 0.4918247220405494,
+      "color": "#E9E7E6",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "oak desk",
+      "category": "Furniture",
+      "x": 0.11279296875,
+      "y": 0.5833878351863964,
+      "width": 0.26708984375,
+      "height": 0.29627207325049054,
+      "color": "#8C6E57",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "desktop monitor",
+      "category": "Other",
+      "x": 0.21875,
+      "y": 0.4355788096795291,
+      "width": 0.0654296875,
+      "height": 0.17527795945062133,
+      "color": "#AAA098",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "grey swivel chair",
+      "category": "Furniture",
+      "x": 0.34716796875,
+      "y": 0.5748855461085677,
+      "width": 0.14404296875,
+      "height": 0.249836494440811,
+      "color": "#715B4E",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "jute rug",
+      "category": "Textile",
+      "x": 0.1337890625,
+      "y": 0.7194244604316546,
+      "width": 0.43359375,
+      "height": 0.2132112491824722,
+      "color": "#A7907E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "oak bookshelf",
+      "category": "Furniture",
+      "x": 0.5263671875,
+      "y": 0.34793982995421846,
+      "width": 0.1826171875,
+      "height": 0.3655984303466318,
+      "color": "#5F442F",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "framed pinboard",
+      "category": "Decor",
+      "x": 0.41064453125,
+      "y": 0.3603662524525834,
+      "width": 0.09619140625,
+      "height": 0.18247220405493786,
+      "color": "#D2C7BE",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.7919921875,
+      "y": 0.30935251798561153,
+      "width": 0.2080078125,
+      "height": 0.4892086330935252,
+      "color": "#2F3314",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "white plant pot",
+      "category": "Decor",
+      "x": 0.8603515625,
+      "y": 0.7671680837148463,
+      "width": 0.10986328125,
+      "height": 0.15631131458469588,
+      "color": "#A59B92",
+      "hand": false
+    }
+  ]
+}

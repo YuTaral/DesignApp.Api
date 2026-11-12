@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.013080444735120994,
+      "width": 0.27783203125,
+      "height": 0.86919555264879,
+      "color": "#D6CEC7",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.25146484375,
+      "y": 0.18835840418574232,
+      "width": 0.35888671875,
+      "height": 0.52648790058862,
+      "color": "#DAD2CB",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 0.91796875,
+      "height": 0.2616088947024199,
+      "color": "#D3C9C0",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6605624591236102,
+      "width": 1,
+      "height": 0.3394375408763898,
+      "color": "#C0A793",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.1640625,
+      "y": 0.6834532374100719,
+      "width": 0.68017578125,
+      "height": 0.25245258338783516,
+      "color": "#A2938B",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "oak dining table",
+      "category": "Furniture",
+      "x": 0.3642578125,
+      "y": 0.5578809679529104,
+      "width": 0.2685546875,
+      "height": 0.29300196206671025,
+      "color": "#BDA18A",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "front dining chair",
+      "category": "Furniture",
+      "x": 0.37060546875,
+      "y": 0.6088947024198823,
+      "width": 0.18896484375,
+      "height": 0.31000654022236757,
+      "color": "#836B59",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "left near dining chair",
+      "category": "Furniture",
+      "x": 0.30712890625,
+      "y": 0.5748855461085677,
+      "width": 0.123046875,
+      "height": 0.2432962720732505,
+      "color": "#755B49",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "right near dining chair",
+      "category": "Furniture",
+      "x": 0.5830078125,
+      "y": 0.5598430346631785,
+      "width": 0.11767578125,
+      "height": 0.2884238064094179,
+      "color": "#9C7D68",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "right back dining chair",
+      "category": "Furniture",
+      "x": 0.56982421875,
+      "y": 0.5676913015042512,
+      "width": 0.08251953125,
+      "height": 0.21255722694571616,
+      "color": "#9C7F6C",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "oak sideboard",
+      "category": "Furniture",
+      "x": 0.072265625,
+      "y": 0.5729234793982996,
+      "width": 0.2275390625,
+      "height": 0.2537606278613473,
+      "color": "#8B694E",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "textured ceramic vase",
+      "category": "Decor",
+      "x": 0.12939453125,
+      "y": 0.538914323086985,
+      "width": 0.04296875,
+      "height": 0.07194244604316546,
+      "color": "#A29285",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "framed abstract print",
+      "category": "Decor",
+      "x": 0.140625,
+      "y": 0.2511445389143231,
+      "width": 0.06494140625,
+      "height": 0.24395029431000653,
+      "color": "#D2CBC6",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "black pendant lamp",
+      "category": "Lighting",
+      "x": 0.4638671875,
+      "y": 0.07325049051667756,
+      "width": 0.076171875,
+      "height": 0.3224329627207325,
+      "color": "#484340",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.65478515625,
+      "y": 0.31131458469587964,
+      "width": 0.11181640625,
+      "height": 0.31131458469587964,
+      "color": "#BAB9A6",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "white plant pot",
+      "category": "Decor",
+      "x": 0.68115234375,
+      "y": 0.5892740353172008,
+      "width": 0.05712890625,
+      "height": 0.09614126880313931,
+      "color": "#E2DAD7",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "sheer right curtain",
+      "category": "Textile",
+      "x": 0.83642578125,
+      "y": 0,
+      "width": 0.16357421875,
+      "height": 0.8521909744931327,
+      "color": "#B6A9A0",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "sheer middle curtain",
+      "category": "Textile",
+      "x": 0.71630859375,
+      "y": 0.1353826030085023,
+      "width": 0.0908203125,
+      "height": 0.5546108567691301,
+      "color": "#EFEDED",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "sheer left curtain",
+      "category": "Textile",
+      "x": 0.60546875,
+      "y": 0.21255722694571616,
+      "width": 0.0810546875,
+      "height": 0.4048397645519948,
+      "color": "#E4DFDC",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "corner glass window",
+      "category": "Opening",
+      "x": 0.779296875,
+      "y": 0.19555264879005888,
+      "width": 0.09375,
+      "height": 0.5467625899280576,
+      "color": "#EAE7E3",
+      "hand": false
+    }
+  ]
+}

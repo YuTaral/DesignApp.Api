@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "white painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.05493786788750817,
+      "width": 0.28125,
+      "height": 0.7789404839764552,
+      "color": "#D1C9C5",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "light oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.5912361020274689,
+      "width": 1,
+      "height": 0.40876389797253104,
+      "color": "#CFBDB2",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 0.90869140625,
+      "height": 0.2014388489208633,
+      "color": "#CBBFB6",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white painted back wall",
+      "category": "Wall",
+      "x": 0.26416015625,
+      "y": 0.19816873773708307,
+      "width": 0.3232421875,
+      "height": 0.5277959450621321,
+      "color": "#B9AB9E",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "grey tiled back wall",
+      "category": "Wall",
+      "x": 0.5712890625,
+      "y": 0.1988227599738391,
+      "width": 0.1826171875,
+      "height": 0.5376062786134729,
+      "color": "#9C9288",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "grey tiled right wall",
+      "category": "Wall",
+      "x": 0.7490234375,
+      "y": 0,
+      "width": 0.2509765625,
+      "height": 0.9568345323741008,
+      "color": "#ACA095",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "freestanding white bathtub",
+      "category": "Fixture",
+      "x": 0.677734375,
+      "y": 0.6553302812295618,
+      "width": 0.298828125,
+      "height": 0.31000654022236757,
+      "color": "#A79486",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "black wall-hung toilet",
+      "category": "Fixture",
+      "x": 0.033203125,
+      "y": 0.7298888162197514,
+      "width": 0.1962890625,
+      "height": 0.20470896010464357,
+      "color": "#110D0B",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "oak floating vanity",
+      "category": "Furniture",
+      "x": 0.1630859375,
+      "y": 0.5696533682145193,
+      "width": 0.1845703125,
+      "height": 0.20078482668410727,
+      "color": "#79593F",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "vessel sink",
+      "category": "Fixture",
+      "x": 0.24267578125,
+      "y": 0.5415304120340092,
+      "width": 0.0810546875,
+      "height": 0.04970568999345978,
+      "color": "#957E6B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "round mirror",
+      "category": "Decor",
+      "x": 0.1728515625,
+      "y": 0.26095487246566385,
+      "width": 0.0888671875,
+      "height": 0.2563767168083715,
+      "color": "#AFA695",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "window",
+      "category": "Opening",
+      "x": 0.46728515625,
+      "y": 0.25768476128188356,
+      "width": 0.1064453125,
+      "height": 0.4565075212557227,
+      "color": "#E5E1D8",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "sheer white curtain",
+      "category": "Textile",
+      "x": 0.39013671875,
+      "y": 0.1935905820797907,
+      "width": 0.091796875,
+      "height": 0.5356442119032047,
+      "color": "#E2DDDB",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "potted plant",
+      "category": "Decor",
+      "x": 0.41015625,
+      "y": 0.6213211249182472,
+      "width": 0.08447265625,
+      "height": 0.1249182472204055,
+      "color": "#A39A81",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "glass shower screen",
+      "category": "Fixture",
+      "x": 0.5986328125,
+      "y": 0.23479398299542184,
+      "width": 0.22265625,
+      "height": 0.5604970568999346,
+      "color": "#ABA49B",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "beige waffle towel",
+      "category": "Textile",
+      "x": 0.84765625,
+      "y": 0.4807063440156965,
+      "width": 0.06494140625,
+      "height": 0.2053629823413996,
+      "color": "#9F8F86",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "grey towel",
+      "category": "Textile",
+      "x": 0.89794921875,
+      "y": 0.48005232177894047,
+      "width": 0.0732421875,
+      "height": 0.2315238718116416,
+      "color": "#928887",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "black flush plate",
+      "category": "Fixture",
+      "x": 0.04736328125,
+      "y": 0.5245258338783518,
+      "width": 0.04150390625,
+      "height": 0.05755395683453238,
+      "color": "#535155",
+      "hand": false
+    }
+  ]
+}

@@ -72,6 +72,34 @@ public static class Constants
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
 
+        /// <summary>The built-in library of ready-made designs.</summary>
+        public const string Library = "/library";
+
+        /// <summary>The photo of a library room's layout.</summary>
+        public const string LibraryLayoutPhoto = "/{designId}/{roomId}/{layoutId}/photo";
+
+        /// <summary>Copying one layout of a library room into a room of the visitor.</summary>
+        public const string LibraryLayoutCopy = "/{designId}/{roomId}/{layoutId}/copy";
+
+        /// <summary>Copying a whole library design into a design of the account.</summary>
+        public const string LibraryDesignCopy = "/{designId}/copy";
+
+        /// <summary>Development-only tools.</summary>
+        public const string Dev = "/dev";
+
+        /// <summary>Packing a room as library files (development only).</summary>
+        public const string LibraryExport = "/library-export/{id:guid}";
+
+        /// <summary>The URL of the photo of a library room's layout.</summary>
+        /// <param name="designId">The library design's id.</param>
+        /// <param name="roomId">The room's id inside it.</param>
+        /// <param name="layoutId">The layout's id inside the room.</param>
+        /// <returns>The path of the photo.</returns>
+        public static string LibraryLayoutPhotoUrl(string designId, string roomId, string layoutId)
+        {
+            return $"{Api}{Library}/{designId}/{roomId}/{layoutId}/photo";
+        }
+
         /// <summary>The URL of a design.</summary>
         /// <param name="id">The design's id.</param>
         /// <returns>The path of the design.</returns>
@@ -234,6 +262,12 @@ public static class Constants
         /// <summary>The cache header of files that never change.</summary>
         public const string ImmutableCache = "private, max-age=31536000, immutable";
 
+        /// <summary>The cache header of library photos: the same for everyone, and changed only by a new release.</summary>
+        public const string LibraryCache = "public, max-age=86400";
+
+        /// <summary>The content type of a library export.</summary>
+        public const string Zip = "application/zip";
+
         /// <summary>The Origin header.</summary>
         public const string Origin = "Origin";
 
@@ -261,6 +295,12 @@ public static class Constants
 
         /// <summary>The room endpoints' tag.</summary>
         public const string RoomsTag = "Rooms";
+
+        /// <summary>The library endpoints' tag.</summary>
+        public const string LibraryTag = "Library";
+
+        /// <summary>The development-only endpoints' tag.</summary>
+        public const string DevTag = "Development";
     }
 
     /// <summary>Titles of problem responses.</summary>
@@ -283,6 +323,9 @@ public static class Constants
 
         /// <summary>An unknown scope was chosen.</summary>
         public const string InvalidScope = "Invalid scope";
+
+        /// <summary>A library export that can't be named.</summary>
+        public const string InvalidExport = "Invalid export";
 
         /// <summary>The photo is over the size limit.</summary>
         public const string PhotoTooLarge = "Photo too large";
@@ -340,6 +383,9 @@ public static class Constants
 
         /// <summary>The photo is over the size limit.</summary>
         public static readonly string PhotoTooLarge = $"Photos can be up to {Application.Constants.Photos.MaxUploadMegabytes} MB.";
+
+        /// <summary>A library export without a usable room id to name its files.</summary>
+        public const string ExportName = "Give the layout's id as `name`: lowercase letters, digits and dashes, such as 2.";
 
         /// <summary>An unknown AI was chosen.</summary>
         /// <param name="ai">What was sent.</param>
