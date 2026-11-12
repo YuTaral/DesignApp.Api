@@ -23,13 +23,20 @@ internal static class LabelMapRefiner
     /// Per label, the area it may take in the last pass (<c>null</c> for anywhere); see
     /// <see cref="FillRemainingGaps"/>. Omitted, every label may reach anywhere.
     /// </param>
+    /// <param name="fillGaps">
+    /// Whether the last pass gives the remaining gaps away. Only when walls, floors or ceilings were outlined: then a
+    /// gap is a sliver between objects. Without them (an "objects only" analysis) the gaps are the room itself, and
+    /// filling them would hand the wall behind a lamp to the lamp and the floor inside a sofa's box to the sofa.
+    /// </param>
     public static void Refine(
-        byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, PixelRect?[]? reach = null)
+        byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, Func<byte, bool> isSurface, PixelRect?[]? reach = null,
+        bool fillGaps = true)
     {
         RemoveFragments(labels, width, height);
         FillEnclosedHoles(labels, width, height);
         GrowIntoGaps(labels, width, height, rgba, isSurface);
-        FillRemainingGaps(labels, width, height, rgba, reach);
+        if (fillGaps)
+            FillRemainingGaps(labels, width, height, rgba, reach);
     }
 
     /// <summary>Clears every piece of an object that is small and isn't the object's largest piece.</summary>

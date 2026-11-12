@@ -64,7 +64,9 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var pixels = photo.GetPixelSpan();
         var surfaces = objects.Select(o => o.Item.Category.IsSurface()).ToArray();
         var reach = Reach(objects, width, height);
-        LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1], reach);
+        // Without walls, floors or ceilings the background stays unassigned instead of going to the objects.
+        LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1], reach,
+            fillGaps: surfaces.Any(s => s));
 
         var stats = Measure(labels, width, height, objects.Count, pixels);
 

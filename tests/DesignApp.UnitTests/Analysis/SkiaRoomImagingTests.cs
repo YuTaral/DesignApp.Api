@@ -121,6 +121,24 @@ public class SkiaRoomImagingTests
     }
 
     [Fact]
+    public void Without_walls_or_floors_the_background_stays_unassigned()
+    {
+        // An "objects only" analysis of a plain gray photo: a thin lamp stand and a sofa, nothing else outlined.
+        // The gray around them is the room, not part of either, even where it is the same color.
+        var map = _imaging.BuildLabelMap(Image(200, 100),
+            [new(Item("floor lamp", ObjectCategory.Lighting), Rect(200, 100, 50, 10, 4, 80)), new(Item("sofa", ObjectCategory.Furniture), Rect(200, 100, 120, 60, 60, 30))]);
+
+        var labels = DecodeLabels(map.Png);
+        Assert.Equal(1, labels[50 * 200 + 51]);   // the stand
+        Assert.Equal(2, labels[75 * 200 + 150]);  // the sofa
+        Assert.Equal(0, labels[50 * 200 + 20]);   // the wall beside the lamp: nobody's
+        Assert.Equal(0, labels[30 * 200 + 150]);  // the wall above the sofa: nobody's
+        // At most the usual few pixels of edge growth around the 4 x 80 stand (nothing stops it on flat gray).
+        var growth = DesignApp.Infrastructure.Constants.Refiner.MaxObjectGrowth;
+        Assert.True(labels.Count(l => l == 1) <= (4 + 2 * growth) * (80 + 2 * growth), "the lamp took more than its edges");
+    }
+
+    [Fact]
     public void Holes_inside_an_object_are_filled()
     {
         // A mirror whose mask has a hole where it reflects something of a very different color.

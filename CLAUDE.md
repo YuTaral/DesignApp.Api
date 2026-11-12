@@ -8,7 +8,7 @@ picture; this file is the working agreement.
 
 ```bash
 dotnet build DesignApp.slnx                     # warnings are errors; every public member needs an XML doc
-dotnet test DesignApp.slnx                      # 184 unit + 45 API tests; Docker must run (Testcontainers)
+dotnet test DesignApp.slnx                      # 185 unit + 45 API tests; Docker must run (Testcontainers)
 dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Database/Migrations
 cd tools/docs && npm install && npm run docs    # regenerate both Word files in the parent DesignApp folder
 dotnet run --project tools/AiLab -- record <photo> <folder>   # PAID (ask first): record one real AI run
