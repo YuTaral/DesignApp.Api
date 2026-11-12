@@ -1,3 +1,4 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
@@ -24,7 +25,7 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
     /// <param name="baseRevision">The label map version the user marked on.</param>
     /// <param name="label">The object's name.</param>
     /// <param name="category">The object's type.</param>
-    /// <param name="strokes">The strokes, applied in order, each with its brush radius.</param>
+    /// <param name="strokes">The strokes, applied in order, each with its brush radius and shape.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The room with the new object current, a failure the user can read, or <c>null</c> when the user has no such room.</returns>
     public async Task<Result<Room>?> AddAsync(
@@ -85,7 +86,7 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         if (strokes.SelectMany(s => s.Points).Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y)
             || p.X is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint || p.Y is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint))
             return Constants.Messages.StrokeOutside;
-        return null;
+        return strokes.Select(s => StrokeShapes.Check(s.Shape, s.Points)).FirstOrDefault(error => error is not null);
     }
 
     /// <summary>Reads a stored file into memory.</summary>

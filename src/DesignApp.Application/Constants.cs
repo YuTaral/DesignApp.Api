@@ -159,6 +159,15 @@ public static class Constants
         /// <summary>A stroke far outside the photo.</summary>
         public const string StrokeOutside = "The stroke has points far outside the photo.";
 
+        /// <summary>A box stroke without exactly two corners.</summary>
+        public const string BoxPoints = "A box needs its two corners.";
+
+        /// <summary>A lasso stroke with too few points to enclose anything.</summary>
+        public const string LassoPoints = "A lasso needs at least 3 points.";
+
+        /// <summary>A stroke with a shape that doesn't exist.</summary>
+        public const string UnknownStrokeShape = "Pick the brush, the box or the lasso.";
+
         /// <summary>A new object with too few or too many strokes.</summary>
         public static readonly string MarkStrokes = $"Mark the object with between 1 and {Marks.MaxStrokes} strokes.";
 
@@ -191,5 +200,16 @@ public static class Constants
         Paint,
         /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
         Erase,
+    }
+
+    /// <summary>What a stroke covers: a round brush along its path, or the area its points enclose.</summary>
+    public enum StrokeShape
+    {
+        /// <summary>A round brush stamped along the path (the radius sets its size).</summary>
+        Brush,
+        /// <summary>A rectangle between two opposite corners; the radius is ignored.</summary>
+        Box,
+        /// <summary>The inside of the path, closed from the last point back to the first (even-odd rule); the radius is ignored.</summary>
+        Lasso,
     }
 }

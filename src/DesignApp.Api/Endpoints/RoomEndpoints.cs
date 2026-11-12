@@ -204,7 +204,7 @@ internal static class RoomEndpoints
             : TypedResults.NotFound();
     }
 
-    /// <summary><c>POST /api/rooms/{id}/outline</c>: paints or erases one object's outline with a brush stroke.</summary>
+    /// <summary><c>POST /api/rooms/{id}/outline</c>: paints or erases one object's outline with a brush, box or lasso stroke.</summary>
     /// <param name="id">The room's id.</param>
     /// <param name="request">The stroke.</param>
     /// <param name="fixOutline">The use case.</param>
@@ -214,7 +214,7 @@ internal static class RoomEndpoints
         Guid id, OutlineStrokeRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken)
     {
         var outcome = await fixOutline.FixAsync(
-            id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius, request.Points ?? [], cancellationToken);
+            id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius, request.Points ?? [], request.Shape, cancellationToken);
         return ToResponse(outcome, Constants.Titles.OutlineFixFailed);
     }
 

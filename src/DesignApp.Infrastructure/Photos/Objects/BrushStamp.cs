@@ -3,8 +3,8 @@ using DesignApp.Application.Objects;
 namespace DesignApp.Infrastructure.Photos;
 
 /// <summary>
-/// Where a round brush lands along a path: the pixel walk shared by the outline brush and object marking. It
-/// matches the web app's <c>stampStroke</c> exactly, so the live preview is what gets saved.
+/// Where a round brush lands along a path: the pixel walk shared by the outline brush and object marking (through
+/// <see cref="StrokeCover"/>). It matches the web app's <c>walkBrush</c> exactly, so the live preview is what gets saved.
 /// </summary>
 internal static class BrushStamp
 {

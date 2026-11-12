@@ -122,7 +122,7 @@ public class OutlineFixTests
         var spot = Array.FindIndex(before, l => l != sofa);
         StrokePoint[] dab = [new((spot % image.Width + 0.5) / image.Width, (spot / image.Width + 0.5) / image.Height)];
 
-        var result = await fixer.FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, CancellationToken.None);
+        var result = await fixer.FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, StrokeShape.Brush, CancellationToken.None);
 
         Assert.True(result!.Succeeded, result.Error);
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
@@ -135,9 +135,9 @@ public class OutlineFixTests
 
         Assert.False((await fixer.UseRevisionAsync(room.Id, 2, CancellationToken.None))!.Succeeded);
         Assert.Null(await new FixRoomOutline(_rooms, new FixedUser("someone-else"), _storage, imaging)
-            .FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, CancellationToken.None));
-        Assert.False((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 9999, dab, CancellationToken.None))!.Succeeded);
-        Assert.False((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 2, [], CancellationToken.None))!.Succeeded);
+            .FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, StrokeShape.Brush, CancellationToken.None));
+        Assert.False((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 9999, dab, StrokeShape.Brush, CancellationToken.None))!.Succeeded);
+        Assert.False((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 2, [], StrokeShape.Brush, CancellationToken.None))!.Succeeded);
     }
 
     [Fact]

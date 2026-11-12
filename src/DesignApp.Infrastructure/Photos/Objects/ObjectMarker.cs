@@ -23,7 +23,7 @@ internal static class ObjectMarker
         foreach (var stroke in mark.Strokes)
         {
             var value = stroke.Mode is OutlineBrushMode.Paint;
-            BrushStamp.Walk(width, height, stroke.Radius, stroke.Points, p => mask[p] = value);
+            StrokeCover.Walk(width, height, stroke.Shape, stroke.Radius, stroke.Points, p => mask[p] = value);
         }
 
         var target = (byte)mark.Index;

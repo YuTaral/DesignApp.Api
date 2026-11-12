@@ -133,6 +133,44 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     [Fact]
+    public async Task A_box_fixes_an_outline_and_a_lasso_marks_a_new_object()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var sofa = room.Objects.Single(o => o.GetProperty("label").GetString() == "sofa").GetProperty("index").GetInt32();
+        var next = room.Objects.Max(o => o.GetProperty("index").GetInt32()) + 1;
+
+        // A box over pixels 100..139 x 100..129, then a triangle around pixel (650, 130).
+        using var box = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline", new
+        {
+            baseRevision = 0, objectIndex = sofa, mode = "Paint", radius = 2, shape = "Box",
+            points = new[] { new { x = 100.0 / 1200, y = 100.0 / 800 }, new { x = 140.0 / 1200, y = 130.0 / 800 } },
+        });
+        box.EnsureSuccessStatusCode();
+        var boxed = (await box.Content.ReadFromJsonAsync<RoomDto>())!;
+        var labels = await LabelsAsync(boxed.LabelMapUrl!);
+        Assert.All(new[] { 100 * 1200 + 100, 129 * 1200 + 139, 115 * 1200 + 120 }, p => Assert.Equal(sofa, labels[p]));
+
+        using var lasso = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
+        {
+            baseRevision = 1, label = "plant", category = "Decor",
+            strokes = new[]
+            {
+                new { mode = "Paint", radius = 6, shape = "Lasso", points = new[] { new { x = 600.0 / 1200, y = 100.0 / 800 }, new { x = 700.0 / 1200, y = 100.0 / 800 }, new { x = 650.0 / 1200, y = 200.0 / 800 } } },
+            },
+        });
+        lasso.EnsureSuccessStatusCode();
+        var marked = (await lasso.Content.ReadFromJsonAsync<RoomDto>())!;
+        Assert.Equal(next, (await LabelsAsync(marked.LabelMapUrl!))[130 * 1200 + 650]);
+
+        using var threeCorners = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline", new
+        {
+            baseRevision = 2, objectIndex = sofa, mode = "Paint", radius = 2, shape = "Box",
+            points = new[] { new { x = 0.1, y = 0.1 }, new { x = 0.2, y = 0.2 }, new { x = 0.3, y = 0.1 } },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, threeCorners.StatusCode);
+    }
+
+    [Fact]
     public async Task Removing_an_object_makes_a_new_photo_version_and_undo_switches_back()
     {
         var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");

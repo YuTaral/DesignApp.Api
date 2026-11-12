@@ -8,5 +8,5 @@ namespace DesignApp.Api.Requests;
 /// <param name="BaseRevision">The label map version the editor shows; the mark is applied to it.</param>
 /// <param name="Label">The object's name, such as "floor lamp".</param>
 /// <param name="Category">The object's type.</param>
-/// <param name="Strokes">The strokes, in order, each with its brush radius: Paint marks the covered pixels, Erase unmarks them.</param>
+/// <param name="Strokes">The strokes, in order, each with its brush radius and shape: Paint marks the covered pixels, Erase unmarks them.</param>
 public sealed record NewObjectRequest(int BaseRevision, string? Label, ObjectCategory Category, IReadOnlyList<MarkStroke>? Strokes);

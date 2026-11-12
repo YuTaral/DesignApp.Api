@@ -100,13 +100,13 @@ public class RemoveObjectTests
         var sofa = room.Objects.Single(o => o.Label == "sofa").Index;
         var spot = Array.FindIndex(before, l => l != sofa);
         StrokePoint[] dab = [new((spot % 600 + 0.5) / 600, (spot / 600 + 0.5) / 400)];
-        Assert.True((await fixer.FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, CancellationToken.None))!.Succeeded);
+        Assert.True((await fixer.FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, StrokeShape.Brush, CancellationToken.None))!.Succeeded);
         Assert.Equal((2, 0), (room.LabelMapRevision, room.PhotoVersion));
         Assert.Equal([0, 1, 0], room.PhotoVersions);
 
         // A fix made on the version without the lamp keeps that version's photo.
         Assert.True((await fixer.UseRevisionAsync(room.Id, 1, CancellationToken.None))!.Succeeded);
-        Assert.True((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 2, dab, CancellationToken.None))!.Succeeded);
+        Assert.True((await fixer.FixAsync(room.Id, 1, sofa, OutlineBrushMode.Paint, 2, dab, StrokeShape.Brush, CancellationToken.None))!.Succeeded);
         Assert.Equal((3, 1), (room.LabelMapRevision, room.PhotoVersion));
     }
 

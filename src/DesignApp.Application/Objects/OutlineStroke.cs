@@ -7,5 +7,7 @@ namespace DesignApp.Application.Objects;
 /// <param name="ObjectLabel">Its name, for messages.</param>
 /// <param name="Mode">Paint or erase.</param>
 /// <param name="Radius">The brush radius, in label map pixels.</param>
-/// <param name="Points">The path, at least one point; the brush is stamped along it.</param>
-public sealed record OutlineStroke(int ObjectIndex, string ObjectLabel, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint> Points);
+/// <param name="Points">The path, at least one point; the brush is stamped along it (or the box's corners, or the lasso).</param>
+/// <param name="Shape">What the stroke covers: the brush along the path, a box, or the inside of a lasso.</param>
+public sealed record OutlineStroke(
+    int ObjectIndex, string ObjectLabel, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint> Points, StrokeShape Shape = StrokeShape.Brush);
