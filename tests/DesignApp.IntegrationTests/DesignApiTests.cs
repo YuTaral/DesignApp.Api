@@ -285,6 +285,52 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             await Refused(new { roomId = room.Id, name = "x", sizes = new[] { new { objectIndex = 250, width = 4.0, height = 2.5 } } }));
     }
 
+    [Fact]
+    public async Task A_wall_split_by_color_keeps_its_tones()
+    {
+        using var browser = await SignedUpAsync();
+        var room = await ReadyRoomAsync(browser);
+        var wall = room.Objects[0];
+        var tones = new object[]
+        {
+            new { center = "#9a4b36", share = 0.7, color = "#F7F9EF", strength = 0.9, paint = "ral-classic/9010" },
+            new { center = "#C8C2B6", share = 0.3, strength = 0.8 },
+        };
+
+        using var created = await browser.PostAsJsonAsync("/api/designs", new
+        {
+            roomId = room.Id, name = "Bricks",
+            edits = new[] { new { objectIndex = wall, color = "#F7F9EF", strength = 0.9, paint = "ral-classic/9010", tones } },
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
+
+        var read = (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!;
+        Assert.Equal(
+            [new ToneDto("#9A4B36", 0.7, "#F7F9EF", 0.9, "ral-classic/9010"), new ToneDto("#C8C2B6", 0.3, null, 0.8)],
+            Assert.Single(read.Rooms[0].Edits).Tones);
+
+        using var mismatch = await browser.PostAsJsonAsync("/api/designs", new
+        {
+            roomId = room.Id, name = "x",
+            edits = new[]
+            {
+                new { objectIndex = wall, color = "#000000", strength = 1.0, tones = new object[]
+                {
+                    new { center = "#9A4B36", share = 0.5, color = "#000000", strength = 1.0, paint = "ral-classic/9010" },
+                    new { center = "#C8C2B6", share = 0.5, strength = 1.0 },
+                } },
+            },
+        });
+        Assert.Equal(DesignApp.Application.Constants.Messages.PaintColorMismatch("RAL 9010"), await ProblemAsync(mismatch));
+        using var one = await browser.PostAsJsonAsync("/api/designs", new
+        {
+            roomId = room.Id, name = "x",
+            edits = new[] { new { objectIndex = wall, color = "#000000", strength = 1.0, tones = new[] { new { center = "#9A4B36", share = 1.0, strength = 1.0 } } } },
+        });
+        Assert.Equal(DesignApp.Domain.Constants.Messages.ToneCount, await ProblemAsync(one));
+    }
+
     /// <summary>Backdates a room's upload time in the database, as if it had been uploaded then.</summary>
     /// <param name="roomId">The room.</param>
     /// <param name="uploaded">When it should look uploaded.</param>
@@ -378,7 +424,15 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private sealed record DesignRoomDto(Guid RoomId, string PhotoUrl, List<EditDto> Edits, List<SizeDto> Sizes);
 
     /// <summary>One recolor as a client reads it.</summary>
-    private sealed record EditDto(int ObjectIndex, string Color, double Strength, string? Paint = null);
+    private sealed record EditDto(int ObjectIndex, string Color, double Strength, string? Paint = null, List<ToneDto>? Tones = null);
+
+    /// <summary>One tone of a split object as returned.</summary>
+    /// <param name="Center">Its original color.</param>
+    /// <param name="Share">How much of the object it covers.</param>
+    /// <param name="Color">Its new color, or null.</param>
+    /// <param name="Strength">How strongly it is applied.</param>
+    /// <param name="Paint">Its paint, or null.</param>
+    private sealed record ToneDto(string Center, double Share, string? Color, double Strength, string? Paint = null);
 
     /// <summary>One surface size as a client reads it.</summary>
     private sealed record SizeDto(int ObjectIndex, double Width, double Height);

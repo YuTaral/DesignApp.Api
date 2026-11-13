@@ -22,19 +22,21 @@ internal static class OutlineBrush
     public static Result<int> Apply(byte[] labels, int width, int height, OutlineStroke stroke)
     {
         var target = (byte)stroke.ObjectIndex;
+        // A part only takes its object's pixels, and erasing gives them back to the object.
+        var parent = stroke.ParentIndex is int index ? (byte)index : (byte?)null;
         var before = stroke.Mode is OutlineBrushMode.Erase ? labels.Count(l => l == target) : 0;
         var changed = 0;
         var copy = stroke.Mode is OutlineBrushMode.Erase ? (byte[])labels.Clone() : null;
         StrokeCover.Walk(width, height, stroke.Shape, stroke.Radius, stroke.Points, p =>
         {
-            if (stroke.Mode is OutlineBrushMode.Paint && labels[p] != target)
+            if (stroke.Mode is OutlineBrushMode.Paint && labels[p] != target && (parent is null || labels[p] == parent))
             {
                 labels[p] = target;
                 changed++;
             }
             else if (stroke.Mode is OutlineBrushMode.Erase && labels[p] == target)
             {
-                labels[p] = 0;
+                labels[p] = parent ?? 0;
                 changed++;
             }
         });

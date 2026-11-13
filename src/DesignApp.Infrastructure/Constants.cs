@@ -367,6 +367,32 @@ public static class Constants
             /// <summary>The smallest box side kept, as a fraction of the image.</summary>
             public const double MinBoxSide = 0.001;
 
+            /// <summary>The instructions for listing one object's parts.</summary>
+            public const string PartsSystemPrompt =
+                "You split one object in a room photo into the parts a person could paint or upholster in different colors. " +
+                "For a chair: seat, backrest, legs, armrests; for a sofa: seat cushions, back cushions, arms, base, legs; for a " +
+                "table: top, legs; for a cabinet: doors, drawer fronts, frame, handles; for a lamp: shade, base. Only list parts " +
+                "you can see in the photo, each a real piece of the object (not a shadow, a reflection or something on it), at " +
+                "most six, largest first. Give each part a short name of one to three words, the object's category, a tight box " +
+                "around the visible part, its main color as #RRGGBB, and two or three spots well inside the part. Set isRoom to " +
+                "true. When the object has no separate parts, return no objects.";
+
+            /// <summary>Names the object whose parts Claude lists, and where it is.</summary>
+            /// <param name="label">The object's name.</param>
+            /// <param name="x">Its box's left edge, in pixels.</param>
+            /// <param name="y">Its box's top edge, in pixels.</param>
+            /// <param name="width">Its box's width, in pixels.</param>
+            /// <param name="height">Its box's height, in pixels.</param>
+            /// <param name="instructions">The user's own words on which parts to find, or <c>null</c>.</param>
+            /// <returns>The text.</returns>
+            public static string PartsMessage(string label, int x, int y, int width, int height, string? instructions)
+            {
+                var message = $"List the parts of the {label} inside the box at x {x}, y {y}, {width} wide and {height} high.";
+                return instructions is null
+                    ? message
+                    : $"{message} The person editing the photo asks for this; follow it where the photo allows, within the rules above: \"{instructions}\"";
+            }
+
             /// <summary>Sent with the photo: Claude gives boxes most accurately in the image's own pixels.</summary>
             /// <param name="width">The photo's width in pixels.</param>
             /// <param name="height">The photo's height in pixels.</param>
@@ -676,6 +702,9 @@ public static class Constants
     /// <summary>Pixel work: masks, label maps and encoding.</summary>
     public static class Imaging
     {
+        /// <summary>A part with less than this share of its object's pixels is too small to keep.</summary>
+        public const double MinPartShare = 0.01;
+
         /// <summary>A mask pixel at or above this coverage (0-255) belongs to the object.</summary>
         public const byte CoverageThreshold = 128;
 
@@ -851,6 +880,27 @@ public static class Constants
 
         /// <summary>A hand-marked object whose strokes leave nothing marked.</summary>
         public const string EmptyMark = "Mark at least part of the object first.";
+
+        /// <summary>A part drawn outside the object it is a part of.</summary>
+        /// <param name="parent">The object.</param>
+        public static string PartOutsideParent(string parent)
+        {
+            return $"Draw the part on the {parent}.";
+        }
+
+        /// <summary>Parts the AI found that don't cover the object.</summary>
+        /// <param name="label">The object.</param>
+        public static string NoPartsInside(string label)
+        {
+            return $"The parts the AI found aren't on the {label}. Try again.";
+        }
+
+        /// <summary>Merging a part that has no pixels in the outlines shown.</summary>
+        /// <param name="label">The part.</param>
+        public static string NothingToMerge(string label)
+        {
+            return $"The {label} isn't in this version of the photo.";
+        }
 
         /// <summary>Painting where the object already is.</summary>
         /// <param name="label">The object.</param>

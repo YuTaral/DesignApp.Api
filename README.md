@@ -104,6 +104,9 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
 | `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
+| `POST` | `/api/rooms/{id}/objects` | Add an object marked by hand, or a part of one (`parentIndex`: a chair's seat, drawn on the chair) |
+| `POST` | `/api/rooms/{id}/parts` | Ask the room's AI for an object's parts (a chair's seat, backrest and legs); paid with the real AI |
+| `POST` | `/api/rooms/{id}/merges` | Merge a part back into the object it is a part of |
 | `GET` | `/api/palettes` | The paint palettes (RAL Classic) with each paint's code, name and on-screen color |
 | `GET` | `/api/library` | The built-in sample houses with their rooms |
 | `GET` | `/api/library/{design}/cover` | A house's cover: its first six rooms in two rows of three, made once and kept in memory |

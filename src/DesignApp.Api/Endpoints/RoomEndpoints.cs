@@ -69,6 +69,17 @@ internal static class RoomEndpoints
             .WithDescription("Starts from `baseRevision`; the new photo and a label map where the object's pixels belong to the objects around it are stored as a new version that becomes current (photo version in `photoVersions`). With the real AI each removal is a paid call, so it is rate-limited.")
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
+        rooms.MapPost(Constants.Routes.RoomParts, FindPartsAsync)
+            .WithName("FindRoomParts")
+            .WithSummary("Asks the room's AI for the parts of an object (`objectIndex`), such as a chair's seat, backrest and legs, with optional `instructions` in the user's words: each part becomes a part of it.")
+            .WithDescription("Starts from `baseRevision`; Claude lists the parts and SAM 3 outlines them, and the object's pixels they cover become the parts in a new label map version that becomes current. With the real AI this is paid, so it is rate-limited.")
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+
+        rooms.MapPost(Constants.Routes.RoomMerges, MergePartAsync)
+            .WithName("MergeRoomPart")
+            .WithSummary("Merges a part (`objectIndex`) back into the object it is a part of: its pixels become the object's again.")
+            .WithDescription("Starts from `baseRevision` and stores the result as a new label map version that becomes current; the part stays listed, so undo brings it back.");
+
         rooms.MapPut(Constants.Routes.RoomCurrentLabels, UseLabelMapRevisionAsync)
             .WithName("UseRoomLabelMapRevision")
             .WithSummary("Makes a stored label map version current again (undo or redo of an outline fix).");
@@ -220,8 +231,34 @@ internal static class RoomEndpoints
         Guid id, NewObjectRequest request, AddRoomObject addObject, CancellationToken cancellationToken)
     {
         var outcome = await addObject.AddAsync(
-            id, request.BaseRevision, request.Label, request.Category, request.Strokes ?? [], cancellationToken);
+            id, request.BaseRevision, request.Label, request.Category, request.Strokes ?? [], request.ParentIndex, cancellationToken);
         return ToResponse(outcome, Constants.Titles.NewObjectFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/parts</c>: asks the AI for an object's parts.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="request">The label map version the editor shows and the object.</param>
+    /// <param name="findParts">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room and its new label map version, 400 when no parts can be found, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> FindPartsAsync(
+        Guid id, FindPartsRequest request, FindRoomParts findParts, CancellationToken cancellationToken)
+    {
+        var outcome = await findParts.FindAsync(id, request.BaseRevision, request.ObjectIndex, request.Instructions, cancellationToken);
+        return ToResponse(outcome, Constants.Titles.PartsFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/merges</c>: merges a part back into its object.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="request">The label map version the editor shows and the part.</param>
+    /// <param name="mergePart">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room and its new label map version, 400 when the part can't be merged, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> MergePartAsync(
+        Guid id, MergePartRequest request, MergeRoomPart mergePart, CancellationToken cancellationToken)
+    {
+        var outcome = await mergePart.MergeAsync(id, request.BaseRevision, request.ObjectIndex, cancellationToken);
+        return ToResponse(outcome, Constants.Titles.MergeFailed);
     }
 
     /// <summary><c>POST /api/rooms/{id}/removals</c>: removes objects from the photo together.</summary>

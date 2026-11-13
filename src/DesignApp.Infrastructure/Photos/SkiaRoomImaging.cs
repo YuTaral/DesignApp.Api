@@ -232,6 +232,84 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     }
 
     /// <inheritdoc/>
+    public Result<LabelMap> AddParts(byte[] labelMapPng, Stream photo, DetectedObject whole, int firstIndex, IReadOnlyList<SegmentedObject> parts)
+    {
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var parent = (byte)whole.Index;
+        var inWhole = labels.Count(l => l == parent);
+        // Each part takes from the object as it was, so a smaller part can sit on top of a larger one (a seat on a frame).
+        var original = (byte[])labels.Clone();
+
+        // Larger parts first, so a smaller one (a seat cushion on a seat) ends up on top of it.
+        var ordered = parts.Select((part, i) => (Part: part, Index: (byte)(firstIndex + i), Area: part.Mask.Coverage.Count(c => c >= Constants.Imaging.CoverageThreshold)))
+            .OrderByDescending(p => p.Area).ToList();
+        foreach (var (part, index, _) in ordered)
+        {
+            var mask = part.Mask;
+            for (var p = 0; p < labels.Length; p++)
+            {
+                if (original[p] != parent)
+                    continue;
+                // The masks are at the analysis size, which is the label map's; scale anyway in case they differ.
+                var (mx, my) = (p % width * mask.Width / width, p / width * mask.Height / height);
+                if (mask.Coverage[my * mask.Width + mx] >= Constants.Imaging.CoverageThreshold)
+                    labels[p] = index;
+            }
+        }
+
+        using var pixels = PhotoAtMapSize(photo, width, height);
+        var colors = pixels.GetPixelSpan();
+        var stats = parts.Select(_ => new ObjectStats()).ToArray();
+        for (var p = 0; p < labels.Length; p++)
+        {
+            var slot = labels[p] - firstIndex;
+            if (slot >= 0 && slot < stats.Length)
+                stats[slot].Add(p % width, p / width, colors[p * 4], colors[p * 4 + 1], colors[p * 4 + 2]);
+        }
+
+        // Parts too small to color are given back to the object; the others are numbered on from firstIndex.
+        var minimum = Math.Max(1, (int)(inWhole * Constants.Imaging.MinPartShare));
+        var renumber = new byte[Constants.Imaging.ByteValues];
+        var found = new List<DetectedObject>();
+        for (var slot = 0; slot < stats.Length; slot++)
+        {
+            var s = stats[slot];
+            if (s.Pixels < minimum)
+            {
+                renumber[firstIndex + slot] = parent;
+                continue;
+            }
+            var index = firstIndex + found.Count;
+            renumber[firstIndex + slot] = (byte)index;
+            var box = new BoundingBox(s.MinX / (double)width, s.MinY / (double)height, (s.MaxX - s.MinX + 1) / (double)width, (s.MaxY - s.MinY + 1) / (double)height);
+            found.Add(new DetectedObject(index, parts[slot].Item.Label, whole.Category, box, s.MedianColor(), ParentIndex: whole.Index));
+        }
+        if (found.Count == 0)
+            return Result.Failure<LabelMap>(Constants.Messages.NoPartsInside(whole.Label));
+        for (var p = 0; p < labels.Length; p++)
+        {
+            if (labels[p] >= firstIndex && labels[p] < firstIndex + stats.Length)
+                labels[p] = renumber[labels[p]];
+        }
+        return new LabelMap(EncodeGrayPng(labels, width, height), found);
+    }
+
+    /// <inheritdoc/>
+    public Result<byte[]> MergePart(byte[] labelMapPng, int partIndex, int parentIndex, string partLabel)
+    {
+        var (labels, width, height) = DecodeGrayPng(labelMapPng);
+        var merged = 0;
+        for (var p = 0; p < labels.Length; p++)
+        {
+            if (labels[p] != partIndex)
+                continue;
+            labels[p] = (byte)parentIndex;
+            merged++;
+        }
+        return merged == 0 ? Result.Failure<byte[]>(Constants.Messages.NothingToMerge(partLabel)) : EncodeGrayPng(labels, width, height);
+    }
+
+    /// <inheritdoc/>
     public byte[]? RemovalMask(byte[] labelMapPng, IReadOnlyCollection<int> indexes, int photoWidth, int photoHeight)
     {
         var (labels, width, height) = DecodeGrayPng(labelMapPng);

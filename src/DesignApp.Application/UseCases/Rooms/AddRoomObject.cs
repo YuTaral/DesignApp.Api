@@ -26,15 +26,21 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
     /// <param name="label">The object's name.</param>
     /// <param name="category">The object's type.</param>
     /// <param name="strokes">The strokes, applied in order, each with its brush radius and shape.</param>
+    /// <param name="parentIndex">To add a part (a chair's seat), the object it is a part of; <c>null</c> for a whole object.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The room with the new object current, a failure the user can read, or <c>null</c> when the user has no such room.</returns>
     public async Task<Result<Room>?> AddAsync(
-        Guid roomId, int baseRevision, string? label, ObjectCategory category, IReadOnlyList<MarkStroke> strokes,
+        Guid roomId, int baseRevision, string? label, ObjectCategory category, IReadOnlyList<MarkStroke> strokes, int? parentIndex,
         CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
         if (room is null)
             return null;
+        var parent = parentIndex is int index ? room.Objects.FirstOrDefault(o => o.Index == index && o.ParentIndex is null) : null;
+        if (parentIndex is not null && parent is null)
+            return Result.Failure<Room>(Constants.Messages.PartParent);
+        // A part is the same kind of thing as its object.
+        category = parent?.Category ?? category;
         var invalid = Check(room, baseRevision, label, category, strokes);
         if (invalid is not null)
             return Result.Failure<Room>(invalid);
@@ -44,7 +50,7 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         await using (var photo = await storage.OpenReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken)
             ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
         {
-            marked = imaging.MarkObject(labelMap, photo.Content, new NewObjectMark(room.NextObjectIndex, strokes));
+            marked = imaging.MarkObject(labelMap, photo.Content, new NewObjectMark(room.NextObjectIndex, strokes, parent?.Index, parent?.Label));
         }
         if (!marked.Succeeded)
             return Result.Failure<Room>(marked.Error);
@@ -53,7 +59,8 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         var revision = room.LatestLabelMapRevision + 1;
         using (var content = new MemoryStream(marked.Value.LabelMapPng, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
-        var detected = new DetectedObject(room.NextObjectIndex, label!.Trim(), category, marked.Value.Box, marked.Value.DominantColor, MarkedByHand: true);
+        var detected = new DetectedObject(
+            room.NextObjectIndex, label!.Trim(), category, marked.Value.Box, marked.Value.DominantColor, MarkedByHand: true, parent?.Index);
         room.AddObject(detected, baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
         return room;

@@ -64,6 +64,19 @@ public static class Constants
         public const char PaintSeparator = '/';
     }
 
+    /// <summary>How an object can be split by color into tones (bricks and mortar), each recolored on its own.</summary>
+    public static class Tones
+    {
+        /// <summary>The fewest tones of a split object.</summary>
+        public const int Min = 2;
+
+        /// <summary>The most tones of a split object.</summary>
+        public const int Max = 4;
+
+        /// <summary>How far the tones' shares may add up past 1, for rounding.</summary>
+        public const double ShareTolerance = 0.001;
+    }
+
     /// <summary>The sizes users give walls, floors and ceilings, for paint amounts.</summary>
     public static class Surfaces
     {
@@ -107,6 +120,18 @@ public static class Constants
         /// <summary>A paint reference that is empty, too long or has no palette.</summary>
         public static readonly string PaintReference = $"A paint must be written as palette{Colors.PaintSeparator}paint, in at most {Colors.MaxPaintLength} characters.";
 
+        /// <summary>A split object with too few or too many tones.</summary>
+        public static readonly string ToneCount = $"An object split by color has between {Tones.Min} and {Tones.Max} tones.";
+
+        /// <summary>Two tones of one object with the same color.</summary>
+        public const string DuplicateTones = "The tones of an object must have different colors.";
+
+        /// <summary>A tone's share outside 0..1, or shares adding up to more than the whole object.</summary>
+        public const string ToneShare = "Each tone's share must be between 0 and 1, and together at most the whole object.";
+
+        /// <summary>A tone that names a paint but has no color.</summary>
+        public const string TonePaintNeedsColor = "A tone with a paint needs that paint's color.";
+
         /// <summary>A surface width or height outside the allowed range.</summary>
         public static readonly string SurfaceSize = $"Sizes must be between {Surfaces.MinMetres} and {Surfaces.MaxMetres} metres.";
 
@@ -148,6 +173,20 @@ public static class Constants
         public static string NotNextObjectIndex(int index, int next)
         {
             return $"A new object must get index {next}, not {index}.";
+        }
+
+        /// <summary>A part whose parent isn't in the room, or is itself a part.</summary>
+        /// <param name="index">The part's index.</param>
+        public static string BadParent(int index)
+        {
+            return $"Object {index} is a part of an object that isn't in the room or is a part itself.";
+        }
+
+        /// <summary>Merging an object that isn't a part.</summary>
+        /// <param name="index">The object's index.</param>
+        public static string NotAPart(int index)
+        {
+            return $"Object {index} isn't a part of another object.";
         }
 
         /// <summary>An edit for an object the room doesn't have.</summary>

@@ -9,5 +9,10 @@ namespace DesignApp.Application.Objects;
 /// <param name="Radius">The brush radius, in label map pixels.</param>
 /// <param name="Points">The path, at least one point; the brush is stamped along it (or the box's corners, or the lasso).</param>
 /// <param name="Shape">What the stroke covers: the brush along the path, a box, or the inside of a lasso.</param>
+/// <param name="ParentIndex">
+/// When the object is a part of another, that object: painting only takes its pixels, and erasing gives them back to
+/// it. <c>null</c> for a whole object.
+/// </param>
 public sealed record OutlineStroke(
-    int ObjectIndex, string ObjectLabel, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint> Points, StrokeShape Shape = StrokeShape.Brush);
+    int ObjectIndex, string ObjectLabel, OutlineBrushMode Mode, double Radius, IReadOnlyList<StrokePoint> Points, StrokeShape Shape = StrokeShape.Brush,
+    int? ParentIndex = null);

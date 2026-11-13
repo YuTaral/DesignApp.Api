@@ -100,7 +100,10 @@ internal sealed class EmbeddedLibrary : ILibrary
         // Removed objects stay listed on the room (for undo) but have no pixels left: a library layout leaves them out.
         var (labels, _, _) = SkiaRoomImaging.DecodeGrayPng(room.LabelMap);
         var present = labels.Where(l => l > 0).ToHashSet();
-        var objects = room.Objects.Where(o => present.Contains((byte)o.Index)).OrderBy(o => o.Index).Select(LibraryObjectFile.From).ToList();
+        // A part whose object is gone from the photo is kept as a whole object.
+        var objects = room.Objects.Where(o => present.Contains((byte)o.Index)).OrderBy(o => o.Index)
+            .Select(o => o.ParentIndex is int parent && !present.Contains((byte)parent) ? o with { ParentIndex = null } : o)
+            .Select(LibraryObjectFile.From).ToList();
         var file = new LibraryRoomFile(room.Width, room.Height, objects);
 
         using var zip = new MemoryStream();

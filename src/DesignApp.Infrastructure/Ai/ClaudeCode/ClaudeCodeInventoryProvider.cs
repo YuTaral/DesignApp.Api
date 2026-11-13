@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai.Claude;
 using Microsoft.Extensions.Logging;
 using static DesignApp.Infrastructure.Constants;
@@ -31,13 +32,35 @@ internal sealed partial class ClaudeCodeInventoryProvider(
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
         var settings = await settingsStore.GetAsync(cancellationToken);
+        return await AskAsync(image, settings, settings.SystemPrompt(), settings.UserMessage, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<IReadOnlyList<InventoryItem>>> ListPartsAsync(AnalysisImage image, DetectedObject whole, string? instructions, CancellationToken cancellationToken)
+    {
+        var settings = await settingsStore.GetAsync(cancellationToken);
+        var box = whole.Box;
+        var message = Constants.Ai.Claude.PartsMessage(whole.Label,
+            (int)(box.X * image.Width), (int)(box.Y * image.Height), (int)(box.Width * image.Width), (int)(box.Height * image.Height), instructions);
+        return await AskAsync(image, settings, Constants.Ai.Claude.PartsSystemPrompt, message, cancellationToken);
+    }
+
+    /// <summary>Runs Claude Code on the photo with instructions and a message, for an answer in the inventory's schema.</summary>
+    /// <param name="image">The photo.</param>
+    /// <param name="settings">The model, effort and limits.</param>
+    /// <param name="system">The instructions.</param>
+    /// <param name="text">The message sent with the photo.</param>
+    /// <param name="cancellationToken">Stops the process.</param>
+    private async Task<Result<IReadOnlyList<InventoryItem>>> AskAsync(
+        AnalysisImage image, AiSettings settings, string system, string text, CancellationToken cancellationToken)
+    {
         var promptFile = Path.GetTempFileName();
         try
         {
-            await File.WriteAllTextAsync(promptFile, settings.SystemPrompt(), cancellationToken);
+            await File.WriteAllTextAsync(promptFile, system, cancellationToken);
             var schema = JsonSerializer.Serialize(InventoryJson.Schema(settings.MaxPoints, image.Width, image.Height));
             var started = Stopwatch.GetTimestamp();
-            var printed = await runner.RunAsync(Arguments(settings, promptFile, schema), Message(image, settings), cancellationToken);
+            var printed = await runner.RunAsync(Arguments(settings, promptFile, schema), Message(image, text), cancellationToken);
             var elapsed = Stopwatch.GetElapsedTime(started);
 
             var result = Read(printed);
@@ -81,6 +104,14 @@ internal sealed partial class ClaudeCodeInventoryProvider(
     /// <param name="settings">The AI settings.</param>
     internal static string Message(AnalysisImage image, AiSettings settings)
     {
+        return Message(image, settings.UserMessage);
+    }
+
+    /// <summary>A user message as one stream-json line: the photo, a text and the photo's size.</summary>
+    /// <param name="image">The analysis image.</param>
+    /// <param name="text">The text sent with the photo.</param>
+    internal static string Message(AnalysisImage image, string text)
+    {
         var message = new JsonObject
         {
             [W.Type] = W.User,
@@ -98,7 +129,7 @@ internal sealed partial class ClaudeCodeInventoryProvider(
                             [W.Data] = Convert.ToBase64String(image.Jpeg),
                         },
                     },
-                    new JsonObject { [W.Type] = W.Text, [W.Text] = settings.UserMessage },
+                    new JsonObject { [W.Type] = W.Text, [W.Text] = text },
                     new JsonObject { [W.Type] = W.Text, [W.Text] = Constants.Ai.Claude.ImageSize(image.Width, image.Height) }),
             },
         };

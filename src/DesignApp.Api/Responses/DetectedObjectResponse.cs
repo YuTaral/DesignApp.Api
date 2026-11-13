@@ -10,12 +10,13 @@ namespace DesignApp.Api.Responses;
 /// <param name="Category">The kind of object, such as Wall or Furniture.</param>
 /// <param name="Box">Where the object is, normalized to 0..1 of the photo's width and height.</param>
 /// <param name="DominantColor">The object's main color as "#RRGGBB".</param>
-public sealed record DetectedObjectResponse(int Index, string Label, ObjectCategory Category, BoundingBoxResponse Box, string DominantColor)
+/// <param name="ParentIndex">For a part of another object (a chair's seat), that object's index; <c>null</c> for a whole object.</param>
+public sealed record DetectedObjectResponse(int Index, string Label, ObjectCategory Category, BoundingBoxResponse Box, string DominantColor, int? ParentIndex)
 {
     /// <summary>Maps a domain object to its API shape.</summary>
     /// <param name="o">The object to map.</param>
     public static DetectedObjectResponse From(DetectedObject o)
     {
-        return new(o.Index, o.Label, o.Category, new(o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height), o.DominantColor.Value);
+        return new(o.Index, o.Label, o.Category, new(o.Box.X, o.Box.Y, o.Box.Width, o.Box.Height), o.DominantColor.Value, o.ParentIndex);
     }
 }

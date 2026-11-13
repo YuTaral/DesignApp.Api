@@ -48,6 +48,16 @@ public static class Constants
         public const int MaxObjects = 20;
     }
 
+    /// <summary>Limits for the parts the AI finds on an object.</summary>
+    public static class Parts
+    {
+        /// <summary>The most parts kept for one object (each is a SAM 3 request with the real AI).</summary>
+        public const int MaxParts = 6;
+
+        /// <summary>The longest instructions a user may give the AI for finding parts.</summary>
+        public const int MaxInstructionsLength = 500;
+    }
+
     /// <summary>Limits for an object the user marks by hand.</summary>
     public static class Marks
     {
@@ -212,6 +222,37 @@ public static class Constants
 
         /// <summary>Removing a wall, floor or ceiling, which can only be recolored.</summary>
         public const string SurfaceRemoval = "Walls, floors and ceilings can't be removed. Recolor them instead.";
+
+        /// <summary>A part for an object the room doesn't have, or for a part (parts have no parts).</summary>
+        public const string PartParent = "A part belongs to a whole object in this room, not to another part.";
+
+        /// <summary>Removing a part on its own.</summary>
+        /// <param name="label">The part.</param>
+        /// <param name="parent">The object it is a part of.</param>
+        public static string PartRemoval(string label, string parent)
+        {
+            return $"The {label} is a part of the {parent}. Merge it back, or remove the whole {parent}.";
+        }
+
+        /// <summary>The AI found no parts on an object.</summary>
+        /// <param name="label">The object.</param>
+        public static string NoParts(string label)
+        {
+            return $"The AI found no separate parts on the {label}.";
+        }
+
+        /// <summary>Instructions for finding parts that are too long.</summary>
+        public static readonly string PartsInstructions = $"Keep the instructions for the AI to {Parts.MaxInstructionsLength} characters.";
+
+        /// <summary>Looking for parts of a part.</summary>
+        /// <param name="parent">The object it is a part of.</param>
+        public static string PartsOfPart(string parent)
+        {
+            return $"Look for parts on the whole {parent} instead.";
+        }
+
+        /// <summary>Merging an object that isn't a part.</summary>
+        public const string NotAPart = "Only a part can be merged back into its object.";
 
         /// <summary>A room that has used up its object numbers.</summary>
         public const string TooManyObjects = "This room can't hold any more objects.";

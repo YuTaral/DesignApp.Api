@@ -171,11 +171,20 @@ internal static class DesignEndpoints
 
     /// <summary>The colors of a request as domain edits; an invalid color, strength or paint is a 400.</summary>
     /// <param name="edits">The colors as sent.</param>
-    /// <exception cref="DomainException">A color isn't #RRGGBB, a strength isn't between 0 and 1, or a paint is malformed.</exception>
+    /// <exception cref="DomainException">A color isn't #RRGGBB, a strength isn't between 0 and 1, a paint is malformed, or the tones are invalid.</exception>
     private static List<EditOperation> ToEdits(List<EditRequest>? edits)
     {
         var sent = edits ?? [];
-        return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength, e.Paint))];
+        return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength, e.Paint, e.Tones?.Select(ToTone).ToList()))];
+    }
+
+    /// <summary>A tone of a request as a domain tone.</summary>
+    /// <param name="tone">The tone as sent.</param>
+    /// <exception cref="DomainException">A color isn't #RRGGBB, or a share, strength or paint is invalid.</exception>
+    private static ToneRecolor ToTone(ToneRequest tone)
+    {
+        var color = tone.Color is null ? (HexColor?)null : HexColor.Parse(tone.Color);
+        return new ToneRecolor(HexColor.Parse(tone.Center ?? ""), tone.Share, color, tone.Strength, tone.Paint);
     }
 
     /// <summary>The surface sizes of a request; a side outside 0.1 to 50 metres is a 400.</summary>

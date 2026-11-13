@@ -31,4 +31,36 @@ internal sealed class FakeInventoryProvider(IOptions<AiOptions> options) : IObje
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
         return Result.Success(SampleRooms.Match(image)?.Inventory() ?? Layout);
     }
+
+    /// <summary>
+    /// The parts of an object as bands of its box, from the top: a seat's backrest, seat and legs; a table's top and
+    /// base; anything else's upper and lower part. The fake segmentation outlines each band.
+    /// </summary>
+    /// <param name="image">The photo (unused).</param>
+    /// <param name="whole">The object.</param>
+    /// <param name="instructions">The user's instructions (the fake doesn't read them).</param>
+    /// <param name="cancellationToken">Cancels the wait.</param>
+    public async Task<Result<IReadOnlyList<InventoryItem>>> ListPartsAsync(AnalysisImage image, DetectedObject whole, string? instructions, CancellationToken cancellationToken)
+    {
+        await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
+        var label = whole.Label.ToLowerInvariant();
+        (string Name, double Top, double Bottom)[] bands = Seating.Any(label.Contains)
+            ? [("backrest", 0, 0.45), ("seat", 0.45, 0.7), ("legs", 0.7, 1)]
+            : Tables.Any(label.Contains)
+                ? [("top", 0, 0.3), ("base", 0.3, 1)]
+                : [("upper part", 0, 0.5), ("lower part", 0.5, 1)];
+        var box = whole.Box;
+        return Result.Success<IReadOnlyList<InventoryItem>>([.. bands.Select(b =>
+        {
+            var part = new BoundingBox(box.X, box.Y + box.Height * b.Top, box.Width, box.Height * (b.Bottom - b.Top));
+            return new InventoryItem(b.Name, whole.Category, part, whole.DominantColor,
+                [new ImagePoint(part.X + part.Width / 2, part.Y + part.Height / 2)]);
+        })]);
+    }
+
+    /// <summary>Words of objects the fake splits into a backrest, a seat and legs.</summary>
+    private static readonly string[] Seating = ["chair", "sofa", "couch", "stool", "bench", "armchair", "seat"];
+
+    /// <summary>Words of objects the fake splits into a top and a base.</summary>
+    private static readonly string[] Tables = ["table", "desk", "console", "cabinet", "dresser", "stand", "sideboard"];
 }

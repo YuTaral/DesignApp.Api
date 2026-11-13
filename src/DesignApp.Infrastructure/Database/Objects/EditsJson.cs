@@ -46,7 +46,8 @@ internal static class EditsJson
     /// <param name="Color">The new color.</param>
     /// <param name="Strength">How strongly it is applied.</param>
     /// <param name="Paint">The real paint the color is, or <c>null</c> (also for edits stored before paints).</param>
-    private sealed record StoredEdit(string Type, int ObjectIndex, string Color, double Strength, string? Paint = null)
+    /// <param name="Tones">The tones of an object split by color, or <c>null</c> for one color (and for older edits).</param>
+    private sealed record StoredEdit(string Type, int ObjectIndex, string Color, double Strength, string? Paint = null, List<StoredTone>? Tones = null)
     {
         /// <summary>The stored form of an edit.</summary>
         /// <param name="edit">The edit.</param>
@@ -54,7 +55,8 @@ internal static class EditsJson
         {
             return edit switch
             {
-                RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength, r.Paint),
+                RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength, r.Paint,
+                    r.Tones.Count == 0 ? null : [.. r.Tones.Select(StoredTone.From)]),
                 _ => throw new NotSupportedException($"Edits of type {edit.GetType().Name} can't be stored yet."),
             };
         }
@@ -65,10 +67,33 @@ internal static class EditsJson
         {
             return Type switch
             {
-                Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength, Paint),
+                Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength, Paint,
+                    Tones?.Select(t => t.ToDomain()).ToList()),
                 _ => throw new NotSupportedException($"Unknown stored edit type '{Type}'."),
             };
         }
 #pragma warning restore CA1859
+    }
+
+    /// <summary>One tone of a split object as stored.</summary>
+    /// <param name="Center">The tone's original color.</param>
+    /// <param name="Share">How much of the object it covers.</param>
+    /// <param name="Color">Its new color, or <c>null</c> to keep it.</param>
+    /// <param name="Strength">How strongly it is applied.</param>
+    /// <param name="Paint">The real paint the color is, or <c>null</c>.</param>
+    private sealed record StoredTone(string Center, double Share, string? Color, double Strength, string? Paint = null)
+    {
+        /// <summary>The stored form of a tone.</summary>
+        /// <param name="tone">The tone.</param>
+        public static StoredTone From(ToneRecolor tone)
+        {
+            return new(tone.Center.Value, tone.Share, tone.Color?.Value, tone.Strength, tone.Paint);
+        }
+
+        /// <summary>The tone this stored form describes.</summary>
+        public ToneRecolor ToDomain()
+        {
+            return new(HexColor.Parse(Center), Share, Color is null ? null : HexColor.Parse(Color), Strength, Paint);
+        }
     }
 }

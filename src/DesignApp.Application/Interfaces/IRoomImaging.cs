@@ -1,4 +1,5 @@
 using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 
 
 namespace DesignApp.Application.Interfaces;
@@ -36,6 +37,26 @@ public interface IRoomImaging
     /// <param name="mark">The strokes and the new object's index.</param>
     /// <returns>The new label map with the object's box and color, or a failure the user can read (nothing marked).</returns>
     Result<MarkedObject> MarkObject(byte[] labelMapPng, Stream photo, NewObjectMark mark);
+
+    /// <summary>
+    /// Makes outlined parts of an object into parts in the label map: each takes the object's pixels its mask covers
+    /// (a smaller part on top of a larger one), and parts left with almost no pixels are dropped.
+    /// </summary>
+    /// <param name="labelMapPng">The label map the parts are added to.</param>
+    /// <param name="photo">The stored room photo (JPEG), for each part's box and main color.</param>
+    /// <param name="whole">The object.</param>
+    /// <param name="firstIndex">The index the first part gets; the others follow.</param>
+    /// <param name="parts">The parts with their masks, at the analysis size.</param>
+    /// <returns>The new label map and the parts in it, or a failure when none of them covers the object.</returns>
+    Result<LabelMap> AddParts(byte[] labelMapPng, Stream photo, DetectedObject whole, int firstIndex, IReadOnlyList<SegmentedObject> parts);
+
+    /// <summary>Gives a part's pixels back to the object it is a part of.</summary>
+    /// <param name="labelMapPng">The label map the merge starts from.</param>
+    /// <param name="partIndex">The part.</param>
+    /// <param name="parentIndex">The object it is a part of.</param>
+    /// <param name="partLabel">The part's name, for messages.</param>
+    /// <returns>The new label map, or a failure when the part has no pixels there.</returns>
+    Result<byte[]> MergePart(byte[] labelMapPng, int partIndex, int parentIndex, string partLabel);
 
     /// <summary>The mask of the objects to remove, at the photo's size: white where any of them is, black elsewhere.</summary>
     /// <param name="labelMapPng">The label map they are removed from.</param>

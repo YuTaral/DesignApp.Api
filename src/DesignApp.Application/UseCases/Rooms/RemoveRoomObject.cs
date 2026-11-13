@@ -44,6 +44,10 @@ public sealed class RemoveRoomObject(IRoomRepository rooms, ICurrentUser current
             return Result.Failure<Room>(Constants.Messages.UnknownStrokeObject);
         if (targets.Any(t => t!.Category.IsSurface()))
             return Result.Failure<Room>(Constants.Messages.SurfaceRemoval);
+        if (targets.FirstOrDefault(t => t!.ParentIndex is not null) is { } part)
+            return Result.Failure<Room>(Constants.Messages.PartRemoval(part.Label, room.Objects.First(o => o.Index == part.ParentIndex).Label));
+        // An object goes together with its parts.
+        indexes = [.. indexes, .. room.Objects.Where(o => o.ParentIndex is int p && indexes.Contains(p)).Select(o => o.Index)];
 
         var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         var mask = imaging.RemovalMask(labelMap, indexes, room.Width, room.Height);

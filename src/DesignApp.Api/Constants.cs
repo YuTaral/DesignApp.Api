@@ -69,6 +69,12 @@ public static class Constants
         /// <summary>Removing objects from a room's photo, one or several together.</summary>
         public const string RoomRemovals = "/{id:guid}/removals";
 
+        /// <summary>Merging a part back into the object it is a part of.</summary>
+        public const string RoomMerges = "/{id:guid}/merges";
+
+        /// <summary>Asking the AI for an object's parts.</summary>
+        public const string RoomParts = "/{id:guid}/parts";
+
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
 
@@ -371,6 +377,12 @@ public static class Constants
 
         /// <summary>An object couldn't be removed from the photo.</summary>
         public const string RemovalFailed = "Can't remove the object";
+
+        /// <summary>A part couldn't be merged back into its object.</summary>
+        public const string MergeFailed = "Can't merge the part";
+
+        /// <summary>No parts could be found on an object.</summary>
+        public const string PartsFailed = "Can't find the parts";
 
         /// <summary>An unknown label map version was chosen.</summary>
         public const string UnknownOutlineVersion = "Unknown outline version";

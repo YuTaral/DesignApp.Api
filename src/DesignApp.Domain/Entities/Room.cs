@@ -175,6 +175,8 @@ public sealed class Room
             throw new DomainException(Constants.Messages.DuplicateObjectIndexes);
         if (list.Any(o => o.Index is < 1 or > Constants.Rooms.MaxObjectIndex))
             throw new DomainException(Constants.Messages.ObjectIndexRange);
+        if (list.FirstOrDefault(o => o.ParentIndex is int parent && !IsWhole(list, parent)) is { } orphan)
+            throw new DomainException(Constants.Messages.BadParent(orphan.Index));
 
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
@@ -199,6 +201,8 @@ public sealed class Room
             throw new DomainException(Constants.Messages.ObjectIndexRange);
         if (detected.Index != NextObjectIndex)
             throw new DomainException(Constants.Messages.NotNextObjectIndex(detected.Index, NextObjectIndex));
+        if (detected.ParentIndex is int parent && !IsWhole(_objects, parent))
+            throw new DomainException(Constants.Messages.BadParent(detected.Index));
         var revision = AddLabelMapRevision(baseRevision, keyFor);
         _objects = _objects.Append(detected).ToArray();
         return revision;
@@ -290,6 +294,58 @@ public sealed class Room
             throw new DomainException(Constants.Messages.CannotFail(Status));
         Status = RoomStatus.Failed;
         FailureReason = reason;
+    }
+
+    /// <summary>
+    /// Adds the parts found on an object (a chair's seat, backrest and legs) in one new label map version, which becomes
+    /// current.
+    /// </summary>
+    /// <param name="parts">The parts, with the room's next indexes in order, each a part of a whole object of the room.</param>
+    /// <param name="baseRevision">The label map version the parts were found on.</param>
+    /// <param name="keyFor">The storage key of a label map version.</param>
+    /// <returns>The new version.</returns>
+    /// <exception cref="DomainException">The room isn't ready, or a part's index or object is wrong.</exception>
+    public int AddParts(IReadOnlyList<DetectedObject> parts, int baseRevision, Func<int, string> keyFor)
+    {
+        ArgumentNullException.ThrowIfNull(parts);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        var next = NextObjectIndex;
+        foreach (var part in parts)
+        {
+            if (part.Index != next || part.Index > Constants.Rooms.MaxObjectIndex)
+                throw new DomainException(Constants.Messages.NotNextObjectIndex(part.Index, next));
+            if (part.ParentIndex is not int parent || !IsWhole(_objects, parent))
+                throw new DomainException(Constants.Messages.BadParent(part.Index));
+            next++;
+        }
+        var revision = AddLabelMapRevision(baseRevision, keyFor);
+        _objects = [.. _objects, .. parts];
+        return revision;
+    }
+
+    /// <summary>
+    /// Records that a part was merged back into its object: its pixels are the parent's again in a new label map
+    /// version, which becomes current. The part stays listed, so undo (an older version) brings it back.
+    /// </summary>
+    /// <param name="partIndex">The part.</param>
+    /// <param name="baseRevision">The label map version the merge was made on.</param>
+    /// <param name="keyFor">The storage key of a label map version.</param>
+    /// <returns>The new version.</returns>
+    /// <exception cref="DomainException">The room isn't ready, or the object isn't a part.</exception>
+    public int MergePart(int partIndex, int baseRevision, Func<int, string> keyFor)
+    {
+        if (_objects.FirstOrDefault(o => o.Index == partIndex) is not { ParentIndex: not null })
+            throw new DomainException(Constants.Messages.NotAPart(partIndex));
+        return AddLabelMapRevision(baseRevision, keyFor);
+    }
+
+    /// <summary>Whether an object is in a list and isn't a part itself, so it can have parts.</summary>
+    /// <param name="objects">The objects.</param>
+    /// <param name="index">The object's index.</param>
+    private static bool IsWhole(IEnumerable<DetectedObject> objects, int index)
+    {
+        return objects.Any(o => o.Index == index && o.ParentIndex is null);
     }
 
     /// <summary>Changes the status, allowing only the one expected step.</summary>

@@ -18,6 +18,8 @@ public static class DependencyInjection
         services.AddScoped<AnalyzeRoom>();
         services.AddScoped<FixRoomOutline>();
         services.AddScoped<AddRoomObject>();
+        services.AddScoped<MergeRoomPart>();
+        services.AddScoped<FindRoomParts>();
         services.AddScoped<RemoveRoomObject>();
         services.AddScoped<SaveGuestRooms>();
         services.AddScoped<CreateDesign>();

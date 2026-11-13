@@ -125,7 +125,7 @@ public class NewObjectTests
         var (width, height) = (600, 400);
         MarkStroke[] dab = [new(OutlineBrushMode.Paint, 5, [new((100 + 0.5) / width, (100 + 0.5) / height)])];
 
-        var result = await adder.AddAsync(room.Id, 0, "  side lamp ", ObjectCategory.Lighting, dab, CancellationToken.None);
+        var result = await adder.AddAsync(room.Id, 0, "  side lamp ", ObjectCategory.Lighting, dab, null, CancellationToken.None);
 
         Assert.True(result!.Succeeded, result.Error);
         var added = room.Objects[^1];
@@ -143,7 +143,7 @@ public class NewObjectTests
         Assert.Equal(count + 1, room.Objects.Count);
 
         // A second object on version 0 never reuses the first one's index.
-        var second = await adder.AddAsync(room.Id, 0, "picture", ObjectCategory.Decor, dab, CancellationToken.None);
+        var second = await adder.AddAsync(room.Id, 0, "picture", ObjectCategory.Decor, dab, null, CancellationToken.None);
         Assert.True(second!.Succeeded, second.Error);
         Assert.Equal(next + 1, room.Objects[^1].Index);
     }
@@ -160,7 +160,7 @@ public class NewObjectTests
         var adder = new AddRoomObject(_rooms, new FixedUser("user-1"), _storage, new SkiaRoomImaging());
         var list = Enumerable.Range(0, strokes).Select(_ => new MarkStroke(OutlineBrushMode.Paint, 5, [new(0.5, 0.5)])).ToList();
 
-        var result = await adder.AddAsync(room.Id, 0, label, category, list, CancellationToken.None);
+        var result = await adder.AddAsync(room.Id, 0, label, category, list, null, CancellationToken.None);
 
         Assert.False(result!.Succeeded);
         Assert.Contains(message, result.Error, StringComparison.Ordinal);
@@ -175,9 +175,9 @@ public class NewObjectTests
         MarkStroke[] dab = [new(OutlineBrushMode.Paint, 5, [new(0.5, 0.5)])];
 
         Assert.Null(await new AddRoomObject(_rooms, new FixedUser("someone-else"), _storage, imaging)
-            .AddAsync(room.Id, 0, "lamp", ObjectCategory.Other, dab, CancellationToken.None));
+            .AddAsync(room.Id, 0, "lamp", ObjectCategory.Other, dab, null, CancellationToken.None));
         Assert.False((await new AddRoomObject(_rooms, new FixedUser("user-1"), _storage, imaging)
-            .AddAsync(room.Id, 3, "lamp", ObjectCategory.Other, dab, CancellationToken.None))!.Succeeded);
+            .AddAsync(room.Id, 3, "lamp", ObjectCategory.Other, dab, null, CancellationToken.None))!.Succeeded);
     }
 
     /// <summary>Uploads and analyzes a room with the fake AI and a real photo.</summary>

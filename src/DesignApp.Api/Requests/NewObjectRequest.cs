@@ -9,4 +9,8 @@ namespace DesignApp.Api.Requests;
 /// <param name="Label">The object's name, such as "floor lamp".</param>
 /// <param name="Category">The object's type.</param>
 /// <param name="Strokes">The strokes, in order, each with its brush radius and shape: Paint marks the covered pixels, Erase unmarks them.</param>
-public sealed record NewObjectRequest(int BaseRevision, string? Label, ObjectCategory Category, IReadOnlyList<MarkStroke>? Strokes);
+/// <param name="ParentIndex">
+/// To add a part of an object (a chair's seat), that object's index: only its pixels are taken, and the part gets its
+/// type. Missing for a whole object.
+/// </param>
+public sealed record NewObjectRequest(int BaseRevision, string? Label, ObjectCategory Category, IReadOnlyList<MarkStroke>? Strokes, int? ParentIndex = null);

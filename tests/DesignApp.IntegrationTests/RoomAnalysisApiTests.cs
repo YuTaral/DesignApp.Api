@@ -239,6 +239,71 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     [Fact]
+    public async Task A_part_is_drawn_inside_its_object_and_merged_back()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var labels = await LabelsAsync(room.LabelMapUrl!);
+        // A pixel well inside a furniture object, so a small dab stays on it.
+        var (parent, x, y) = Enumerable.Range(0, labels.Length)
+            .Select(p => (Index: (int)labels[p], X: p % 1200, Y: p / 1200))
+            .First(c => c.X is > 5 and < 1194 && c.Y is > 5 and < 794 && c.Index != 0
+                && room.Objects.Any(o => o.GetProperty("index").GetInt32() == c.Index && o.GetProperty("category").GetString() == "Furniture")
+                && Enumerable.Range(-5, 11).All(d => labels[c.Y * 1200 + c.X + d] == c.Index && labels[(c.Y + d) * 1200 + c.X] == c.Index));
+        var point = new { x = (x + 0.5) / 1200, y = (y + 0.5) / 800 };
+
+        using var add = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
+        {
+            baseRevision = 0, label = "seat", category = "Other", parentIndex = parent,
+            strokes = new[] { new { mode = "Paint", radius = 2, points = new[] { point } } },
+        });
+        add.EnsureSuccessStatusCode();
+        var withSeat = (await add.Content.ReadFromJsonAsync<RoomDto>())!;
+        var seat = withSeat.Objects[^1];
+        Assert.Equal((parent, "Furniture"), (seat.GetProperty("parentIndex").GetInt32(), seat.GetProperty("category").GetString()));
+        Assert.Equal(seat.GetProperty("index").GetInt32(), (await LabelsAsync(withSeat.LabelMapUrl!))[y * 1200 + x]);
+
+        using var outside = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
+        {
+            baseRevision = 1, label = "lamp", category = "Other", parentIndex = parent,
+            strokes = new[] { new { mode = "Paint", radius = 2, points = new[] { new { x = 0.0005, y = 0.0005 } } } },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, outside.StatusCode);
+
+        using var merge = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/merges", new { baseRevision = 1, objectIndex = seat.GetProperty("index").GetInt32() });
+        merge.EnsureSuccessStatusCode();
+        var merged = (await merge.Content.ReadFromJsonAsync<RoomDto>())!;
+        Assert.Equal(2, merged.LabelMapRevision);
+        Assert.Equal(parent, (await LabelsAsync(merged.LabelMapUrl!))[y * 1200 + x]);
+
+        using var whole = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/merges", new { baseRevision = 2, objectIndex = parent });
+        Assert.Equal(HttpStatusCode.BadRequest, whole.StatusCode);
+    }
+
+    [Fact]
+    public async Task The_ai_finds_the_parts_of_an_object()
+    {
+        var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
+        var sofa = room.Objects.First(o => o.GetProperty("category").GetString() == "Furniture").GetProperty("index").GetInt32();
+
+        using var tooLong = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 0, objectIndex = sofa, instructions = new string('x', 501) });
+        Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
+        using var find = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 0, objectIndex = sofa, instructions = "the cushions on their own" });
+        find.EnsureSuccessStatusCode();
+        var withParts = (await find.Content.ReadFromJsonAsync<RoomDto>())!;
+
+        Assert.Equal(1, withParts.LabelMapRevision);
+        var parts = withParts.Objects.Where(o => o.TryGetProperty("parentIndex", out var p) && p.ValueKind == JsonValueKind.Number && p.GetInt32() == sofa).ToList();
+        Assert.NotEmpty(parts);
+        var labels = await LabelsAsync(withParts.LabelMapUrl!);
+        Assert.All(parts, p => Assert.Contains((byte)p.GetProperty("index").GetInt32(), labels));
+
+        using var ofPart = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 1, objectIndex = parts[0].GetProperty("index").GetInt32() });
+        Assert.Equal(HttpStatusCode.BadRequest, ofPart.StatusCode);
+        using var unknown = await Client.PostAsJsonAsync($"/api/rooms/{Guid.NewGuid()}/parts", new { baseRevision = 0, objectIndex = sofa });
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+    }
+
+    [Fact]
     public async Task Progress_arrives_live_over_signalr()
     {
         var statuses = new List<string>();

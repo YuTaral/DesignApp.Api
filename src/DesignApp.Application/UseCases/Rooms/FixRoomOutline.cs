@@ -61,7 +61,7 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
             labelMap = buffer.ToArray();
         }
 
-        var painted = imaging.PaintOutline(labelMap, new OutlineStroke(target.Index, target.Label, mode, radius, points, shape));
+        var painted = imaging.PaintOutline(labelMap, new OutlineStroke(target.Index, target.Label, mode, radius, points, shape, target.ParentIndex));
         if (!painted.Succeeded)
             return Result.Failure<Room>(painted.Error);
 

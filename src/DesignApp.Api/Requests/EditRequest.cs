@@ -5,4 +5,8 @@ namespace DesignApp.Api.Requests;
 /// <param name="Color">The new color as #RRGGBB.</param>
 /// <param name="Strength">How strongly it is applied, from 0 to 1.</param>
 /// <param name="Paint">The real paint the color is, such as <c>ral-classic/9010</c> (see <c>GET /api/palettes</c>); missing for a free color.</param>
-internal sealed record EditRequest(int ObjectIndex, string? Color, double Strength, string? Paint = null);
+/// <param name="Tones">
+/// The object's 2 to 4 tones when it is split by color (bricks and mortar); missing for one color. <c>Color</c>,
+/// <c>Strength</c> and <c>Paint</c> then repeat the first recolored tone.
+/// </param>
+internal sealed record EditRequest(int ObjectIndex, string? Color, double Strength, string? Paint = null, List<ToneRequest>? Tones = null);

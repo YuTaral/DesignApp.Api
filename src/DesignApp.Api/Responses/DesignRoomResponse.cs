@@ -20,7 +20,8 @@ internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<Edi
         return new(
             room.RoomId,
             Constants.Routes.RoomPhotoUrl(room.RoomId, photoVersion),
-            [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength, e.Paint))],
+            [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength, e.Paint,
+                e.Tones.Count == 0 ? null : [.. e.Tones.Select(t => new ToneRequest(t.Center.Value, t.Share, t.Color?.Value, t.Strength, t.Paint))]))],
             [.. room.Sizes.Select(s => new SizeRequest(s.ObjectIndex, s.Width, s.Height))]);
     }
 }

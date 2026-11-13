@@ -30,11 +30,14 @@ internal static class ObjectMarker
         var marked = 0;
         for (var p = 0; p < labels.Length; p++)
         {
-            if (!mask[p])
+            // A part only takes its object's pixels.
+            if (!mask[p] || (mark.ParentIndex is int parent && labels[p] != parent))
                 continue;
             labels[p] = target;
             marked++;
         }
-        return marked == 0 ? Result.Failure<int>(Constants.Messages.EmptyMark) : marked;
+        if (marked == 0)
+            return Result.Failure<int>(mark.ParentIndex is null ? Constants.Messages.EmptyMark : Constants.Messages.PartOutsideParent(mark.ParentLabel ?? ""));
+        return marked;
     }
 }

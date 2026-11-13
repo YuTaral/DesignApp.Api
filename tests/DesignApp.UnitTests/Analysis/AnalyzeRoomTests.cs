@@ -2,6 +2,7 @@ using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Infrastructure.Photos;
@@ -159,6 +160,11 @@ public class AnalyzeRoomTests
         {
             return Task.FromResult(result);
         }
+
+        public Task<Result<IReadOnlyList<InventoryItem>>> ListPartsAsync(AnalysisImage image, DetectedObject whole, string? instructions, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(result);
+        }
     }
 
     /// <summary>Cancels the analysis as if the API were shutting down.</summary>
@@ -170,6 +176,11 @@ public class AnalyzeRoomTests
             await shutdown.CancelAsync();
             cancellationToken.ThrowIfCancellationRequested();
             throw new InvalidOperationException("unreachable");
+        }
+
+        public Task<Result<IReadOnlyList<InventoryItem>>> ListPartsAsync(AnalysisImage image, DetectedObject whole, string? instructions, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException();
         }
     }
 

@@ -4,6 +4,7 @@ using Anthropic;
 using Anthropic.Models.Messages;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
+using DesignApp.Domain.Objects;
 using DesignApp.Infrastructure.Ai.Fakes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,11 +33,47 @@ internal sealed partial class ClaudeInventoryProvider(
     {
         var settings = await settingsStore.GetAsync(cancellationToken);
         var started = Stopwatch.GetTimestamp();
+        var response = await AskAsync(image, settings, settings.SystemPrompt(), settings.UserMessage, cancellationToken);
+
+        var elapsed = Stopwatch.GetElapsedTime(started);
+        LogUsage(settings.InventoryModel, settings.InventoryEffort, response.Usage.InputTokens, response.Usage.OutputTokens, elapsed.TotalSeconds);
+        await RecordUsageAsync(image, options.Value.RecordSamplesTo, settings, response.Usage, elapsed, cancellationToken);
+        return Read(response, settings, image);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<IReadOnlyList<InventoryItem>>> ListPartsAsync(AnalysisImage image, DetectedObject whole, string? instructions, CancellationToken cancellationToken)
+    {
+        var settings = await settingsStore.GetAsync(cancellationToken);
+        var started = Stopwatch.GetTimestamp();
+        var box = whole.Box;
+        var message = Constants.Ai.Claude.PartsMessage(whole.Label,
+            (int)(box.X * image.Width), (int)(box.Y * image.Height), (int)(box.Width * image.Width), (int)(box.Height * image.Height), instructions);
+        var response = await AskAsync(image, settings, Constants.Ai.Claude.PartsSystemPrompt, message, cancellationToken);
+        var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
+        LogPartsUsage(settings.InventoryModel, response.Usage.InputTokens, response.Usage.OutputTokens, seconds);
+        var parts = Read(response, settings, image);
+        if (parts.Succeeded)
+        {
+            var names = string.Join(", ", parts.Value.Select(p => p.Label));
+            LogParts(whole.Label, names);
+        }
+        return parts;
+    }
+
+    /// <summary>Sends the photo with instructions and a message, asking for an answer in the inventory's JSON schema.</summary>
+    /// <param name="image">The photo.</param>
+    /// <param name="settings">The model, effort and limits.</param>
+    /// <param name="system">The instructions.</param>
+    /// <param name="text">The message sent with the photo.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    private async Task<Message> AskAsync(AnalysisImage image, AiSettings settings, string system, string text, CancellationToken cancellationToken)
+    {
         var response = await client.Messages.Create(new MessageCreateParams
         {
             Model = settings.InventoryModel,
             MaxTokens = settings.MaxTokens,
-            System = settings.SystemPrompt(),
+            System = system,
             OutputConfig = new OutputConfig
             {
                 Effort = settings.InventoryEffort switch
@@ -57,20 +94,24 @@ internal sealed partial class ClaudeInventoryProvider(
                         {
                             Source = new Base64ImageSource { Data = Convert.ToBase64String(image.Jpeg), MediaType = MediaType.ImageJpeg },
                         },
-                        new TextBlockParam { Text = settings.UserMessage },
+                        new TextBlockParam { Text = text },
                         new TextBlockParam { Text = Constants.Ai.Claude.ImageSize(image.Width, image.Height) },
                     },
                 },
             ],
         }, cancellationToken);
+        return response;
+    }
 
-        var elapsed = Stopwatch.GetElapsedTime(started);
-        LogUsage(settings.InventoryModel, settings.InventoryEffort, response.Usage.InputTokens, response.Usage.OutputTokens, elapsed.TotalSeconds);
-        await RecordUsageAsync(image, options.Value.RecordSamplesTo, settings, response.Usage, elapsed, cancellationToken);
-
+    /// <summary>Reads Claude's answer.</summary>
+    /// <param name="response">The answer.</param>
+    /// <param name="settings">The limits the answer is kept to.</param>
+    /// <param name="image">The photo the boxes are measured in.</param>
+    /// <exception cref="InvalidOperationException">Claude stopped before finishing.</exception>
+    private static Result<IReadOnlyList<InventoryItem>> Read(Message response, AiSettings settings, AnalysisImage image)
+    {
         if (response.StopReason != StopReason.EndTurn)
             throw new InvalidOperationException($"Claude stopped early ({response.StopReason}) while listing objects.");
-
         var json = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
         return InventoryJson.Parse(json, settings.MaxPoints, image.Width, image.Height);
     }
@@ -107,4 +148,11 @@ internal sealed partial class ClaudeInventoryProvider(
     [LoggerMessage(Level = LogLevel.Information,
         Message = "Claude {Model} ({Effort} effort) listed the objects with {InputTokens} input and {OutputTokens} output tokens in {Seconds:0.0} s")]
     private partial void LogUsage(string model, InventoryEffort effort, long inputTokens, long outputTokens, double seconds);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Claude {Model} listed an object's parts with {InputTokens} input and {OutputTokens} output tokens in {Seconds:0.0} s")]
+    private partial void LogPartsUsage(string model, long inputTokens, long outputTokens, double seconds);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Claude listed the parts of the {Object}: {Parts}")]
+    private partial void LogParts(string @object, string parts);
 }
