@@ -69,6 +69,12 @@ public static class Constants
         /// <summary>Removing objects from a room's photo, one or several together.</summary>
         public const string RoomRemovals = "/{id:guid}/removals";
 
+        /// <summary>A room's depth map, for the 3D view.</summary>
+        public const string RoomDepth = "/{id:guid}/depth";
+
+        /// <summary>One file of a room's empty-room backdrop: photo, labels or depth.</summary>
+        public const string RoomBackdrop = "/{id:guid}/backdrop/{file}";
+
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
 
@@ -147,6 +153,23 @@ public static class Constants
         public static string RoomPhotoUrl(Guid id, int version = 0)
         {
             return version == 0 ? $"{RoomUrl(id)}/photo" : $"{RoomUrl(id)}/photo/{version}";
+        }
+
+        /// <summary>The URL of one file of a room's empty-room backdrop.</summary>
+        /// <param name="id">The room's id.</param>
+        /// <param name="file">Which file.</param>
+        /// <returns>The path of the file.</returns>
+        public static string RoomBackdropUrl(Guid id, Application.Constants.BackdropFile file)
+        {
+            return $"{RoomUrl(id)}/backdrop/{file.ToString().ToLowerInvariant()}";
+        }
+
+        /// <summary>The URL of a room's depth map.</summary>
+        /// <param name="id">The room's id.</param>
+        /// <returns>The path of the depth map.</returns>
+        public static string RoomDepthUrl(Guid id)
+        {
+            return $"{RoomUrl(id)}/depth";
         }
 
         /// <summary>The URL of one version of a room's label map.</summary>
@@ -347,6 +370,9 @@ public static class Constants
 
         /// <summary>An unknown scope was chosen.</summary>
         public const string InvalidScope = "Invalid scope";
+
+        /// <summary>The 3D view couldn't be built.</summary>
+        public const string DepthFailed = "3D view unavailable";
 
         /// <summary>A library export that can't be named.</summary>
         public const string InvalidExport = "Invalid export";

@@ -111,6 +111,8 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `POST` | `/api/library/{design}/{room}/{layout}/copy` | Copy a layout into a new room of the visitor, already analyzed (no AI runs) |
 | `POST` | `/api/library/{design}/copy` | Copy a whole sample house (each room's first layout) into a new design of the account |
 | `GET` | `/api/dev/library-export/{id}?name=` | Development only: pack one of your rooms as library files (a zip) |
+| `POST` | `/api/rooms/{id}/depth` | Give a room its depth map for the 3D view, measuring it once (MoGe-2 on fal, about $0.01, or the fake) |
+| `GET` | `/api/rooms/{id}/depth` | The depth map: a PNG grid, 16 bits per cell in red and green, relative to the farthest cell |
 | `GET` `POST` | `/api/designs` | List the account's designs, or create one from a room and its colors |
 | `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open a design, change its name and description, or delete it with its rooms |
 | `POST` | `/api/designs/{id}/rooms` | Add one of the account's rooms to a design |
@@ -235,6 +237,9 @@ runs them in Firefox against the five sample photos.
   house's shared style; `library/<style>/prompts.json` made each house). Without `--yes` it only prints
   what it would make and the cost; with it, it is **paid**. The first room is made from text; `--reference` makes
   the others from the chosen photo so the whole house matches.
+- `tools/AiLab depth <library design folder> [--yes]`: measures the depth map of every layout of a library house
+  with MoGe-2 (about $0.01 each, **paid** with `--yes`) and writes `<layout>.depth.png` plus the camera into
+  `<layout>.objects.json`, so sample rooms open in 3D at no cost.
 - `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the
   solution when a turn ends with uncommitted C# changes and sends any errors back.
 

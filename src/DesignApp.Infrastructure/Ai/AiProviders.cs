@@ -46,6 +46,14 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
             : services.GetKeyedService<IObjectRemovalProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
     }
 
+    /// <inheritdoc/>
+    public IDepthProvider Depth(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeDepthProvider>()
+            : services.GetKeyedService<IDepthProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
+
     private static InvalidOperationException NotSetUp()
     {
         return new(Constants.Config.RealAiNotSetUp);

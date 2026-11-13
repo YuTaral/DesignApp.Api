@@ -77,6 +77,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<FakeInventoryProvider>();
         builder.Services.AddSingleton<FakeSegmentationProvider>();
         builder.Services.AddSingleton<FakeObjectRemovalProvider>();
+        builder.Services.AddSingleton<FakeDepthProvider>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
         builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
 
@@ -121,6 +122,8 @@ public static class DependencyInjection
         AddFalClient<FalSegmentationProvider>(builder);
         AddFalEraserClient(builder);
         builder.Services.AddKeyedSingleton<IObjectRemovalProvider>(Constants.Ai.RealKey, (sp, _) => sp.GetRequiredService<FalObjectRemovalProvider>());
+        AddFalDepthClient(builder);
+        builder.Services.AddKeyedSingleton<IDepthProvider>(Constants.Ai.RealKey, (sp, _) => sp.GetRequiredService<FalDepthProvider>());
         builder.Services.AddKeyedSingleton<ISegmentationProvider>(Constants.Ai.RealKey, (sp, _) => new RecordingSegmentationProvider(
             sp.GetRequiredService<FalSegmentationProvider>(),
             sp.GetRequiredService<IOptions<AiOptions>>(),
@@ -139,6 +142,20 @@ public static class DependencyInjection
                 http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
             .RemoveAllResilienceHandlers()
             .AddResilienceHandler(Constants.Ai.Removal.ResilienceName, resilience => resilience.AddTimeout(Constants.Ai.Removal.CallTimeout));
+#pragma warning restore EXTEXP0001
+    }
+
+    /// <summary>
+    /// The depth model's HTTP client: the fal.ai key and a timeout, but no retries, as each call is paid.
+    /// </summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddFalDepthClient(IHostApplicationBuilder builder)
+    {
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
+        builder.Services.AddHttpClient<FalDepthProvider>((sp, http) =>
+                http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
+            .RemoveAllResilienceHandlers()
+            .AddResilienceHandler(Constants.Ai.Depth.ResilienceName, resilience => resilience.AddTimeout(Constants.Ai.Depth.CallTimeout));
 #pragma warning restore EXTEXP0001
     }
 

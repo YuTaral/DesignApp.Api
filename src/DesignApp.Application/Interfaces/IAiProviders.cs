@@ -23,4 +23,9 @@ public interface IAiProviders
     /// <summary>Removes objects from photos with the given AI: the free fake or the real eraser.</summary>
     /// <param name="mode">The room's AI mode.</param>
     IObjectRemovalProvider Removal(AiMode mode);
+
+    /// <summary>The depth provider of an AI mode, for the 3D view.</summary>
+    /// <param name="mode">The room's AI.</param>
+    /// <exception cref="InvalidOperationException">The real AI isn't set up.</exception>
+    IDepthProvider Depth(AiMode mode);
 }

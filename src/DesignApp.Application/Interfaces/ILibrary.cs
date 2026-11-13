@@ -1,5 +1,7 @@
 using DesignApp.Application.Objects;
 
+using static DesignApp.Application.Constants;
+
 namespace DesignApp.Application.Interfaces;
 
 /// <summary>
@@ -28,6 +30,21 @@ public interface ILibrary
     /// <param name="layoutId">The layout's id inside the room.</param>
     /// <exception cref="KeyNotFoundException">The library has no such layout.</exception>
     Stream OpenLabelMap(string designId, string roomId, string layoutId);
+
+    /// <summary>Opens the depth map of a library room's layout (a PNG), for one that has it.</summary>
+    /// <param name="designId">The design's id.</param>
+    /// <param name="roomId">The room's id inside the design.</param>
+    /// <param name="layoutId">The layout's id inside the room.</param>
+    /// <exception cref="KeyNotFoundException">The library has no such layout, or it has no depth map.</exception>
+    Stream OpenDepth(string designId, string roomId, string layoutId);
+
+    /// <summary>Opens one file of a layout's empty-room backdrop, for one that has it.</summary>
+    /// <param name="designId">The design's id.</param>
+    /// <param name="roomId">The room's id inside the design.</param>
+    /// <param name="layoutId">The layout's id inside the room.</param>
+    /// <param name="file">Which file.</param>
+    /// <exception cref="KeyNotFoundException">The library has no such layout, or it has no backdrop.</exception>
+    Stream OpenBackdrop(string designId, string roomId, string layoutId, BackdropFile file);
 
     /// <summary>A small copy of a layout's photo for lists (a JPEG), made once and then kept in memory.</summary>
     /// <param name="designId">The design's id.</param>

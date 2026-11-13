@@ -69,6 +69,22 @@ internal static class RoomEndpoints
             .WithDescription("Starts from `baseRevision`; the new photo and a label map where the object's pixels belong to the objects around it are stored as a new version that becomes current (photo version in `photoVersions`). With the real AI each removal is a paid call, so it is rate-limited.")
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
+        rooms.MapPost(Constants.Routes.RoomDepth, MeasureDepthAsync)
+            .WithName("MeasureRoomDepth")
+            .WithSummary("Gives the room its depth map for the 3D view, measuring it once from the original photo if it has none.")
+            .WithDescription("With the real AI the first call is a paid request, so it is rate-limited; later calls return the stored map. Sample rooms bring theirs.")
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+
+        rooms.MapGet(Constants.Routes.RoomDepth, GetDepthAsync)
+            .WithName("GetRoomDepth")
+            .WithSummary("Returns the room's depth map: a PNG grid, 16 bits per cell in red (high) and green (low), relative to the farthest cell.")
+            .WithDescription("Available once measured; it never changes, so it can be cached for good.");
+
+        rooms.MapGet(Constants.Routes.RoomBackdrop, GetBackdropAsync)
+            .WithName("GetRoomBackdrop")
+            .WithSummary("Returns one file of the room's empty-room backdrop for the 3D view: `photo`, `labels` or `depth`.")
+            .WithDescription("Only rooms that have one (sample rooms prepared ahead of time); the files never change, so they can be cached for good.");
+
         rooms.MapPut(Constants.Routes.RoomCurrentLabels, UseLabelMapRevisionAsync)
             .WithName("UseRoomLabelMapRevision")
             .WithSummary("Makes a stored label map version current again (undo or redo of an outline fix).");
@@ -235,6 +251,51 @@ internal static class RoomEndpoints
     {
         var outcome = await removeObject.RemoveAsync(id, request.BaseRevision, request.ObjectIndexes ?? [], cancellationToken);
         return ToResponse(outcome, Constants.Titles.RemovalFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/depth</c>: gives the room its depth map, measuring it if needed.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="measureDepth">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room and its depth map, 400 when it can't be measured, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> MeasureDepthAsync(
+        Guid id, MeasureRoomDepth measureDepth, CancellationToken cancellationToken)
+    {
+        var outcome = await measureDepth.HandleAsync(id, cancellationToken);
+        return ToResponse(outcome, Constants.Titles.DepthFailed);
+    }
+
+    /// <summary><c>GET /api/rooms/{id}/depth</c>: streams the room's depth map.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the depth map is stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the PNG, or 404 when the room is missing or has no depth map yet.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetDepthAsync(
+        Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var room = await getRoom.HandleAsync(id, cancellationToken);
+        return room?.DepthKey is { } key ? await StreamImmutableAsync(key, storage, response, cancellationToken) : TypedResults.NotFound();
+    }
+
+    /// <summary><c>GET /api/rooms/{id}/backdrop/{file}</c>: streams one file of the room's empty-room backdrop.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="file">photo, labels or depth.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the files are stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the file, or 404 when the room is missing, has no backdrop, or the file name is unknown.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetBackdropAsync(
+        Guid id, string file, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        if (!Enum.TryParse<Application.Constants.BackdropFile>(file, ignoreCase: true, out var which) || !Enum.IsDefined(which))
+            return TypedResults.NotFound();
+        var room = await getRoom.HandleAsync(id, cancellationToken);
+        return room is { HasBackdrop: true }
+            ? await StreamImmutableAsync(Application.Constants.Rooms.BackdropKey(room.Id, which), storage, response, cancellationToken)
+            : TypedResults.NotFound();
     }
 
     /// <summary><c>PUT /api/rooms/{id}/labels/current</c>: makes a stored label map version current.</summary>

@@ -3,6 +3,7 @@ using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
+using static DesignApp.Application.Constants;
 using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Application.Helpers;
@@ -51,6 +52,27 @@ public sealed partial class LibraryCopier(
 
         var room = Room.FromLibrary(id, currentUser.Id, photoKey, layout.Width, layout.Height, now, layout.Objects,
             labelMapKey, Constants.Library.RoomName(design.Id, source.Id, layout.Id), aiMode);
+        // Layouts measured ahead of time bring their depth map, so their 3D view costs nothing.
+        if (layout is { DepthFovX: { } fovX, DepthFovY: { } fovY })
+        {
+            var depthKey = Constants.Rooms.DepthKey(id);
+            await using (var depth = library.OpenDepth(design.Id, source.Id, layout.Id))
+                await storage.SaveAsync(depthKey, depth, Constants.ContentTypes.Png, cancellationToken);
+            _stored.Add(depthKey);
+            room.SetDepth(depthKey, fovX, fovY);
+            // And the empty room behind the furniture, when the layout has one.
+            if (layout.HasBackdrop)
+            {
+                foreach (var file in Enum.GetValues<BackdropFile>())
+                {
+                    var key = Constants.Rooms.BackdropKey(id, file);
+                    await using (var content = library.OpenBackdrop(design.Id, source.Id, layout.Id, file))
+                        await storage.SaveAsync(key, content, file is BackdropFile.Photo ? Constants.ContentTypes.Jpeg : Constants.ContentTypes.Png, cancellationToken);
+                    _stored.Add(key);
+                }
+                room.SetBackdrop();
+            }
+        }
         rooms.Add(room);
         return room;
     }

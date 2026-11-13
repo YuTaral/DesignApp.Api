@@ -46,7 +46,10 @@ public class LibraryTests
     public void Every_file_belongs_to_a_listed_layout()
     {
         var expected = Library.Designs
-            .SelectMany(d => d.Rooms.SelectMany(r => r.Layouts.SelectMany(l => LayoutFiles.Select(s => $"{d.Id}/{r.Id}/{l.Id}{s}")))
+            .SelectMany(d => d.Rooms.SelectMany(r => r.Layouts.SelectMany(l => LayoutFiles
+                    .Concat(l.DepthFovX is null ? [] : [".depth.png"])
+                    .Concat(l.HasBackdrop ? [".backdrop.jpg", ".backdrop.labels.png", ".backdrop.depth.png"] : [])
+                    .Select(s => $"{d.Id}/{r.Id}/{l.Id}{s}")))
                 .Append($"{d.Id}/design.json"))
             .Order(StringComparer.Ordinal);
         Assert.Equal(expected, Library.Files.Order(StringComparer.Ordinal));
@@ -129,9 +132,17 @@ public class LibraryTests
         Assert.Equal((layout.Width, layout.Height), (room.Width, room.Height));
         Assert.Equal(0, room.AnalysisAttempts);
         Assert.Same(room, Assert.Single(_rooms.Saved));
-        Assert.Equal(
-            [DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id), DesignApp.Application.Constants.Rooms.PhotoKey(room.Id)],
-            _storage.Files.Keys.Order(StringComparer.Ordinal));
+        // A layout measured ahead of time brings its depth map, so its 3D view costs nothing.
+        // ...and, when it has one, the empty room behind the furniture.
+        var files = new List<string> { DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id), DesignApp.Application.Constants.Rooms.PhotoKey(room.Id) };
+        if (layout.DepthFovX is not null)
+            files.Add(DesignApp.Application.Constants.Rooms.DepthKey(room.Id));
+        if (layout.HasBackdrop)
+            files.AddRange(Enum.GetValues<DesignApp.Application.Constants.BackdropFile>().Select(f => DesignApp.Application.Constants.Rooms.BackdropKey(room.Id, f)));
+        Assert.Equal(files.Order(StringComparer.Ordinal), _storage.Files.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal(layout.HasBackdrop, room.HasBackdrop);
+        Assert.Equal(layout.DepthFovX, room.DepthFovX);
+        Assert.Equal(layout.DepthFovX is null ? null : DesignApp.Application.Constants.Rooms.DepthKey(room.Id), room.DepthKey);
     }
 
     [Fact]

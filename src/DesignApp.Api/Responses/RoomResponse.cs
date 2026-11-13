@@ -21,6 +21,12 @@ namespace DesignApp.Api.Responses;
 /// For each label map version (by its number), which photo version goes with it: 0 is the uploaded photo
 /// (<c>photo</c>), a higher one is <c>photo/{version}</c>, after an object was removed.
 /// </param>
+/// <param name="DepthUrl">The room's depth map for the 3D view (16 bits in red and green, relative to the farthest point), or <c>null</c> until it is measured.</param>
+/// <param name="DepthFovX">The depth map's horizontal field of view, in degrees.</param>
+/// <param name="DepthFovY">The depth map's vertical field of view, in degrees.</param>
+/// <param name="BackdropPhotoUrl">The empty-room backdrop's photo (the furniture erased), or <c>null</c> when the room has none.</param>
+/// <param name="BackdropLabelsUrl">The backdrop's label map, or <c>null</c>.</param>
+/// <param name="BackdropDepthUrl">The backdrop's depth map, or <c>null</c>.</param>
 /// <param name="LibraryRoom">The built-in library layout it was copied from, such as <c>minimalist/kitchen/2</c>; <c>null</c> for an upload.</param>
 public sealed record RoomResponse(
     Guid Id,
@@ -36,7 +42,13 @@ public sealed record RoomResponse(
     AnalysisScope Scope,
     AiMode AiMode,
     IReadOnlyList<int> PhotoVersions,
-    string? LibraryRoom)
+    string? LibraryRoom,
+    string? DepthUrl,
+    double? DepthFovX,
+    double? DepthFovY,
+    string? BackdropPhotoUrl,
+    string? BackdropLabelsUrl,
+    string? BackdropDepthUrl)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -56,6 +68,12 @@ public sealed record RoomResponse(
             room.Scope,
             room.AiMode,
             [.. Enumerable.Range(0, room.LatestLabelMapRevision + 1).Select(room.PhotoVersionOf)],
-            room.LibraryRoom);
+            room.LibraryRoom,
+            room.DepthKey is null ? null : Constants.Routes.RoomDepthUrl(room.Id),
+            room.DepthFovX,
+            room.DepthFovY,
+            room.HasBackdrop ? Constants.Routes.RoomBackdropUrl(room.Id, Application.Constants.BackdropFile.Photo) : null,
+            room.HasBackdrop ? Constants.Routes.RoomBackdropUrl(room.Id, Application.Constants.BackdropFile.Labels) : null,
+            room.HasBackdrop ? Constants.Routes.RoomBackdropUrl(room.Id, Application.Constants.BackdropFile.Depth) : null);
     }
 }

@@ -581,6 +581,84 @@ public static class Constants
             }
         }
 
+        /// <summary>Depth for the 3D view: MoGe-2 on fal.ai, which measures how far each pixel is from the camera.</summary>
+        public static class Depth
+        {
+            /// <summary>The depth model's endpoint (synchronous: one call returns the result).</summary>
+            public const string Endpoint = "https://fal.run/microsoft/moge-2";
+
+            /// <summary>The checkpoint: the large one, without surface normals (not needed).</summary>
+            public const string Model = "vitl";
+
+            /// <summary>
+            /// The most pixels sent: the photo is scaled down to this first. fal bills per started megapixel, so this
+            /// keeps a call at the minimum price, and the depth grid is far smaller anyway.
+            /// </summary>
+            public const int MaxInputPixels = 1_000_000;
+
+            /// <summary>The JPEG quality of the scaled-down photo sent.</summary>
+            public const int InputQuality = 90;
+
+            /// <summary>How long one call may take; it is never repeated, as each call is paid.</summary>
+            public static readonly TimeSpan CallTimeout = TimeSpan.FromSeconds(120);
+
+            /// <summary>The name of the depth client's resilience pipeline (a timeout, no retries).</summary>
+            public const string ResilienceName = "fal-depth";
+
+            /// <summary>The width of the depth grid, in cells; its height follows the photo's shape.</summary>
+            public const int GridWidth = 512;
+
+            /// <summary>Hole-filling passes over the grid before cells the model left out are given up on.</summary>
+            public const int MaxFillPasses = 64;
+
+            /// <summary>The fake's horizontal field of view, in degrees (a typical phone camera).</summary>
+            public const double FakeFovX = 60;
+
+            /// <summary>The fake room: half its width, in meters from the camera's line of sight.</summary>
+            public const double FakeHalfWidth = 1.6;
+
+            /// <summary>The fake room: how far below the camera the floor is, in meters.</summary>
+            public const double FakeFloor = 1.2;
+
+            /// <summary>The fake room: how far above the camera the ceiling is, in meters.</summary>
+            public const double FakeCeiling = 1.3;
+
+            /// <summary>The fake room: how far the back wall is, in meters.</summary>
+            public const double FakeBackWall = 4.5;
+
+            /// <summary>The request and response field names.</summary>
+            public static class Json
+            {
+                /// <summary>The photo.</summary>
+                public const string ImageUrl = "image_url";
+                /// <summary>The checkpoint.</summary>
+                public const string Model = "model";
+                /// <summary>Whether to export a textured mesh (not needed).</summary>
+                public const string ExportGlb = "export_glb";
+                /// <summary>Whether to export the point cloud.</summary>
+                public const string ExportPly = "export_ply";
+                /// <summary>Whether to leave out sky and uncertain pixels.</summary>
+                public const string ApplyMask = "apply_mask";
+                /// <summary>The point cloud.</summary>
+                public const string PointCloud = "point_cloud";
+                /// <summary>A file's URL.</summary>
+                public const string Url = "url";
+                /// <summary>The camera matrix, normalized to the image's size.</summary>
+                public const string Intrinsics = "intrinsics";
+                /// <summary>The horizontal field of view, in degrees.</summary>
+                public const string FovX = "fov_x";
+                /// <summary>The vertical field of view, in degrees.</summary>
+                public const string FovY = "fov_y";
+            }
+
+            /// <summary>What the user is told.</summary>
+            public static class Messages
+            {
+                /// <summary>The depth model failed or returned nothing usable.</summary>
+                public const string Failed = "We couldn't build the 3D view of this room. Try again in a moment.";
+            }
+        }
+
         /// <summary>How long SAM 3 requests may take: one photo can take well over the default 10 s per attempt.</summary>
         public static class Resilience
         {
@@ -643,6 +721,30 @@ public static class Constants
 
         /// <summary>A layout's size and objects: <c>&lt;room&gt;/&lt;layout&gt;.objects.json</c>.</summary>
         public const string ObjectsSuffix = ".objects.json";
+
+        /// <summary>A layout's depth map, when it has one: <c>&lt;room&gt;/&lt;layout&gt;.depth.png</c>.</summary>
+        public const string DepthSuffix = ".depth.png";
+
+        /// <summary>A layout's empty-room backdrop photo, when it has one: <c>&lt;layout&gt;.backdrop.jpg</c>.</summary>
+        public const string BackdropPhotoSuffix = ".backdrop.jpg";
+
+        /// <summary>The backdrop's label map: <c>&lt;layout&gt;.backdrop.labels.png</c>.</summary>
+        public const string BackdropLabelsSuffix = ".backdrop.labels.png";
+
+        /// <summary>The backdrop's depth map: <c>&lt;layout&gt;.backdrop.depth.png</c>.</summary>
+        public const string BackdropDepthSuffix = ".backdrop.depth.png";
+
+        /// <summary>The suffix of each backdrop file.</summary>
+        /// <param name="file">Which file.</param>
+        public static string BackdropSuffix(Application.Constants.BackdropFile file)
+        {
+            return file switch
+            {
+                Application.Constants.BackdropFile.Photo => BackdropPhotoSuffix,
+                Application.Constants.BackdropFile.Labels => BackdropLabelsSuffix,
+                _ => BackdropDepthSuffix,
+            };
+        }
 
         /// <summary>The width of a layout's thumbnail, in pixels: sharp in a tile on a high-density screen.</summary>
         public const int ThumbnailWidth = 640;

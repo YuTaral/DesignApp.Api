@@ -30,7 +30,9 @@ public sealed class ExportLibraryRoom(IRoomRepository rooms, IFileStorage storag
         var labelMap = await ReadAsync(room.LabelMapKey, cancellationToken);
         if (photo is null || labelMap is null)
             return null;
-        return library.Pack(new LibraryExport(libraryRoomId, photo, labelMap, room.Width, room.Height, room.Objects));
+        var depth = room.DepthKey is { } depthKey ? await ReadAsync(depthKey, cancellationToken) : null;
+        return library.Pack(new LibraryExport(
+            libraryRoomId, photo, labelMap, room.Width, room.Height, room.Objects, depth, room.DepthFovX, room.DepthFovY));
     }
 
     /// <summary>Reads a stored file into memory.</summary>

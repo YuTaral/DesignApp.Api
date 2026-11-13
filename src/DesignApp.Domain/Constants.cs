@@ -94,6 +94,12 @@ public static class Constants
         /// <summary>A photo with a zero or negative size.</summary>
         public const string PhotoSize = "Photo dimensions must be positive.";
 
+        /// <summary>An empty-room backdrop for a room whose 3D view has no depth map to sit behind.</summary>
+        public const string BackdropNeedsDepth = "A room needs its depth map before an empty-room backdrop.";
+
+        /// <summary>A depth map with a field of view that isn't between 0 and 180 degrees.</summary>
+        public const string DepthFieldOfView = "A depth map's field of view must be between 0 and 180 degrees.";
+
         /// <summary>A ready room without objects.</summary>
         public const string ReadyNeedsObjects = "A ready room needs at least one detected object.";
 

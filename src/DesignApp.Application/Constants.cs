@@ -113,6 +113,26 @@ public static class Constants
             return version == 0 ? $"rooms/{roomId}/photo.jpg" : $"rooms/{roomId}/photo-{version}.jpg";
         }
 
+        /// <summary>Storage key of one file of a room's empty-room backdrop, for the 3D view.</summary>
+        /// <param name="roomId">The room's id.</param>
+        /// <param name="file">Which file.</param>
+        public static string BackdropKey(Guid roomId, BackdropFile file)
+        {
+            return file switch
+            {
+                BackdropFile.Photo => $"rooms/{roomId}/backdrop.jpg",
+                BackdropFile.Labels => $"rooms/{roomId}/backdrop-labels.png",
+                _ => $"rooms/{roomId}/backdrop-depth.png",
+            };
+        }
+
+        /// <summary>Storage key of a room's depth map, for the 3D view.</summary>
+        /// <param name="roomId">The room's id.</param>
+        public static string DepthKey(Guid roomId)
+        {
+            return $"rooms/{roomId}/depth.png";
+        }
+
         /// <summary>Storage key of a room's label map, as the analysis made it or after outline fixes.</summary>
         /// <param name="roomId">The room's id.</param>
         /// <param name="revision">The label map version: 0 from the analysis, then one per fix.</param>
@@ -178,6 +198,9 @@ public static class Constants
         /// <summary>A lasso stroke with too few points to enclose anything.</summary>
         public const string LassoPoints = "A lasso needs at least 3 points.";
 
+        /// <summary>The 3D view of a room that isn't analyzed yet.</summary>
+        public const string DepthNotReady = "The room can be seen in 3D once the analysis is ready.";
+
         /// <summary>A stroke with a shape that doesn't exist.</summary>
         public const string UnknownStrokeShape = "Pick the brush, the box or the lasso.";
 
@@ -213,6 +236,17 @@ public static class Constants
         Paint,
         /// <summary>Covered pixels of the object become unassigned; other objects are untouched.</summary>
         Erase,
+    }
+
+    /// <summary>The files of an empty-room backdrop (the photo with its furniture erased), for the 3D view.</summary>
+    public enum BackdropFile
+    {
+        /// <summary>The empty room's photo (a JPEG).</summary>
+        Photo,
+        /// <summary>Its label map: the walls, floor and ceiling carry on where the furniture was.</summary>
+        Labels,
+        /// <summary>Its depth map.</summary>
+        Depth,
     }
 
     /// <summary>What a stroke covers: a round brush along its path, or the area its points enclose.</summary>

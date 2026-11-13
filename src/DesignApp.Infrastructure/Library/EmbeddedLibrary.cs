@@ -78,6 +78,18 @@ internal sealed class EmbeddedLibrary : ILibrary
     }
 
     /// <inheritdoc/>
+    public Stream OpenDepth(string designId, string roomId, string layoutId)
+    {
+        return Open(LayoutFile(designId, roomId, layoutId, Constants.Library.DepthSuffix));
+    }
+
+    /// <inheritdoc/>
+    public Stream OpenBackdrop(string designId, string roomId, string layoutId, Application.Constants.BackdropFile file)
+    {
+        return Open(LayoutFile(designId, roomId, layoutId, Constants.Library.BackdropSuffix(file)));
+    }
+
+    /// <inheritdoc/>
     public byte[] Thumbnail(string designId, string roomId, string layoutId)
     {
         var path = LayoutFile(designId, roomId, layoutId, Constants.Library.PhotoSuffix);
@@ -101,7 +113,8 @@ internal sealed class EmbeddedLibrary : ILibrary
         var (labels, _, _) = SkiaRoomImaging.DecodeGrayPng(room.LabelMap);
         var present = labels.Where(l => l > 0).ToHashSet();
         var objects = room.Objects.Where(o => present.Contains((byte)o.Index)).OrderBy(o => o.Index).Select(LibraryObjectFile.From).ToList();
-        var file = new LibraryRoomFile(room.Width, room.Height, objects);
+        var depth = room is { Depth: not null, DepthFovX: { } fovX, DepthFovY: { } fovY } ? new LibraryDepthFile(fovX, fovY) : null;
+        var file = new LibraryRoomFile(room.Width, room.Height, objects, depth);
 
         using var zip = new MemoryStream();
         using (var archive = new ZipArchive(zip, ZipArchiveMode.Create, leaveOpen: true))
@@ -109,6 +122,8 @@ internal sealed class EmbeddedLibrary : ILibrary
             Add(archive, room.RoomId + Constants.Library.PhotoSuffix, room.Photo);
             Add(archive, room.RoomId + Constants.Library.LabelMapSuffix, room.LabelMap);
             Add(archive, room.RoomId + Constants.Library.ObjectsSuffix, JsonSerializer.SerializeToUtf8Bytes(file, Options));
+            if (depth is not null)
+                Add(archive, room.RoomId + Constants.Library.DepthSuffix, room.Depth!);
         }
         return zip.ToArray();
     }
@@ -152,7 +167,15 @@ internal sealed class EmbeddedLibrary : ILibrary
         var layout = Read<LibraryRoomFile>(LayoutFile(designId, roomId, layoutId, Constants.Library.ObjectsSuffix));
         if (layout.Width <= 0 || layout.Height <= 0 || layout.Objects.Count == 0)
             throw new InvalidDataException($"Library layout {name} needs a size and at least one object.");
-        return new LibraryLayout(layoutId, layout.Width, layout.Height, [.. layout.Objects.Select(o => o.ToDomain()).OrderBy(o => o.Index)]);
+        var hasDepthFile = _resources.ContainsKey(LayoutFile(designId, roomId, layoutId, Constants.Library.DepthSuffix));
+        if (hasDepthFile != layout.Depth is not null)
+            throw new InvalidDataException($"Library layout {name} needs both a depth map and its camera, or neither.");
+        var backdropFiles = Enum.GetValues<Application.Constants.BackdropFile>()
+            .Count(file => _resources.ContainsKey(LayoutFile(designId, roomId, layoutId, Constants.Library.BackdropSuffix(file))));
+        if (layout.Backdrop ? backdropFiles != 3 || layout.Depth is null : backdropFiles != 0)
+            throw new InvalidDataException($"Library layout {name} needs all three backdrop files and a depth map, or no backdrop files.");
+        return new LibraryLayout(layoutId, layout.Width, layout.Height, [.. layout.Objects.Select(o => o.ToDomain()).OrderBy(o => o.Index)],
+            layout.Depth?.FovX, layout.Depth?.FovY, layout.Backdrop);
     }
 
     /// <summary>Scales one of the library's photos down to <see cref="Constants.Library.ThumbnailWidth"/> pixels wide.</summary>

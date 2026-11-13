@@ -9,7 +9,9 @@ namespace DesignApp.UnitTests;
 /// <param name="inventory">Step 1.</param>
 /// <param name="segmentation">Step 2.</param>
 /// <param name="removal">Removing objects from photos; none unless a test needs it.</param>
-internal sealed class FixedAiProviders(IObjectInventoryProvider inventory, ISegmentationProvider segmentation, IObjectRemovalProvider? removal = null)
+/// <param name="depth">Depth for the 3D view; none unless a test needs it.</param>
+internal sealed class FixedAiProviders(
+    IObjectInventoryProvider inventory, ISegmentationProvider segmentation, IObjectRemovalProvider? removal = null, IDepthProvider? depth = null)
     : IAiProviders
 {
     /// <inheritdoc/>
@@ -35,5 +37,11 @@ internal sealed class FixedAiProviders(IObjectInventoryProvider inventory, ISegm
     public IObjectRemovalProvider Removal(AiMode mode)
     {
         return removal ?? throw new InvalidOperationException("This test has no object remover.");
+    }
+
+    /// <inheritdoc/>
+    public IDepthProvider Depth(AiMode mode)
+    {
+        return depth ?? throw new InvalidOperationException("This test has no depth provider.");
     }
 }

@@ -89,10 +89,29 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<double?>("DepthFovX")
+                        .HasColumnType("double precision")
+                        .HasColumnName("depth_fov_x");
+
+                    b.Property<double?>("DepthFovY")
+                        .HasColumnType("double precision")
+                        .HasColumnName("depth_fov_y");
+
+                    b.Property<string>("DepthKey")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("depth_key");
+
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("failure_reason");
+
+                    b.Property<bool>("HasBackdrop")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("has_backdrop");
 
                     b.Property<int>("Height")
                         .HasColumnType("integer")

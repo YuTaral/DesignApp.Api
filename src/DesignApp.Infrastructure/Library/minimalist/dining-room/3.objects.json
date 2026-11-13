@@ -233,5 +233,9 @@
       "color": "#B6A9A0",
       "hand": false
     }
-  ]
+  ],
+  "depth": {
+    "fovX": 75.57,
+    "fovY": 60.13
+  }
 }

@@ -33,6 +33,8 @@ public static class DependencyInjection
         services.AddScoped<CopyLibraryRoom>();
         services.AddScoped<CopyLibraryDesign>();
         services.AddScoped<ExportLibraryRoom>();
+        services.AddScoped<MeasureRoomDepth>();
+        services.AddSingleton<RoomLocks>();
         return services;
     }
 }

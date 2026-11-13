@@ -56,6 +56,20 @@ public sealed class Room
     /// an uploaded photo.
     /// </summary>
     public string? LibraryRoom { get; private set; }
+    /// <summary>
+    /// Storage key of the room's depth map (how far each part of the original photo is from the camera, for the 3D
+    /// view), or <c>null</c> until it is measured.
+    /// </summary>
+    public string? DepthKey { get; private set; }
+    /// <summary>The depth map's horizontal field of view, in degrees; <c>null</c> until it is measured.</summary>
+    public double? DepthFovX { get; private set; }
+    /// <summary>The depth map's vertical field of view, in degrees; <c>null</c> until it is measured.</summary>
+    public double? DepthFovY { get; private set; }
+    /// <summary>
+    /// Whether the room has an empty-room backdrop for the 3D view: the photo with its furniture erased, with its own
+    /// label map and depth map, shown through the gaps behind the furniture when the view turns.
+    /// </summary>
+    public bool HasBackdrop { get; private set; }
     /// <summary>The photo version that goes with the current label map version.</summary>
     public int PhotoVersion => PhotoVersionOf(LabelMapRevision);
     /// <summary>The newest photo version stored.</summary>
@@ -278,6 +292,32 @@ public sealed class Room
     public bool HasLabelMapRevision(int revision)
     {
         return Status is RoomStatus.Ready && revision >= 0 && revision <= LatestLabelMapRevision;
+    }
+
+    /// <summary>Records the room's depth map, measured from its original photo, for the 3D view.</summary>
+    /// <param name="key">Storage key of the depth map; the caller saves the file first.</param>
+    /// <param name="fovX">The camera's horizontal field of view, in degrees.</param>
+    /// <param name="fovY">The camera's vertical field of view, in degrees.</param>
+    /// <exception cref="DomainException">The room isn't ready, or a field of view isn't between 0 and 180 degrees.</exception>
+    public void SetDepth(string key, double fovX, double fovY)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        if (Status is not RoomStatus.Ready)
+            throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        if (fovX is <= 0 or >= 180 || fovY is <= 0 or >= 180 || double.IsNaN(fovX) || double.IsNaN(fovY))
+            throw new DomainException(Constants.Messages.DepthFieldOfView);
+        DepthKey = key;
+        DepthFovX = fovX;
+        DepthFovY = fovY;
+    }
+
+    /// <summary>Records that the room's empty-room backdrop is stored (the caller saves its files first).</summary>
+    /// <exception cref="DomainException">The room has no depth map yet.</exception>
+    public void SetBackdrop()
+    {
+        if (DepthKey is null)
+            throw new DomainException(Constants.Messages.BackdropNeedsDepth);
+        HasBackdrop = true;
     }
 
     /// <summary>Stops the analysis with a reason the user can see.</summary>

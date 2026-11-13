@@ -7,4 +7,8 @@ namespace DesignApp.Application.Objects;
 /// <param name="Width">Width of the photo, in pixels.</param>
 /// <param name="Height">Height of the photo, in pixels.</param>
 /// <param name="Objects">The objects in its label map, ordered by index.</param>
-public sealed record LibraryLayout(string Id, int Width, int Height, IReadOnlyList<DetectedObject> Objects);
+/// <param name="DepthFovX">Its depth map's horizontal field of view in degrees, or <c>null</c> when it has no depth map.</param>
+/// <param name="DepthFovY">Its depth map's vertical field of view in degrees, or <c>null</c> when it has no depth map.</param>
+/// <param name="HasBackdrop">Whether it has an empty-room backdrop for the 3D view.</param>
+public sealed record LibraryLayout(
+    string Id, int Width, int Height, IReadOnlyList<DetectedObject> Objects, double? DepthFovX = null, double? DepthFovY = null, bool HasBackdrop = false);

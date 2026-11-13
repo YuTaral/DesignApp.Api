@@ -48,6 +48,13 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
             yield return Constants.Rooms.PhotoKey(room.Id, version);
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
             yield return Constants.Rooms.LabelMapKey(room.Id, revision);
+        if (room.DepthKey is { } depth)
+            yield return depth;
+        if (room.HasBackdrop)
+        {
+            foreach (var file in Enum.GetValues<Constants.BackdropFile>())
+                yield return Constants.Rooms.BackdropKey(room.Id, file);
+        }
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Couldn't delete the file {Key} of a deleted room")]

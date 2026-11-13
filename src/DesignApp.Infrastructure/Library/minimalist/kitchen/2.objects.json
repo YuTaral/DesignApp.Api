@@ -255,5 +255,9 @@
       "color": "#AB998C",
       "hand": false
     }
-  ]
+  ],
+  "depth": {
+    "fovX": 72.74,
+    "fovY": 57.61
+  }
 }
