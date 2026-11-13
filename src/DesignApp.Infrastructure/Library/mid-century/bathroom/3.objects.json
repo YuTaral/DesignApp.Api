@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7122302158273381,
+      "width": 1,
+      "height": 0.28776978417266186,
+      "color": "#AD794E",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0.04541015625,
+      "y": 0,
+      "width": 0.95458984375,
+      "height": 0.2701111837802485,
+      "color": "#C5AE96",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.2763671875,
+      "height": 0.9483322432962721,
+      "color": "#837E62",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green painted back wall above shower",
+      "category": "Wall",
+      "x": 0.27587890625,
+      "y": 0.22956180510137345,
+      "width": 0.17236328125,
+      "height": 0.1157619359058208,
+      "color": "#6A6548",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.43408203125,
+      "y": 0.21255722694571616,
+      "width": 0.44091796875,
+      "height": 0.5349901896664486,
+      "color": "#D3C1AD",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.82275390625,
+      "y": 0.5827338129496403,
+      "width": 0.17724609375,
+      "height": 0.2223675604970569,
+      "color": "#D5C2B5",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "green shower tiles",
+      "category": "Wall",
+      "x": 0.2216796875,
+      "y": 0.2949640287769784,
+      "width": 0.212890625,
+      "height": 0.43623283191628515,
+      "color": "#676957",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "sink backsplash tiles",
+      "category": "Wall",
+      "x": 0.04931640625,
+      "y": 0.5186396337475474,
+      "width": 0.14306640625,
+      "height": 0.1144538914323087,
+      "color": "#888A7C",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "shower tray",
+      "category": "Fixture",
+      "x": 0.22314453125,
+      "y": 0.7050359712230215,
+      "width": 0.22119140625,
+      "height": 0.053629823413996074,
+      "color": "#B1B0AA",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "walnut floating vanity",
+      "category": "Furniture",
+      "x": 0.0478515625,
+      "y": 0.565729234793983,
+      "width": 0.23291015625,
+      "height": 0.22302158273381295,
+      "color": "#6A4329",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "white vessel sink",
+      "category": "Fixture",
+      "x": 0.123046875,
+      "y": 0.5467625899280576,
+      "width": 0.109375,
+      "height": 0.06605624591236102,
+      "color": "#988577",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "round brass mirror",
+      "category": "Decor",
+      "x": 0.08251953125,
+      "y": 0.2812295618051014,
+      "width": 0.09228515625,
+      "height": 0.21124918247220406,
+      "color": "#646349",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "white freestanding bathtub",
+      "category": "Fixture",
+      "x": 0.671875,
+      "y": 0.6278613472858077,
+      "width": 0.26806640625,
+      "height": 0.262916939175932,
+      "color": "#A28571",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.50244140625,
+      "y": 0.5565729234793984,
+      "width": 0.056640625,
+      "height": 0.18051013734466972,
+      "color": "#D8D2D0",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "colorful towels",
+      "category": "Textile",
+      "x": 0.6142578125,
+      "y": 0.578155657292348,
+      "width": 0.1279296875,
+      "height": 0.11772400261608895,
+      "color": "#AB743F",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden window on back wall",
+      "category": "Opening",
+      "x": 0.60205078125,
+      "y": 0.2884238064094179,
+      "width": 0.2197265625,
+      "height": 0.2779594506213211,
+      "color": "#BCA98C",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "wooden corner windows",
+      "category": "Opening",
+      "x": 0.8212890625,
+      "y": 0.18378024852844996,
+      "width": 0.1787109375,
+      "height": 0.43100065402223675,
+      "color": "#C8AA87",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "snake plant",
+      "category": "Decor",
+      "x": 0.0205078125,
+      "y": 0.6638325703073904,
+      "width": 0.10400390625,
+      "height": 0.2858077174623937,
+      "color": "#4D4122",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.474609375,
+      "y": 0.059516023544800525,
+      "width": 0.08203125,
+      "height": 0.050359712230215826,
+      "color": "#A8957D",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "brass shower fixtures",
+      "category": "Fixture",
+      "x": 0.2509765625,
+      "y": 0.29365598430346634,
+      "width": 0.0869140625,
+      "height": 0.2975801177240026,
+      "color": "#656147",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "brass floor tub filler",
+      "category": "Fixture",
+      "x": 0.83349609375,
+      "y": 0.5565729234793984,
+      "width": 0.05712890625,
+      "height": 0.1118378024852845,
+      "color": "#C3A685",
+      "hand": false
+    }
+  ]
+}

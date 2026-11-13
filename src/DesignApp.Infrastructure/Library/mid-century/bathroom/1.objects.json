@@ -1,0 +1,248 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.737083060824068,
+      "width": 1,
+      "height": 0.262916939175932,
+      "color": "#A9774C",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.310546875,
+      "height": 0.9516023544800524,
+      "color": "#C2B198",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.033203125,
+      "y": 0,
+      "width": 0.9306640625,
+      "height": 0.24787442773054283,
+      "color": "#C2AE97",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green tiled back wall",
+      "category": "Wall",
+      "x": 0.32958984375,
+      "y": 0.22171353826030085,
+      "width": 0.5009765625,
+      "height": 0.52648790058862,
+      "color": "#817D64",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "sage green tiled right wall",
+      "category": "Wall",
+      "x": 0.8173828125,
+      "y": 0,
+      "width": 0.1826171875,
+      "height": 0.9928057553956835,
+      "color": "#726B54",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "teak floating vanity",
+      "category": "Furniture",
+      "x": 0.0224609375,
+      "y": 0.5775016350555919,
+      "width": 0.2666015625,
+      "height": 0.24002616088947024,
+      "color": "#774123",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white vessel basin",
+      "category": "Fixture",
+      "x": 0.11181640625,
+      "y": 0.5775016350555919,
+      "width": 0.12060546875,
+      "height": 0.05755395683453238,
+      "color": "#A8978A",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "round brass mirror",
+      "category": "Decor",
+      "x": 0.060546875,
+      "y": 0.27730542838456507,
+      "width": 0.12255859375,
+      "height": 0.223675604970569,
+      "color": "#888D77",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "brass wall sconce",
+      "category": "Lighting",
+      "x": 0.2001953125,
+      "y": 0.2864617396991498,
+      "width": 0.05029296875,
+      "height": 0.09941137998691955,
+      "color": "#B39A7A",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.2470703125,
+      "y": 0.5689993459777632,
+      "width": 0.13232421875,
+      "height": 0.210595160235448,
+      "color": "#B7A193",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "glass shower screen",
+      "category": "Fixture",
+      "x": 0.3095703125,
+      "y": 0.2079790712884238,
+      "width": 0.228515625,
+      "height": 0.5068672334859385,
+      "color": "#737662",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "brass shower set",
+      "category": "Fixture",
+      "x": 0.33935546875,
+      "y": 0.2995421844342708,
+      "width": 0.08154296875,
+      "height": 0.30739045127534337,
+      "color": "#766D4E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "timber framed window",
+      "category": "Opening",
+      "x": 0.60595703125,
+      "y": 0.19816873773708307,
+      "width": 0.32470703125,
+      "height": 0.4244604316546763,
+      "color": "#C1AA8A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "freestanding white bathtub",
+      "category": "Fixture",
+      "x": 0.71142578125,
+      "y": 0.6291693917593199,
+      "width": 0.19482421875,
+      "height": 0.2459123610202747,
+      "color": "#98785D",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.58447265625,
+      "y": 0.5291039895356442,
+      "width": 0.06640625,
+      "height": 0.2040549378678875,
+      "color": "#6E7440",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "brass heated towel rail",
+      "category": "Fixture",
+      "x": 0.90869140625,
+      "y": 0.3211249182472204,
+      "width": 0.09130859375,
+      "height": 0.578809679529104,
+      "color": "#5F4221",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "rust towel",
+      "category": "Textile",
+      "x": 0.9189453125,
+      "y": 0.33747547416612167,
+      "width": 0.06884765625,
+      "height": 0.210595160235448,
+      "color": "#81381C",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "teal towel",
+      "category": "Textile",
+      "x": 0.93310546875,
+      "y": 0.44996729888816217,
+      "width": 0.06005859375,
+      "height": 0.16481360366252454,
+      "color": "#263232",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "mustard towel",
+      "category": "Textile",
+      "x": 0.93017578125,
+      "y": 0.5990843688685416,
+      "width": 0.05712890625,
+      "height": 0.2223675604970569,
+      "color": "#976827",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.484375,
+      "y": 0.041203400915631135,
+      "width": 0.080078125,
+      "height": 0.052975801177240024,
+      "color": "#A6947B",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "timber shower mat",
+      "category": "Textile",
+      "x": 0.3671875,
+      "y": 0.7017658600392414,
+      "width": 0.16943359375,
+      "height": 0.04905166775670373,
+      "color": "#836245",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "green shower floor tiles",
+      "category": "Floor",
+      "x": 0.51904296875,
+      "y": 0.7096141268803139,
+      "width": 0.19873046875,
+      "height": 0.05689993459777633,
+      "color": "#ABB4AB",
+      "hand": false
+    }
+  ]
+}

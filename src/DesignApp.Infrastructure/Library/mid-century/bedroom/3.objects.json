@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6847612818835841,
+      "width": 1,
+      "height": 0.31523871811641596,
+      "color": "#A26B40",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0.00390625,
+      "y": 0,
+      "width": 0.99609375,
+      "height": 0.2844996729888816,
+      "color": "#BFA890",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.26123046875,
+      "height": 0.8835840418574231,
+      "color": "#C5B198",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green painted back wall",
+      "category": "Wall",
+      "x": 0.25927734375,
+      "y": 0.2289077828646174,
+      "width": 0.56396484375,
+      "height": 0.4695879659908437,
+      "color": "#908A74",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.7890625,
+      "y": 0.17069980379332897,
+      "width": 0.17529296875,
+      "height": 0.12622629169391758,
+      "color": "#C9AF92",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "walnut bed frame",
+      "category": "Furniture",
+      "x": 0.11669921875,
+      "y": 0.5245258338783518,
+      "width": 0.45947265625,
+      "height": 0.28515369522563766,
+      "color": "#532D1C",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white bedding",
+      "category": "Textile",
+      "x": 0.24609375,
+      "y": 0.6003924133420536,
+      "width": 0.3544921875,
+      "height": 0.17396991497710923,
+      "color": "#C8B7B1",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "mustard throw blanket",
+      "category": "Textile",
+      "x": 0.388671875,
+      "y": 0.6003924133420536,
+      "width": 0.1396484375,
+      "height": 0.14650098103335513,
+      "color": "#8F5B23",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "white pillows",
+      "category": "Textile",
+      "x": 0.1318359375,
+      "y": 0.565729234793983,
+      "width": 0.1376953125,
+      "height": 0.10464355788096795,
+      "color": "#BFADA2",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "mustard cushions",
+      "category": "Textile",
+      "x": 0.22021484375,
+      "y": 0.5434924787442773,
+      "width": 0.107421875,
+      "height": 0.0974493132766514,
+      "color": "#B58E60",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "walnut nightstand",
+      "category": "Furniture",
+      "x": 0.04052734375,
+      "y": 0.6592544146500982,
+      "width": 0.15283203125,
+      "height": 0.20863309352517986,
+      "color": "#62311A",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left globe table lamp",
+      "category": "Lighting",
+      "x": 0.08056640625,
+      "y": 0.5160235448005233,
+      "width": 0.06591796875,
+      "height": 0.16285153695225638,
+      "color": "#BCAB9B",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "geometric area rug",
+      "category": "Textile",
+      "x": 0.37109375,
+      "y": 0.6677567037279267,
+      "width": 0.44287109375,
+      "height": 0.19816873773708307,
+      "color": "#AAA49A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "rust orange armchair",
+      "category": "Furniture",
+      "x": 0.6748046875,
+      "y": 0.5232177894048398,
+      "width": 0.18408203125,
+      "height": 0.23217789404839764,
+      "color": "#833820",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "walnut wardrobe",
+      "category": "Furniture",
+      "x": 0.88818359375,
+      "y": 0.2642249836494441,
+      "width": 0.11181640625,
+      "height": 0.5820797907128843,
+      "color": "#724024",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden framed window",
+      "category": "Opening",
+      "x": 0.5986328125,
+      "y": 0.23217789404839764,
+      "width": 0.32958984375,
+      "height": 0.35578809679529105,
+      "color": "#C9B291",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "abstract framed art",
+      "category": "Decor",
+      "x": 0.38427734375,
+      "y": 0.3315892740353172,
+      "width": 0.08837890625,
+      "height": 0.15565729234793982,
+      "color": "#B19679",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.65771484375,
+      "y": 0.4591236102027469,
+      "width": 0.07763671875,
+      "height": 0.15696533682145192,
+      "color": "#737D37",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "right potted plant",
+      "category": "Decor",
+      "x": 0.8251953125,
+      "y": 0.5637671680837149,
+      "width": 0.06689453125,
+      "height": 0.19424460431654678,
+      "color": "#8B7048",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.50927734375,
+      "y": 0.04578155657292348,
+      "width": 0.08251953125,
+      "height": 0.052321778940483975,
+      "color": "#9E8F78",
+      "hand": false
+    }
+  ]
+}

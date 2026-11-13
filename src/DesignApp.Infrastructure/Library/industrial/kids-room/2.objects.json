@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.501953125,
+      "y": 0.2812295618051014,
+      "width": 0.43798828125,
+      "height": 0.3996075866579464,
+      "color": "#705047",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5166015625,
+      "height": 0.8410725964682799,
+      "color": "#48332F",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.93701171875,
+      "y": 0.050359712230215826,
+      "width": 0.06298828125,
+      "height": 0.7325049051667757,
+      "color": "#8C8A8C",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "black beamed ceiling",
+      "category": "Ceiling",
+      "x": 0.02294921875,
+      "y": 0,
+      "width": 0.97705078125,
+      "height": 0.3198168737737083,
+      "color": "#1D1A1C",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6546762589928058,
+      "width": 1,
+      "height": 0.34532374100719426,
+      "color": "#8B847D",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.16023544800523218,
+      "width": 0.24267578125,
+      "height": 0.45846958796599085,
+      "color": "#F1EBF1",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "center window",
+      "category": "Opening",
+      "x": 0.3330078125,
+      "y": 0.27665140614780903,
+      "width": 0.1416015625,
+      "height": 0.302158273381295,
+      "color": "#EEE9EB",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "metal bed frame",
+      "category": "Furniture",
+      "x": 0.1748046875,
+      "y": 0.5958142576847613,
+      "width": 0.34765625,
+      "height": 0.2380640941792021,
+      "color": "#241E20",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "pine print bedding",
+      "category": "Textile",
+      "x": 0.1787109375,
+      "y": 0.6167429692609548,
+      "width": 0.3544921875,
+      "height": 0.17920209287115763,
+      "color": "#79695E",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "pillows",
+      "category": "Textile",
+      "x": 0.21435546875,
+      "y": 0.5918901242642249,
+      "width": 0.13916015625,
+      "height": 0.08502289077828647,
+      "color": "#A8A4A6",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "wooden nightstand",
+      "category": "Furniture",
+      "x": 0.04638671875,
+      "y": 0.6991497710922171,
+      "width": 0.146484375,
+      "height": 0.15042511445389142,
+      "color": "#3D291D",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "cage table lamp",
+      "category": "Lighting",
+      "x": 0.08203125,
+      "y": 0.5696533682145193,
+      "width": 0.06103515625,
+      "height": 0.1484630477436233,
+      "color": "#6A6566",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "potted plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.552648790058862,
+      "width": 0.09130859375,
+      "height": 0.13603662524525834,
+      "color": "#758A47",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "round jute rug",
+      "category": "Textile",
+      "x": 0.4169921875,
+      "y": 0.7606278613472858,
+      "width": 0.3740234375,
+      "height": 0.18508829300196206,
+      "color": "#B49C8A",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "black metal console shelf",
+      "category": "Furniture",
+      "x": 0.5693359375,
+      "y": 0.551994767822106,
+      "width": 0.1435546875,
+      "height": 0.13865271419228253,
+      "color": "#393232",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "storage bins",
+      "category": "Decor",
+      "x": 0.58154296875,
+      "y": 0.5761935905820798,
+      "width": 0.11474609375,
+      "height": 0.04905166775670373,
+      "color": "#8E8682",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "wooden toy chest",
+      "category": "Furniture",
+      "x": 0.7265625,
+      "y": 0.6337475474166122,
+      "width": 0.119140625,
+      "height": 0.1000654022236756,
+      "color": "#AF754E",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.84130859375,
+      "y": 0.6605624591236102,
+      "width": 0.142578125,
+      "height": 0.3106605624591236,
+      "color": "#29211E",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "desk chair",
+      "category": "Furniture",
+      "x": 0.8232421875,
+      "y": 0.6782210595160235,
+      "width": 0.13818359375,
+      "height": 0.26618705035971224,
+      "color": "#3D302A",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "books",
+      "category": "Decor",
+      "x": 0.91162109375,
+      "y": 0.6121648136036625,
+      "width": 0.06103515625,
+      "height": 0.0974493132766514,
+      "color": "#655D50",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "bear poster",
+      "category": "Decor",
+      "x": 0.61181640625,
+      "y": 0.4022236756049706,
+      "width": 0.0625,
+      "height": 0.12426422498364945,
+      "color": "#CECED3",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "track lighting",
+      "category": "Lighting",
+      "x": 0.52880859375,
+      "y": 0.16285153695225638,
+      "width": 0.16064453125,
+      "height": 0.06540222367560497,
+      "color": "#2E2726",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.8671875,
+      "y": 0.2844996729888816,
+      "width": 0.04443359375,
+      "height": 0.3832570307390451,
+      "color": "#1D1C20",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "black ductwork",
+      "category": "Fixture",
+      "x": 0.55029296875,
+      "y": 0.2354480052321779,
+      "width": 0.396484375,
+      "height": 0.09417920209287116,
+      "color": "#1C1A1C",
+      "hand": false
+    }
+  ]
+}

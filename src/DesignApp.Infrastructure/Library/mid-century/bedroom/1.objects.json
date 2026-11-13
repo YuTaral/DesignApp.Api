@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6625245258338783,
+      "width": 1,
+      "height": 0.33747547416612167,
+      "color": "#A17149",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2805755395683453,
+      "color": "#C0A68D",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.1236102027468934,
+      "width": 0.5703125,
+      "height": 0.6245912361020275,
+      "color": "#86785B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.53662109375,
+      "y": 0.1484630477436233,
+      "width": 0.46337890625,
+      "height": 0.5971223021582733,
+      "color": "#A1876C",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "patterned area rug",
+      "category": "Textile",
+      "x": 0.24072265625,
+      "y": 0.7063440156965337,
+      "width": 0.654296875,
+      "height": 0.2779594506213211,
+      "color": "#A18666",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "wooden bed frame",
+      "category": "Furniture",
+      "x": 0.259765625,
+      "y": 0.5153695225637671,
+      "width": 0.4306640625,
+      "height": 0.31000654022236757,
+      "color": "#3A1D11",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "mustard bedding",
+      "category": "Textile",
+      "x": 0.28076171875,
+      "y": 0.5428384565075213,
+      "width": 0.41943359375,
+      "height": 0.2459123610202747,
+      "color": "#A87A46",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "white pillows",
+      "category": "Textile",
+      "x": 0.2861328125,
+      "y": 0.5009810333551341,
+      "width": 0.18701171875,
+      "height": 0.11249182472204054,
+      "color": "#C5A686",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "walnut wardrobe",
+      "category": "Furniture",
+      "x": 0.6865234375,
+      "y": 0.3512099411379987,
+      "width": 0.18359375,
+      "height": 0.35251798561151076,
+      "color": "#794122",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "orange armchair",
+      "category": "Furniture",
+      "x": 0.79541015625,
+      "y": 0.566383257030739,
+      "width": 0.18505859375,
+      "height": 0.2262916939175932,
+      "color": "#5F250D",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "left nightstand",
+      "category": "Furniture",
+      "x": 0.17724609375,
+      "y": 0.60431654676259,
+      "width": 0.103515625,
+      "height": 0.15173315892740352,
+      "color": "#5D2D17",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.21517331589274036,
+      "width": 0.22607421875,
+      "height": 0.39633747547416615,
+      "color": "#B0AB8F",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "corner window",
+      "category": "Opening",
+      "x": 0.42333984375,
+      "y": 0.30869849574885544,
+      "width": 0.255859375,
+      "height": 0.2812295618051014,
+      "color": "#DECAAD",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "framed abstract art",
+      "category": "Decor",
+      "x": 0.33056640625,
+      "y": 0.3185088293001962,
+      "width": 0.07763671875,
+      "height": 0.16350555918901244,
+      "color": "#AD8C6B",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "left table lamp",
+      "category": "Lighting",
+      "x": 0.201171875,
+      "y": 0.5232177894048398,
+      "width": 0.05029296875,
+      "height": 0.0987573577501635,
+      "color": "#E0D1C6",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.51953125,
+      "y": 0.061478090255068674,
+      "width": 0.08251953125,
+      "height": 0.05428384565075212,
+      "color": "#A08A6F",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "potted plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.5814257684761281,
+      "width": 0.1455078125,
+      "height": 0.29300196206671025,
+      "color": "#504520",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "white skirting board",
+      "category": "Other",
+      "x": 0,
+      "y": 0.6886854153041203,
+      "width": 0.11376953125,
+      "height": 0.05559189012426422,
+      "color": "#24260D",
+      "hand": false
+    }
+  ]
+}

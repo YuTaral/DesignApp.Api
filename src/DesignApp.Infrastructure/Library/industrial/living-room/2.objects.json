@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.50390625,
+      "y": 0.28973185088293,
+      "width": 0.37060546875,
+      "height": 0.40614780902550685,
+      "color": "#6D5144",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5234375,
+      "height": 0.8371484630477436,
+      "color": "#462E26",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.9384765625,
+      "y": 0.050359712230215826,
+      "width": 0.0615234375,
+      "height": 0.7318508829300197,
+      "color": "#8E8C8D",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "right brick wall strip",
+      "category": "Wall",
+      "x": 0.908203125,
+      "y": 0.27992151733158926,
+      "width": 0.03271484375,
+      "height": 0.3623283191628515,
+      "color": "#49352A",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "dark wood plank ceiling",
+      "category": "Ceiling",
+      "x": 0.02294921875,
+      "y": 0,
+      "width": 0.97705078125,
+      "height": 0.3302812295618051,
+      "color": "#211D1B",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6278613472858077,
+      "width": 1,
+      "height": 0.3721386527141923,
+      "color": "#93908A",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "left steel-framed window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.15369522563767168,
+      "width": 0.2431640625,
+      "height": 0.4774362328319163,
+      "color": "#F3F2F6",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "middle steel-framed window",
+      "category": "Opening",
+      "x": 0.333984375,
+      "y": 0.275997383911053,
+      "width": 0.1396484375,
+      "height": 0.30412034009156313,
+      "color": "#EAE8E8",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "black steel ceiling beam",
+      "category": "Fixture",
+      "x": 0.2841796875,
+      "y": 0,
+      "width": 0.7158203125,
+      "height": 0.22432962720732505,
+      "color": "#141212",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "black ventilation duct",
+      "category": "Fixture",
+      "x": 0.548828125,
+      "y": 0.2354480052321779,
+      "width": 0.39697265625,
+      "height": 0.09417920209287116,
+      "color": "#1C1918",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.8662109375,
+      "y": 0.2838456507521256,
+      "width": 0.0439453125,
+      "height": 0.3917593198168738,
+      "color": "#1A1A1C",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "brown leather sofa",
+      "category": "Furniture",
+      "x": 0.2197265625,
+      "y": 0.5729234793982996,
+      "width": 0.31689453125,
+      "height": 0.24002616088947024,
+      "color": "#522E1E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wood coffee table",
+      "category": "Furniture",
+      "x": 0.4765625,
+      "y": 0.6527141922825376,
+      "width": 0.20703125,
+      "height": 0.17985611510791366,
+      "color": "#4D3D36",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "side table",
+      "category": "Furniture",
+      "x": 0.20166015625,
+      "y": 0.6932635709614127,
+      "width": 0.12841796875,
+      "height": 0.17266187050359713,
+      "color": "#3C2F25",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "grey armchair",
+      "category": "Furniture",
+      "x": 0.72021484375,
+      "y": 0.631131458469588,
+      "width": 0.24462890625,
+      "height": 0.33616742969260954,
+      "color": "#3D3B3D",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "black tv console",
+      "category": "Furniture",
+      "x": 0.62353515625,
+      "y": 0.5945062132112492,
+      "width": 0.21923828125,
+      "height": 0.10202746893394375,
+      "color": "#27272A",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "flat screen tv",
+      "category": "Decor",
+      "x": 0.67626953125,
+      "y": 0.49901896664486595,
+      "width": 0.1357421875,
+      "height": 0.11249182472204054,
+      "color": "#1A1919",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "framed black and white print",
+      "category": "Decor",
+      "x": 0.58251953125,
+      "y": 0.40156965336821454,
+      "width": 0.0634765625,
+      "height": 0.1301504251144539,
+      "color": "#A6A7AF",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.1865234375,
+      "y": 0.7096141268803139,
+      "width": 0.63037109375,
+      "height": 0.29038587311968606,
+      "color": "#8E8886",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "arc floor lamp",
+      "category": "Lighting",
+      "x": 0.1787109375,
+      "y": 0.34270765206017006,
+      "width": 0.21630859375,
+      "height": 0.49051667756703726,
+      "color": "#B49472",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "track pendant lights",
+      "category": "Lighting",
+      "x": 0.53125,
+      "y": 0.16742969260954874,
+      "width": 0.1591796875,
+      "height": 0.06278613472858077,
+      "color": "#6A452C",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.02587890625,
+      "y": 0.4238064094179202,
+      "width": 0.1328125,
+      "height": 0.2674950948332243,
+      "color": "#4C6121",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.05029296875,
+      "y": 0.7442773054283846,
+      "width": 0.0791015625,
+      "height": 0.10202746893394375,
+      "color": "#4E2614",
+      "hand": false
+    }
+  ]
+}

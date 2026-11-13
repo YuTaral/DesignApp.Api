@@ -84,6 +84,35 @@ public class LibraryTests
     }
 
     [Fact]
+    public void A_thumbnail_is_a_small_copy_of_the_photo_with_the_same_shape()
+    {
+        var design = Library.Designs[0];
+        var room = design.Rooms[0];
+        var layout = room.Layouts[0];
+
+        var first = Library.Thumbnail(design.Id, room.Id, layout.Id);
+
+        using var thumbnail = SKBitmap.Decode(first);
+        Assert.Equal(640, thumbnail.Width);
+        Assert.True(Math.Abs((double)thumbnail.Width / thumbnail.Height - (double)layout.Width / layout.Height) < 0.01);
+        Assert.Same(first, Library.Thumbnail(design.Id, room.Id, layout.Id)); // made once
+        Assert.Throws<KeyNotFoundException>(() => Library.Thumbnail(design.Id, room.Id, "no-such-layout"));
+    }
+
+    [Fact]
+    public void A_cover_shows_two_rows_of_three_rooms()
+    {
+        var design = Library.Designs[0];
+
+        var first = Library.Cover(design.Id);
+
+        using var cover = SKBitmap.Decode(first);
+        Assert.Equal((3 * 400 + 2 * 4, 2 * 300 + 4), (cover.Width, cover.Height));
+        Assert.Same(first, Library.Cover(design.Id)); // made once
+        Assert.Throws<KeyNotFoundException>(() => Library.Cover("no-such-design"));
+    }
+
+    [Fact]
     public async Task Copying_a_layout_stores_its_files_and_saves_a_ready_room()
     {
         var design = Library.Designs[0];

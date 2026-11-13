@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.22607421875,
+      "height": 0.7658600392413342,
+      "color": "#87826D",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.2216796875,
+      "y": 0.21255722694571616,
+      "width": 0.630859375,
+      "height": 0.4695879659908437,
+      "color": "#C2A890",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2668410725964683,
+      "color": "#BEA68E",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "herringbone wood floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6762589928057554,
+      "width": 1,
+      "height": 0.3237410071942446,
+      "color": "#AE7D56",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "walnut platform bed",
+      "category": "Furniture",
+      "x": 0.17919921875,
+      "y": 0.5356442119032047,
+      "width": 0.47509765625,
+      "height": 0.31393067364290383,
+      "color": "#754F3B",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "mustard duvet",
+      "category": "Textile",
+      "x": 0.23193359375,
+      "y": 0.5892740353172008,
+      "width": 0.43798828125,
+      "height": 0.2511445389143231,
+      "color": "#BC9151",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white pillows",
+      "category": "Textile",
+      "x": 0.20703125,
+      "y": 0.5022890778286462,
+      "width": 0.19091796875,
+      "height": 0.1249182472204055,
+      "color": "#CEC3C0",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "rust cushion",
+      "category": "Textile",
+      "x": 0.32958984375,
+      "y": 0.5454545454545454,
+      "width": 0.0927734375,
+      "height": 0.060824068018312624,
+      "color": "#B3582F",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "mustard cushions",
+      "category": "Textile",
+      "x": 0.232421875,
+      "y": 0.5304120340091563,
+      "width": 0.208984375,
+      "height": 0.0987573577501635,
+      "color": "#A77747",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.17578125,
+      "y": 0.723348593852191,
+      "width": 0.64892578125,
+      "height": 0.27665140614780903,
+      "color": "#8F8B7B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "left nightstand",
+      "category": "Furniture",
+      "x": 0.08447265625,
+      "y": 0.6252452583387835,
+      "width": 0.126953125,
+      "height": 0.17527795945062133,
+      "color": "#4C2E1D",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "globe table lamp",
+      "category": "Lighting",
+      "x": 0.1201171875,
+      "y": 0.5637671680837149,
+      "width": 0.04541015625,
+      "height": 0.07194244604316546,
+      "color": "#B4A89A",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "abstract framed artwork",
+      "category": "Decor",
+      "x": 0.34130859375,
+      "y": 0.3198168737737083,
+      "width": 0.142578125,
+      "height": 0.17069980379332897,
+      "color": "#9E8164",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "walnut wardrobe",
+      "category": "Furniture",
+      "x": 0.6123046875,
+      "y": 0.3734466971877044,
+      "width": 0.18505859375,
+      "height": 0.3368214519293656,
+      "color": "#A3623A",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.607421875,
+      "y": 0.28776978417266186,
+      "width": 0.2109375,
+      "height": 0.2864617396991498,
+      "color": "#C1B495",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.79736328125,
+      "y": 0.17854807063440156,
+      "width": 0.20263671875,
+      "height": 0.5448005232177894,
+      "color": "#CEAB86",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "orange chair",
+      "category": "Furniture",
+      "x": 0.7861328125,
+      "y": 0.5748855461085677,
+      "width": 0.10498046875,
+      "height": 0.20863309352517986,
+      "color": "#BD7248",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.84423828125,
+      "y": 0.4002616088947024,
+      "width": 0.14794921875,
+      "height": 0.27665140614780903,
+      "color": "#515617",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "plant pot and wooden stand",
+      "category": "Decor",
+      "x": 0.86328125,
+      "y": 0.6232831916285154,
+      "width": 0.11767578125,
+      "height": 0.2210595160235448,
+      "color": "#765133",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.474609375,
+      "y": 0.059516023544800525,
+      "width": 0.08154296875,
+      "height": 0.050359712230215826,
+      "color": "#A69279",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "white skirting board",
+      "category": "Other",
+      "x": 0,
+      "y": 0.7056899934597777,
+      "width": 0.1640625,
+      "height": 0.1353826030085023,
+      "color": "#88756B",
+      "hand": false
+    }
+  ]
+}

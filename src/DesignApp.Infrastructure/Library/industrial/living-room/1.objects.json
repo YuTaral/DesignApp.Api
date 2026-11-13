@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "exposed brick back wall",
+      "category": "Wall",
+      "x": 0.30712890625,
+      "y": 0.2184434270765206,
+      "width": 0.42919921875,
+      "height": 0.4290385873119686,
+      "color": "#755A4C",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "exposed brick right wall",
+      "category": "Wall",
+      "x": 0.72802734375,
+      "y": 0,
+      "width": 0.27197265625,
+      "height": 0.8456507521255723,
+      "color": "#765849",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "brick left wall under window",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.5833878351863964,
+      "width": 0.19775390625,
+      "height": 0.3080444735120994,
+      "color": "#3C271B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "brick wall strip beside window",
+      "category": "Wall",
+      "x": 0.0390625,
+      "y": 0,
+      "width": 0.279296875,
+      "height": 0.5565729234793984,
+      "color": "#1E1E20",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6370176586003924,
+      "width": 1,
+      "height": 0.3629823413996076,
+      "color": "#9F9F98",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "black steel ceiling",
+      "category": "Ceiling",
+      "x": 0.193359375,
+      "y": 0,
+      "width": 0.67529296875,
+      "height": 0.24787442773054283,
+      "color": "#0D0D0D",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "large steel-framed window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0,
+      "width": 0.27685546875,
+      "height": 0.644211903204709,
+      "color": "#EBE2DC",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "silver ductwork",
+      "category": "Fixture",
+      "x": 0.150390625,
+      "y": 0,
+      "width": 0.6015625,
+      "height": 0.2655330281229562,
+      "color": "#524944",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "tan leather sofa",
+      "category": "Furniture",
+      "x": 0.16552734375,
+      "y": 0.5448005232177894,
+      "width": 0.25341796875,
+      "height": 0.25049051667756705,
+      "color": "#6B422B",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "grey area rug",
+      "category": "Textile",
+      "x": 0.13623046875,
+      "y": 0.6572923479398299,
+      "width": 0.701171875,
+      "height": 0.2380640941792021,
+      "color": "#A29C96",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "reclaimed wood coffee table",
+      "category": "Furniture",
+      "x": 0.46435546875,
+      "y": 0.6141268803139307,
+      "width": 0.11865234375,
+      "height": 0.1497710922171354,
+      "color": "#826A58",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "black side table",
+      "category": "Furniture",
+      "x": 0.19287109375,
+      "y": 0.6344015696533682,
+      "width": 0.1298828125,
+      "height": 0.22432962720732505,
+      "color": "#473025",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "black leather armchair",
+      "category": "Furniture",
+      "x": 0.62353515625,
+      "y": 0.6599084368868542,
+      "width": 0.2451171875,
+      "height": 0.2537606278613473,
+      "color": "#292728",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "grey throw pillow",
+      "category": "Textile",
+      "x": 0.70947265625,
+      "y": 0.6546762589928058,
+      "width": 0.11083984375,
+      "height": 0.1432308698495749,
+      "color": "#87827C",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "tv console",
+      "category": "Furniture",
+      "x": 0.72265625,
+      "y": 0.5461085676913014,
+      "width": 0.19287109375,
+      "height": 0.20994113799869196,
+      "color": "#463831",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "flat screen tv",
+      "category": "Decor",
+      "x": 0.806640625,
+      "y": 0.45846958796599085,
+      "width": 0.125,
+      "height": 0.15500327011118378,
+      "color": "#1F1E12",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "arc floor lamp",
+      "category": "Lighting",
+      "x": 0.34228515625,
+      "y": 0.3629823413996076,
+      "width": 0.14306640625,
+      "height": 0.20863309352517986,
+      "color": "#675853",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "framed black and white art",
+      "category": "Decor",
+      "x": 0.75,
+      "y": 0.3407455853499019,
+      "width": 0.0537109375,
+      "height": 0.18378024852844996,
+      "color": "#454142",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.845703125,
+      "y": 0.3695225637671681,
+      "width": 0.1494140625,
+      "height": 0.3302812295618051,
+      "color": "#2A350F",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.880859375,
+      "y": 0.7573577501635056,
+      "width": 0.06884765625,
+      "height": 0.07979071288423806,
+      "color": "#92593A",
+      "hand": false
+    }
+  ]
+}

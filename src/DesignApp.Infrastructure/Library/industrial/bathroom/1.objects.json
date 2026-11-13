@@ -1,0 +1,215 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6527141922825376,
+      "width": 1,
+      "height": 0.34728580771746237,
+      "color": "#8E8B89",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "dark painted concrete ceiling",
+      "category": "Ceiling",
+      "x": 0.171875,
+      "y": 0,
+      "width": 0.662109375,
+      "height": 0.22563767168083715,
+      "color": "#2F2C2B",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "back red brick wall",
+      "category": "Wall",
+      "x": 0.291015625,
+      "y": 0.18312622629169392,
+      "width": 0.4609375,
+      "height": 0.55134074558535,
+      "color": "#46312D",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "left red brick wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.30517578125,
+      "height": 0.8678875081752779,
+      "color": "#33292A",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "right red brick wall",
+      "category": "Wall",
+      "x": 0.703125,
+      "y": 0,
+      "width": 0.2685546875,
+      "height": 0.2432962720732505,
+      "color": "#211B18",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "dark glossy tile wall",
+      "category": "Wall",
+      "x": 0.72314453125,
+      "y": 0,
+      "width": 0.27685546875,
+      "height": 0.9378678875081753,
+      "color": "#4D3F3C",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "shower tile wall",
+      "category": "Wall",
+      "x": 0.6181640625,
+      "y": 0.34401569653368214,
+      "width": 0.103515625,
+      "height": 0.34139960758665794,
+      "color": "#302E2F",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.09810333551340746,
+      "width": 0.2548828125,
+      "height": 0.539568345323741,
+      "color": "#EFE9EF",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.35400390625,
+      "y": 0.2753433616742969,
+      "width": 0.26416015625,
+      "height": 0.30608240680183124,
+      "color": "#F7F1F4",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "black freestanding bathtub",
+      "category": "Fixture",
+      "x": 0.146484375,
+      "y": 0.6108567691301504,
+      "width": 0.20849609375,
+      "height": 0.20340091563113147,
+      "color": "#1C1C1E",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "glass shower enclosure",
+      "category": "Fixture",
+      "x": 0.5751953125,
+      "y": 0.33355134074558535,
+      "width": 0.19384765625,
+      "height": 0.40091563113145845,
+      "color": "#3A393A",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.69091796875,
+      "y": 0.6644865925441465,
+      "width": 0.0751953125,
+      "height": 0.1144538914323087,
+      "color": "#8A8585",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "rustic wood vanity",
+      "category": "Furniture",
+      "x": 0.7607421875,
+      "y": 0.6108567691301504,
+      "width": 0.224609375,
+      "height": 0.31523871811641596,
+      "color": "#211610",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "round black mirror",
+      "category": "Decor",
+      "x": 0.8525390625,
+      "y": 0.26880313930673644,
+      "width": 0.11669921875,
+      "height": 0.2485284499672989,
+      "color": "#D7DEE0",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "black towel ladder",
+      "category": "Furniture",
+      "x": 0.28564453125,
+      "y": 0.4028776978417266,
+      "width": 0.0908203125,
+      "height": 0.223675604970569,
+      "color": "#342E30",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "grey towels",
+      "category": "Textile",
+      "x": 0.296875,
+      "y": 0.48005232177894047,
+      "width": 0.05029296875,
+      "height": 0.1366906474820144,
+      "color": "#3E3A40",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "snake plant",
+      "category": "Decor",
+      "x": 0.0478515625,
+      "y": 0.5814257684761281,
+      "width": 0.091796875,
+      "height": 0.289077828646174,
+      "color": "#34240E",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fern in grey pot",
+      "category": "Decor",
+      "x": 0.35205078125,
+      "y": 0.5814257684761281,
+      "width": 0.115234375,
+      "height": 0.1236102027468934,
+      "color": "#404A25",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "hanging bulb pendants",
+      "category": "Lighting",
+      "x": 0.80517578125,
+      "y": 0.002616088947024199,
+      "width": 0.12646484375,
+      "height": 0.2858077174623937,
+      "color": "#5C3D32",
+      "hand": false
+    }
+  ]
+}

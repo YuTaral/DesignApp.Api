@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6814911706998038,
+      "width": 1,
+      "height": 0.3185088293001962,
+      "color": "#AB7345",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2858077174623937,
+      "color": "#C5A98D",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.2734375,
+      "height": 0.7959450621321125,
+      "color": "#8F836B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.22607421875,
+      "y": 0.21124918247220406,
+      "width": 0.60595703125,
+      "height": 0.4761281883584042,
+      "color": "#CFB396",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.7890625,
+      "y": 0.5670372792674951,
+      "width": 0.2109375,
+      "height": 0.15827338129496402,
+      "color": "#BE9C84",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "wooden bed frame",
+      "category": "Furniture",
+      "x": 0.0302734375,
+      "y": 0.5304120340091563,
+      "width": 0.3212890625,
+      "height": 0.28776978417266186,
+      "color": "#542710",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "patterned duvet",
+      "category": "Textile",
+      "x": 0.01416015625,
+      "y": 0.5775016350555919,
+      "width": 0.328125,
+      "height": 0.19032047089601045,
+      "color": "#8C7552",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "round patterned rug",
+      "category": "Textile",
+      "x": 0.35986328125,
+      "y": 0.7318508829300197,
+      "width": 0.3671875,
+      "height": 0.17069980379332897,
+      "color": "#C89866",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "back wooden window",
+      "category": "Opening",
+      "x": 0.6044921875,
+      "y": 0.2884238064094179,
+      "width": 0.21484375,
+      "height": 0.27665140614780903,
+      "color": "#BEAF90",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.78857421875,
+      "y": 0.17854807063440156,
+      "width": 0.21142578125,
+      "height": 0.44277305428384567,
+      "color": "#C7A786",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "wooden bookshelf",
+      "category": "Furniture",
+      "x": 0.4140625,
+      "y": 0.5448005232177894,
+      "width": 0.13134765625,
+      "height": 0.15631131458469588,
+      "color": "#5D3018",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "floor lamp",
+      "category": "Lighting",
+      "x": 0.34423828125,
+      "y": 0.41268803139306737,
+      "width": 0.0595703125,
+      "height": 0.29038587311968606,
+      "color": "#CC843E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.59912109375,
+      "y": 0.55134074558535,
+      "width": 0.2314453125,
+      "height": 0.16219751471550034,
+      "color": "#AD7755",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "wooden chair with teal seat",
+      "category": "Furniture",
+      "x": 0.6630859375,
+      "y": 0.5598430346631785,
+      "width": 0.09765625,
+      "height": 0.17200784826684107,
+      "color": "#A3886B",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "wooden storage chest",
+      "category": "Furniture",
+      "x": 0.80322265625,
+      "y": 0.6429038587311968,
+      "width": 0.19091796875,
+      "height": 0.19555264879005888,
+      "color": "#763B1B",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "snake plant",
+      "category": "Decor",
+      "x": 0.94580078125,
+      "y": 0.6729888816219751,
+      "width": 0.05419921875,
+      "height": 0.22694571615434925,
+      "color": "#463011",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "animal poster",
+      "category": "Decor",
+      "x": 0.0234375,
+      "y": 0.22563767168083715,
+      "width": 0.0830078125,
+      "height": 0.2603008502289078,
+      "color": "#B89D7F",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.4755859375,
+      "y": 0.059516023544800525,
+      "width": 0.080078125,
+      "height": 0.050359712230215826,
+      "color": "#AB9376",
+      "hand": false
+    }
+  ]
+}

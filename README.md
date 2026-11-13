@@ -105,7 +105,9 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
 | `GET` | `/api/library` | The built-in sample houses with their rooms |
+| `GET` | `/api/library/{design}/cover` | A house's cover: its first six rooms in two rows of three, made once and kept in memory |
 | `GET` | `/api/library/{design}/{room}/{layout}/photo` | The photo of one layout of a library room |
+| `GET` | `/api/library/{design}/{room}/{layout}/thumbnail` | A 640 px copy of that photo for lists, made once and kept in memory |
 | `POST` | `/api/library/{design}/{room}/{layout}/copy` | Copy a layout into a new room of the visitor, already analyzed (no AI runs) |
 | `POST` | `/api/library/{design}/copy` | Copy a whole sample house (each room's first layout) into a new design of the account |
 | `GET` | `/api/dev/library-export/{id}?name=` | Development only: pack one of your rooms as library files (a zip) |
@@ -122,8 +124,9 @@ A design has a name, an optional description (up to 300 characters) and 1 to 20 
 ### The built-in library
 
 Visitors can start without a photo: the library holds ready-made **sample houses**, one style each. Every room
-has one or more **layouts** (different photos of it, such as three kitchens), all analyzed ahead of time. The
-first is the **Minimalist house**: seven rooms with three layouts each. The files ship inside the API as embedded
+has one or more **layouts** (different photos of it, such as three kitchens), all analyzed ahead of time. There
+are four houses, each with seven rooms of three layouts: **Minimalist**, **Industrial loft**, **Mid-century
+modern** and **Bohemian** (about 86 MB of photos in all). The files ship inside the API as embedded
 resources, in `src/DesignApp.Infrastructure/Library/<design>/`:
 
 - `design.json`: the id (the folder's name), name, style, description, list order and the rooms (id, title and
@@ -229,7 +232,7 @@ runs them in Firefox against the five sample photos.
   per photo and per scenario. The set of 20 hard photos lives in `../rooms-eval` (outside the repos).
 - `tools/AiLab generate <prompts.json> <folder> [--rooms a,b] [--candidates n] [--reference <photo>] [--yes]`:
   makes library photos with an image model on fal (the prompts file sets the model, size, price per image and the
-  house's shared style; `library/minimalist/prompts.json` made the Minimalist house). Without `--yes` it only prints
+  house's shared style; `library/<style>/prompts.json` made each house). Without `--yes` it only prints
   what it would make and the cost; with it, it is **paid**. The first room is made from text; `--reference` makes
   the others from the chosen photo so the whole house matches.
 - `tools/hooks/build-check.sh`: a Claude Code Stop hook (set in `../.claude/settings.json`) that builds the

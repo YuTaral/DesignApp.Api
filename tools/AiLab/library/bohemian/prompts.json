@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana-2",
+  "editModel": "fal-ai/nano-banana-2/edit",
+  "resolution": "2K",
+  "aspectRatio": "4:3",
+  "pricePerImage": 0.12,
+  "style": "Bohemian style: warm terracotta and cream walls, a honey wooden floor, a white ceiling with a rattan pendant, arched windows, rattan and cane furniture, layered patterned kilim rugs, macramé, warm earthy colours of rust, ochre, olive and deep pink, many green plants in woven baskets. Warm golden daylight. Photorealistic real-estate interior photograph, eye-level wide-angle shot from a corner of the room, showing the floor, two walls and the ceiling. Every piece of furniture stands on its own with some clear space around it, nothing overlapping. No people, no text, no logos, no watermark.",
+  "sameHouse": "The reference photo shows another room of the same house. Keep exactly the same floor, wall colours and finishes, ceiling, window style, light, colour palette and furniture style, and the same camera height and lens.",
+  "rooms": [
+    { "id": "living-room", "title": "Living room", "prompt": "A rust velvet three-seat sofa with patterned cushions, a rattan peacock armchair, a low round carved wooden coffee table, a large kilim rug, a rattan floor lamp, a low wooden TV console with a TV, a pouf, a tall plant in a woven basket and a macramé wall hanging." },
+    { "id": "kitchen", "title": "Kitchen", "prompt": "Olive green base cabinets and open wooden shelves with pottery, a wooden countertop, a ceramic sink with a brass faucet, a cooktop under a range hood, a built-in oven, a cream refrigerator, patterned cement backsplash tiles, a kitchen island with three rattan bar stools and two woven pendant lights above it." },
+    { "id": "dining-room", "title": "Dining room", "prompt": "A round wooden dining table with six rattan chairs, a large woven pendant lamp above the table, a carved wooden sideboard with a vase on it, a kilim rug under the table, a macramé wall hanging and a tall plant in a basket." },
+    { "id": "bedroom", "title": "Bedroom", "prompt": "A low wooden bed with deep pink and ochre bedding, patterned pillows and a throw, two rattan bedside tables with a lamp on each, a carved wooden wardrobe, a kilim rug beside the bed, a rattan hanging chair in the corner and a macramé hanging above the bed." },
+    { "id": "bathroom", "title": "Bathroom", "prompt": "A wooden vanity with a ceramic basin and an arched rattan mirror above it, a white toilet, a walk-in shower with a glass screen, a white bathtub, a wooden ladder with striped towels, patterned zellige tiled walls, a small rug and a hanging plant." },
+    { "id": "home-office", "title": "Home office", "prompt": "A wooden desk with a computer monitor and a rattan desk lamp, a cane office chair, a tall wooden bookshelf with books, baskets and plants, a kilim rug under the desk, a tall plant in a basket and a pinboard on the wall." },
+    { "id": "kids-room", "title": "Kid's room", "prompt": "A wooden single bed with a patterned duvet, a low shelf with woven toy baskets, a small desk with a rattan chair, a round jute rug, a wooden toy chest, a teepee in the corner, a reading lamp and a framed animal print on the wall." }
+  ]
+}

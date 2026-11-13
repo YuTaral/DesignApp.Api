@@ -643,6 +643,27 @@ public static class Constants
 
         /// <summary>A layout's size and objects: <c>&lt;room&gt;/&lt;layout&gt;.objects.json</c>.</summary>
         public const string ObjectsSuffix = ".objects.json";
+
+        /// <summary>The width of a layout's thumbnail, in pixels: sharp in a tile on a high-density screen.</summary>
+        public const int ThumbnailWidth = 640;
+
+        /// <summary>The JPEG quality of a thumbnail or a cover (0-100).</summary>
+        public const int ThumbnailQuality = 80;
+
+        /// <summary>A design's cover shows this many rooms per row.</summary>
+        public const int CoverColumns = 3;
+
+        /// <summary>A design's cover shows this many rows of rooms.</summary>
+        public const int CoverRows = 2;
+
+        /// <summary>The width of one room in a cover, in pixels.</summary>
+        public const int CoverCellWidth = 400;
+
+        /// <summary>The height of one room in a cover, in pixels (the photos' 4:3).</summary>
+        public const int CoverCellHeight = 300;
+
+        /// <summary>The gap between the rooms of a cover, in pixels.</summary>
+        public const int CoverGap = 4;
     }
 
     /// <summary>Pixel work: masks, label maps and encoding.</summary>

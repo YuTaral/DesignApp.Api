@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "cream plaster back wall",
+      "category": "Wall",
+      "x": 0.02001953125,
+      "y": 0.08829300196206671,
+      "width": 0.548828125,
+      "height": 0.6030085022890779,
+      "color": "#D9B38A",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "terracotta right wall",
+      "category": "Wall",
+      "x": 0.525390625,
+      "y": 0.13996075866579463,
+      "width": 0.474609375,
+      "height": 0.5964682799215173,
+      "color": "#B67046",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.04833984375,
+      "height": 0.8672334859385219,
+      "color": "#B19570",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "honey oak plank floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6671026814911707,
+      "width": 1,
+      "height": 0.3328973185088293,
+      "color": "#A25D24",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.00341796875,
+      "y": 0,
+      "width": 0.99658203125,
+      "height": 0.2858077174623937,
+      "color": "#D7B492",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left ceiling beam",
+      "category": "Fixture",
+      "x": 0.24755859375,
+      "y": 0,
+      "width": 0.23828125,
+      "height": 0.20601700457815567,
+      "color": "#A97D53",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "right ceiling beam",
+      "category": "Fixture",
+      "x": 0.42236328125,
+      "y": 0,
+      "width": 0.52783203125,
+      "height": 0.2596468279921517,
+      "color": "#B48860",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "carved wooden wardrobe",
+      "category": "Furniture",
+      "x": 0.04052734375,
+      "y": 0.30150425114453894,
+      "width": 0.2177734375,
+      "height": 0.44931327665140613,
+      "color": "#7C4720",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.46630859375,
+      "y": 0.027468933943754086,
+      "width": 0.13134765625,
+      "height": 0.24787442773054283,
+      "color": "#AF7747",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden bed frame",
+      "category": "Furniture",
+      "x": 0.3232421875,
+      "y": 0.540222367560497,
+      "width": 0.39013671875,
+      "height": 0.2805755395683453,
+      "color": "#6E2D0D",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "pink and mustard bedding",
+      "category": "Textile",
+      "x": 0.3486328125,
+      "y": 0.566383257030739,
+      "width": 0.37548828125,
+      "height": 0.22040549378678875,
+      "color": "#A9524D",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "bed pillows",
+      "category": "Textile",
+      "x": 0.3466796875,
+      "y": 0.52648790058862,
+      "width": 0.1865234375,
+      "height": 0.07782864617396991,
+      "color": "#A65529",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left rattan nightstand",
+      "category": "Furniture",
+      "x": 0.255859375,
+      "y": 0.5886200130804448,
+      "width": 0.08642578125,
+      "height": 0.1379986919555265,
+      "color": "#6D3617",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "left table lamp",
+      "category": "Lighting",
+      "x": 0.27001953125,
+      "y": 0.4918247220405494,
+      "width": 0.052734375,
+      "height": 0.10725964682799215,
+      "color": "#E89D56",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "macrame wall hanging",
+      "category": "Decor",
+      "x": 0.3486328125,
+      "y": 0.33616742969260954,
+      "width": 0.12548828125,
+      "height": 0.18901242642249835,
+      "color": "#CFAA88",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.61181640625,
+      "y": 0.3080444735120994,
+      "width": 0.09765625,
+      "height": 0.2923479398299542,
+      "color": "#F4EED5",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.76025390625,
+      "y": 0.2603008502289078,
+      "width": 0.16455078125,
+      "height": 0.36102027468933945,
+      "color": "#F0EACE",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "hanging rattan chair",
+      "category": "Furniture",
+      "x": 0.8427734375,
+      "y": 0.05493786788750817,
+      "width": 0.1572265625,
+      "height": 0.658600392413342,
+      "color": "#AA6A3C",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left kilim rug",
+      "category": "Textile",
+      "x": 0.24169921875,
+      "y": 0.7135382603008502,
+      "width": 0.28564453125,
+      "height": 0.197514715500327,
+      "color": "#793819",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right kilim rug",
+      "category": "Textile",
+      "x": 0.49267578125,
+      "y": 0.7253106605624591,
+      "width": 0.45556640625,
+      "height": 0.27468933943754087,
+      "color": "#AF7462",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "monstera plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.6213211249182472,
+      "width": 0.1572265625,
+      "height": 0.17004578155657293,
+      "color": "#3D340C",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "woven basket",
+      "category": "Decor",
+      "x": 0.015625,
+      "y": 0.7652060170045781,
+      "width": 0.10693359375,
+      "height": 0.11510791366906475,
+      "color": "#74431E",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "white skirting board",
+      "category": "Fixture",
+      "x": 0.71923828125,
+      "y": 0.671680837148463,
+      "width": 0.28076171875,
+      "height": 0.08502289077828647,
+      "color": "#B07A53",
+      "hand": false
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "honey hardwood floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6664486592544147,
+      "width": 1,
+      "height": 0.33355134074558535,
+      "color": "#BA7946",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.54150390625,
+      "y": 0,
+      "width": 0.45849609375,
+      "height": 0.7455853499018966,
+      "color": "#D3B6A4",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "terracotta painted back wall",
+      "category": "Wall",
+      "x": 0.06298828125,
+      "y": 0.16154349247874428,
+      "width": 0.4814453125,
+      "height": 0.5336821451929366,
+      "color": "#B0673B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "terracotta painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.0771484375,
+      "height": 0.8933943754087639,
+      "color": "#D09F88",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0.02587890625,
+      "y": 0,
+      "width": 0.97412109375,
+      "height": 0.2668410725964683,
+      "color": "#D2AA85",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "ceiling beams",
+      "category": "Other",
+      "x": 0.0283203125,
+      "y": 0,
+      "width": 0.76953125,
+      "height": 0.21517331589274036,
+      "color": "#B2845C",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.1904296875,
+      "y": 0.2596468279921517,
+      "width": 0.1416015625,
+      "height": 0.34728580771746237,
+      "color": "#F0E6CA",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.3779296875,
+      "y": 0.2923479398299542,
+      "width": 0.10009765625,
+      "height": 0.249836494440811,
+      "color": "#EEE5C5",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.40869140625,
+      "y": 0.011118378024852845,
+      "width": 0.12548828125,
+      "height": 0.23675604970569,
+      "color": "#A46A3C",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "round wooden dining table",
+      "category": "Furniture",
+      "x": 0.3544921875,
+      "y": 0.5434924787442773,
+      "width": 0.28857421875,
+      "height": 0.2517985611510791,
+      "color": "#D0996D",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "carved wooden sideboard",
+      "category": "Furniture",
+      "x": 0.23974609375,
+      "y": 0.5376062786134729,
+      "width": 0.23876953125,
+      "height": 0.15761935905820798,
+      "color": "#733D1C",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "terracotta vase",
+      "category": "Decor",
+      "x": 0.34130859375,
+      "y": 0.4565075212557227,
+      "width": 0.052734375,
+      "height": 0.09287115761935906,
+      "color": "#8A5731",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "macrame wall hanging",
+      "category": "Textile",
+      "x": 0.6748046875,
+      "y": 0.24918247220405493,
+      "width": 0.1279296875,
+      "height": 0.33093525179856115,
+      "color": "#BA916F",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.8466796875,
+      "y": 0.21648136036625246,
+      "width": 0.1533203125,
+      "height": 0.4807063440156965,
+      "color": "#393508",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "woven basket planter",
+      "category": "Decor",
+      "x": 0.87744140625,
+      "y": 0.6474820143884892,
+      "width": 0.12255859375,
+      "height": 0.18247220405493786,
+      "color": "#623217",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "patterned kilim rug under table",
+      "category": "Textile",
+      "x": 0.18505859375,
+      "y": 0.6880313930673643,
+      "width": 0.59423828125,
+      "height": 0.30869849574885544,
+      "color": "#98654D",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "red kilim runner rug",
+      "category": "Textile",
+      "x": 0.31103515625,
+      "y": 0.7959450621321125,
+      "width": 0.68896484375,
+      "height": 0.2040549378678875,
+      "color": "#7A3722",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "left corner rattan chair",
+      "category": "Furniture",
+      "x": 0.07177734375,
+      "y": 0.5454545454545454,
+      "width": 0.1162109375,
+      "height": 0.18443427076520602,
+      "color": "#944E1D",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "front center rattan chair",
+      "category": "Furniture",
+      "x": 0.39697265625,
+      "y": 0.6200130804447351,
+      "width": 0.140625,
+      "height": 0.2864617396991498,
+      "color": "#7B3E14",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "front right rattan chair",
+      "category": "Furniture",
+      "x": 0.52490234375,
+      "y": 0.606278613472858,
+      "width": 0.1572265625,
+      "height": 0.29038587311968606,
+      "color": "#763C14",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "front left rattan chair",
+      "category": "Furniture",
+      "x": 0.283203125,
+      "y": 0.5912361020274689,
+      "width": 0.1328125,
+      "height": 0.275997383911053,
+      "color": "#8B4F29",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "back left rattan chair",
+      "category": "Furniture",
+      "x": 0.3076171875,
+      "y": 0.5644211903204709,
+      "width": 0.09765625,
+      "height": 0.12884238064094178,
+      "color": "#9B5F33",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "right side rattan chair",
+      "category": "Furniture",
+      "x": 0.66162109375,
+      "y": 0.5748855461085677,
+      "width": 0.0595703125,
+      "height": 0.23741007194244604,
+      "color": "#905B3A",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "back right rattan chair",
+      "category": "Furniture",
+      "x": 0.5595703125,
+      "y": 0.5533028122956181,
+      "width": 0.10546875,
+      "height": 0.144538914323087,
+      "color": "#B6896D",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "far back rattan chairs",
+      "category": "Furniture",
+      "x": 0.51171875,
+      "y": 0.5225637671680837,
+      "width": 0.0498046875,
+      "height": 0.052975801177240024,
+      "color": "#A96A34",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "small potted plant",
+      "category": "Decor",
+      "x": 0.4775390625,
+      "y": 0.5304120340091563,
+      "width": 0.04150390625,
+      "height": 0.06801831262262917,
+      "color": "#7A451A",
+      "hand": false
+    }
+  ]
+}

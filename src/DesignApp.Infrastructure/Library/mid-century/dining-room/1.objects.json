@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.658600392413342,
+      "width": 1,
+      "height": 0.34139960758665794,
+      "color": "#AA744A",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.28515369522563766,
+      "color": "#C4AB94",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.2099609375,
+      "y": 0.2014388489208633,
+      "width": 0.6220703125,
+      "height": 0.49313276651406146,
+      "color": "#C9B6A6",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04708960104643558,
+      "width": 0.2265625,
+      "height": 0.7939829954218444,
+      "color": "#857E65",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.79541015625,
+      "y": 0.5637671680837149,
+      "width": 0.20458984375,
+      "height": 0.24133420536298233,
+      "color": "#BEA085",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.15869140625,
+      "y": 0.7089601046435579,
+      "width": 0.74462890625,
+      "height": 0.16873773708306083,
+      "color": "#9A8878",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "teak sideboard",
+      "category": "Furniture",
+      "x": 0.0302734375,
+      "y": 0.5578809679529104,
+      "width": 0.232421875,
+      "height": 0.24918247220405493,
+      "color": "#7C472A",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "oval teak dining table",
+      "category": "Furniture",
+      "x": 0.3515625,
+      "y": 0.5703073904512753,
+      "width": 0.36962890625,
+      "height": 0.2393721386527142,
+      "color": "#A4795E",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left dining chair",
+      "category": "Furniture",
+      "x": 0.31396484375,
+      "y": 0.5860039241334205,
+      "width": 0.09130859375,
+      "height": 0.2119032047089601,
+      "color": "#5A3520",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front left dining chair",
+      "category": "Furniture",
+      "x": 0.41455078125,
+      "y": 0.6128188358404185,
+      "width": 0.1064453125,
+      "height": 0.2315238718116416,
+      "color": "#5E2F17",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "front right dining chair",
+      "category": "Furniture",
+      "x": 0.5498046875,
+      "y": 0.6128188358404185,
+      "width": 0.10888671875,
+      "height": 0.2302158273381295,
+      "color": "#6C3A1F",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right dining chair",
+      "category": "Furniture",
+      "x": 0.65625,
+      "y": 0.5833878351863964,
+      "width": 0.11083984375,
+      "height": 0.22563767168083715,
+      "color": "#88563C",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "brass sputnik chandelier",
+      "category": "Lighting",
+      "x": 0.427734375,
+      "y": 0.06736429038587312,
+      "width": 0.1767578125,
+      "height": 0.30935251798561153,
+      "color": "#C4AA8E",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "back wooden window",
+      "category": "Opening",
+      "x": 0.60205078125,
+      "y": 0.2884238064094179,
+      "width": 0.22021484375,
+      "height": 0.2812295618051014,
+      "color": "#BDAA8E",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.82177734375,
+      "y": 0.18443427076520602,
+      "width": 0.17822265625,
+      "height": 0.4349247874427731,
+      "color": "#C9AE8C",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "abstract framed art",
+      "category": "Decor",
+      "x": 0.07421875,
+      "y": 0.2262916939175932,
+      "width": 0.091796875,
+      "height": 0.30608240680183124,
+      "color": "#B68E7B",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.7373046875,
+      "y": 0.3649444081098757,
+      "width": 0.10986328125,
+      "height": 0.2838456507521256,
+      "color": "#6E702D",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "cream plant pot",
+      "category": "Decor",
+      "x": 0.75244140625,
+      "y": 0.6383257030739045,
+      "width": 0.0673828125,
+      "height": 0.07979071288423806,
+      "color": "#A27C59",
+      "hand": false
+    }
+  ]
+}

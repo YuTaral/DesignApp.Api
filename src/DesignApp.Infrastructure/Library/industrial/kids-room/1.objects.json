@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.50146484375,
+      "y": 0.2786134728580772,
+      "width": 0.40283203125,
+      "height": 0.41465009810333553,
+      "color": "#725249",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5126953125,
+      "height": 0.8528449967298888,
+      "color": "#482F2B",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.904296875,
+      "y": 0.02419882275997384,
+      "width": 0.095703125,
+      "height": 0.6527141922825376,
+      "color": "#726863",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "dark wood plank ceiling",
+      "category": "Ceiling",
+      "x": 0.02197265625,
+      "y": 0,
+      "width": 0.97802734375,
+      "height": 0.328973185088293,
+      "color": "#24201F",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6481360366252452,
+      "width": 0.98974609375,
+      "height": 0.35186396337475473,
+      "color": "#878078",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.15696533682145192,
+      "width": 0.2421875,
+      "height": 0.4708960104643558,
+      "color": "#F0EDF2",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "center window",
+      "category": "Opening",
+      "x": 0.33349609375,
+      "y": 0.2753433616742969,
+      "width": 0.140625,
+      "height": 0.2969260954872466,
+      "color": "#EFEBEE",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "round jute rug",
+      "category": "Textile",
+      "x": 0.31787109375,
+      "y": 0.7527795945062132,
+      "width": 0.376953125,
+      "height": 0.18705035971223022,
+      "color": "#C0AB9A",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "metal frame bed",
+      "category": "Furniture",
+      "x": 0.43017578125,
+      "y": 0.513407455853499,
+      "width": 0.294921875,
+      "height": 0.2223675604970569,
+      "color": "#8C7A74",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "animal print bedding",
+      "category": "Textile",
+      "x": 0.44091796875,
+      "y": 0.5860039241334205,
+      "width": 0.28662109375,
+      "height": 0.11903204708960105,
+      "color": "#B8AEAD",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "storage shelf unit",
+      "category": "Furniture",
+      "x": 0.205078125,
+      "y": 0.5552648790058862,
+      "width": 0.22802734375,
+      "height": 0.22825376062786135,
+      "color": "#2C2525",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "wooden trunk",
+      "category": "Furniture",
+      "x": 0.02734375,
+      "y": 0.696533682145193,
+      "width": 0.18994140625,
+      "height": 0.16546762589928057,
+      "color": "#402517",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.072265625,
+      "y": 0.5467625899280576,
+      "width": 0.08935546875,
+      "height": 0.18116415958142576,
+      "color": "#61632A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.82470703125,
+      "y": 0.5689993459777632,
+      "width": 0.17529296875,
+      "height": 0.43100065402223675,
+      "color": "#34241C",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "wooden chair",
+      "category": "Furniture",
+      "x": 0.7529296875,
+      "y": 0.6285153695225638,
+      "width": 0.15478515625,
+      "height": 0.2831916285153695,
+      "color": "#553F34",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "fox framed picture",
+      "category": "Decor",
+      "x": 0.72314453125,
+      "y": 0.3969914977109222,
+      "width": 0.0732421875,
+      "height": 0.131458469587966,
+      "color": "#BDB8BE",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "cage desk lamp",
+      "category": "Lighting",
+      "x": 0.9091796875,
+      "y": 0.49051667756703726,
+      "width": 0.0849609375,
+      "height": 0.18051013734466972,
+      "color": "#634C42",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "track pendant lights",
+      "category": "Lighting",
+      "x": 0.52978515625,
+      "y": 0.16481360366252454,
+      "width": 0.1611328125,
+      "height": 0.06540222367560497,
+      "color": "#613E2C",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "black steel beam",
+      "category": "Fixture",
+      "x": 0.28515625,
+      "y": 0,
+      "width": 0.60009765625,
+      "height": 0.22432962720732505,
+      "color": "#161414",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "ventilation duct",
+      "category": "Fixture",
+      "x": 0.548828125,
+      "y": 0.21517331589274036,
+      "width": 0.39697265625,
+      "height": 0.1393067364290386,
+      "color": "#1D1818",
+      "hand": false
+    }
+  ]
+}

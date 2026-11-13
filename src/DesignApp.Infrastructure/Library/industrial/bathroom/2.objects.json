@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.2529296875,
+      "y": 0.23479398299542184,
+      "width": 0.49267578125,
+      "height": 0.5068672334859385,
+      "color": "#5F4137",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick right wall",
+      "category": "Wall",
+      "x": 0.7275390625,
+      "y": 0,
+      "width": 0.2724609375,
+      "height": 0.9601046435578809,
+      "color": "#765448",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.28662109375,
+      "height": 0.9005886200130805,
+      "color": "#412D2A",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7122302158273381,
+      "width": 1,
+      "height": 0.28776978417266186,
+      "color": "#77716A",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "black wood plank ceiling",
+      "category": "Ceiling",
+      "x": 0.17138671875,
+      "y": 0,
+      "width": 0.7197265625,
+      "height": 0.24525833878351863,
+      "color": "#1E1918",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "large grid window",
+      "category": "Opening",
+      "x": 0.01318359375,
+      "y": 0.08829300196206671,
+      "width": 0.21044921875,
+      "height": 0.5846958796599084,
+      "color": "#E8E3E7",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "white freestanding bathtub",
+      "category": "Fixture",
+      "x": 0.11181640625,
+      "y": 0.6468279921517331,
+      "width": 0.23876953125,
+      "height": 0.24525833878351863,
+      "color": "#AEB1BB",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "black tub faucet",
+      "category": "Fixture",
+      "x": 0.13916015625,
+      "y": 0.5552648790058862,
+      "width": 0.0810546875,
+      "height": 0.16023544800523218,
+      "color": "#5D4B4B",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "black tile shower enclosure",
+      "category": "Fixture",
+      "x": 0.24853515625,
+      "y": 0.3263570961412688,
+      "width": 0.2607421875,
+      "height": 0.4316546762589928,
+      "color": "#302F33",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden vanity",
+      "category": "Furniture",
+      "x": 0.72998046875,
+      "y": 0.6389797253106606,
+      "width": 0.2578125,
+      "height": 0.31916285153695223,
+      "color": "#402C1E",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "concrete vanity top",
+      "category": "Fixture",
+      "x": 0.72265625,
+      "y": 0.5846958796599084,
+      "width": 0.26513671875,
+      "height": 0.1105297580117724,
+      "color": "#5D534E",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "concrete sink basin",
+      "category": "Fixture",
+      "x": 0.796875,
+      "y": 0.5716154349247874,
+      "width": 0.109375,
+      "height": 0.08306082406801832,
+      "color": "#49423F",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "round black mirror",
+      "category": "Decor",
+      "x": 0.81103515625,
+      "y": 0.27207325049051667,
+      "width": 0.138671875,
+      "height": 0.2622629169391759,
+      "color": "#4D362B",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.66796875,
+      "y": 0.6514061478090255,
+      "width": 0.06591796875,
+      "height": 0.09810333551340746,
+      "color": "#BAB9BF",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "towel ladder",
+      "category": "Furniture",
+      "x": 0.55224609375,
+      "y": 0.4617396991497711,
+      "width": 0.0712890625,
+      "height": 0.2668410725964683,
+      "color": "#4F3D38",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "grey towel on ladder",
+      "category": "Textile",
+      "x": 0.564453125,
+      "y": 0.48724656638325703,
+      "width": 0.04541015625,
+      "height": 0.1118378024852845,
+      "color": "#6B666D",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "white towel on ladder",
+      "category": "Textile",
+      "x": 0.56201171875,
+      "y": 0.5964682799215173,
+      "width": 0.05078125,
+      "height": 0.07063440156965337,
+      "color": "#C1C0CB",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "folded towels on shelf",
+      "category": "Textile",
+      "x": 0.7529296875,
+      "y": 0.7462393721386528,
+      "width": 0.07666015625,
+      "height": 0.10464355788096795,
+      "color": "#93919D",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "potted snake plant",
+      "category": "Decor",
+      "x": 0.89794921875,
+      "y": 0.5042511445389143,
+      "width": 0.07080078125,
+      "height": 0.16415958142576847,
+      "color": "#5B5439",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "track light with bulbs",
+      "category": "Lighting",
+      "x": 0.36279296875,
+      "y": 0.04643557880967953,
+      "width": 0.23681640625,
+      "height": 0.06932635709614127,
+      "color": "#3F291E",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "right wall sconce",
+      "category": "Lighting",
+      "x": 0.93408203125,
+      "y": 0.2831916285153695,
+      "width": 0.05029296875,
+      "height": 0.10464355788096795,
+      "color": "#5E3829",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "black ventilation duct",
+      "category": "Fixture",
+      "x": 0.33984375,
+      "y": 0.20732504905166776,
+      "width": 0.4267578125,
+      "height": 0.07063440156965337,
+      "color": "#1C1514",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "black pipes",
+      "category": "Fixture",
+      "x": 0.31494140625,
+      "y": 0,
+      "width": 0.59716796875,
+      "height": 0.1393067364290386,
+      "color": "#241E1C",
+      "hand": false
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "honey oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6291693917593199,
+      "width": 1,
+      "height": 0.3708306082406802,
+      "color": "#B27139",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "terracotta painted back wall",
+      "category": "Wall",
+      "x": 0.06201171875,
+      "y": 0.16023544800523218,
+      "width": 0.482421875,
+      "height": 0.5009810333551341,
+      "color": "#B36A3D",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.5419921875,
+      "y": 0.02485284499672989,
+      "width": 0.4580078125,
+      "height": 0.6173969914977109,
+      "color": "#D4B99A",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "terracotta left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.06884765625,
+      "height": 0.8652714192282538,
+      "color": "#CF9E7D",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0.06005859375,
+      "y": 0,
+      "width": 0.93994140625,
+      "height": 0.2668410725964683,
+      "color": "#C79D75",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "ceiling beams",
+      "category": "Other",
+      "x": 0.02734375,
+      "y": 0,
+      "width": 0.9453125,
+      "height": 0.2393721386527142,
+      "color": "#C9A078",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.4072265625,
+      "y": 0.011118378024852845,
+      "width": 0.12841796875,
+      "height": 0.23741007194244604,
+      "color": "#A3693E",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.1904296875,
+      "y": 0.26357096141268804,
+      "width": 0.140625,
+      "height": 0.33878351863963374,
+      "color": "#F0E6CC",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.376953125,
+      "y": 0.2923479398299542,
+      "width": 0.1005859375,
+      "height": 0.2884238064094179,
+      "color": "#EEE5C4",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden single bed",
+      "category": "Furniture",
+      "x": 0.06591796875,
+      "y": 0.5081752779594506,
+      "width": 0.25634765625,
+      "height": 0.28776978417266186,
+      "color": "#783509",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "patterned bedding",
+      "category": "Textile",
+      "x": 0.0185546875,
+      "y": 0.5964682799215173,
+      "width": 0.318359375,
+      "height": 0.14911706998037932,
+      "color": "#8F532C",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "bed pillow",
+      "category": "Textile",
+      "x": 0.1103515625,
+      "y": 0.5369522563767168,
+      "width": 0.11572265625,
+      "height": 0.06801831262262917,
+      "color": "#A5623A",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "bolster cushion",
+      "category": "Textile",
+      "x": 0.1171875,
+      "y": 0.565729234793983,
+      "width": 0.107421875,
+      "height": 0.041203400915631135,
+      "color": "#8E4C1A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "round jute rug",
+      "category": "Textile",
+      "x": 0.36474609375,
+      "y": 0.6723348593852191,
+      "width": 0.3486328125,
+      "height": 0.15631131458469588,
+      "color": "#CEA787",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "kilim rug",
+      "category": "Textile",
+      "x": 0.259765625,
+      "y": 0.6599084368868542,
+      "width": 0.5166015625,
+      "height": 0.27665140614780903,
+      "color": "#AB7760",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden kids desk",
+      "category": "Furniture",
+      "x": 0.384765625,
+      "y": 0.5487246566383257,
+      "width": 0.08447265625,
+      "height": 0.11379986919555266,
+      "color": "#A46032",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "rattan chair",
+      "category": "Furniture",
+      "x": 0.4345703125,
+      "y": 0.5441465009810333,
+      "width": 0.08251953125,
+      "height": 0.12753433616742968,
+      "color": "#9C5A2A",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "wooden bookshelf",
+      "category": "Furniture",
+      "x": 0.58544921875,
+      "y": 0.5173315892740353,
+      "width": 0.15673828125,
+      "height": 0.18639633747547416,
+      "color": "#794723",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "wooden toy chest",
+      "category": "Furniture",
+      "x": 0.71337890625,
+      "y": 0.6206671026814912,
+      "width": 0.134765625,
+      "height": 0.118378024852845,
+      "color": "#CE9869",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "llama framed picture",
+      "category": "Decor",
+      "x": 0.76513671875,
+      "y": 0.3211249182472204,
+      "width": 0.08984375,
+      "height": 0.17331589274035317,
+      "color": "#D1B291",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "canvas teepee",
+      "category": "Furniture",
+      "x": 0.779296875,
+      "y": 0.3355134074558535,
+      "width": 0.220703125,
+      "height": 0.6298234139960759,
+      "color": "#A2734D",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "floor cushions",
+      "category": "Textile",
+      "x": 0.8369140625,
+      "y": 0.6847612818835841,
+      "width": 0.12841796875,
+      "height": 0.2014388489208633,
+      "color": "#663A14",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.4951171875,
+      "y": 0.3871811641595814,
+      "width": 0.078125,
+      "height": 0.25310660562459125,
+      "color": "#73551D",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "terracotta vase with plant",
+      "category": "Decor",
+      "x": 0.54248046875,
+      "y": 0.46108567691301505,
+      "width": 0.05126953125,
+      "height": 0.19032047089601045,
+      "color": "#7A4C27",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "snake plant in basket",
+      "category": "Decor",
+      "x": 0.33203125,
+      "y": 0.5238718116415958,
+      "width": 0.06591796875,
+      "height": 0.14257684761281883,
+      "color": "#955A25",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "monstera in basket",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.6173969914977109,
+      "width": 0.16064453125,
+      "height": 0.2818835840418574,
+      "color": "#4B2C07",
+      "hand": false
+    },
+    {
+      "index": 27,
+      "label": "small plant on shelf",
+      "category": "Decor",
+      "x": 0.60986328125,
+      "y": 0.421190320470896,
+      "width": 0.0478515625,
+      "height": 0.1039895356442119,
+      "color": "#6F5A25",
+      "hand": false
+    }
+  ]
+}

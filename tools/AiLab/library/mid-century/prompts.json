@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana-2",
+  "editModel": "fal-ai/nano-banana-2/edit",
+  "resolution": "2K",
+  "aspectRatio": "4:3",
+  "pricePerImage": 0.12,
+  "style": "Mid-century modern style from the 1950s and 60s: warm teak and walnut wood, tapered legs, a herringbone oak floor, warm off-white walls with one wall in muted sage green, a white ceiling, large windows, accents in mustard yellow, burnt orange and teal, sculptural brass and globe lamps, a few green plants. Warm afternoon daylight. Photorealistic real-estate interior photograph, eye-level wide-angle shot from a corner of the room, showing the floor, two walls and the ceiling. Uncluttered: every piece of furniture stands on its own with clear space around it, nothing overlapping. No people, no text, no logos, no watermark.",
+  "sameHouse": "The reference photo shows another room of the same house. Keep exactly the same floor, wall colours and finishes, ceiling, window style, light, colour palette and furniture style, and the same camera height and lens.",
+  "rooms": [
+    { "id": "living-room", "title": "Living room", "prompt": "A low teal three-seat sofa on tapered legs, a mustard lounge chair, an oval walnut coffee table, a geometric rug, a brass arc floor lamp, a long low teak credenza with a TV on it, a small round side table, a potted plant and one framed abstract print on the wall." },
+    { "id": "kitchen", "title": "Kitchen", "prompt": "Walnut flat-front base and wall cabinets, a white countertop, a sink with a brass faucet, a cooktop under a range hood, a built-in oven, a pastel refrigerator, a kitchen island with three bar stools on tapered legs and two globe pendant lights above it." },
+    { "id": "dining-room", "title": "Dining room", "prompt": "An oval teak dining table with six moulded chairs, a sputnik brass pendant lamp above the table, a long teak sideboard with a vase on it, a rug under the table, a framed abstract print and a potted plant." },
+    { "id": "bedroom", "title": "Bedroom", "prompt": "A low walnut bed with mustard and white bedding, pillows and a throw, two teak bedside tables with a mushroom lamp on each, a tall teak wardrobe, a rug beside the bed, an orange lounge chair in the corner and a framed print above the bed." },
+    { "id": "bathroom", "title": "Bathroom", "prompt": "A teak floating vanity with a basin and a round brass-framed mirror above it, a white toilet, a walk-in shower with a glass screen, a white bathtub, a brass towel rail with towels, sage green tiled walls and a small plant." },
+    { "id": "home-office", "title": "Home office", "prompt": "A walnut writing desk on tapered legs with a computer monitor and a brass desk lamp, a moulded office chair, a teak wall shelf unit with books and boxes, a rug under the desk, a potted plant and a pinboard on the wall." },
+    { "id": "kids-room", "title": "Kid's room", "prompt": "A teak single bed with a patterned duvet in mustard and teal, a low shelf with toy boxes, a small desk with a chair on tapered legs, a round rug, a wooden toy chest, a globe reading lamp and a framed animal print on the wall." }
+  ]
+}

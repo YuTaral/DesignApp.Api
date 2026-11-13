@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.22607421875,
+      "y": 0.21124918247220406,
+      "width": 0.619140625,
+      "height": 0.4748201438848921,
+      "color": "#CEB7A2",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04774362328319163,
+      "width": 0.2265625,
+      "height": 0.6926095487246566,
+      "color": "#93917F",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.7900390625,
+      "y": 0.15434924787442772,
+      "width": 0.2099609375,
+      "height": 0.6514061478090255,
+      "color": "#C6A88D",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0.00244140625,
+      "y": 0,
+      "width": 0.99755859375,
+      "height": 0.2302158273381295,
+      "color": "#C1A890",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0.01123046875,
+      "y": 0.6671026814911707,
+      "width": 0.98876953125,
+      "height": 0.3328973185088293,
+      "color": "#BF8E66",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "jute round rug",
+      "category": "Textile",
+      "x": 0.25537109375,
+      "y": 0.8489208633093526,
+      "width": 0.60009765625,
+      "height": 0.1510791366906475,
+      "color": "#C19E7E",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "wooden bed frame",
+      "category": "Furniture",
+      "x": 0.1689453125,
+      "y": 0.52648790058862,
+      "width": 0.267578125,
+      "height": 0.30150425114453894,
+      "color": "#54230B",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "patterned duvet",
+      "category": "Textile",
+      "x": 0.15234375,
+      "y": 0.5971223021582733,
+      "width": 0.2880859375,
+      "height": 0.18378024852844996,
+      "color": "#A48D76",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "mustard pillow",
+      "category": "Textile",
+      "x": 0.29541015625,
+      "y": 0.5441465009810333,
+      "width": 0.11376953125,
+      "height": 0.06671026814911707,
+      "color": "#B27A32",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden storage shelf",
+      "category": "Furniture",
+      "x": 0,
+      "y": 0.697841726618705,
+      "width": 0.16943359375,
+      "height": 0.302158273381295,
+      "color": "#744E32",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "yellow fabric bin",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.7985611510791367,
+      "width": 0.05859375,
+      "height": 0.16873773708306083,
+      "color": "#BA8639",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "blue fabric bin",
+      "category": "Decor",
+      "x": 0.0703125,
+      "y": 0.7580117724002616,
+      "width": 0.04541015625,
+      "height": 0.1458469587965991,
+      "color": "#487B84",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "orange fabric bin",
+      "category": "Decor",
+      "x": 0.123046875,
+      "y": 0.7272727272727273,
+      "width": 0.037109375,
+      "height": 0.1236102027468934,
+      "color": "#BD5E3E",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "wooden toy chest",
+      "category": "Furniture",
+      "x": 0.57763671875,
+      "y": 0.6134728580771747,
+      "width": 0.14111328125,
+      "height": 0.1026814911706998,
+      "color": "#9C5229",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.765625,
+      "y": 0.631785480706344,
+      "width": 0.21875,
+      "height": 0.2393721386527142,
+      "color": "#6F3C23",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden chair",
+      "category": "Furniture",
+      "x": 0.736328125,
+      "y": 0.6415958142576847,
+      "width": 0.09814453125,
+      "height": 0.2001308044473512,
+      "color": "#67331A",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "back wooden window",
+      "category": "Opening",
+      "x": 0.60498046875,
+      "y": 0.2884238064094179,
+      "width": 0.21142578125,
+      "height": 0.2812295618051014,
+      "color": "#BFAF91",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.82666015625,
+      "y": 0.20209287115761937,
+      "width": 0.17333984375,
+      "height": 0.4395029431000654,
+      "color": "#CCB18F",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left fox poster",
+      "category": "Decor",
+      "x": 0.02099609375,
+      "y": 0.22432962720732505,
+      "width": 0.08544921875,
+      "height": 0.26095487246566385,
+      "color": "#B89C7F",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "center fox poster",
+      "category": "Decor",
+      "x": 0.318359375,
+      "y": 0.3342053629823414,
+      "width": 0.08154296875,
+      "height": 0.14780902550686723,
+      "color": "#726553",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.474609375,
+      "y": 0.059516023544800525,
+      "width": 0.08154296875,
+      "height": 0.051667756703727925,
+      "color": "#A9937A",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "globe",
+      "category": "Decor",
+      "x": 0.8232421875,
+      "y": 0.5461085676913014,
+      "width": 0.07177734375,
+      "height": 0.1000654022236756,
+      "color": "#DAB996",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "crown molding",
+      "category": "Other",
+      "x": 0,
+      "y": 0,
+      "width": 0.2333984375,
+      "height": 0.23086984957488554,
+      "color": "#B7A38B",
+      "hand": false
+    }
+  ]
+}

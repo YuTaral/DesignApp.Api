@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6684107259646828,
+      "width": 1,
+      "height": 0.3315892740353172,
+      "color": "#AF794D",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.27141922825376064,
+      "color": "#C3AB93",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.21630859375,
+      "y": 0.21255722694571616,
+      "width": 0.6337890625,
+      "height": 0.4813603662524526,
+      "color": "#CBB9A8",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.2265625,
+      "height": 0.7658600392413342,
+      "color": "#89816A",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream right wall",
+      "category": "Wall",
+      "x": 0.7939453125,
+      "y": 0.5709614126880314,
+      "width": 0.2060546875,
+      "height": 0.2341399607586658,
+      "color": "#C4A68C",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.611328125,
+      "y": 0.2884238064094179,
+      "width": 0.208984375,
+      "height": 0.27665140614780903,
+      "color": "#BEAD90",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.806640625,
+      "y": 0.17789404839764553,
+      "width": 0.193359375,
+      "height": 0.45323741007194246,
+      "color": "#CBAD8A",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "teak sideboard",
+      "category": "Furniture",
+      "x": 0.03125,
+      "y": 0.5618051013734467,
+      "width": 0.23193359375,
+      "height": 0.24525833878351863,
+      "color": "#7F4627",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "oval dining table",
+      "category": "Furniture",
+      "x": 0.33544921875,
+      "y": 0.5696533682145193,
+      "width": 0.37451171875,
+      "height": 0.2393721386527142,
+      "color": "#AA7E63",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front left chair",
+      "category": "Furniture",
+      "x": 0.39990234375,
+      "y": 0.6121648136036625,
+      "width": 0.1044921875,
+      "height": 0.2289077828646174,
+      "color": "#5D3017",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "front right chair",
+      "category": "Furniture",
+      "x": 0.53271484375,
+      "y": 0.6108567691301504,
+      "width": 0.111328125,
+      "height": 0.22825376062786135,
+      "color": "#6A381D",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left chair",
+      "category": "Furniture",
+      "x": 0.29931640625,
+      "y": 0.5853499018966645,
+      "width": 0.1083984375,
+      "height": 0.2092871157619359,
+      "color": "#5E3A26",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "right chair",
+      "category": "Furniture",
+      "x": 0.6357421875,
+      "y": 0.5860039241334205,
+      "width": 0.1220703125,
+      "height": 0.2079790712884238,
+      "color": "#8C6045",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.14501953125,
+      "y": 0.7030739045127534,
+      "width": 0.70947265625,
+      "height": 0.16415958142576847,
+      "color": "#938271",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "brass sputnik chandelier",
+      "category": "Lighting",
+      "x": 0.41845703125,
+      "y": 0.08109875735775017,
+      "width": 0.19189453125,
+      "height": 0.2975801177240026,
+      "color": "#C4AC91",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "framed abstract art",
+      "category": "Decor",
+      "x": 0.02099609375,
+      "y": 0.22432962720732505,
+      "width": 0.0849609375,
+      "height": 0.2616088947024199,
+      "color": "#AE8472",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "small fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.7509765625,
+      "y": 0.43100065402223675,
+      "width": 0.08056640625,
+      "height": 0.17527795945062133,
+      "color": "#81853D",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "large fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.841796875,
+      "y": 0.3976455199476782,
+      "width": 0.134765625,
+      "height": 0.2779594506213211,
+      "color": "#474E11",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "small plant stand pot",
+      "category": "Furniture",
+      "x": 0.7646484375,
+      "y": 0.6017004578155657,
+      "width": 0.05322265625,
+      "height": 0.11249182472204054,
+      "color": "#A67A57",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "large plant stand pot",
+      "category": "Furniture",
+      "x": 0.875,
+      "y": 0.6638325703073904,
+      "width": 0.08349609375,
+      "height": 0.17985611510791366,
+      "color": "#694329",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "white skirting board",
+      "category": "Other",
+      "x": 0,
+      "y": 0.6697187704381949,
+      "width": 0.29541015625,
+      "height": 0.16285153695225638,
+      "color": "#AE9990",
+      "hand": false
+    }
+  ]
+}

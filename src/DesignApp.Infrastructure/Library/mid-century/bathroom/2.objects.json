@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7416612164813604,
+      "width": 1,
+      "height": 0.25833878351863965,
+      "color": "#AB7547",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "sage green painted back wall",
+      "category": "Wall",
+      "x": 0.2177734375,
+      "y": 0.22694571615434925,
+      "width": 0.6064453125,
+      "height": 0.5166775670372793,
+      "color": "#8E856A",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.041857423152387184,
+      "width": 0.2177734375,
+      "height": 0.8960104643557881,
+      "color": "#C3B29A",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2871157619359058,
+      "color": "#C3AB93",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white painted right wall",
+      "category": "Wall",
+      "x": 0.65087890625,
+      "y": 0.52648790058862,
+      "width": 0.2451171875,
+      "height": 0.1471550032701112,
+      "color": "#CDBFB3",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "sage shower tiles",
+      "category": "Wall",
+      "x": 0.1357421875,
+      "y": 0.22956180510137345,
+      "width": 0.20068359375,
+      "height": 0.5833878351863964,
+      "color": "#6E6B58",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "shower glass panel",
+      "category": "Opening",
+      "x": 0.32373046875,
+      "y": 0.2727272727272727,
+      "width": 0.05029296875,
+      "height": 0.5421844342707652,
+      "color": "#6C684C",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "teak floating vanity",
+      "category": "Furniture",
+      "x": 0.4033203125,
+      "y": 0.5618051013734467,
+      "width": 0.19384765625,
+      "height": 0.12753433616742968,
+      "color": "#83411A",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "round brass mirror",
+      "category": "Decor",
+      "x": 0.43017578125,
+      "y": 0.31916285153695223,
+      "width": 0.14111328125,
+      "height": 0.18705035971223022,
+      "color": "#BDA786",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "white vessel sink",
+      "category": "Fixture",
+      "x": 0.4609375,
+      "y": 0.5591890124264225,
+      "width": 0.078125,
+      "height": 0.041203400915631135,
+      "color": "#D3C3BC",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.677734375,
+      "y": 0.5755395683453237,
+      "width": 0.09521484375,
+      "height": 0.1948986265533028,
+      "color": "#C1AEA4",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "white freestanding bathtub",
+      "category": "Fixture",
+      "x": 0.74169921875,
+      "y": 0.6664486592544147,
+      "width": 0.25830078125,
+      "height": 0.302812295618051,
+      "color": "#A5846A",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left timber window",
+      "category": "Opening",
+      "x": 0.65087890625,
+      "y": 0.2884238064094179,
+      "width": 0.16943359375,
+      "height": 0.24133420536298233,
+      "color": "#BDAE94",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "right corner timber window",
+      "category": "Opening",
+      "x": 0.814453125,
+      "y": 0.17462393721386527,
+      "width": 0.185546875,
+      "height": 0.38194898626553303,
+      "color": "#D2C09F",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "sage green towel",
+      "category": "Textile",
+      "x": 0.03271484375,
+      "y": 0.5533028122956181,
+      "width": 0.06884765625,
+      "height": 0.24525833878351863,
+      "color": "#7A7C6D",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "mustard towel",
+      "category": "Textile",
+      "x": 0.09375,
+      "y": 0.5461085676913014,
+      "width": 0.04833984375,
+      "height": 0.21648136036625246,
+      "color": "#C18D44",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "brass shower set",
+      "category": "Fixture",
+      "x": 0.2509765625,
+      "y": 0.27992151733158926,
+      "width": 0.048828125,
+      "height": 0.33093525179856115,
+      "color": "#675F43",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "pothos plant",
+      "category": "Decor",
+      "x": 0.57666015625,
+      "y": 0.44015696533682147,
+      "width": 0.06640625,
+      "height": 0.12622629169391758,
+      "color": "#727430",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "sink backsplash tiles",
+      "category": "Wall",
+      "x": 0.4111328125,
+      "y": 0.513407455853499,
+      "width": 0.19287109375,
+      "height": 0.08240680183126227,
+      "color": "#8C8B7D",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right bath tiles",
+      "category": "Wall",
+      "x": 0.89404296875,
+      "y": 0.5428384565075213,
+      "width": 0.10595703125,
+      "height": 0.17527795945062133,
+      "color": "#878679",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.4716796875,
+      "y": 0.053629823413996074,
+      "width": 0.0810546875,
+      "height": 0.052321778940483975,
+      "color": "#AD9B82",
+      "hand": false
+    }
+  ]
+}

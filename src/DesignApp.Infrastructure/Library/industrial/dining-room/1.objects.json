@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5126953125,
+      "height": 0.8371484630477436,
+      "color": "#4B2F29",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.5068359375,
+      "y": 0.29038587311968606,
+      "width": 0.36181640625,
+      "height": 0.41007194244604317,
+      "color": "#75554A",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.8984375,
+      "y": 0.04970568999345978,
+      "width": 0.1015625,
+      "height": 0.7318508829300197,
+      "color": "#868282",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6729888816219751,
+      "width": 1,
+      "height": 0.3270111183780249,
+      "color": "#706962",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "black beamed ceiling",
+      "category": "Ceiling",
+      "x": 0.12060546875,
+      "y": 0,
+      "width": 0.87939453125,
+      "height": 0.25310660562459125,
+      "color": "#201C1D",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.1497710922171354,
+      "width": 0.2431640625,
+      "height": 0.4813603662524526,
+      "color": "#F4F0F7",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle window",
+      "category": "Opening",
+      "x": 0.333984375,
+      "y": 0.2753433616742969,
+      "width": 0.138671875,
+      "height": 0.30412034009156313,
+      "color": "#EDEAEE",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "wood dining table",
+      "category": "Furniture",
+      "x": 0.30224609375,
+      "y": 0.5820797907128843,
+      "width": 0.37451171875,
+      "height": 0.31196860693263573,
+      "color": "#6C5850",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "front left chair",
+      "category": "Furniture",
+      "x": 0.48828125,
+      "y": 0.6409417920209287,
+      "width": 0.1484375,
+      "height": 0.2354480052321779,
+      "color": "#3B2B24",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front right chair",
+      "category": "Furniture",
+      "x": 0.6142578125,
+      "y": 0.5912361020274689,
+      "width": 0.10791015625,
+      "height": 0.223675604970569,
+      "color": "#433632",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "left chair",
+      "category": "Furniture",
+      "x": 0.3212890625,
+      "y": 0.5820797907128843,
+      "width": 0.12353515625,
+      "height": 0.2328319162851537,
+      "color": "#5C4B46",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "far chair",
+      "category": "Furniture",
+      "x": 0.37109375,
+      "y": 0.5735775016350556,
+      "width": 0.1220703125,
+      "height": 0.17396991497710923,
+      "color": "#59433C",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.18115234375,
+      "y": 0.7292347939829954,
+      "width": 0.615234375,
+      "height": 0.22563767168083715,
+      "color": "#888080",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "black sideboard",
+      "category": "Furniture",
+      "x": 0.6142578125,
+      "y": 0.5604970568999346,
+      "width": 0.31982421875,
+      "height": 0.1406147809025507,
+      "color": "#342A29",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "framed black and white art",
+      "category": "Decor",
+      "x": 0.66748046875,
+      "y": 0.37998691955526487,
+      "width": 0.08154296875,
+      "height": 0.15173315892740352,
+      "color": "#8B8286",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.0244140625,
+      "y": 0.42315238718116416,
+      "width": 0.13427734375,
+      "height": 0.3270111183780249,
+      "color": "#4E5C23",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.05029296875,
+      "y": 0.7442773054283846,
+      "width": 0.07958984375,
+      "height": 0.10202746893394375,
+      "color": "#522718",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "pendant bulb lights",
+      "category": "Lighting",
+      "x": 0.45458984375,
+      "y": 0,
+      "width": 0.11572265625,
+      "height": 0.4277305428384565,
+      "color": "#46332E",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.8671875,
+      "y": 0.2838456507521256,
+      "width": 0.072265625,
+      "height": 0.421190320470896,
+      "color": "#222124",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "round duct",
+      "category": "Fixture",
+      "x": 0.54931640625,
+      "y": 0.21517331589274036,
+      "width": 0.396484375,
+      "height": 0.13211249182472204,
+      "color": "#181314",
+      "hand": false
+    }
+  ]
+}

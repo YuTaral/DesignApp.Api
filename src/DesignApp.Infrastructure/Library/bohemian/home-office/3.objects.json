@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster back wall",
+      "category": "Wall",
+      "x": 0.0576171875,
+      "y": 0.15892740353172008,
+      "width": 0.49365234375,
+      "height": 0.6141268803139307,
+      "color": "#AB6539",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.54150390625,
+      "y": 0.03727926749509483,
+      "width": 0.45849609375,
+      "height": 0.8521909744931327,
+      "color": "#D8BFA4",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "terracotta left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.068359375,
+      "height": 1,
+      "color": "#B88059",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "honey oak hardwood floor",
+      "category": "Floor",
+      "x": 0.0009765625,
+      "y": 0.697187704381949,
+      "width": 0.9990234375,
+      "height": 0.302812295618051,
+      "color": "#A66531",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white beamed ceiling",
+      "category": "Ceiling",
+      "x": 0.02587890625,
+      "y": 0,
+      "width": 0.97412109375,
+      "height": 0.2668410725964683,
+      "color": "#C29B74",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "arched window",
+      "category": "Opening",
+      "x": 0.255859375,
+      "y": 0.2681491170699804,
+      "width": 0.19384765625,
+      "height": 0.37148463047743624,
+      "color": "#EDE5C7",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "rattan pendant light",
+      "category": "Lighting",
+      "x": 0.40869140625,
+      "y": 0.009810333551340745,
+      "width": 0.1259765625,
+      "height": 0.23871811641595814,
+      "color": "#A4693D",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.28125,
+      "y": 0.565729234793983,
+      "width": 0.30419921875,
+      "height": 0.2884238064094179,
+      "color": "#7F4420",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "rattan office chair",
+      "category": "Furniture",
+      "x": 0.4404296875,
+      "y": 0.5846958796599084,
+      "width": 0.1474609375,
+      "height": 0.2995421844342708,
+      "color": "#7D451D",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "kilim rug",
+      "category": "Textile",
+      "x": 0.197265625,
+      "y": 0.7423152387181164,
+      "width": 0.64111328125,
+      "height": 0.25768476128188356,
+      "color": "#91593B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "bird of paradise plant",
+      "category": "Decor",
+      "x": 0.0419921875,
+      "y": 0.31393067364290383,
+      "width": 0.22119140625,
+      "height": 0.4002616088947024,
+      "color": "#3C3806",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "woven floor basket",
+      "category": "Decor",
+      "x": 0.095703125,
+      "y": 0.6631785480706344,
+      "width": 0.1162109375,
+      "height": 0.16873773708306083,
+      "color": "#693213",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wooden bookshelf",
+      "category": "Furniture",
+      "x": 0.76123046875,
+      "y": 0.31523871811641596,
+      "width": 0.20849609375,
+      "height": 0.5899280575539568,
+      "color": "#734523",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "macrame wall hanging",
+      "category": "Textile",
+      "x": 0.5830078125,
+      "y": 0.31654676258992803,
+      "width": 0.06982421875,
+      "height": 0.2563767168083715,
+      "color": "#DFC1A7",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "cork pinboard",
+      "category": "Decor",
+      "x": 0.66845703125,
+      "y": 0.38260300850228907,
+      "width": 0.083984375,
+      "height": 0.18312622629169392,
+      "color": "#CDA47F",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "desktop monitor",
+      "category": "Other",
+      "x": 0.37646484375,
+      "y": 0.48528449967298887,
+      "width": 0.09228515625,
+      "height": 0.1223021582733813,
+      "color": "#7C7062",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "rattan table lamp",
+      "category": "Lighting",
+      "x": 0.49462890625,
+      "y": 0.4813603662524526,
+      "width": 0.04150390625,
+      "height": 0.10725964682799215,
+      "color": "#D89B55",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "top shelf plant",
+      "category": "Decor",
+      "x": 0.85400390625,
+      "y": 0.2733812949640288,
+      "width": 0.06884765625,
+      "height": 0.09679529103989536,
+      "color": "#683A10",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "shelf pothos plant",
+      "category": "Decor",
+      "x": 0.77490234375,
+      "y": 0.3080444735120994,
+      "width": 0.08203125,
+      "height": 0.07913669064748201,
+      "color": "#72531F",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "upper books",
+      "category": "Decor",
+      "x": 0.7802734375,
+      "y": 0.39045127534336166,
+      "width": 0.14501953125,
+      "height": 0.10202746893394375,
+      "color": "#714123",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "lower books",
+      "category": "Decor",
+      "x": 0.775390625,
+      "y": 0.4977109221713538,
+      "width": 0.14794921875,
+      "height": 0.10725964682799215,
+      "color": "#71442A",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "shelf basket",
+      "category": "Decor",
+      "x": 0.78173828125,
+      "y": 0.60431654676259,
+      "width": 0.10009765625,
+      "height": 0.10071942446043165,
+      "color": "#744427",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "bottom shelf basket",
+      "category": "Decor",
+      "x": 0.79833984375,
+      "y": 0.7050359712230215,
+      "width": 0.1240234375,
+      "height": 0.1236102027468934,
+      "color": "#65351E",
+      "hand": false
+    }
+  ]
+}

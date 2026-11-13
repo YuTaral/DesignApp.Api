@@ -1,0 +1,303 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "honey wood plank floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6723348593852191,
+      "width": 1,
+      "height": 0.3276651406147809,
+      "color": "#C3854F",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "white beamed ceiling",
+      "category": "Ceiling",
+      "x": 0.02001953125,
+      "y": 0,
+      "width": 0.97998046875,
+      "height": 0.27141922825376064,
+      "color": "#C5A17C",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "terracotta plaster back wall",
+      "category": "Wall",
+      "x": 0.06640625,
+      "y": 0.15631131458469588,
+      "width": 0.50244140625,
+      "height": 0.5271419228253761,
+      "color": "#BD7E52",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.56640625,
+      "y": 0.08240680183126227,
+      "width": 0.43359375,
+      "height": 0.618051013734467,
+      "color": "#D9BBA3",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "terracotta left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.06884765625,
+      "height": 0.5984303466317855,
+      "color": "#B67C4D",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "patterned shower tiles",
+      "category": "Wall",
+      "x": 0.00390625,
+      "y": 0.14650098103335513,
+      "width": 0.29248046875,
+      "height": 0.6527141922825376,
+      "color": "#7A4828",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "glass shower panel",
+      "category": "Fixture",
+      "x": 0.04296875,
+      "y": 0.19686069326357097,
+      "width": 0.25732421875,
+      "height": 0.6200130804447351,
+      "color": "#99613C",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "arched window",
+      "category": "Opening",
+      "x": 0.298828125,
+      "y": 0.28253760627861346,
+      "width": 0.15380859375,
+      "height": 0.3276651406147809,
+      "color": "#F1EBCF",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "clawfoot bathtub",
+      "category": "Fixture",
+      "x": 0.27490234375,
+      "y": 0.551994767822106,
+      "width": 0.24072265625,
+      "height": 0.24264224983649443,
+      "color": "#A97855",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "knit throw on tub",
+      "category": "Textile",
+      "x": 0.4443359375,
+      "y": 0.6082406801831263,
+      "width": 0.04541015625,
+      "height": 0.10202746893394375,
+      "color": "#996541",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "wooden ladder",
+      "category": "Furniture",
+      "x": 0.48974609375,
+      "y": 0.3897972531066056,
+      "width": 0.080078125,
+      "height": 0.3132766514061478,
+      "color": "#8B4D2A",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "striped towels",
+      "category": "Textile",
+      "x": 0.50146484375,
+      "y": 0.434270765206017,
+      "width": 0.0546875,
+      "height": 0.20601700457815567,
+      "color": "#8F352F",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "white toilet",
+      "category": "Fixture",
+      "x": 0.599609375,
+      "y": 0.5722694571615435,
+      "width": 0.10107421875,
+      "height": 0.17331589274035317,
+      "color": "#AE8A73",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "rattan wood vanity",
+      "category": "Furniture",
+      "x": 0.74072265625,
+      "y": 0.6023544800523217,
+      "width": 0.23486328125,
+      "height": 0.2779594506213211,
+      "color": "#885335",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "stone vessel sink",
+      "category": "Fixture",
+      "x": 0.78759765625,
+      "y": 0.5729234793982996,
+      "width": 0.11376953125,
+      "height": 0.05755395683453238,
+      "color": "#895C3B",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "rattan arched mirror",
+      "category": "Decor",
+      "x": 0.8095703125,
+      "y": 0.26618705035971224,
+      "width": 0.1494140625,
+      "height": 0.2668410725964683,
+      "color": "#915D33",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.41162109375,
+      "y": 0.009810333551340745,
+      "width": 0.12939453125,
+      "height": 0.24002616088947024,
+      "color": "#AA7245",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "macrame hanging planter",
+      "category": "Decor",
+      "x": 0.708984375,
+      "y": 0.1327665140614781,
+      "width": 0.06591796875,
+      "height": 0.4296926095487247,
+      "color": "#BA9971",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left kilim rug",
+      "category": "Textile",
+      "x": 0.326171875,
+      "y": 0.7292347939829954,
+      "width": 0.24560546875,
+      "height": 0.1105297580117724,
+      "color": "#985F40",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right red kilim rug",
+      "category": "Textile",
+      "x": 0.60595703125,
+      "y": 0.7861347285807717,
+      "width": 0.33251953125,
+      "height": 0.2066710268149117,
+      "color": "#974D3F",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "snake plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.5454545454545454,
+      "width": 0.12353515625,
+      "height": 0.3198168737737083,
+      "color": "#2C2405",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.8005232177894048,
+      "width": 0.1279296875,
+      "height": 0.18901242642249835,
+      "color": "#5C2006",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "left monstera",
+      "category": "Decor",
+      "x": 0.0947265625,
+      "y": 0.6847612818835841,
+      "width": 0.18212890625,
+      "height": 0.2040549378678875,
+      "color": "#4F430D",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "left woven basket",
+      "category": "Decor",
+      "x": 0.12060546875,
+      "y": 0.8345323741007195,
+      "width": 0.11181640625,
+      "height": 0.13342053629823414,
+      "color": "#652F0C",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "fiddle plant in basket",
+      "category": "Decor",
+      "x": 0.68212890625,
+      "y": 0.6245912361020275,
+      "width": 0.0712890625,
+      "height": 0.15042511445389142,
+      "color": "#69451D",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "right monstera in basket",
+      "category": "Decor",
+      "x": 0.919921875,
+      "y": 0.6572923479398299,
+      "width": 0.080078125,
+      "height": 0.27992151733158926,
+      "color": "#3E320C",
+      "hand": false
+    },
+    {
+      "index": 27,
+      "label": "tiled shower step",
+      "category": "Fixture",
+      "x": 0.2177734375,
+      "y": 0.7809025506867233,
+      "width": 0.09912109375,
+      "height": 0.09483322432962721,
+      "color": "#6D391B",
+      "hand": false
+    }
+  ]
+}

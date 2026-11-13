@@ -1,0 +1,248 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6801831262262917,
+      "width": 1,
+      "height": 0.3198168737737083,
+      "color": "#B48051",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.21484375,
+      "y": 0.21255722694571616,
+      "width": 0.6298828125,
+      "height": 0.4728580771746239,
+      "color": "#C0AE97",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.22802734375,
+      "height": 0.7965990843688685,
+      "color": "#7E775A",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.27403531720078483,
+      "color": "#BEA88F",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream right wall",
+      "category": "Wall",
+      "x": 0.83935546875,
+      "y": 0.578809679529104,
+      "width": 0.16064453125,
+      "height": 0.22694571615434925,
+      "color": "#C6AA8E",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.1220703125,
+      "y": 0.6998037933289731,
+      "width": 0.69189453125,
+      "height": 0.16612164813603664,
+      "color": "#A3937D",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "teak sideboard",
+      "category": "Furniture",
+      "x": 0.03125,
+      "y": 0.5689993459777632,
+      "width": 0.23193359375,
+      "height": 0.2380640941792021,
+      "color": "#693416",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "television",
+      "category": "Furniture",
+      "x": 0.1494140625,
+      "y": 0.4486592544146501,
+      "width": 0.07861328125,
+      "height": 0.13865271419228253,
+      "color": "#322E29",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "teal sofa",
+      "category": "Furniture",
+      "x": 0.3046875,
+      "y": 0.5428384565075213,
+      "width": 0.31201171875,
+      "height": 0.1419228253760628,
+      "color": "#375054",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "mustard cushion",
+      "category": "Textile",
+      "x": 0.31982421875,
+      "y": 0.5428384565075213,
+      "width": 0.0625,
+      "height": 0.08044473512099411,
+      "color": "#9E6D33",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "orange cushion",
+      "category": "Textile",
+      "x": 0.3623046875,
+      "y": 0.566383257030739,
+      "width": 0.07470703125,
+      "height": 0.05624591236102027,
+      "color": "#A7632B",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "rust cushion",
+      "category": "Textile",
+      "x": 0.537109375,
+      "y": 0.5487246566383257,
+      "width": 0.07177734375,
+      "height": 0.07521255722694571,
+      "color": "#7D341D",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "oval coffee table",
+      "category": "Furniture",
+      "x": 0.32861328125,
+      "y": 0.6487900588620014,
+      "width": 0.25146484375,
+      "height": 0.1458469587965991,
+      "color": "#64402A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "mustard armchair",
+      "category": "Furniture",
+      "x": 0.677734375,
+      "y": 0.5101373446697187,
+      "width": 0.19189453125,
+      "height": 0.2694571615434925,
+      "color": "#955A1D",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "brass side table",
+      "category": "Furniture",
+      "x": 0.62109375,
+      "y": 0.5873119686069327,
+      "width": 0.078125,
+      "height": 0.1249182472204055,
+      "color": "#C49E79",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "arc floor lamp",
+      "category": "Lighting",
+      "x": 0.63623046875,
+      "y": 0.3145846958796599,
+      "width": 0.17822265625,
+      "height": 0.40941792020928713,
+      "color": "#BD9F79",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.84033203125,
+      "y": 0.39895356442119034,
+      "width": 0.14599609375,
+      "height": 0.2779594506213211,
+      "color": "#475112",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "plant stand",
+      "category": "Furniture",
+      "x": 0.87548828125,
+      "y": 0.6638325703073904,
+      "width": 0.0830078125,
+      "height": 0.18051013734466972,
+      "color": "#684425",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.6015625,
+      "y": 0.27730542838456507,
+      "width": 0.2275390625,
+      "height": 0.3145846958796599,
+      "color": "#BBA886",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "corner windows",
+      "category": "Opening",
+      "x": 0.81884765625,
+      "y": 0.17854807063440156,
+      "width": 0.18115234375,
+      "height": 0.4525833878351864,
+      "color": "#CAB08A",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "abstract framed art",
+      "category": "Decor",
+      "x": 0.02099609375,
+      "y": 0.223675604970569,
+      "width": 0.0849609375,
+      "height": 0.2616088947024199,
+      "color": "#AC7F71",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.474609375,
+      "y": 0.059516023544800525,
+      "width": 0.08154296875,
+      "height": 0.050359712230215826,
+      "color": "#A39278",
+      "hand": false
+    }
+  ]
+}

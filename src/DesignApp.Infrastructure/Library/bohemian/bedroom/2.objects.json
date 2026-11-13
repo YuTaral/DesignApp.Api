@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.1366906474820144,
+      "width": 0.46240234375,
+      "height": 0.5493786788750817,
+      "color": "#B06B41",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.4501953125,
+      "y": 0.02289077828646174,
+      "width": 0.5498046875,
+      "height": 0.7226945716154349,
+      "color": "#DBBA96",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "honey oak plank floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6801831262262917,
+      "width": 1,
+      "height": 0.3198168737737083,
+      "color": "#C89A7A",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.28253760627861346,
+      "color": "#D6B18C",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white ceiling beam",
+      "category": "Fixture",
+      "x": 0.54443359375,
+      "y": 0,
+      "width": 0.2265625,
+      "height": 0.17069980379332897,
+      "color": "#A27950",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.06103515625,
+      "y": 0.2517985611510791,
+      "width": 0.17138671875,
+      "height": 0.36625245258338784,
+      "color": "#F3E9D2",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.2861328125,
+      "y": 0.29888816219751474,
+      "width": 0.10546875,
+      "height": 0.31196860693263573,
+      "color": "#EDE4C0",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "wooden platform bed base",
+      "category": "Furniture",
+      "x": 0.291015625,
+      "y": 0.6736429038587312,
+      "width": 0.4052734375,
+      "height": 0.17069980379332897,
+      "color": "#7D3D0E",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "pink velvet bedding",
+      "category": "Textile",
+      "x": 0.31103515625,
+      "y": 0.5676913015042512,
+      "width": 0.3818359375,
+      "height": 0.20732504905166776,
+      "color": "#964539",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "mustard throw blanket",
+      "category": "Textile",
+      "x": 0.333984375,
+      "y": 0.5840418574231524,
+      "width": 0.2578125,
+      "height": 0.16088947024198821,
+      "color": "#B2714C",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "bed pillows",
+      "category": "Textile",
+      "x": 0.5029296875,
+      "y": 0.538914323086985,
+      "width": 0.18115234375,
+      "height": 0.08894702419882276,
+      "color": "#863D29",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "carved wooden wardrobe",
+      "category": "Furniture",
+      "x": 0.81201171875,
+      "y": 0.25310660562459125,
+      "width": 0.18798828125,
+      "height": 0.552648790058862,
+      "color": "#76441E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "kilim rug",
+      "category": "Textile",
+      "x": 0.42578125,
+      "y": 0.7462393721386528,
+      "width": 0.47216796875,
+      "height": 0.2537606278613473,
+      "color": "#814021",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "rattan hanging chair",
+      "category": "Furniture",
+      "x": 0.025390625,
+      "y": 0.06801831262262917,
+      "width": 0.18310546875,
+      "height": 0.6422498364944408,
+      "color": "#B9875D",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "knit throw on chair",
+      "category": "Textile",
+      "x": 0.12158203125,
+      "y": 0.6337475474166122,
+      "width": 0.09033203125,
+      "height": 0.13996075866579463,
+      "color": "#9A633E",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "macrame wall hanging",
+      "category": "Decor",
+      "x": 0.5400390625,
+      "y": 0.31916285153695223,
+      "width": 0.1591796875,
+      "height": 0.22040549378678875,
+      "color": "#C59D79",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.4072265625,
+      "y": 0.08567691301504252,
+      "width": 0.12890625,
+      "height": 0.17069980379332897,
+      "color": "#A87041",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "right rattan nightstand",
+      "category": "Furniture",
+      "x": 0.6953125,
+      "y": 0.6147809025506867,
+      "width": 0.109375,
+      "height": 0.15238718116415959,
+      "color": "#753E17",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "right table lamp",
+      "category": "Lighting",
+      "x": 0.72900390625,
+      "y": 0.5297580117724002,
+      "width": 0.04248046875,
+      "height": 0.09810333551340746,
+      "color": "#D1914D",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.384765625,
+      "y": 0.3597122302158273,
+      "width": 0.09423828125,
+      "height": 0.24787442773054283,
+      "color": "#7C7221",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "snake plant in basket",
+      "category": "Decor",
+      "x": 0.201171875,
+      "y": 0.5212557226945717,
+      "width": 0.0634765625,
+      "height": 0.19947678221059517,
+      "color": "#885723",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "left striped basket plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.6415958142576847,
+      "width": 0.087890625,
+      "height": 0.22171353826030085,
+      "color": "#422D0A",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "monstera in basket",
+      "category": "Decor",
+      "x": 0.86083984375,
+      "y": 0.6128188358404185,
+      "width": 0.13916015625,
+      "height": 0.3459777632439503,
+      "color": "#533910",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "trailing plant on wardrobe",
+      "category": "Decor",
+      "x": 0.79052734375,
+      "y": 0.210595160235448,
+      "width": 0.1064453125,
+      "height": 0.25049051667756705,
+      "color": "#614915",
+      "hand": false
+    }
+  ]
+}

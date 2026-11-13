@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.52099609375,
+      "y": 0.2779594506213211,
+      "width": 0.4443359375,
+      "height": 0.4617396991497711,
+      "color": "#715249",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.032701111837802485,
+      "width": 0.5234375,
+      "height": 0.8031393067364291,
+      "color": "#4E3530",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.947265625,
+      "y": 0.04708960104643558,
+      "width": 0.052734375,
+      "height": 0.749509483322433,
+      "color": "#979495",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "dark concrete ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.45454545454545453,
+      "color": "#262020",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6729888816219751,
+      "width": 1,
+      "height": 0.3270111183780249,
+      "color": "#7E776F",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left industrial window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.15500327011118378,
+      "width": 0.24755859375,
+      "height": 0.47678221059516024,
+      "color": "#F0EBF1",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle industrial window",
+      "category": "Opening",
+      "x": 0.34228515625,
+      "y": 0.28253760627861346,
+      "width": 0.15478515625,
+      "height": 0.29888816219751474,
+      "color": "#EDE9EB",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "round jute rug",
+      "category": "Textile",
+      "x": 0.36474609375,
+      "y": 0.7697841726618705,
+      "width": 0.4033203125,
+      "height": 0.2079790712884238,
+      "color": "#9B816D",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "metal bed frame",
+      "category": "Furniture",
+      "x": 0.1982421875,
+      "y": 0.5330281229561805,
+      "width": 0.39697265625,
+      "height": 0.32047089601046436,
+      "color": "#584440",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "geometric duvet",
+      "category": "Textile",
+      "x": 0.26611328125,
+      "y": 0.6258992805755396,
+      "width": 0.33251953125,
+      "height": 0.18835840418574232,
+      "color": "#8C9AA2",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "animal pillows",
+      "category": "Textile",
+      "x": 0.24169921875,
+      "y": 0.55134074558535,
+      "width": 0.12890625,
+      "height": 0.10464355788096795,
+      "color": "#7B6C64",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "wooden storage chest",
+      "category": "Furniture",
+      "x": 0.037109375,
+      "y": 0.6932635709614127,
+      "width": 0.19921875,
+      "height": 0.17004578155657293,
+      "color": "#452C20",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "cage table lamp",
+      "category": "Lighting",
+      "x": 0.142578125,
+      "y": 0.6017004578155657,
+      "width": 0.07275390625,
+      "height": 0.10595160235448005,
+      "color": "#734C3A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "track pendant lights",
+      "category": "Lighting",
+      "x": 0.5390625,
+      "y": 0.15761935905820798,
+      "width": 0.16455078125,
+      "height": 0.07063440156965337,
+      "color": "#5C3B28",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "low bookshelf",
+      "category": "Furniture",
+      "x": 0.57861328125,
+      "y": 0.5343361674296926,
+      "width": 0.16015625,
+      "height": 0.17396991497710923,
+      "color": "#4C413D",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.75048828125,
+      "y": 0.5925441465009811,
+      "width": 0.212890625,
+      "height": 0.17266187050359713,
+      "color": "#403027",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "leather desk chair",
+      "category": "Furniture",
+      "x": 0.79345703125,
+      "y": 0.5951602354480052,
+      "width": 0.11083984375,
+      "height": 0.19424460431654678,
+      "color": "#3D2B26",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fox art print",
+      "category": "Decor",
+      "x": 0.81201171875,
+      "y": 0.3865271419228254,
+      "width": 0.0908203125,
+      "height": 0.15173315892740352,
+      "color": "#B6AFB4",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.484375,
+      "y": 0.45454545454545453,
+      "width": 0.07080078125,
+      "height": 0.18378024852844996,
+      "color": "#525F2A",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "black steel beam",
+      "category": "Fixture",
+      "x": 0.29150390625,
+      "y": 0,
+      "width": 0.70849609375,
+      "height": 0.22302158273381295,
+      "color": "#191617",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "ventilation duct",
+      "category": "Fixture",
+      "x": 0.56201171875,
+      "y": 0.2485284499672989,
+      "width": 0.39208984375,
+      "height": 0.07979071288423806,
+      "color": "#231E1E",
+      "hand": false
+    }
+  ]
+}

@@ -20,6 +20,10 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var design = await FirstDesignAsync(browser);
 
         Assert.False(string.IsNullOrWhiteSpace(design.Name));
+        using var cover = await browser.GetAsync(design.CoverUrl);
+        Assert.Equal(HttpStatusCode.OK, cover.StatusCode);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, cover.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/library/no-such-design/cover")).StatusCode);
         var room = Assert.IsType<LibraryRoomDto>(design.Rooms[0]);
         var layout = Assert.IsType<LibraryLayoutDto>(room.Layouts[0]);
         Assert.True(layout.ObjectCount > 0);
@@ -27,6 +31,10 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, photo.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, photo.Content.Headers.ContentType?.MediaType);
         Assert.True(photo.Headers.CacheControl?.Public);
+        using var thumbnail = await browser.GetAsync(layout.ThumbnailUrl);
+        Assert.Equal(HttpStatusCode.OK, thumbnail.StatusCode);
+        Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, thumbnail.Content.Headers.ContentType?.MediaType);
+        Assert.True(thumbnail.Content.Headers.ContentLength < photo.Content.Headers.ContentLength / 4, "The thumbnail is much smaller than the photo.");
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/library/{design.Id}/{room.Id}/no-such-layout/photo")).StatusCode);
     }
 
@@ -126,11 +134,11 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     /// <summary>A library design as a client reads it.</summary>
-    private sealed record LibraryDesignDto(string Id, string Name, string Style, string Description, List<LibraryRoomDto> Rooms);
+    private sealed record LibraryDesignDto(string Id, string Name, string Style, string Description, string CoverUrl, List<LibraryRoomDto> Rooms);
 
     /// <summary>A library room as a client reads it.</summary>
     private sealed record LibraryRoomDto(string Id, string Title, List<LibraryLayoutDto> Layouts);
 
     /// <summary>A layout of a library room as a client reads it.</summary>
-    private sealed record LibraryLayoutDto(string Id, string PhotoUrl, int Width, int Height, int ObjectCount);
+    private sealed record LibraryLayoutDto(string Id, string PhotoUrl, string ThumbnailUrl, int Width, int Height, int ObjectCount);
 }

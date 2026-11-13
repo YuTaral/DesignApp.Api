@@ -1,0 +1,292 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6991497710922171,
+      "width": 1,
+      "height": 0.30085022890778285,
+      "color": "#A66D3C",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2753433616742969,
+      "color": "#C9B19A",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.05624591236102027,
+      "width": 0.236328125,
+      "height": 0.7750163505559189,
+      "color": "#CDB6A2",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "sage green back wall",
+      "category": "Wall",
+      "x": 0.20947265625,
+      "y": 0.2302158273381295,
+      "width": 0.35302734375,
+      "height": 0.342053629823414,
+      "color": "#9C9476",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.76171875,
+      "y": 0.06671026814911707,
+      "width": 0.23828125,
+      "height": 0.5166775670372793,
+      "color": "#C3AE92",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "cream back wall above counter",
+      "category": "Wall",
+      "x": 0.52294921875,
+      "y": 0.4244604316546763,
+      "width": 0.283203125,
+      "height": 0.12753433616742968,
+      "color": "#AA9279",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "corner timber window",
+      "category": "Opening",
+      "x": 0.12060546875,
+      "y": 0.24525833878351863,
+      "width": 0.2822265625,
+      "height": 0.3577501635055592,
+      "color": "#E2D3BB",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "upper cabinets",
+      "category": "Furniture",
+      "x": 0.5244140625,
+      "y": 0.27468933943754087,
+      "width": 0.296875,
+      "height": 0.16154349247874428,
+      "color": "#67371A",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "island",
+      "category": "Furniture",
+      "x": 0.28271484375,
+      "y": 0.6003924133420536,
+      "width": 0.38330078125,
+      "height": 0.2485284499672989,
+      "color": "#502A18",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "island white countertop",
+      "category": "Fixture",
+      "x": 0.28466796875,
+      "y": 0.5434924787442773,
+      "width": 0.396484375,
+      "height": 0.06344015696533682,
+      "color": "#CBBCB2",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "lower cabinets right",
+      "category": "Furniture",
+      "x": 0.75537109375,
+      "y": 0.5637671680837149,
+      "width": 0.24462890625,
+      "height": 0.3727926749509483,
+      "color": "#814A2A",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "lower cabinets back",
+      "category": "Furniture",
+      "x": 0.56005859375,
+      "y": 0.5618051013734467,
+      "width": 0.2021484375,
+      "height": 0.16415958142576847,
+      "color": "#54250E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "white counter",
+      "category": "Fixture",
+      "x": 0.52490234375,
+      "y": 0.5349901896664486,
+      "width": 0.47509765625,
+      "height": 0.08763897972531066,
+      "color": "#C6B4A6",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "built-in oven",
+      "category": "Fixture",
+      "x": 0.65234375,
+      "y": 0.5722694571615435,
+      "width": 0.05126953125,
+      "height": 0.1209941137998692,
+      "color": "#140906",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "light blue fridge",
+      "category": "Fixture",
+      "x": 0.412109375,
+      "y": 0.40745585349901897,
+      "width": 0.09423828125,
+      "height": 0.16481360366252454,
+      "color": "#ACB9BE",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "left bar stool",
+      "category": "Furniture",
+      "x": 0.3046875,
+      "y": 0.6599084368868542,
+      "width": 0.1123046875,
+      "height": 0.2380640941792021,
+      "color": "#6C3B24",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "middle bar stool",
+      "category": "Furniture",
+      "x": 0.439453125,
+      "y": 0.6599084368868542,
+      "width": 0.099609375,
+      "height": 0.23741007194244604,
+      "color": "#6E3C21",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "right bar stool",
+      "category": "Furniture",
+      "x": 0.568359375,
+      "y": 0.6599084368868542,
+      "width": 0.109375,
+      "height": 0.23741007194244604,
+      "color": "#572C16",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "left pendant lamp",
+      "category": "Lighting",
+      "x": 0.36181640625,
+      "y": 0.07717462393721386,
+      "width": 0.06982421875,
+      "height": 0.3315892740353172,
+      "color": "#D3BEA8",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right pendant lamp",
+      "category": "Lighting",
+      "x": 0.54345703125,
+      "y": 0.07652060170045781,
+      "width": 0.05810546875,
+      "height": 0.2655330281229562,
+      "color": "#C9B294",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.20947265625,
+      "y": 0.4381948986265533,
+      "width": 0.1171875,
+      "height": 0.17920209287115763,
+      "color": "#939B4A",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "plant stand with pot",
+      "category": "Decor",
+      "x": 0.2275390625,
+      "y": 0.5964682799215173,
+      "width": 0.07470703125,
+      "height": 0.13342053629823414,
+      "color": "#BD977C",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "framed abstract art",
+      "category": "Decor",
+      "x": 0.9091796875,
+      "y": 0.2393721386527142,
+      "width": 0.0634765625,
+      "height": 0.2145192936559843,
+      "color": "#967055",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "orange towel",
+      "category": "Textile",
+      "x": 0.84912109375,
+      "y": 0.5964682799215173,
+      "width": 0.0390625,
+      "height": 0.0987573577501635,
+      "color": "#B46331",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "ceramic bowls",
+      "category": "Decor",
+      "x": 0.5517578125,
+      "y": 0.52648790058862,
+      "width": 0.2158203125,
+      "height": 0.03531720078482668,
+      "color": "#A8917B",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "white skirting board",
+      "category": "Other",
+      "x": 0,
+      "y": 0.6867233485938522,
+      "width": 0.2236328125,
+      "height": 0.17789404839764553,
+      "color": "#CAAF9E",
+      "hand": false
+    }
+  ]
+}

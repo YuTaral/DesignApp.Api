@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.684107259646828,
+      "width": 1,
+      "height": 0.315892740353172,
+      "color": "#A76F42",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.28776978417266186,
+      "color": "#C1A890",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.2294921875,
+      "height": 0.7965990843688685,
+      "color": "#908B77",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.22607421875,
+      "y": 0.2289077828646174,
+      "width": 0.607421875,
+      "height": 0.46108567691301505,
+      "color": "#C3AD98",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.82275390625,
+      "y": 0.5755395683453237,
+      "width": 0.17724609375,
+      "height": 0.1249182472204055,
+      "color": "#C5A58A",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "wooden single bed",
+      "category": "Furniture",
+      "x": 0.0361328125,
+      "y": 0.52648790058862,
+      "width": 0.3486328125,
+      "height": 0.29888816219751474,
+      "color": "#5C2F14",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "patterned bedding",
+      "category": "Textile",
+      "x": 0.05859375,
+      "y": 0.5814257684761281,
+      "width": 0.31640625,
+      "height": 0.1079136690647482,
+      "color": "#A68B62",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "round mustard rug",
+      "category": "Textile",
+      "x": 0.38232421875,
+      "y": 0.7429692609548725,
+      "width": 0.42041015625,
+      "height": 0.19555264879005888,
+      "color": "#CFA063",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "wooden bookshelf",
+      "category": "Furniture",
+      "x": 0.40966796875,
+      "y": 0.5251798561151079,
+      "width": 0.1689453125,
+      "height": 0.17789404839764553,
+      "color": "#502813",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.59765625,
+      "y": 0.55134074558535,
+      "width": 0.19921875,
+      "height": 0.16939175931981687,
+      "color": "#A67754",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "wooden desk chair",
+      "category": "Furniture",
+      "x": 0.6787109375,
+      "y": 0.5415304120340092,
+      "width": 0.130859375,
+      "height": 0.20732504905166776,
+      "color": "#AD7653",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "wooden storage chest",
+      "category": "Furniture",
+      "x": 0.826171875,
+      "y": 0.6618705035971223,
+      "width": 0.173828125,
+      "height": 0.19686069326357097,
+      "color": "#713A18",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "back window",
+      "category": "Opening",
+      "x": 0.61083984375,
+      "y": 0.2884238064094179,
+      "width": 0.2109375,
+      "height": 0.275997383911053,
+      "color": "#BDAC8F",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "right corner windows",
+      "category": "Opening",
+      "x": 0.8095703125,
+      "y": 0.18378024852844996,
+      "width": 0.1904296875,
+      "height": 0.4375408763897973,
+      "color": "#CAAB89",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fox art print",
+      "category": "Decor",
+      "x": 0.44921875,
+      "y": 0.33747547416612167,
+      "width": 0.087890625,
+      "height": 0.14780902550686723,
+      "color": "#B4977A",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.474609375,
+      "y": 0.059516023544800525,
+      "width": 0.08251953125,
+      "height": 0.050359712230215826,
+      "color": "#A69279",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "globe",
+      "category": "Decor",
+      "x": 0.61572265625,
+      "y": 0.4918247220405494,
+      "width": 0.048828125,
+      "height": 0.07259646827992151,
+      "color": "#C59670",
+      "hand": false
+    }
+  ]
+}

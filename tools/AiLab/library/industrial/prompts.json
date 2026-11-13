@@ -1,0 +1,18 @@
+{
+  "model": "fal-ai/nano-banana-2",
+  "editModel": "fal-ai/nano-banana-2/edit",
+  "resolution": "2K",
+  "aspectRatio": "4:3",
+  "pricePerImage": 0.12,
+  "style": "Industrial loft style: exposed red-brown brick wall, polished grey concrete floor, dark ceiling with exposed black steel beams and ducts, tall black steel-framed factory windows, black metal, worn leather, reclaimed dark wood, Edison bulb lights, a few green plants. Soft daylight from the big windows. Photorealistic real-estate interior photograph, eye-level wide-angle shot from a corner of the room, showing the floor, two walls and the ceiling. Uncluttered: every piece of furniture stands on its own with clear space around it, nothing overlapping. No people, no text, no logos, no watermark.",
+  "sameHouse": "The reference photo shows another room of the same loft. Keep exactly the same floor, brick and wall finishes, ceiling, window style, light, colour palette and furniture style, and the same camera height and lens.",
+  "rooms": [
+    { "id": "living-room", "title": "Living room", "prompt": "A cognac leather three-seat sofa, a black metal armchair with a cushion, a reclaimed-wood coffee table on steel legs, a large rug, an arc floor lamp, a low metal-and-wood TV console with a TV, a small side table, a potted plant and one framed print on the wall." },
+    { "id": "kitchen", "title": "Kitchen", "prompt": "Matte black base cabinets and open steel shelves, a concrete countertop, a stainless steel sink with a black faucet, a gas cooktop under a steel range hood, a built-in oven, a stainless steel refrigerator, a kitchen island with three metal bar stools and three cage pendant lights above it." },
+    { "id": "dining-room", "title": "Dining room", "prompt": "A long reclaimed-wood dining table on black steel legs with six metal chairs, a row of Edison bulb pendant lights above it, a metal-and-wood sideboard against the brick wall with a vase on it, a rug under the table, a large framed print and a potted plant." },
+    { "id": "bedroom", "title": "Bedroom", "prompt": "A black metal bed frame with grey bedding, pillows and a throw, two wooden bedside crates with a lamp on each, a black steel clothes rack wardrobe, a rug beside the bed, a leather armchair in the corner and a framed print above the bed." },
+    { "id": "bathroom", "title": "Bathroom", "prompt": "A reclaimed-wood vanity with a concrete basin and a round black-framed mirror above it, a white toilet, a walk-in shower with a black steel-framed glass screen, a freestanding bathtub, a black towel ladder with towels, dark subway-tiled walls and a small plant." },
+    { "id": "home-office", "title": "Home office", "prompt": "A reclaimed-wood desk on black steel legs with a computer monitor and a metal desk lamp, a leather office chair, a tall black metal bookshelf with books and boxes, a rug under the desk, a potted plant and a pinboard on the brick wall." },
+    { "id": "kids-room", "title": "Kid's room", "prompt": "A black metal single bed with a patterned duvet, a low metal shelf with toy boxes, a small wooden desk with a chair, a round rug, a wooden toy chest, a cage reading lamp and a framed animal print on the wall." }
+  ]
+}

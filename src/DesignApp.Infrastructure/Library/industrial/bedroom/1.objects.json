@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.2958984375,
+      "y": 0.2701111837802485,
+      "width": 0.49169921875,
+      "height": 0.42315238718116416,
+      "color": "#704F44",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.3125,
+      "height": 0.9143230869849575,
+      "color": "#4C322C",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted right wall",
+      "category": "Wall",
+      "x": 0.78515625,
+      "y": 0.060824068018312624,
+      "width": 0.21484375,
+      "height": 0.7802485284499673,
+      "color": "#AFACAF",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6370176586003924,
+      "width": 1,
+      "height": 0.3629823413996076,
+      "color": "#8C8783",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "black wood plank ceiling",
+      "category": "Ceiling",
+      "x": 0.0927734375,
+      "y": 0,
+      "width": 0.9072265625,
+      "height": 0.28776978417266186,
+      "color": "#1B1718",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.060824068018312624,
+      "width": 0.04296875,
+      "height": 0.5951602354480052,
+      "color": "#C2B2B0",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle window",
+      "category": "Opening",
+      "x": 0.146484375,
+      "y": 0.18770438194898625,
+      "width": 0.10107421875,
+      "height": 0.41661216481360364,
+      "color": "#E5DFDF",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "bed with grey bedding",
+      "category": "Furniture",
+      "x": 0.33984375,
+      "y": 0.5546108567691301,
+      "width": 0.31884765625,
+      "height": 0.2459123610202747,
+      "color": "#7B7881",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "grey knit throw",
+      "category": "Textile",
+      "x": 0.36181640625,
+      "y": 0.6298234139960759,
+      "width": 0.27587890625,
+      "height": 0.17069980379332897,
+      "color": "#828084",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "woven runner rug",
+      "category": "Textile",
+      "x": 0.509765625,
+      "y": 0.7272727272727273,
+      "width": 0.35400390625,
+      "height": 0.17920209287115763,
+      "color": "#928988",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "leather armchair",
+      "category": "Furniture",
+      "x": 0.68701171875,
+      "y": 0.566383257030739,
+      "width": 0.13330078125,
+      "height": 0.17004578155657293,
+      "color": "#84543A",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left crate nightstand",
+      "category": "Furniture",
+      "x": 0.06689453125,
+      "y": 0.7004578155657293,
+      "width": 0.123046875,
+      "height": 0.17985611510791366,
+      "color": "#241711",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "bedside crate left",
+      "category": "Furniture",
+      "x": 0.32470703125,
+      "y": 0.6147809025506867,
+      "width": 0.07861328125,
+      "height": 0.09352517985611511,
+      "color": "#392B22",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "bedside crate right",
+      "category": "Furniture",
+      "x": 0.609375,
+      "y": 0.6128188358404185,
+      "width": 0.056640625,
+      "height": 0.09090909090909091,
+      "color": "#130B08",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "clothes rack",
+      "category": "Furniture",
+      "x": 0.8173828125,
+      "y": 0.35840418574231525,
+      "width": 0.1552734375,
+      "height": 0.4682799215173316,
+      "color": "#3B3A3D",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "hanging sweaters",
+      "category": "Textile",
+      "x": 0.8271484375,
+      "y": 0.4303466317854807,
+      "width": 0.12451171875,
+      "height": 0.18639633747547416,
+      "color": "#7F7069",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "framed black and white print",
+      "category": "Decor",
+      "x": 0.462890625,
+      "y": 0.3747547416612165,
+      "width": 0.07470703125,
+      "height": 0.1432308698495749,
+      "color": "#958F96",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.28662109375,
+      "y": 0.4395029431000654,
+      "width": 0.06298828125,
+      "height": 0.22563767168083715,
+      "color": "#4E4D29",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "track lighting",
+      "category": "Lighting",
+      "x": 0.38330078125,
+      "y": 0.11118378024852844,
+      "width": 0.2109375,
+      "height": 0.05559189012426422,
+      "color": "#38241B",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "round ventilation duct",
+      "category": "Fixture",
+      "x": 0.36279296875,
+      "y": 0.24656638325703073,
+      "width": 0.4462890625,
+      "height": 0.050359712230215826,
+      "color": "#211B1B",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.7216796875,
+      "y": 0.29038587311968606,
+      "width": 0.04345703125,
+      "height": 0.2818835840418574,
+      "color": "#1D1B1E",
+      "hand": false
+    }
+  ]
+}

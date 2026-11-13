@@ -1,0 +1,237 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6625245258338783,
+      "width": 1,
+      "height": 0.33747547416612167,
+      "color": "#736B64",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "black beamed ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.3459777632439503,
+      "color": "#1C1A1B",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "left red brick wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5126953125,
+      "height": 0.8502289077828646,
+      "color": "#452F2B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "back red brick wall",
+      "category": "Wall",
+      "x": 0.49853515625,
+      "y": 0.29038587311968606,
+      "width": 0.37548828125,
+      "height": 0.4107259646827992,
+      "color": "#75554B",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.90625,
+      "y": 0.04970568999345978,
+      "width": 0.09375,
+      "height": 0.7318508829300197,
+      "color": "#8D8B8C",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.16088947024198821,
+      "width": 0.244140625,
+      "height": 0.4702419882275997,
+      "color": "#F1ECF1",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle window",
+      "category": "Opening",
+      "x": 0.33349609375,
+      "y": 0.2733812949640288,
+      "width": 0.13818359375,
+      "height": 0.30608240680183124,
+      "color": "#EEEAEC",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "reclaimed wood dining table",
+      "category": "Furniture",
+      "x": 0.20703125,
+      "y": 0.5886200130804448,
+      "width": 0.39599609375,
+      "height": 0.2916939175931982,
+      "color": "#504644",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "front left chair",
+      "category": "Furniture",
+      "x": 0.1484375,
+      "y": 0.6514061478090255,
+      "width": 0.1689453125,
+      "height": 0.28515369522563766,
+      "color": "#32292B",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front center chair",
+      "category": "Furniture",
+      "x": 0.3828125,
+      "y": 0.6357096141268803,
+      "width": 0.1357421875,
+      "height": 0.2622629169391759,
+      "color": "#2D2826",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "front right chair",
+      "category": "Furniture",
+      "x": 0.46533203125,
+      "y": 0.6344015696533682,
+      "width": 0.103515625,
+      "height": 0.2040549378678875,
+      "color": "#221C1C",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left back chair",
+      "category": "Furniture",
+      "x": 0.23486328125,
+      "y": 0.6030085022890779,
+      "width": 0.07421875,
+      "height": 0.13865271419228253,
+      "color": "#372825",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "far right chair",
+      "category": "Furniture",
+      "x": 0.53271484375,
+      "y": 0.578809679529104,
+      "width": 0.0966796875,
+      "height": 0.2197514715500327,
+      "color": "#36302E",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "metal mesh sideboard",
+      "category": "Furniture",
+      "x": 0.62451171875,
+      "y": 0.5676913015042512,
+      "width": 0.2255859375,
+      "height": 0.1366906474820144,
+      "color": "#363437",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "framed black and white art",
+      "category": "Decor",
+      "x": 0.68017578125,
+      "y": 0.3577501635055592,
+      "width": 0.10595703125,
+      "height": 0.18247220405493786,
+      "color": "#888489",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.853515625,
+      "y": 0.4447351209941138,
+      "width": 0.09375,
+      "height": 0.23741007194244604,
+      "color": "#404523",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.8701171875,
+      "y": 0.670372792674951,
+      "width": 0.06103515625,
+      "height": 0.06474820143884892,
+      "color": "#9E5B42",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "ceramic vase with branches",
+      "category": "Decor",
+      "x": 0.62548828125,
+      "y": 0.46893394375408765,
+      "width": 0.05810546875,
+      "height": 0.10333551340745585,
+      "color": "#95796D",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "pendant bulb lights",
+      "category": "Lighting",
+      "x": 0.3583984375,
+      "y": 0,
+      "width": 0.154296875,
+      "height": 0.49051667756703726,
+      "color": "#4D4141",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "black steel support column",
+      "category": "Fixture",
+      "x": 0.86572265625,
+      "y": 0.2838456507521256,
+      "width": 0.0625,
+      "height": 0.3871811641595814,
+      "color": "#19171A",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "black ventilation duct",
+      "category": "Fixture",
+      "x": 0.51611328125,
+      "y": 0.23479398299542184,
+      "width": 0.4296875,
+      "height": 0.09548724656638326,
+      "color": "#1C191B",
+      "hand": false
+    }
+  ]
+}

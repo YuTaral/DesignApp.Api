@@ -29,6 +29,21 @@ public interface ILibrary
     /// <exception cref="KeyNotFoundException">The library has no such layout.</exception>
     Stream OpenLabelMap(string designId, string roomId, string layoutId);
 
+    /// <summary>A small copy of a layout's photo for lists (a JPEG), made once and then kept in memory.</summary>
+    /// <param name="designId">The design's id.</param>
+    /// <param name="roomId">The room's id inside the design.</param>
+    /// <param name="layoutId">The layout's id inside the room.</param>
+    /// <exception cref="KeyNotFoundException">The library has no such layout.</exception>
+    byte[] Thumbnail(string designId, string roomId, string layoutId);
+
+    /// <summary>
+    /// A design's cover for lists (a JPEG): its first rooms side by side, two rows of three, each in its first layout.
+    /// Made once and then kept in memory.
+    /// </summary>
+    /// <param name="designId">The design's id.</param>
+    /// <exception cref="KeyNotFoundException">The library has no such design.</exception>
+    byte[] Cover(string designId);
+
     /// <summary>Packs a room as the files of one library layout, in a zip (development only).</summary>
     /// <param name="room">The room's photo, label map and objects.</param>
     /// <returns>The zip's bytes.</returns>

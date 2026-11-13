@@ -1,0 +1,72 @@
+{
+  "id": "mid-century",
+  "name": "Mid-century modern house",
+  "style": "Mid-century modern",
+  "description": "A 1960s-style home: teak and walnut, herringbone floors, a sage wall and mustard, teal and orange accents. Seven rooms, three layouts each.",
+  "order": 3,
+  "rooms": [
+    {
+      "id": "living-room",
+      "title": "Living room",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "kitchen",
+      "title": "Kitchen",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "dining-room",
+      "title": "Dining room",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "bedroom",
+      "title": "Bedroom",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "bathroom",
+      "title": "Bathroom",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "home-office",
+      "title": "Home office",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "kids-room",
+      "title": "Kid's room",
+      "layouts": [
+        "1",
+        "2",
+        "3"
+      ]
+    }
+  ]
+}

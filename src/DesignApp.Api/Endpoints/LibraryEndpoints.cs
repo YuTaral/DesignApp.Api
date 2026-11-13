@@ -28,6 +28,14 @@ internal static class LibraryEndpoints
             .WithName("GetLibraryLayoutPhoto")
             .WithSummary("Returns the photo of a library room's layout.");
 
+        library.MapGet(Constants.Routes.LibraryDesignCover, GetCover)
+            .WithName("GetLibraryDesignCover")
+            .WithSummary("Returns a design's cover: its first six rooms in two rows of three, for lists.");
+
+        library.MapGet(Constants.Routes.LibraryLayoutThumbnail, GetThumbnail)
+            .WithName("GetLibraryLayoutThumbnail")
+            .WithSummary($"Returns a small copy of a layout's photo ({DesignApp.Infrastructure.Constants.Library.ThumbnailWidth} px wide), for lists.");
+
         library.MapPost(Constants.Routes.LibraryLayoutCopy, CopyRoomAsync)
             .WithName("CopyLibraryRoom")
             .WithSummary("Copies one layout of a library room into a new room of the visitor, already analyzed.")
@@ -58,6 +66,34 @@ internal static class LibraryEndpoints
             return TypedResults.NotFound();
         response.Headers.CacheControl = Constants.Http.LibraryCache;
         return TypedResults.Stream(library.OpenPhoto(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
+    }
+
+    /// <summary><c>GET /api/library/{designId}/cover</c>.</summary>
+    /// <param name="designId">The library design's id.</param>
+    /// <param name="library">The library.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <returns>200 with the JPEG, or 404.</returns>
+    private static Results<FileContentHttpResult, NotFound> GetCover(string designId, ILibrary library, HttpResponse response)
+    {
+        if (library.FindDesign(designId) is null)
+            return TypedResults.NotFound();
+        response.Headers.CacheControl = Constants.Http.LibraryCache;
+        return TypedResults.File(library.Cover(designId), Application.Constants.ContentTypes.Jpeg);
+    }
+
+    /// <summary><c>GET /api/library/{designId}/{roomId}/{layoutId}/thumbnail</c>.</summary>
+    /// <param name="designId">The library design's id.</param>
+    /// <param name="roomId">The room's id inside it.</param>
+    /// <param name="layoutId">The layout's id inside the room.</param>
+    /// <param name="library">The library.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <returns>200 with the JPEG, or 404.</returns>
+    private static Results<FileContentHttpResult, NotFound> GetThumbnail(string designId, string roomId, string layoutId, ILibrary library, HttpResponse response)
+    {
+        if (library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId) is null)
+            return TypedResults.NotFound();
+        response.Headers.CacheControl = Constants.Http.LibraryCache;
+        return TypedResults.File(library.Thumbnail(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
     }
 
     /// <summary><c>POST /api/library/{designId}/{roomId}/{layoutId}/copy</c>.</summary>

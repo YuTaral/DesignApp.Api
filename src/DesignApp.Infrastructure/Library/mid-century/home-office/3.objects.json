@@ -1,0 +1,160 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.03597122302158273,
+      "width": 0.49951171875,
+      "height": 0.8378024852844996,
+      "color": "#D1C2AC",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "sage green painted back wall",
+      "category": "Wall",
+      "x": 0.47607421875,
+      "y": 0.13996075866579463,
+      "width": 0.52392578125,
+      "height": 0.6337475474166122,
+      "color": "#857F64",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2596468279921517,
+      "color": "#CCB7A1",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6795291039895357,
+      "width": 1,
+      "height": 0.32047089601046436,
+      "color": "#B2835E",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "geometric area rug",
+      "category": "Textile",
+      "x": 0.21142578125,
+      "y": 0.7115761935905821,
+      "width": 0.548828125,
+      "height": 0.26618705035971224,
+      "color": "#AA907C",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "walnut bookshelf",
+      "category": "Furniture",
+      "x": 0.27392578125,
+      "y": 0.33616742969260954,
+      "width": 0.205078125,
+      "height": 0.447351209941138,
+      "color": "#724228",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "walnut desk",
+      "category": "Furniture",
+      "x": 0.53466796875,
+      "y": 0.5748855461085677,
+      "width": 0.2822265625,
+      "height": 0.2184434270765206,
+      "color": "#532A17",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "swivel office chair",
+      "category": "Furniture",
+      "x": 0.5205078125,
+      "y": 0.566383257030739,
+      "width": 0.16357421875,
+      "height": 0.27468933943754087,
+      "color": "#805E3D",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "wooden window",
+      "category": "Opening",
+      "x": 0.58984375,
+      "y": 0.23871811641595814,
+      "width": 0.24267578125,
+      "height": 0.3433616742969261,
+      "color": "#CDBDA3",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "desktop computer",
+      "category": "Decor",
+      "x": 0.607421875,
+      "y": 0.47351209941138,
+      "width": 0.1142578125,
+      "height": 0.11641595814257685,
+      "color": "#111110",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "brass desk lamp",
+      "category": "Lighting",
+      "x": 0.7392578125,
+      "y": 0.47678221059516024,
+      "width": 0.05322265625,
+      "height": 0.1157619359058208,
+      "color": "#C2B49B",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "potted monstera plant",
+      "category": "Decor",
+      "x": 0.8486328125,
+      "y": 0.46631785480706345,
+      "width": 0.1513671875,
+      "height": 0.34793982995421846,
+      "color": "#54512A",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "pinboard with brass frame",
+      "category": "Decor",
+      "x": 0.0283203125,
+      "y": 0.2302158273381295,
+      "width": 0.185546875,
+      "height": 0.34401569653368214,
+      "color": "#B2997B",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "globe ceiling light",
+      "category": "Lighting",
+      "x": 0.54248046875,
+      "y": 0.02485284499672989,
+      "width": 0.0517578125,
+      "height": 0.08829300196206671,
+      "color": "#C7B49C",
+      "hand": false
+    }
+  ]
+}

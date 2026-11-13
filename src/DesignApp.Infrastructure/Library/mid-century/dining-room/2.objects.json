@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.671680837148463,
+      "width": 1,
+      "height": 0.32831916285153695,
+      "color": "#AD794D",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2871157619359058,
+      "color": "#C3A990",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.22802734375,
+      "height": 0.7965990843688685,
+      "color": "#8B846B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.1904296875,
+      "y": 0.21255722694571616,
+      "width": 0.6376953125,
+      "height": 0.4728580771746239,
+      "color": "#CDBAA7",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.8037109375,
+      "y": 0.5631131458469588,
+      "width": 0.1962890625,
+      "height": 0.24264224983649443,
+      "color": "#BFA086",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "colorblock rug",
+      "category": "Textile",
+      "x": 0.17578125,
+      "y": 0.7089601046435579,
+      "width": 0.6708984375,
+      "height": 0.17004578155657293,
+      "color": "#A47443",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "teak sideboard",
+      "category": "Furniture",
+      "x": 0.02978515625,
+      "y": 0.5683453237410072,
+      "width": 0.234375,
+      "height": 0.24002616088947024,
+      "color": "#7D4626",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "oval teak dining table",
+      "category": "Furniture",
+      "x": 0.3388671875,
+      "y": 0.5853499018966645,
+      "width": 0.3642578125,
+      "height": 0.23479398299542184,
+      "color": "#A77658",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left teal chair",
+      "category": "Furniture",
+      "x": 0.30029296875,
+      "y": 0.5853499018966645,
+      "width": 0.107421875,
+      "height": 0.22040549378678875,
+      "color": "#514C40",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front teal chair",
+      "category": "Furniture",
+      "x": 0.40380859375,
+      "y": 0.6141268803139307,
+      "width": 0.10595703125,
+      "height": 0.2393721386527142,
+      "color": "#4B463A",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "front cream chair",
+      "category": "Furniture",
+      "x": 0.50439453125,
+      "y": 0.6147809025506867,
+      "width": 0.1318359375,
+      "height": 0.23871811641595814,
+      "color": "#A38058",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right teal chair",
+      "category": "Furniture",
+      "x": 0.63330078125,
+      "y": 0.5860039241334205,
+      "width": 0.10986328125,
+      "height": 0.2184434270765206,
+      "color": "#907563",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "brass sputnik chandelier",
+      "category": "Lighting",
+      "x": 0.416015625,
+      "y": 0.07128842380640942,
+      "width": 0.20361328125,
+      "height": 0.27403531720078483,
+      "color": "#C5AA8C",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "geometric framed art",
+      "category": "Decor",
+      "x": 0.37109375,
+      "y": 0.3250490516677567,
+      "width": 0.0966796875,
+      "height": 0.16219751471550034,
+      "color": "#A88864",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "back wooden window",
+      "category": "Opening",
+      "x": 0.59765625,
+      "y": 0.28776978417266186,
+      "width": 0.22412109375,
+      "height": 0.29823413996075865,
+      "color": "#BEA98C",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "right wooden windows",
+      "category": "Opening",
+      "x": 0.82080078125,
+      "y": 0.17854807063440156,
+      "width": 0.17919921875,
+      "height": 0.4434270765206017,
+      "color": "#C9AC8B",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "monstera plant",
+      "category": "Decor",
+      "x": 0.72314453125,
+      "y": 0.40418574231523874,
+      "width": 0.13818359375,
+      "height": 0.2079790712884238,
+      "color": "#7E8846",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "plant stand and terracotta pot",
+      "category": "Decor",
+      "x": 0.7646484375,
+      "y": 0.6069326357096141,
+      "width": 0.05224609375,
+      "height": 0.10856769130150425,
+      "color": "#9E5A33",
+      "hand": false
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "exposed brick back wall",
+      "category": "Wall",
+      "x": 0.3876953125,
+      "y": 0.2786134728580772,
+      "width": 0.5498046875,
+      "height": 0.2975801177240026,
+      "color": "#6D5044",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "exposed brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.412109375,
+      "height": 0.8587311968606932,
+      "color": "#43302C",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "black beam ceiling",
+      "category": "Ceiling",
+      "x": 0.11181640625,
+      "y": 0,
+      "width": 0.88818359375,
+      "height": 0.31196860693263573,
+      "color": "#1A1819",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6069326357096141,
+      "width": 1,
+      "height": 0.39306736429038586,
+      "color": "#827D77",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "right white painted wall",
+      "category": "Wall",
+      "x": 0.921875,
+      "y": 0.12164813603662525,
+      "width": 0.078125,
+      "height": 0.6657946370176586,
+      "color": "#969497",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.1379986919555265,
+      "width": 0.10400390625,
+      "height": 0.513407455853499,
+      "color": "#EFE8E6",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle window",
+      "category": "Opening",
+      "x": 0.21142578125,
+      "y": 0.2446043165467626,
+      "width": 0.15771484375,
+      "height": 0.34270765206017006,
+      "color": "#EEE8E8",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "black lower cabinets",
+      "category": "Furniture",
+      "x": 0.1318359375,
+      "y": 0.605624591236102,
+      "width": 0.20166015625,
+      "height": 0.2315238718116416,
+      "color": "#141418",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "back lower cabinets",
+      "category": "Furniture",
+      "x": 0.3994140625,
+      "y": 0.5814257684761281,
+      "width": 0.38916015625,
+      "height": 0.15369522563767168,
+      "color": "#1D1C21",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "left concrete countertop",
+      "category": "Fixture",
+      "x": 0.1318359375,
+      "y": 0.551994767822106,
+      "width": 0.28955078125,
+      "height": 0.09941137998691955,
+      "color": "#767173",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "back concrete countertop",
+      "category": "Fixture",
+      "x": 0.39013671875,
+      "y": 0.5552648790058862,
+      "width": 0.3984375,
+      "height": 0.04839764551994768,
+      "color": "#928A83",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "concrete island table",
+      "category": "Furniture",
+      "x": 0.45947265625,
+      "y": 0.5945062132112492,
+      "width": 0.44580078125,
+      "height": 0.3296272073250491,
+      "color": "#534F4C",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left metal stool",
+      "category": "Furniture",
+      "x": 0.4873046875,
+      "y": 0.6906474820143885,
+      "width": 0.1083984375,
+      "height": 0.2380640941792021,
+      "color": "#60574F",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "middle metal stool",
+      "category": "Furniture",
+      "x": 0.61962890625,
+      "y": 0.6984957488554611,
+      "width": 0.10791015625,
+      "height": 0.249836494440811,
+      "color": "#594D47",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "right metal stool",
+      "category": "Furniture",
+      "x": 0.7548828125,
+      "y": 0.7063440156965337,
+      "width": 0.12939453125,
+      "height": 0.2622629169391759,
+      "color": "#423933",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "stainless refrigerator",
+      "category": "Furniture",
+      "x": 0.7802734375,
+      "y": 0.41007194244604317,
+      "width": 0.16015625,
+      "height": 0.3564421190320471,
+      "color": "#544E4C",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "range hood",
+      "category": "Fixture",
+      "x": 0.23095703125,
+      "y": 0.17331589274035317,
+      "width": 0.13134765625,
+      "height": 0.2603008502289078,
+      "color": "#564A49",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "built-in oven",
+      "category": "Fixture",
+      "x": 0.31982421875,
+      "y": 0.5938521909744932,
+      "width": 0.076171875,
+      "height": 0.16285153695225638,
+      "color": "#0D0B10",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "track lighting",
+      "category": "Lighting",
+      "x": 0.4443359375,
+      "y": 0.15892740353172008,
+      "width": 0.19482421875,
+      "height": 0.06409417920209287,
+      "color": "#5B3D2B",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "snake plant",
+      "category": "Decor",
+      "x": 0.15673828125,
+      "y": 0.25506867233485936,
+      "width": 0.05322265625,
+      "height": 0.14780902550686723,
+      "color": "#4B3E2D",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "ceiling duct",
+      "category": "Fixture",
+      "x": 0.44140625,
+      "y": 0.23479398299542184,
+      "width": 0.4970703125,
+      "height": 0.08371484630477437,
+      "color": "#211B1B",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "wooden cutting board",
+      "category": "Decor",
+      "x": 0.40625,
+      "y": 0.5186396337475474,
+      "width": 0.076171875,
+      "height": 0.04905166775670373,
+      "color": "#C7A593",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "window sill",
+      "category": "Fixture",
+      "x": 0,
+      "y": 0.6291693917593199,
+      "width": 0.126953125,
+      "height": 0.07848266841072596,
+      "color": "#56473B",
+      "hand": false
+    }
+  ]
+}

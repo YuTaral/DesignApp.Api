@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick right wall",
+      "category": "Wall",
+      "x": 0.5,
+      "y": 0.1236102027468934,
+      "width": 0.5,
+      "height": 0.6991497710922171,
+      "color": "#5D4136",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.4755859375,
+      "height": 0.8469587965990844,
+      "color": "#452F29",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7475474166121648,
+      "width": 1,
+      "height": 0.25245258338783516,
+      "color": "#6B645B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "black ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.24133420536298233,
+      "color": "#211D1C",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "large steel window",
+      "category": "Opening",
+      "x": 0.0888671875,
+      "y": 0.18966644865925442,
+      "width": 0.333984375,
+      "height": 0.4296926095487247,
+      "color": "#F6F3F7",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.2216796875,
+      "y": 0.5853499018966645,
+      "width": 0.33056640625,
+      "height": 0.2727272727272727,
+      "color": "#413738",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "leather office chair",
+      "category": "Furniture",
+      "x": 0.46533203125,
+      "y": 0.5689993459777632,
+      "width": 0.171875,
+      "height": 0.2923479398299542,
+      "color": "#553A2C",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.1689453125,
+      "y": 0.7383911052975801,
+      "width": 0.6337890625,
+      "height": 0.2616088947024199,
+      "color": "#948B8B",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "left metal bookshelf",
+      "category": "Furniture",
+      "x": 0.6904296875,
+      "y": 0.3224329627207325,
+      "width": 0.25390625,
+      "height": 0.47939829954218444,
+      "color": "#524441",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "right metal bookshelf",
+      "category": "Furniture",
+      "x": 0.7998046875,
+      "y": 0.29888816219751474,
+      "width": 0.1572265625,
+      "height": 0.538914323086985,
+      "color": "#291F1B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "cork board",
+      "category": "Decor",
+      "x": 0.5458984375,
+      "y": 0.3754087638979725,
+      "width": 0.11181640625,
+      "height": 0.1223021582733813,
+      "color": "#C39B7B",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "monstera plant",
+      "category": "Decor",
+      "x": 0.0283203125,
+      "y": 0.5598430346631785,
+      "width": 0.18994140625,
+      "height": 0.21386527141922826,
+      "color": "#3F4922",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.080078125,
+      "y": 0.750817527795945,
+      "width": 0.080078125,
+      "height": 0.10725964682799215,
+      "color": "#582D1E",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "desktop computer",
+      "category": "Furniture",
+      "x": 0.29541015625,
+      "y": 0.49574885546108566,
+      "width": 0.126953125,
+      "height": 0.1236102027468934,
+      "color": "#1A1920",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "track lighting bulbs",
+      "category": "Lighting",
+      "x": 0.4609375,
+      "y": 0,
+      "width": 0.21875,
+      "height": 0.1092217135382603,
+      "color": "#503526",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "ventilation duct",
+      "category": "Fixture",
+      "x": 0.529296875,
+      "y": 0.12622629169391758,
+      "width": 0.380859375,
+      "height": 0.144538914323087,
+      "color": "#261F1D",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "black storage boxes",
+      "category": "Decor",
+      "x": 0.716796875,
+      "y": 0.60431654676259,
+      "width": 0.2041015625,
+      "height": 0.18901242642249835,
+      "color": "#363235",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.47314453125,
+      "y": 0.19555264879005888,
+      "width": 0.037109375,
+      "height": 0.408109875735775,
+      "color": "#191416",
+      "hand": false
+    }
+  ]
+}

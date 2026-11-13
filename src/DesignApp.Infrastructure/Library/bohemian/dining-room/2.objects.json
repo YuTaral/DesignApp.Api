@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster back wall",
+      "category": "Wall",
+      "x": 0.0595703125,
+      "y": 0.15892740353172008,
+      "width": 0.48876953125,
+      "height": 0.5232177894048398,
+      "color": "#B4693B",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.54150390625,
+      "y": 0.026814911706998037,
+      "width": 0.45849609375,
+      "height": 0.7148463047743623,
+      "color": "#D6BBA0",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "terracotta left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.064453125,
+      "height": 0.894702419882276,
+      "color": "#D3A386",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "honey wood floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6638325703073904,
+      "width": 1,
+      "height": 0.33616742969260954,
+      "color": "#B6723B",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white beamed ceiling",
+      "category": "Ceiling",
+      "x": 0.025390625,
+      "y": 0,
+      "width": 0.974609375,
+      "height": 0.2655330281229562,
+      "color": "#D5AD89",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "arched window",
+      "category": "Opening",
+      "x": 0.19140625,
+      "y": 0.2446043165467626,
+      "width": 0.28515625,
+      "height": 0.36102027468933945,
+      "color": "#EDE5C6",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "ceiling beams",
+      "category": "Other",
+      "x": 0.0283203125,
+      "y": 0,
+      "width": 0.76953125,
+      "height": 0.21517331589274036,
+      "color": "#B68960",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.40869140625,
+      "y": 0.009810333551340745,
+      "width": 0.12548828125,
+      "height": 0.23871811641595814,
+      "color": "#A56C3F",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "round wood dining table",
+      "category": "Furniture",
+      "x": 0.32470703125,
+      "y": 0.5186396337475474,
+      "width": 0.31884765625,
+      "height": 0.25768476128188356,
+      "color": "#C69068",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "front left rattan chair",
+      "category": "Furniture",
+      "x": 0.23828125,
+      "y": 0.5709614126880314,
+      "width": 0.15869140625,
+      "height": 0.28973185088293,
+      "color": "#834828",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "front center rattan chair",
+      "category": "Furniture",
+      "x": 0.37744140625,
+      "y": 0.6023544800523217,
+      "width": 0.13525390625,
+      "height": 0.30477436232831917,
+      "color": "#743914",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "front right rattan chair",
+      "category": "Furniture",
+      "x": 0.50537109375,
+      "y": 0.5892740353172008,
+      "width": 0.1591796875,
+      "height": 0.30673642903858733,
+      "color": "#703713",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left rattan chair",
+      "category": "Furniture",
+      "x": 0.27392578125,
+      "y": 0.5500327011118378,
+      "width": 0.10986328125,
+      "height": 0.13603662524525834,
+      "color": "#A76F47",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "right rattan chair",
+      "category": "Furniture",
+      "x": 0.64013671875,
+      "y": 0.5644211903204709,
+      "width": 0.0654296875,
+      "height": 0.24264224983649443,
+      "color": "#8B522D",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "carved wood sideboard",
+      "category": "Furniture",
+      "x": 0.6337890625,
+      "y": 0.538914323086985,
+      "width": 0.158203125,
+      "height": 0.18835840418574232,
+      "color": "#905936",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "kilim rug under table",
+      "category": "Textile",
+      "x": 0.1884765625,
+      "y": 0.7096141268803139,
+      "width": 0.58203125,
+      "height": 0.28515369522563766,
+      "color": "#956249",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "front kilim rug",
+      "category": "Textile",
+      "x": 0.3076171875,
+      "y": 0.7913669064748201,
+      "width": 0.6923828125,
+      "height": 0.20863309352517986,
+      "color": "#7C3620",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "macrame wall hanging",
+      "category": "Decor",
+      "x": 0.07666015625,
+      "y": 0.31262262916939176,
+      "width": 0.10400390625,
+      "height": 0.2432962720732505,
+      "color": "#A96E44",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.8369140625,
+      "y": 0.21778940483976456,
+      "width": 0.1630859375,
+      "height": 0.4728580771746239,
+      "color": "#3C3708",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right woven basket",
+      "category": "Decor",
+      "x": 0.861328125,
+      "y": 0.6396337475474166,
+      "width": 0.138671875,
+      "height": 0.19032047089601045,
+      "color": "#633318",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "monstera plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.618051013734467,
+      "width": 0.1611328125,
+      "height": 0.1948986265533028,
+      "color": "#4D400D",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "left woven basket",
+      "category": "Decor",
+      "x": 0.0048828125,
+      "y": 0.7750163505559189,
+      "width": 0.12158203125,
+      "height": 0.1249182472204055,
+      "color": "#602D0C",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "ceramic vase with branches",
+      "category": "Decor",
+      "x": 0.611328125,
+      "y": 0.41203400915631133,
+      "width": 0.0927734375,
+      "height": 0.1366906474820144,
+      "color": "#BBA293",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "white baseboard",
+      "category": "Fixture",
+      "x": 0.134765625,
+      "y": 0.6494440810987574,
+      "width": 0.14453125,
+      "height": 0.03793328973185088,
+      "color": "#BD825C",
+      "hand": false
+    }
+  ]
+}

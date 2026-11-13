@@ -78,6 +78,12 @@ public static class Constants
         /// <summary>The photo of a library room's layout.</summary>
         public const string LibraryLayoutPhoto = "/{designId}/{roomId}/{layoutId}/photo";
 
+        /// <summary>A design's cover: its first rooms in a grid, for lists.</summary>
+        public const string LibraryDesignCover = "/{designId}/cover";
+
+        /// <summary>A small copy of a layout's photo, for lists.</summary>
+        public const string LibraryLayoutThumbnail = "/{designId}/{roomId}/{layoutId}/thumbnail";
+
         /// <summary>Copying one layout of a library room into a room of the visitor.</summary>
         public const string LibraryLayoutCopy = "/{designId}/{roomId}/{layoutId}/copy";
 
@@ -98,6 +104,24 @@ public static class Constants
         public static string LibraryLayoutPhotoUrl(string designId, string roomId, string layoutId)
         {
             return $"{Api}{Library}/{designId}/{roomId}/{layoutId}/photo";
+        }
+
+        /// <summary>The URL of a design's cover.</summary>
+        /// <param name="designId">The library design's id.</param>
+        /// <returns>The path of the cover.</returns>
+        public static string LibraryDesignCoverUrl(string designId)
+        {
+            return $"{Api}{Library}/{designId}/cover";
+        }
+
+        /// <summary>The URL of a layout's thumbnail.</summary>
+        /// <param name="designId">The library design's id.</param>
+        /// <param name="roomId">The room's id inside it.</param>
+        /// <param name="layoutId">The layout's id inside the room.</param>
+        /// <returns>The path of the thumbnail.</returns>
+        public static string LibraryLayoutThumbnailUrl(string designId, string roomId, string layoutId)
+        {
+            return $"{Api}{Library}/{designId}/{roomId}/{layoutId}/thumbnail";
         }
 
         /// <summary>The URL of a design.</summary>

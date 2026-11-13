@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.671680837148463,
+      "width": 1,
+      "height": 0.32831916285153695,
+      "color": "#B6835C",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.28515369522563766,
+      "color": "#C2AA92",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted back wall",
+      "category": "Wall",
+      "x": 0.22607421875,
+      "y": 0.22956180510137345,
+      "width": 0.3896484375,
+      "height": 0.4551994767822106,
+      "color": "#8E8870",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.02419882275997384,
+      "width": 0.2275390625,
+      "height": 0.81621975147155,
+      "color": "#BCAC96",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.619140625,
+      "y": 0.5650752125572269,
+      "width": 0.380859375,
+      "height": 0.23675604970569,
+      "color": "#D4BEAE",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "geometric area rug",
+      "category": "Textile",
+      "x": 0.12255859375,
+      "y": 0.7096141268803139,
+      "width": 0.69140625,
+      "height": 0.15631131458469588,
+      "color": "#AFA291",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "walnut desk",
+      "category": "Furniture",
+      "x": 0.34423828125,
+      "y": 0.5775016350555919,
+      "width": 0.310546875,
+      "height": 0.2171353826030085,
+      "color": "#562915",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "mustard chair",
+      "category": "Furniture",
+      "x": 0.44970703125,
+      "y": 0.540876389797253,
+      "width": 0.10693359375,
+      "height": 0.22694571615434925,
+      "color": "#8E5B20",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "computer monitor",
+      "category": "Decor",
+      "x": 0.37841796875,
+      "y": 0.4774362328319163,
+      "width": 0.09912109375,
+      "height": 0.11379986919555266,
+      "color": "#221C18",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "brass floor lamp",
+      "category": "Lighting",
+      "x": 0.2421875,
+      "y": 0.40353172007848265,
+      "width": 0.06982421875,
+      "height": 0.2995421844342708,
+      "color": "#A18262",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "brass desk lamp",
+      "category": "Lighting",
+      "x": 0.5576171875,
+      "y": 0.4238064094179202,
+      "width": 0.08642578125,
+      "height": 0.16546762589928057,
+      "color": "#BF9A71",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "fiddle leaf plant",
+      "category": "Decor",
+      "x": 0.74609375,
+      "y": 0.3512099411379987,
+      "width": 0.10107421875,
+      "height": 0.38260300850228907,
+      "color": "#75692D",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wall-mounted wooden shelves",
+      "category": "Furniture",
+      "x": 0,
+      "y": 0.2223675604970569,
+      "width": 0.16162109375,
+      "height": 0.3708306082406802,
+      "color": "#5A3118",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "cork pin board",
+      "category": "Decor",
+      "x": 0.15380859375,
+      "y": 0.34532374100719426,
+      "width": 0.05517578125,
+      "height": 0.1962066710268149,
+      "color": "#BDAA99",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "left wooden window",
+      "category": "Opening",
+      "x": 0.60205078125,
+      "y": 0.2727272727272727,
+      "width": 0.228515625,
+      "height": 0.30085022890778285,
+      "color": "#C2AF93",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "right bay windows",
+      "category": "Opening",
+      "x": 0.8212890625,
+      "y": 0.17854807063440156,
+      "width": 0.1787109375,
+      "height": 0.45323741007194246,
+      "color": "#C8AC89",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.4755859375,
+      "y": 0.059516023544800525,
+      "width": 0.0810546875,
+      "height": 0.050359712230215826,
+      "color": "#A59279",
+      "hand": false
+    }
+  ]
+}

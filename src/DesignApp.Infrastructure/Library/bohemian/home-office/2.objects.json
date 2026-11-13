@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster back wall",
+      "category": "Wall",
+      "x": 0.056640625,
+      "y": 0.16023544800523218,
+      "width": 0.490234375,
+      "height": 0.5382603008502289,
+      "color": "#B36D40",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "terracotta left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.06591796875,
+      "height": 0.854153041203401,
+      "color": "#C58F6C",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.541015625,
+      "y": 0.07259646827992151,
+      "width": 0.458984375,
+      "height": 0.6566383257030739,
+      "color": "#DCC5A8",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "honey oak hardwood floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6396337475474166,
+      "width": 1,
+      "height": 0.3603662524525834,
+      "color": "#AD6B37",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "white ceiling",
+      "category": "Ceiling",
+      "x": 0.0400390625,
+      "y": 0,
+      "width": 0.9599609375,
+      "height": 0.26357096141268804,
+      "color": "#C8A078",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "white ceiling beams",
+      "category": "Decor",
+      "x": 0.0283203125,
+      "y": 0,
+      "width": 0.77734375,
+      "height": 0.21517331589274036,
+      "color": "#C1986F",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "kilim rug",
+      "category": "Textile",
+      "x": 0.18896484375,
+      "y": 0.6821451929365598,
+      "width": 0.548828125,
+      "height": 0.3106605624591236,
+      "color": "#9E6A51",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.26953125,
+      "y": 0.565729234793983,
+      "width": 0.2919921875,
+      "height": 0.2380640941792021,
+      "color": "#6A3114",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "rattan office chair",
+      "category": "Furniture",
+      "x": 0.40380859375,
+      "y": 0.5735775016350556,
+      "width": 0.140625,
+      "height": 0.25506867233485936,
+      "color": "#84491E",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.40869140625,
+      "y": 0.009810333551340745,
+      "width": 0.12548828125,
+      "height": 0.2393721386527142,
+      "color": "#A46A3D",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.189453125,
+      "y": 0.2655330281229562,
+      "width": 0.140625,
+      "height": 0.3355134074558535,
+      "color": "#F1E8CB",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.3779296875,
+      "y": 0.2923479398299542,
+      "width": 0.103515625,
+      "height": 0.2858077174623937,
+      "color": "#F1E8CA",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "wooden open bookshelf",
+      "category": "Furniture",
+      "x": 0.76416015625,
+      "y": 0.3224329627207325,
+      "width": 0.23583984375,
+      "height": 0.5317200784826684,
+      "color": "#734728",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "cork bulletin board",
+      "category": "Decor",
+      "x": 0.59765625,
+      "y": 0.34466971877043817,
+      "width": 0.142578125,
+      "height": 0.1935905820797907,
+      "color": "#CA9973",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.0546875,
+      "y": 0.2753433616742969,
+      "width": 0.16455078125,
+      "height": 0.3172007848266841,
+      "color": "#4B4109",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "woven floor basket",
+      "category": "Decor",
+      "x": 0.0830078125,
+      "y": 0.6304774362328319,
+      "width": 0.107421875,
+      "height": 0.13865271419228253,
+      "color": "#743C1C",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "desktop monitor",
+      "category": "Other",
+      "x": 0.365234375,
+      "y": 0.4722040549378679,
+      "width": 0.0927734375,
+      "height": 0.118378024852845,
+      "color": "#1A1314",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "rattan table lamp",
+      "category": "Lighting",
+      "x": 0.46728515625,
+      "y": 0.45062132112491826,
+      "width": 0.05517578125,
+      "height": 0.12426422498364945,
+      "color": "#A2673B",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "potted cacti",
+      "category": "Decor",
+      "x": 0.29833984375,
+      "y": 0.5042511445389143,
+      "width": 0.05615234375,
+      "height": 0.08633093525179857,
+      "color": "#85522F",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "trailing pothos plants",
+      "category": "Decor",
+      "x": 0.76171875,
+      "y": 0.2262916939175932,
+      "width": 0.23828125,
+      "height": 0.3302812295618051,
+      "color": "#5E4617",
+      "hand": false
+    }
+  ]
+}

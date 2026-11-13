@@ -1,0 +1,193 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6337475474166122,
+      "width": 1,
+      "height": 0.36625245258338784,
+      "color": "#B27E52",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.28776978417266186,
+      "color": "#C3AA93",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.04447351209941138,
+      "width": 0.2587890625,
+      "height": 0.7959450621321125,
+      "color": "#837D64",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted back wall",
+      "category": "Wall",
+      "x": 0.22607421875,
+      "y": 0.2275997383911053,
+      "width": 0.60400390625,
+      "height": 0.4708960104643558,
+      "color": "#C5AC95",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.8212890625,
+      "y": 0.5735775016350556,
+      "width": 0.1787109375,
+      "height": 0.23217789404839764,
+      "color": "#CCB09B",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.14599609375,
+      "y": 0.7083060824068018,
+      "width": 0.7509765625,
+      "height": 0.15827338129496402,
+      "color": "#CAB4A3",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "walnut desk",
+      "category": "Furniture",
+      "x": 0.16455078125,
+      "y": 0.5696533682145193,
+      "width": 0.20556640625,
+      "height": 0.25572269457161545,
+      "color": "#714A32",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "walnut bookshelf",
+      "category": "Furniture",
+      "x": 0.34375,
+      "y": 0.3296272073250491,
+      "width": 0.146484375,
+      "height": 0.3708306082406802,
+      "color": "#754D37",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "walnut dresser",
+      "category": "Furniture",
+      "x": 0.47900390625,
+      "y": 0.5474166121648136,
+      "width": 0.109375,
+      "height": 0.15238718116415959,
+      "color": "#824323",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden office chair",
+      "category": "Furniture",
+      "x": 0.36083984375,
+      "y": 0.5676913015042512,
+      "width": 0.12060546875,
+      "height": 0.21386527141922826,
+      "color": "#6D442A",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.0205078125,
+      "y": 0.4022236756049706,
+      "width": 0.15478515625,
+      "height": 0.2864617396991498,
+      "color": "#30320F",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "plant pot with stand",
+      "category": "Decor",
+      "x": 0.052734375,
+      "y": 0.6742969260954872,
+      "width": 0.09228515625,
+      "height": 0.18639633747547416,
+      "color": "#6B4B33",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "front window",
+      "category": "Opening",
+      "x": 0.60791015625,
+      "y": 0.2884238064094179,
+      "width": 0.212890625,
+      "height": 0.2818835840418574,
+      "color": "#BDA98A",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "corner windows",
+      "category": "Opening",
+      "x": 0.8173828125,
+      "y": 0.18378024852844996,
+      "width": 0.1826171875,
+      "height": 0.4395029431000654,
+      "color": "#C9AA88",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "cork board",
+      "category": "Decor",
+      "x": 0.50390625,
+      "y": 0.36102027468933945,
+      "width": 0.0751953125,
+      "height": 0.12034009156311315,
+      "color": "#A97246",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "desktop computer",
+      "category": "Other",
+      "x": 0.22509765625,
+      "y": 0.4623937213865271,
+      "width": 0.05859375,
+      "height": 0.12818835840418574,
+      "color": "#362C28",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.4755859375,
+      "y": 0.059516023544800525,
+      "width": 0.08154296875,
+      "height": 0.050359712230215826,
+      "color": "#A8957B",
+      "hand": false
+    }
+  ]
+}

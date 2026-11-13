@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
@@ -5,6 +6,7 @@ using System.Text.Json.Serialization;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Photos;
+using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Library;
 
@@ -24,6 +26,10 @@ internal sealed class EmbeddedLibrary : ILibrary
     private readonly Assembly _assembly;
     // Resource names by their path inside the library, with forward slashes ("minimalist/kitchen/2.jpg").
     private readonly Dictionary<string, string> _resources;
+    // Thumbnails by photo path, made on first use.
+    private readonly ConcurrentDictionary<string, byte[]> _thumbnails = new(StringComparer.Ordinal);
+    // Covers by design id, made on first use.
+    private readonly ConcurrentDictionary<string, byte[]> _covers = new(StringComparer.Ordinal);
 
     /// <summary>Reads the library embedded in this assembly.</summary>
     public EmbeddedLibrary() : this(typeof(EmbeddedLibrary).Assembly)
@@ -69,6 +75,22 @@ internal sealed class EmbeddedLibrary : ILibrary
     public Stream OpenLabelMap(string designId, string roomId, string layoutId)
     {
         return Open(LayoutFile(designId, roomId, layoutId, Constants.Library.LabelMapSuffix));
+    }
+
+    /// <inheritdoc/>
+    public byte[] Thumbnail(string designId, string roomId, string layoutId)
+    {
+        var path = LayoutFile(designId, roomId, layoutId, Constants.Library.PhotoSuffix);
+        if (!_resources.ContainsKey(path))
+            throw new KeyNotFoundException($"The library has no file {path}.");
+        return _thumbnails.GetOrAdd(path, MakeThumbnail);
+    }
+
+    /// <inheritdoc/>
+    public byte[] Cover(string designId)
+    {
+        var design = FindDesign(designId) ?? throw new KeyNotFoundException($"The library has no design {designId}.");
+        return _covers.GetOrAdd(design.Id, _ => MakeCover(design));
     }
 
     /// <inheritdoc/>
@@ -131,6 +153,53 @@ internal sealed class EmbeddedLibrary : ILibrary
         if (layout.Width <= 0 || layout.Height <= 0 || layout.Objects.Count == 0)
             throw new InvalidDataException($"Library layout {name} needs a size and at least one object.");
         return new LibraryLayout(layoutId, layout.Width, layout.Height, [.. layout.Objects.Select(o => o.ToDomain()).OrderBy(o => o.Index)]);
+    }
+
+    /// <summary>Scales one of the library's photos down to <see cref="Constants.Library.ThumbnailWidth"/> pixels wide.</summary>
+    /// <param name="path">The photo's path inside the library.</param>
+    /// <returns>The thumbnail as a JPEG.</returns>
+    private byte[] MakeThumbnail(string path)
+    {
+        using var stream = Open(path);
+        using var photo = SKBitmap.Decode(stream) ?? throw new InvalidDataException($"Library photo {path} can't be decoded.");
+        var width = Math.Min(Constants.Library.ThumbnailWidth, photo.Width);
+        var height = Math.Max(1, (int)Math.Round((double)photo.Height * width / photo.Width));
+        using var small = photo.Resize(new SKImageInfo(width, height), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
+            ?? throw new InvalidOperationException($"Library photo {path} can't be scaled.");
+        using var image = SKImage.FromBitmap(small);
+        using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, Constants.Library.ThumbnailQuality);
+        return encoded.ToArray();
+    }
+
+    /// <summary>
+    /// Draws a design's first rooms (each in its first layout) into a grid of
+    /// <see cref="Constants.Library.CoverColumns"/> by <see cref="Constants.Library.CoverRows"/>, with a thin white gap.
+    /// A design with fewer rooms leaves the last cells white.
+    /// </summary>
+    /// <param name="design">The design.</param>
+    /// <returns>The cover as a JPEG.</returns>
+    private byte[] MakeCover(LibraryDesign design)
+    {
+        const int columns = Constants.Library.CoverColumns, rows = Constants.Library.CoverRows;
+        const int cellWidth = Constants.Library.CoverCellWidth, cellHeight = Constants.Library.CoverCellHeight, gap = Constants.Library.CoverGap;
+        using var cover = new SKBitmap(new SKImageInfo(columns * cellWidth + (columns - 1) * gap, rows * cellHeight + (rows - 1) * gap));
+        using var canvas = new SKCanvas(cover);
+        canvas.Clear(SKColors.White);
+        var sampling = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
+        foreach (var (room, i) in design.Rooms.Take(columns * rows).Select((room, i) => (room, i)))
+        {
+            using var stream = Open(LayoutFile(design.Id, room.Id, room.Layouts[0].Id, Constants.Library.PhotoSuffix));
+            using var photo = SKBitmap.Decode(stream) ?? throw new InvalidDataException($"Library photo of {design.Id}/{room.Id} can't be decoded.");
+            using var image = SKImage.FromBitmap(photo);
+            // Fill the cell, cutting the photo's longer side evenly if its shape differs.
+            var scale = Math.Max((float)cellWidth / photo.Width, (float)cellHeight / photo.Height);
+            var (sourceWidth, sourceHeight) = (cellWidth / scale, cellHeight / scale);
+            var source = SKRect.Create((photo.Width - sourceWidth) / 2, (photo.Height - sourceHeight) / 2, sourceWidth, sourceHeight);
+            var target = SKRect.Create(i % columns * (cellWidth + gap), i / columns * (cellHeight + gap), cellWidth, cellHeight);
+            canvas.DrawImage(image, source, target, sampling);
+        }
+        using var encoded = SKImage.FromBitmap(cover).Encode(SKEncodedImageFormat.Jpeg, Constants.Library.ThumbnailQuality);
+        return encoded.ToArray();
     }
 
     /// <summary>Reads and parses one JSON file of the library.</summary>

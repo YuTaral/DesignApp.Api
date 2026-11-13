@@ -1,0 +1,303 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.10464355788096795,
+      "width": 0.51904296875,
+      "height": 0.671026814911707,
+      "color": "#B06A3C",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.4755859375,
+      "y": 0.06344015696533682,
+      "width": 0.5244140625,
+      "height": 0.7155003270111184,
+      "color": "#C8A87F",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "cream ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2831916285153695,
+      "color": "#D3AE8C",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "honey oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6952256376716809,
+      "width": 1,
+      "height": 0.30477436232831917,
+      "color": "#934E13",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "ceiling beams",
+      "category": "Other",
+      "x": 0.16552734375,
+      "y": 0,
+      "width": 0.8212890625,
+      "height": 0.21386527141922826,
+      "color": "#BD956D",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "arched window",
+      "category": "Opening",
+      "x": 0.08251953125,
+      "y": 0.24264224983649443,
+      "width": 0.1884765625,
+      "height": 0.4277305428384565,
+      "color": "#F1E9CA",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "large kilim rug",
+      "category": "Textile",
+      "x": 0,
+      "y": 0.7527795945062132,
+      "width": 0.755859375,
+      "height": 0.2472204054937868,
+      "color": "#B47660",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "small kilim rug",
+      "category": "Textile",
+      "x": 0.37353515625,
+      "y": 0.6749509483322433,
+      "width": 0.25048828125,
+      "height": 0.1484630477436233,
+      "color": "#955933",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.2805755395683453,
+      "width": 0.11474609375,
+      "height": 0.3917593198168738,
+      "color": "#5E570D",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "woven basket planter",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.6389797253106606,
+      "width": 0.07080078125,
+      "height": 0.19816873773708307,
+      "color": "#763D1B",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "snake plant in basket",
+      "category": "Decor",
+      "x": 0.23486328125,
+      "y": 0.5297580117724002,
+      "width": 0.06591796875,
+      "height": 0.2158273381294964,
+      "color": "#8A5A21",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "large rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.42333984375,
+      "y": 0.006540222367560497,
+      "width": 0.1279296875,
+      "height": 0.24395029431000653,
+      "color": "#B17846",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "middle rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.70703125,
+      "y": 0,
+      "width": 0.0712890625,
+      "height": 0.3407455853499019,
+      "color": "#9C6A3C",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "right rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.77197265625,
+      "y": 0.06605624591236102,
+      "width": 0.06298828125,
+      "height": 0.29627207325049054,
+      "color": "#A5703F",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "open wood shelves",
+      "category": "Furniture",
+      "x": 0.2919921875,
+      "y": 0.37148463047743624,
+      "width": 0.25927734375,
+      "height": 0.08109875735775017,
+      "color": "#703916",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "patterned tile backsplash left",
+      "category": "Fixture",
+      "x": 0.2880859375,
+      "y": 0.42576847612818836,
+      "width": 0.3583984375,
+      "height": 0.12164813603662525,
+      "color": "#905832",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "patterned tile backsplash right",
+      "category": "Fixture",
+      "x": 0.7666015625,
+      "y": 0.44931327665140613,
+      "width": 0.1572265625,
+      "height": 0.1105297580117724,
+      "color": "#996645",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "white upper cabinet",
+      "category": "Furniture",
+      "x": 0.55126953125,
+      "y": 0.30150425114453894,
+      "width": 0.09375,
+      "height": 0.1170699803793329,
+      "color": "#E8CFAF",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "tall green cabinet",
+      "category": "Furniture",
+      "x": 0.6435546875,
+      "y": 0.2871157619359058,
+      "width": 0.12841796875,
+      "height": 0.26880313930673644,
+      "color": "#73562F",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "cream retro fridge",
+      "category": "Furniture",
+      "x": 0.64208984375,
+      "y": 0.40353172007848265,
+      "width": 0.08984375,
+      "height": 0.16481360366252454,
+      "color": "#E0CAB3",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "green lower cabinets",
+      "category": "Furniture",
+      "x": 0.29248046875,
+      "y": 0.5428384565075213,
+      "width": 0.35302734375,
+      "height": 0.19424460431654678,
+      "color": "#553916",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "farmhouse sink",
+      "category": "Fixture",
+      "x": 0.41552734375,
+      "y": 0.5461085676913014,
+      "width": 0.07275390625,
+      "height": 0.04643557880967953,
+      "color": "#BD9062",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "wood countertop",
+      "category": "Furniture",
+      "x": 0.287109375,
+      "y": 0.5042511445389143,
+      "width": 0.359375,
+      "height": 0.058207979071288427,
+      "color": "#85481D",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "wood and green island",
+      "category": "Furniture",
+      "x": 0.6044921875,
+      "y": 0.5179856115107914,
+      "width": 0.31884765625,
+      "height": 0.37998691955526487,
+      "color": "#633E1A",
+      "hand": false
+    },
+    {
+      "index": 25,
+      "label": "left rattan stool",
+      "category": "Furniture",
+      "x": 0.6005859375,
+      "y": 0.5886200130804448,
+      "width": 0.14111328125,
+      "height": 0.35251798561151076,
+      "color": "#8D5C32",
+      "hand": false
+    },
+    {
+      "index": 26,
+      "label": "front right rattan stool",
+      "category": "Furniture",
+      "x": 0.8046875,
+      "y": 0.5820797907128843,
+      "width": 0.13671875,
+      "height": 0.34728580771746237,
+      "color": "#612E0A",
+      "hand": false
+    },
+    {
+      "index": 27,
+      "label": "back right rattan stool",
+      "category": "Furniture",
+      "x": 0.857421875,
+      "y": 0.5683453237410072,
+      "width": 0.107421875,
+      "height": 0.2818835840418574,
+      "color": "#542506",
+      "hand": false
+    }
+  ]
+}

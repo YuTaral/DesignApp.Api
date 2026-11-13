@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "herringbone oak floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6782210595160235,
+      "width": 1,
+      "height": 0.32177894048397643,
+      "color": "#956132",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream painted ceiling",
+      "category": "Ceiling",
+      "x": 0.0400390625,
+      "y": 0,
+      "width": 0.9599609375,
+      "height": 0.2779594506213211,
+      "color": "#CCB59A",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "sage green painted back wall",
+      "category": "Wall",
+      "x": 0.0400390625,
+      "y": 0.197514715500327,
+      "width": 0.55078125,
+      "height": 0.551994767822106,
+      "color": "#797655",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream painted left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.04833984375,
+      "height": 0.9247874427730542,
+      "color": "#C0A481",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "cream painted right wall",
+      "category": "Wall",
+      "x": 0.5888671875,
+      "y": 0.16154349247874428,
+      "width": 0.4111328125,
+      "height": 0.4447351209941138,
+      "color": "#C5A883",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "teal sofa",
+      "category": "Furniture",
+      "x": 0.45263671875,
+      "y": 0.5918901242642249,
+      "width": 0.4384765625,
+      "height": 0.2871157619359058,
+      "color": "#445F5F",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "walnut sideboard",
+      "category": "Furniture",
+      "x": 0.25927734375,
+      "y": 0.5631131458469588,
+      "width": 0.26513671875,
+      "height": 0.14780902550686723,
+      "color": "#985124",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "yellow armchair",
+      "category": "Furniture",
+      "x": 0.09423828125,
+      "y": 0.6088947024198823,
+      "width": 0.224609375,
+      "height": 0.2805755395683453,
+      "color": "#77480D",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "oval coffee table",
+      "category": "Furniture",
+      "x": 0.39013671875,
+      "y": 0.6389797253106606,
+      "width": 0.1728515625,
+      "height": 0.1118378024852845,
+      "color": "#9A6746",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "round side table",
+      "category": "Furniture",
+      "x": 0.19384765625,
+      "y": 0.7096141268803139,
+      "width": 0.119140625,
+      "height": 0.2027468933943754,
+      "color": "#593110",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "geometric rug",
+      "category": "Textile",
+      "x": 0.302734375,
+      "y": 0.7056899934597777,
+      "width": 0.19140625,
+      "height": 0.15958142576847612,
+      "color": "#BA9C83",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "grey armchair",
+      "category": "Furniture",
+      "x": 0.5439453125,
+      "y": 0.5487246566383257,
+      "width": 0.08203125,
+      "height": 0.09221713538260301,
+      "color": "#6F553A",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "arc floor lamp",
+      "category": "Lighting",
+      "x": 0.0595703125,
+      "y": 0.27926749509483323,
+      "width": 0.3046875,
+      "height": 0.5297580117724002,
+      "color": "#A48154",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "table lamp",
+      "category": "Lighting",
+      "x": 0.2578125,
+      "y": 0.44669718770438194,
+      "width": 0.0576171875,
+      "height": 0.13865271419228253,
+      "color": "#A88761",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "ceiling light",
+      "category": "Lighting",
+      "x": 0.5595703125,
+      "y": 0.040549378678875085,
+      "width": 0.06884765625,
+      "height": 0.118378024852845,
+      "color": "#D1BBA1",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "television",
+      "category": "Decor",
+      "x": 0.33740234375,
+      "y": 0.4597776324395029,
+      "width": 0.1220703125,
+      "height": 0.1157619359058208,
+      "color": "#B2C1C6",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "framed abstract art",
+      "category": "Decor",
+      "x": 0.48974609375,
+      "y": 0.3570961412688031,
+      "width": 0.060546875,
+      "height": 0.12753433616742968,
+      "color": "#BE9D7A",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.06787109375,
+      "y": 0.4525833878351864,
+      "width": 0.10400390625,
+      "height": 0.3172007848266841,
+      "color": "#2A2E0E",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "monstera plant",
+      "category": "Decor",
+      "x": 0.64013671875,
+      "y": 0.48528449967298887,
+      "width": 0.1171875,
+      "height": 0.13603662524525834,
+      "color": "#89A344",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "linen curtain",
+      "category": "Textile",
+      "x": 0.6201171875,
+      "y": 0.2975801177240026,
+      "width": 0.0576171875,
+      "height": 0.3302812295618051,
+      "color": "#A28463",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "black framed window",
+      "category": "Opening",
+      "x": 0.68603515625,
+      "y": 0.30346631785480704,
+      "width": 0.08154296875,
+      "height": 0.3106605624591236,
+      "color": "#DADFBD",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "black framed glass doors",
+      "category": "Opening",
+      "x": 0.8369140625,
+      "y": 0.2446043165467626,
+      "width": 0.1630859375,
+      "height": 0.5291039895356442,
+      "color": "#CDDCB2",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "curtain rod",
+      "category": "Fixture",
+      "x": 0.6240234375,
+      "y": 0.18705035971223022,
+      "width": 0.3759765625,
+      "height": 0.1236102027468934,
+      "color": "#977C5E",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "crown molding",
+      "category": "Fixture",
+      "x": 0.0400390625,
+      "y": 0.17658600392413343,
+      "width": 0.5517578125,
+      "height": 0.1131458469587966,
+      "color": "#C7B291",
+      "hand": false
+    }
+  ]
+}

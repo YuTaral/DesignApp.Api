@@ -1,0 +1,215 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.51416015625,
+      "height": 0.843034663178548,
+      "color": "#49302A",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.4853515625,
+      "y": 0.2805755395683453,
+      "width": 0.462890625,
+      "height": 0.43100065402223675,
+      "color": "#5E4237",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.9453125,
+      "y": 0.007848266841072597,
+      "width": 0.0546875,
+      "height": 0.7743623283191629,
+      "color": "#8C898B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6461739699149771,
+      "width": 1,
+      "height": 0.3538260300850229,
+      "color": "#989694",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "black industrial ceiling",
+      "category": "Ceiling",
+      "x": 0.02392578125,
+      "y": 0,
+      "width": 0.97607421875,
+      "height": 0.31196860693263573,
+      "color": "#1C191A",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.15369522563767168,
+      "width": 0.2431640625,
+      "height": 0.4565075212557227,
+      "color": "#F5F0F6",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "middle window",
+      "category": "Opening",
+      "x": 0.3349609375,
+      "y": 0.2786134728580772,
+      "width": 0.1376953125,
+      "height": 0.30085022890778285,
+      "color": "#ECE8EB",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "wooden desk",
+      "category": "Furniture",
+      "x": 0.45068359375,
+      "y": 0.6036625245258339,
+      "width": 0.36376953125,
+      "height": 0.2694571615434925,
+      "color": "#4C3E3C",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "brown leather office chair",
+      "category": "Furniture",
+      "x": 0.599609375,
+      "y": 0.5585349901896665,
+      "width": 0.12744140625,
+      "height": 0.2459123610202747,
+      "color": "#5A392F",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "grey woven rug",
+      "category": "Textile",
+      "x": 0.3330078125,
+      "y": 0.7194244604316546,
+      "width": 0.56298828125,
+      "height": 0.2805755395683453,
+      "color": "#9B9293",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "computer monitor",
+      "category": "Decor",
+      "x": 0.53466796875,
+      "y": 0.5016350555918901,
+      "width": 0.11181640625,
+      "height": 0.13603662524525834,
+      "color": "#3E3C42",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "right metal shelf",
+      "category": "Furniture",
+      "x": 0.8173828125,
+      "y": 0.39110529758011775,
+      "width": 0.1181640625,
+      "height": 0.34401569653368214,
+      "color": "#362E2C",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left metal shelf",
+      "category": "Furniture",
+      "x": 0.52490234375,
+      "y": 0.41465009810333553,
+      "width": 0.11669921875,
+      "height": 0.1157619359058208,
+      "color": "#725C54",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "cork board",
+      "category": "Decor",
+      "x": 0.66943359375,
+      "y": 0.39045127534336166,
+      "width": 0.1171875,
+      "height": 0.1105297580117724,
+      "color": "#AF8664",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "potted banana plant",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.3976455199476782,
+      "width": 0.1826171875,
+      "height": 0.4486592544146501,
+      "color": "#545F2F",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "track light with bulbs",
+      "category": "Lighting",
+      "x": 0.5302734375,
+      "y": 0.16350555918901244,
+      "width": 0.1611328125,
+      "height": 0.06671026814911707,
+      "color": "#5F3F2D",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "black steel beam",
+      "category": "Other",
+      "x": 0.28662109375,
+      "y": 0.06932635709614127,
+      "width": 0.59423828125,
+      "height": 0.15500327011118378,
+      "color": "#342824",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "air duct",
+      "category": "Fixture",
+      "x": 0.552734375,
+      "y": 0.23086984957488554,
+      "width": 0.3994140625,
+      "height": 0.0987573577501635,
+      "color": "#1F1A1A",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "storage boxes",
+      "category": "Decor",
+      "x": 0.8291015625,
+      "y": 0.5755395683453237,
+      "width": 0.09814453125,
+      "height": 0.1366906474820144,
+      "color": "#393135",
+      "hand": false
+    }
+  ]
+}

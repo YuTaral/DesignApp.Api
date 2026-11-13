@@ -1,0 +1,204 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0.501953125,
+      "y": 0.2864617396991498,
+      "width": 0.4384765625,
+      "height": 0.3897972531066056,
+      "color": "#705248",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick left wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0,
+      "width": 0.5263671875,
+      "height": 0.8371484630477436,
+      "color": "#432E2A",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "white right wall",
+      "category": "Wall",
+      "x": 0.908203125,
+      "y": 0.050359712230215826,
+      "width": 0.091796875,
+      "height": 0.6612164813603663,
+      "color": "#858181",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "dark wood ceiling",
+      "category": "Ceiling",
+      "x": 0.02392578125,
+      "y": 0,
+      "width": 0.97607421875,
+      "height": 0.3237410071942446,
+      "color": "#231F1E",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6553302812295618,
+      "width": 1,
+      "height": 0.34466971877043817,
+      "color": "#766C64",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left large window",
+      "category": "Opening",
+      "x": 0,
+      "y": 0.15565729234793982,
+      "width": 0.2412109375,
+      "height": 0.47416612164813604,
+      "color": "#F1ECF3",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "center window",
+      "category": "Opening",
+      "x": 0.33251953125,
+      "y": 0.275997383911053,
+      "width": 0.14111328125,
+      "height": 0.302158273381295,
+      "color": "#EEECEF",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "metal bed frame",
+      "category": "Furniture",
+      "x": 0.1943359375,
+      "y": 0.539568345323741,
+      "width": 0.447265625,
+      "height": 0.3302812295618051,
+      "color": "#514746",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "grey bedding",
+      "category": "Textile",
+      "x": 0.2099609375,
+      "y": 0.5801177240026161,
+      "width": 0.42138671875,
+      "height": 0.2668410725964683,
+      "color": "#848186",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "wooden crate nightstand",
+      "category": "Furniture",
+      "x": 0.1044921875,
+      "y": 0.6671026814911707,
+      "width": 0.1318359375,
+      "height": 0.16285153695225638,
+      "color": "#251A17",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "grey striped rug",
+      "category": "Textile",
+      "x": 0.1328125,
+      "y": 0.7946370176586004,
+      "width": 0.3447265625,
+      "height": 0.15761935905820798,
+      "color": "#A29EA3",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "leather armchair",
+      "category": "Furniture",
+      "x": 0.80322265625,
+      "y": 0.5879659908436887,
+      "width": 0.15625,
+      "height": 0.1935905820797907,
+      "color": "#654538",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "clothing rack",
+      "category": "Furniture",
+      "x": 0.70556640625,
+      "y": 0.4185742315238718,
+      "width": 0.15283203125,
+      "height": 0.2733812949640288,
+      "color": "#433330",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "framed art print",
+      "category": "Decor",
+      "x": 0.25634765625,
+      "y": 0.31654676258992803,
+      "width": 0.07958984375,
+      "height": 0.2053629823413996,
+      "color": "#584E50",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0.4970703125,
+      "y": 0.41530412034009156,
+      "width": 0.06494140625,
+      "height": 0.20732504905166776,
+      "color": "#505C26",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "potted plant",
+      "category": "Decor",
+      "x": 0.88427734375,
+      "y": 0.6461739699149771,
+      "width": 0.11572265625,
+      "height": 0.2341399607586658,
+      "color": "#273117",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "steel ceiling beam",
+      "category": "Fixture",
+      "x": 0.28515625,
+      "y": 0,
+      "width": 0.63037109375,
+      "height": 0.223675604970569,
+      "color": "#171415",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "air duct",
+      "category": "Fixture",
+      "x": 0.548828125,
+      "y": 0.23479398299542184,
+      "width": 0.396484375,
+      "height": 0.11249182472204054,
+      "color": "#1F1A1B",
+      "hand": false
+    }
+  ]
+}

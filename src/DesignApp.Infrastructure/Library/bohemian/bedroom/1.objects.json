@@ -1,0 +1,226 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "terracotta plaster back wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.1301504251144539,
+      "width": 0.57861328125,
+      "height": 0.5709614126880314,
+      "color": "#B46F41",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "cream plaster right wall",
+      "category": "Wall",
+      "x": 0.564453125,
+      "y": 0.09156311314584696,
+      "width": 0.435546875,
+      "height": 0.6723348593852191,
+      "color": "#DEC5A5",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "honey wood floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.6644865925441465,
+      "width": 1,
+      "height": 0.3355134074558535,
+      "color": "#A66326",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "cream beamed ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0.025506867233485938,
+      "width": 1,
+      "height": 0.4251144538914323,
+      "color": "#C49B75",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "wooden ceiling beams",
+      "category": "Other",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.2393721386527142,
+      "color": "#C49A75",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "left arched window",
+      "category": "Opening",
+      "x": 0.056640625,
+      "y": 0.24656638325703073,
+      "width": 0.1884765625,
+      "height": 0.395029431000654,
+      "color": "#F4ECCD",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "right arched window",
+      "category": "Opening",
+      "x": 0.4443359375,
+      "y": 0.3145846958796599,
+      "width": 0.0908203125,
+      "height": 0.275997383911053,
+      "color": "#F3E8C7",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "rattan pendant lamp",
+      "category": "Lighting",
+      "x": 0.46142578125,
+      "y": 0.02877697841726619,
+      "width": 0.1259765625,
+      "height": 0.23741007194244604,
+      "color": "#A66F42",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "bed with pink bedding",
+      "category": "Furniture",
+      "x": 0.2490234375,
+      "y": 0.55134074558535,
+      "width": 0.40625,
+      "height": 0.30085022890778285,
+      "color": "#813921",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "throw pillows",
+      "category": "Textile",
+      "x": 0.25732421875,
+      "y": 0.5434924787442773,
+      "width": 0.2080078125,
+      "height": 0.08502289077828647,
+      "color": "#994C37",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "macrame wall hanging",
+      "category": "Decor",
+      "x": 0.30322265625,
+      "y": 0.3328973185088293,
+      "width": 0.09912109375,
+      "height": 0.20209287115761937,
+      "color": "#AE7851",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "left rattan nightstand",
+      "category": "Furniture",
+      "x": 0.1513671875,
+      "y": 0.6075866579463701,
+      "width": 0.09716796875,
+      "height": 0.15042511445389142,
+      "color": "#81431E",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "left rattan table lamp",
+      "category": "Lighting",
+      "x": 0.17724609375,
+      "y": 0.5448005232177894,
+      "width": 0.0478515625,
+      "height": 0.07194244604316546,
+      "color": "#C89263",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "kilim rug",
+      "category": "Textile",
+      "x": 0.18359375,
+      "y": 0.7161543492478745,
+      "width": 0.66552734375,
+      "height": 0.2838456507521256,
+      "color": "#884B31",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "hanging rattan chair",
+      "category": "Furniture",
+      "x": 0.55419921875,
+      "y": 0.4486592544146501,
+      "width": 0.123046875,
+      "height": 0.19032047089601045,
+      "color": "#C39E83",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "carved wooden wardrobe",
+      "category": "Furniture",
+      "x": 0.77392578125,
+      "y": 0.30150425114453894,
+      "width": 0.2177734375,
+      "height": 0.4833224329627207,
+      "color": "#774623",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "fiddle leaf fig",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.2969260954872466,
+      "width": 0.15966796875,
+      "height": 0.3054283845650752,
+      "color": "#68631D",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "monstera in left basket",
+      "category": "Decor",
+      "x": 0,
+      "y": 0.6010464355788097,
+      "width": 0.15576171875,
+      "height": 0.29561805101373445,
+      "color": "#5C360D",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "snake plant in pot",
+      "category": "Decor",
+      "x": 0.5498046875,
+      "y": 0.4898626553302812,
+      "width": 0.04150390625,
+      "height": 0.1066056245912361,
+      "color": "#816F38",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "right monstera in basket",
+      "category": "Decor",
+      "x": 0.703125,
+      "y": 0.55134074558535,
+      "width": 0.08154296875,
+      "height": 0.16612164813603664,
+      "color": "#5E4B1F",
+      "hand": false
+    }
+  ]
+}

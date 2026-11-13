@@ -1,0 +1,270 @@
+{
+  "width": 2400,
+  "height": 1792,
+  "objects": [
+    {
+      "index": 1,
+      "label": "red brick back wall",
+      "category": "Wall",
+      "x": 0,
+      "y": 0.03989535644211903,
+      "width": 0.6494140625,
+      "height": 0.8371484630477436,
+      "color": "#614439",
+      "hand": false
+    },
+    {
+      "index": 2,
+      "label": "red brick right wall",
+      "category": "Wall",
+      "x": 0.68212890625,
+      "y": 0.02158273381294964,
+      "width": 0.31787109375,
+      "height": 0.8221059516023544,
+      "color": "#402C28",
+      "hand": false
+    },
+    {
+      "index": 3,
+      "label": "polished concrete floor",
+      "category": "Floor",
+      "x": 0,
+      "y": 0.7272727272727273,
+      "width": 1,
+      "height": 0.2727272727272727,
+      "color": "#7B746B",
+      "hand": false
+    },
+    {
+      "index": 4,
+      "label": "dark wood plank ceiling",
+      "category": "Ceiling",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 0.16742969260954874,
+      "color": "#272220",
+      "hand": false
+    },
+    {
+      "index": 5,
+      "label": "black steel ceiling beam",
+      "category": "Fixture",
+      "x": 0.1806640625,
+      "y": 0,
+      "width": 0.50341796875,
+      "height": 0.23479398299542184,
+      "color": "#1F1A19",
+      "hand": false
+    },
+    {
+      "index": 6,
+      "label": "black steel column",
+      "category": "Fixture",
+      "x": 0.64794921875,
+      "y": 0.16873773708306083,
+      "width": 0.037109375,
+      "height": 0.4434270765206017,
+      "color": "#171418",
+      "hand": false
+    },
+    {
+      "index": 7,
+      "label": "black metal bookshelf",
+      "category": "Furniture",
+      "x": 0.0283203125,
+      "y": 0.27403531720078483,
+      "width": 0.23095703125,
+      "height": 0.6592544146500982,
+      "color": "#1F1C1D",
+      "hand": false
+    },
+    {
+      "index": 8,
+      "label": "large paned window",
+      "category": "Opening",
+      "x": 0.73291015625,
+      "y": 0.17266187050359713,
+      "width": 0.26708984375,
+      "height": 0.4617396991497711,
+      "color": "#F6F0F4",
+      "hand": false
+    },
+    {
+      "index": 9,
+      "label": "concrete window sill",
+      "category": "Fixture",
+      "x": 0.72314453125,
+      "y": 0.5977763243950295,
+      "width": 0.27685546875,
+      "height": 0.051013734466971876,
+      "color": "#5C4C42",
+      "hand": false
+    },
+    {
+      "index": 10,
+      "label": "reclaimed wood desk",
+      "category": "Furniture",
+      "x": 0.390625,
+      "y": 0.6023544800523217,
+      "width": 0.28857421875,
+      "height": 0.2393721386527142,
+      "color": "#4F3C3A",
+      "hand": false
+    },
+    {
+      "index": 11,
+      "label": "brown leather office chair",
+      "category": "Furniture",
+      "x": 0.57568359375,
+      "y": 0.5997383911052976,
+      "width": 0.15185546875,
+      "height": 0.25506867233485936,
+      "color": "#48302B",
+      "hand": false
+    },
+    {
+      "index": 12,
+      "label": "persian rug",
+      "category": "Textile",
+      "x": 0.3857421875,
+      "y": 0.7567037279267496,
+      "width": 0.51025390625,
+      "height": 0.22563767168083715,
+      "color": "#90736D",
+      "hand": false
+    },
+    {
+      "index": 13,
+      "label": "fiddle leaf fig plant",
+      "category": "Decor",
+      "x": 0.26953125,
+      "y": 0.42315238718116416,
+      "width": 0.12548828125,
+      "height": 0.27468933943754087,
+      "color": "#353B0F",
+      "hand": false
+    },
+    {
+      "index": 14,
+      "label": "terracotta pot",
+      "category": "Decor",
+      "x": 0.29296875,
+      "y": 0.7521255722694572,
+      "width": 0.07470703125,
+      "height": 0.105297580117724,
+      "color": "#5A2E20",
+      "hand": false
+    },
+    {
+      "index": 15,
+      "label": "cork bulletin board",
+      "category": "Decor",
+      "x": 0.44189453125,
+      "y": 0.342053629823414,
+      "width": 0.11962890625,
+      "height": 0.14126880313930673,
+      "color": "#C19E82",
+      "hand": false
+    },
+    {
+      "index": 16,
+      "label": "computer monitor",
+      "category": "Other",
+      "x": 0.47900390625,
+      "y": 0.49051667756703726,
+      "width": 0.107421875,
+      "height": 0.12753433616742968,
+      "color": "#1C1C20",
+      "hand": false
+    },
+    {
+      "index": 17,
+      "label": "track lighting with bulbs",
+      "category": "Lighting",
+      "x": 0.43505859375,
+      "y": 0,
+      "width": 0.27099609375,
+      "height": 0.1223021582733813,
+      "color": "#654635",
+      "hand": false
+    },
+    {
+      "index": 18,
+      "label": "top shelf books",
+      "category": "Decor",
+      "x": 0.0498046875,
+      "y": 0.41661216481360364,
+      "width": 0.17626953125,
+      "height": 0.12753433616742968,
+      "color": "#45362F",
+      "hand": false
+    },
+    {
+      "index": 19,
+      "label": "middle shelf books",
+      "category": "Decor",
+      "x": 0.13623046875,
+      "y": 0.5284499672988882,
+      "width": 0.11328125,
+      "height": 0.10595160235448005,
+      "color": "#573C35",
+      "hand": false
+    },
+    {
+      "index": 20,
+      "label": "stacked white books",
+      "category": "Decor",
+      "x": 0.05029296875,
+      "y": 0.5925441465009811,
+      "width": 0.09765625,
+      "height": 0.04774362328319163,
+      "color": "#988F84",
+      "hand": false
+    },
+    {
+      "index": 21,
+      "label": "bottom shelf books",
+      "category": "Decor",
+      "x": 0.05029296875,
+      "y": 0.762589928057554,
+      "width": 0.09619140625,
+      "height": 0.118378024852845,
+      "color": "#514640",
+      "hand": false
+    },
+    {
+      "index": 22,
+      "label": "upper brown storage box",
+      "category": "Decor",
+      "x": 0.05712890625,
+      "y": 0.35251798561151076,
+      "width": 0.0908203125,
+      "height": 0.051013734466971876,
+      "color": "#36241F",
+      "hand": false
+    },
+    {
+      "index": 23,
+      "label": "lower brown wooden box",
+      "category": "Decor",
+      "x": 0.05029296875,
+      "y": 0.6827992151733159,
+      "width": 0.1279296875,
+      "height": 0.07717462393721386,
+      "color": "#432D28",
+      "hand": false
+    },
+    {
+      "index": 24,
+      "label": "bottom metal storage box",
+      "category": "Decor",
+      "x": 0.13623046875,
+      "y": 0.7455853499018966,
+      "width": 0.11279296875,
+      "height": 0.10987573577501634,
+      "color": "#5E5252",
+      "hand": false
+    }
+  ]
+}
