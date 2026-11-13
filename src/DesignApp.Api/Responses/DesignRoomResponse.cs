@@ -9,7 +9,8 @@ namespace DesignApp.Api.Responses;
 /// <param name="RoomId">The room.</param>
 /// <param name="PhotoUrl">Its current photo (with any removed objects gone), for a thumbnail.</param>
 /// <param name="Edits">Its colors.</param>
-internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<EditRequest> Edits)
+/// <param name="Sizes">The sizes the user gave its walls, floors and ceilings.</param>
+internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<EditRequest> Edits, List<SizeRequest> Sizes)
 {
     /// <summary>The response for a room of a design.</summary>
     /// <param name="room">The room.</param>
@@ -19,6 +20,7 @@ internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<Edi
         return new(
             room.RoomId,
             Constants.Routes.RoomPhotoUrl(room.RoomId, photoVersion),
-            [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength))]);
+            [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength, e.Paint))],
+            [.. room.Sizes.Select(s => new SizeRequest(s.ObjectIndex, s.Width, s.Height))]);
     }
 }

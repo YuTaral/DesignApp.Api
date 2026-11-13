@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using DesignApp.Domain.Objects;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -9,7 +10,10 @@ namespace DesignApp.Infrastructure.Database;
 /// <summary>Stores a room's edits as JSON, each with a type so new kinds of edits can be added.</summary>
 internal static class EditsJson
 {
-    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, // edits without a paint stay as they were
+    };
 
     /// <summary>Converts the edits to and from the jsonb column.</summary>
     public static readonly ValueConverter<IReadOnlyList<EditOperation>, string> Converter = new(
@@ -41,7 +45,8 @@ internal static class EditsJson
     /// <param name="ObjectIndex">The edited object.</param>
     /// <param name="Color">The new color.</param>
     /// <param name="Strength">How strongly it is applied.</param>
-    private sealed record StoredEdit(string Type, int ObjectIndex, string Color, double Strength)
+    /// <param name="Paint">The real paint the color is, or <c>null</c> (also for edits stored before paints).</param>
+    private sealed record StoredEdit(string Type, int ObjectIndex, string Color, double Strength, string? Paint = null)
     {
         /// <summary>The stored form of an edit.</summary>
         /// <param name="edit">The edit.</param>
@@ -49,7 +54,7 @@ internal static class EditsJson
         {
             return edit switch
             {
-                RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength),
+                RecolorEdit r => new(Constants.Persistence.RecolorEdit, r.ObjectIndex, r.Color.Value, r.Strength, r.Paint),
                 _ => throw new NotSupportedException($"Edits of type {edit.GetType().Name} can't be stored yet."),
             };
         }
@@ -60,7 +65,7 @@ internal static class EditsJson
         {
             return Type switch
             {
-                Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength),
+                Constants.Persistence.RecolorEdit => new RecolorEdit(ObjectIndex, HexColor.Parse(Color), Strength, Paint),
                 _ => throw new NotSupportedException($"Unknown stored edit type '{Type}'."),
             };
         }

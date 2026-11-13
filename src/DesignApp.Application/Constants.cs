@@ -148,6 +148,20 @@ public static class Constants
     /// <summary>The messages the use cases show to users.</summary>
     public static class Messages
     {
+        /// <summary>An edit names a paint no palette has.</summary>
+        /// <param name="paint">The paint reference.</param>
+        public static string UnknownPaint(string paint)
+        {
+            return $"There is no paint '{paint}'.";
+        }
+
+        /// <summary>An edit names a paint but has another color.</summary>
+        /// <param name="code">The paint's code, such as RAL 9010.</param>
+        public static string PaintColorMismatch(string code)
+        {
+            return $"The color doesn't match {code}. Pick the paint again.";
+        }
+
         /// <summary>The analysis failed unexpectedly. The details are only logged.</summary>
         public const string UnexpectedFailure = "We couldn't analyze this photo. Try uploading it again in a moment.";
 

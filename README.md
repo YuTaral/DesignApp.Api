@@ -104,6 +104,7 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` | `/api/rooms/{id}/photo` | The stored photo |
 | `GET` | `/api/rooms/{id}/labels/{revision}` | A version of the label map, once the room is Ready |
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
+| `GET` | `/api/palettes` | The paint palettes (RAL Classic) with each paint's code, name and on-screen color |
 | `GET` | `/api/library` | The built-in sample houses with their rooms |
 | `GET` | `/api/library/{design}/cover` | A house's cover: its first six rooms in two rows of three, made once and kept in memory |
 | `GET` | `/api/library/{design}/{room}/{layout}/photo` | The photo of one layout of a library room |
@@ -114,7 +115,7 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `GET` `POST` | `/api/designs` | List the account's designs, or create one from a room and its colors |
 | `GET` `PUT` `DELETE` | `/api/designs/{id}` | Open a design, change its name and description, or delete it with its rooms |
 | `POST` | `/api/designs/{id}/rooms` | Add one of the account's rooms to a design |
-| `PUT` `DELETE` | `/api/designs/{id}/rooms/{roomId}` | Save a room's colors, or remove the room (which deletes it) |
+| `PUT` `DELETE` | `/api/designs/{id}/rooms/{roomId}` | Save a room's colors (each may name a paint, such as `ral-classic/9010`) and its wall, floor and ceiling sizes, or remove the room (which deletes it) |
 | SignalR | `/api/hubs/rooms` | Call `Watch(roomId)` to get the room now and a `RoomChanged` message on every change |
 
 ### Designs and rooms

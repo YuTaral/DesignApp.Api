@@ -211,6 +211,80 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync($"/api/rooms/{saved.Id}/photo")).StatusCode);
     }
 
+    [Fact]
+    public async Task The_palettes_list_RAL_Classic_for_everyone()
+    {
+        using var guest = factory.CreateClient();
+
+        using var response = await guest.GetAsync("/api/palettes");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(DesignApp.Api.Constants.Http.LibraryCache, response.Headers.CacheControl?.ToString());
+        var palettes = (await response.Content.ReadFromJsonAsync<List<PaletteDto>>())!;
+        var ral = Assert.Single(palettes, p => p.Id == "ral-classic");
+        Assert.Contains(new PaintDto("ral-classic/9010", "RAL 9010", "Pure white", "#F7F9EF"), ral.Paints);
+    }
+
+    [Fact]
+    public async Task Paints_and_wall_sizes_are_saved_with_a_rooms_colors()
+    {
+        using var browser = await SignedUpAsync();
+        var kitchen = await ReadyRoomAsync(browser);
+        var (wall, other) = (kitchen.Objects[0], kitchen.Objects[1]);
+
+        using var created = await browser.PostAsJsonAsync("/api/designs", new
+        {
+            roomId = kitchen.Id,
+            name = "Painted",
+            edits = new object[]
+            {
+                new { objectIndex = wall, color = "#f7f9ef", strength = 0.9, paint = "ral-classic/9010" },
+                new { objectIndex = other, color = "#123456", strength = 1.0 },
+            },
+            sizes = new[] { new { objectIndex = wall, width = 4.0, height = 2.5 } },
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
+        var room = Assert.Single(design.Rooms);
+        Assert.Equal([new EditDto(wall, "#F7F9EF", 0.9, "ral-classic/9010"), new EditDto(other, "#123456", 1.0)], room.Edits);
+        Assert.Equal([new SizeDto(wall, 4.0, 2.5)], room.Sizes);
+
+        var resized = await OkAsync(await browser.PutAsJsonAsync($"/api/designs/{design.Id}/rooms/{kitchen.Id}", new
+        {
+            edits = new[] { new { objectIndex = wall, color = "#F7F9EF", strength = 0.9, paint = "ral-classic/9010" } },
+            sizes = new[] { new { objectIndex = wall, width = 3.2, height = 2.7 } },
+        }));
+        Assert.Equal([new SizeDto(wall, 3.2, 2.7)], resized.Rooms[0].Sizes);
+
+        var read = (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!;
+        Assert.Equal("ral-classic/9010", Assert.Single(read.Rooms[0].Edits).Paint);
+        Assert.Equal([new SizeDto(wall, 3.2, 2.7)], read.Rooms[0].Sizes);
+    }
+
+    [Fact]
+    public async Task Wrong_paints_and_sizes_are_refused()
+    {
+        using var browser = await SignedUpAsync();
+        var room = await ReadyRoomAsync(browser);
+        var index = room.Objects[0];
+
+        async Task<string?> Refused(object body)
+        {
+            var response = await browser.PostAsJsonAsync("/api/designs", body);
+            return await ProblemAsync(response);
+        }
+
+        Assert.Equal(DesignApp.Application.Constants.Messages.UnknownPaint("ral-classic/0000"),
+            await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "#000000", strength = 1.0, paint = "ral-classic/0000" } } }));
+        Assert.Equal(DesignApp.Application.Constants.Messages.PaintColorMismatch("RAL 9010"),
+            await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "#000000", strength = 1.0, paint = "ral-classic/9010" } } }));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.PaintReference,
+            await Refused(new { roomId = room.Id, name = "x", edits = new[] { new { objectIndex = index, color = "#000000", strength = 1.0, paint = "9010" } } }));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.SurfaceSize,
+            await Refused(new { roomId = room.Id, name = "x", sizes = new[] { new { objectIndex = index, width = 0.0, height = 2.5 } } }));
+        Assert.Equal(DesignApp.Domain.Constants.Messages.UnknownSizeObject(250),
+            await Refused(new { roomId = room.Id, name = "x", sizes = new[] { new { objectIndex = 250, width = 4.0, height = 2.5 } } }));
+    }
+
     /// <summary>Backdates a room's upload time in the database, as if it had been uploaded then.</summary>
     /// <param name="roomId">The room.</param>
     /// <param name="uploaded">When it should look uploaded.</param>
@@ -301,8 +375,17 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private sealed record DesignDto(Guid Id, string Name, string Description, DateTimeOffset UpdatedAt, List<DesignRoomDto> Rooms);
 
     /// <summary>One room of a design as a client reads it.</summary>
-    private sealed record DesignRoomDto(Guid RoomId, string PhotoUrl, List<EditDto> Edits);
+    private sealed record DesignRoomDto(Guid RoomId, string PhotoUrl, List<EditDto> Edits, List<SizeDto> Sizes);
 
     /// <summary>One recolor as a client reads it.</summary>
-    private sealed record EditDto(int ObjectIndex, string Color, double Strength);
+    private sealed record EditDto(int ObjectIndex, string Color, double Strength, string? Paint = null);
+
+    /// <summary>One surface size as a client reads it.</summary>
+    private sealed record SizeDto(int ObjectIndex, double Width, double Height);
+
+    /// <summary>A palette as a client reads it.</summary>
+    private sealed record PaletteDto(string Id, string Name, string Notice, List<PaintDto> Paints);
+
+    /// <summary>One paint as a client reads it.</summary>
+    private sealed record PaintDto(string Ref, string Code, string Name, string Color);
 }

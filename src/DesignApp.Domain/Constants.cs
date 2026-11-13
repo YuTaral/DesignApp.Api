@@ -56,6 +56,22 @@ public static class Constants
 
         /// <summary>The strongest recolor strength: the new color only.</summary>
         public const double MaxStrength = 1;
+
+        /// <summary>The longest paint reference, such as <c>ral-classic/9010</c>.</summary>
+        public const int MaxPaintLength = 60;
+
+        /// <summary>Separates a paint reference's palette from the paint (<c>ral-classic/9010</c>).</summary>
+        public const char PaintSeparator = '/';
+    }
+
+    /// <summary>The sizes users give walls, floors and ceilings, for paint amounts.</summary>
+    public static class Surfaces
+    {
+        /// <summary>The smallest width or height, in metres.</summary>
+        public const double MinMetres = 0.1;
+
+        /// <summary>The largest width or height, in metres.</summary>
+        public const double MaxMetres = 50;
     }
 
     /// <summary>The messages shown when a domain rule is broken.</summary>
@@ -87,6 +103,26 @@ public static class Constants
 
         /// <summary>A recolor strength outside 0..1.</summary>
         public static readonly string StrengthRange = $"Recolor strength must be between {Colors.MinStrength} and {Colors.MaxStrength}.";
+
+        /// <summary>A paint reference that is empty, too long or has no palette.</summary>
+        public static readonly string PaintReference = $"A paint must be written as palette{Colors.PaintSeparator}paint, in at most {Colors.MaxPaintLength} characters.";
+
+        /// <summary>A surface width or height outside the allowed range.</summary>
+        public static readonly string SurfaceSize = $"Sizes must be between {Surfaces.MinMetres} and {Surfaces.MaxMetres} metres.";
+
+        /// <summary>A size for an object the room doesn't have.</summary>
+        /// <param name="objectIndex">The object.</param>
+        public static string UnknownSizeObject(int objectIndex)
+        {
+            return $"Object {objectIndex} isn't in this room, so it can't have a size.";
+        }
+
+        /// <summary>Two sizes for one object.</summary>
+        /// <param name="objectIndex">The object.</param>
+        public static string DuplicateSize(int objectIndex)
+        {
+            return $"Object {objectIndex} has more than one size.";
+        }
 
         /// <summary>A room without an id.</summary>
         public const string RoomNeedsId = "A room needs an id.";

@@ -40,6 +40,12 @@
     <UpToDateCheckInput Include="Library\**\*.json;Library\**\*.jpg;Library\**\*.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The paint palettes the editor offers, one file each (palettes/<id>.json). -->
+    <EmbeddedResource Include="Palettes\*.json" LogicalName="DesignApp.Palettes/%(Filename)%(Extension)" />
+    <UpToDateCheckInput Include="Palettes\*.json" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

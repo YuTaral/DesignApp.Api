@@ -34,6 +34,13 @@ internal sealed class DesignConfiguration : IEntityTypeConfiguration<Design>
                 .UsePropertyAccessMode(PropertyAccessMode.Field)
                 .HasColumnType(Constants.Persistence.Json)
                 .HasConversion(EditsJson.Converter, EditsJson.Comparer);
+            // The sizes users gave its surfaces, for paint amounts; rooms saved before them have none.
+            rooms.Property(r => r.Sizes)
+                .HasField("_sizes")
+                .UsePropertyAccessMode(PropertyAccessMode.Field)
+                .HasColumnType(Constants.Persistence.Json)
+                .HasDefaultValueSql(Constants.Persistence.EmptyJsonArray)
+                .HasConversion(SizesJson.Converter, SizesJson.Comparer);
         });
         builder.Navigation(d => d.Rooms).HasField("_rooms").UsePropertyAccessMode(PropertyAccessMode.Field);
     }

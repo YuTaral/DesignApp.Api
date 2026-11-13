@@ -72,6 +72,9 @@ public static class Constants
         /// <summary>The label map version a room uses.</summary>
         public const string RoomCurrentLabels = "/{id:guid}/labels/current";
 
+        /// <summary>The paint palettes, under <see cref="Api"/>.</summary>
+        public const string Palettes = "/palettes";
+
         /// <summary>The built-in library of ready-made designs.</summary>
         public const string Library = "/library";
 
@@ -286,7 +289,7 @@ public static class Constants
         /// <summary>The cache header of files that never change.</summary>
         public const string ImmutableCache = "private, max-age=31536000, immutable";
 
-        /// <summary>The cache header of library photos: the same for everyone, and changed only by a new release.</summary>
+        /// <summary>The cache header of library photos and palettes: the same for everyone, and changed only by a new release.</summary>
         public const string LibraryCache = "public, max-age=86400";
 
         /// <summary>The content type of a library export.</summary>
@@ -319,6 +322,9 @@ public static class Constants
 
         /// <summary>The room endpoints' tag.</summary>
         public const string RoomsTag = "Rooms";
+
+        /// <summary>The palette endpoint's tag.</summary>
+        public const string PalettesTag = "Palettes";
 
         /// <summary>The library endpoints' tag.</summary>
         public const string LibraryTag = "Library";

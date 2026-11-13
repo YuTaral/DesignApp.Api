@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<GetDesigns>();
         services.AddScoped<DeleteDesign>();
         services.AddScoped<RoomRemover>();
+        services.AddScoped<EditChecks>();
         services.AddScoped<DeleteUnsavedRooms>();
         services.AddScoped<LibraryCopier>();
         services.AddScoped<CopyLibraryRoom>();

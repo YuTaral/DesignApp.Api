@@ -77,7 +77,7 @@ internal static class DesignEndpoints
         CreateDesignRequest request, CreateDesign createDesign, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await createDesign.HandleAsync(
-            request.RoomId, request.Name ?? "", request.Description, ToEdits(request.Edits), cancellationToken);
+            request.RoomId, request.Name ?? "", request.Description, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
         if (design is null)
             return TypedResults.NotFound();
         var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
@@ -126,7 +126,7 @@ internal static class DesignEndpoints
     private static async Task<Results<Ok<DesignResponse>, NotFound>> AddRoomAsync(
         Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
-        var design = await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), cancellationToken);
+        var design = await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -140,7 +140,7 @@ internal static class DesignEndpoints
     private static async Task<Results<Ok<DesignResponse>, NotFound>> SaveRoomColorsAsync(
         Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
-        var design = await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), cancellationToken);
+        var design = await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -169,12 +169,21 @@ internal static class DesignEndpoints
         return TypedResults.Ok(DesignResponse.From(design, photoVersions));
     }
 
-    /// <summary>The colors of a request as domain edits; an invalid color or strength is a 400.</summary>
+    /// <summary>The colors of a request as domain edits; an invalid color, strength or paint is a 400.</summary>
     /// <param name="edits">The colors as sent.</param>
-    /// <exception cref="DomainException">A color isn't #RRGGBB or a strength isn't between 0 and 1.</exception>
+    /// <exception cref="DomainException">A color isn't #RRGGBB, a strength isn't between 0 and 1, or a paint is malformed.</exception>
     private static List<EditOperation> ToEdits(List<EditRequest>? edits)
     {
         var sent = edits ?? [];
-        return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength))];
+        return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength, e.Paint))];
+    }
+
+    /// <summary>The surface sizes of a request; a side outside 0.1 to 50 metres is a 400.</summary>
+    /// <param name="sizes">The sizes as sent.</param>
+    /// <exception cref="DomainException">A side is out of range.</exception>
+    private static List<SurfaceSize> ToSizes(List<SizeRequest>? sizes)
+    {
+        var sent = sizes ?? [];
+        return [.. sent.Select(s => new SurfaceSize(s.ObjectIndex, s.Width, s.Height))];
     }
 }

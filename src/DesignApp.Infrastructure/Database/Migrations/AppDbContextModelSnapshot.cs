@@ -557,6 +557,13 @@ namespace DesignApp.Infrastructure.Database.Migrations
                                 .HasColumnType("integer")
                                 .HasColumnName("position");
 
+                            b1.Property<string>("Sizes")
+                                .IsRequired()
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("jsonb")
+                                .HasColumnName("sizes")
+                                .HasDefaultValueSql("'[]'::jsonb");
+
                             b1.HasKey("DesignId", "RoomId")
                                 .HasName("pk_design_rooms");
 

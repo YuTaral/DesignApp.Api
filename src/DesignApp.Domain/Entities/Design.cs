@@ -41,10 +41,25 @@ public sealed class Design
     /// <exception cref="DomainException">The room isn't the owner's, or the name, description or edits are invalid.</exception>
     public static Design Create(Room room, string ownerId, string name, string? description, IEnumerable<EditOperation> edits, DateTimeOffset now)
     {
+        return Create(room, ownerId, name, description, edits, [], now);
+    }
+
+    /// <summary>Creates a design with its first room and the sizes of its surfaces.</summary>
+    /// <param name="room">The first room; it must be the owner's.</param>
+    /// <param name="ownerId">The user creating the design.</param>
+    /// <param name="name">The design's name; it is trimmed.</param>
+    /// <param name="description">An optional short description; it is trimmed.</param>
+    /// <param name="edits">The room's edits.</param>
+    /// <param name="sizes">The sizes of the room's walls, floors and ceilings.</param>
+    /// <param name="now">The creation time.</param>
+    /// <exception cref="DomainException">The room isn't the owner's, or the name, description, edits or sizes are invalid.</exception>
+    public static Design Create(
+        Room room, string ownerId, string name, string? description, IEnumerable<EditOperation> edits, IEnumerable<SurfaceSize> sizes, DateTimeOffset now)
+    {
         var design = new Design { Id = Guid.CreateVersion7(now), OwnerId = ownerId, CreatedAt = now };
         design.Rename(name, description, now);
         design.AddRoom(room, now);
-        design.SetRoomEdits(room, edits, now);
+        design.SetRoomEdits(room, edits, sizes, now);
         return design;
     }
 
@@ -84,18 +99,30 @@ public sealed class Design
         UpdatedAt = now;
     }
 
-    /// <summary>Replaces one room's edits.</summary>
+    /// <summary>Replaces one room's edits, and clears its sizes.</summary>
     /// <param name="room">The room; it must be in this design, and analyzed when there are edits.</param>
     /// <param name="edits">The new edits, at most one per object.</param>
     /// <param name="now">The change time.</param>
     /// <exception cref="DomainException">The room isn't here or isn't analyzed yet, or an edit is invalid.</exception>
     public void SetRoomEdits(Room room, IEnumerable<EditOperation> edits, DateTimeOffset now)
     {
+        SetRoomEdits(room, edits, [], now);
+    }
+
+    /// <summary>Replaces one room's edits and the sizes of its surfaces.</summary>
+    /// <param name="room">The room; it must be in this design, and analyzed when there are edits or sizes.</param>
+    /// <param name="edits">The new edits, at most one per object.</param>
+    /// <param name="sizes">The sizes of its walls, floors and ceilings, at most one per object.</param>
+    /// <param name="now">The change time.</param>
+    /// <exception cref="DomainException">The room isn't here or isn't analyzed yet, or an edit or size is invalid.</exception>
+    public void SetRoomEdits(Room room, IEnumerable<EditOperation> edits, IEnumerable<SurfaceSize> sizes, DateTimeOffset now)
+    {
         var entry = _rooms.SingleOrDefault(r => r.RoomId == room.Id)
             ?? throw new DomainException(Constants.Messages.RoomNotInDesign);
 
         var list = edits.ToList();
-        if (list.Count > 0 && room.Status != RoomStatus.Ready)
+        var sizeList = sizes.ToList();
+        if ((list.Count > 0 || sizeList.Count > 0) && room.Status != RoomStatus.Ready)
             throw new DomainException(Constants.Messages.ColorsNeedAnalysis);
         var knownIndexes = room.Objects.Select(o => o.Index).ToHashSet();
         var unknown = list.FirstOrDefault(e => !knownIndexes.Contains(e.ObjectIndex));
@@ -104,8 +131,15 @@ public sealed class Design
         var repeated = list.GroupBy(e => e.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
         if (repeated is not null)
             throw new DomainException(Constants.Messages.DuplicateEdit(repeated.Key));
+        var unknownSize = sizeList.FirstOrDefault(s => !knownIndexes.Contains(s.ObjectIndex));
+        if (unknownSize is not null)
+            throw new DomainException(Constants.Messages.UnknownSizeObject(unknownSize.ObjectIndex));
+        var repeatedSize = sizeList.GroupBy(s => s.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
+        if (repeatedSize is not null)
+            throw new DomainException(Constants.Messages.DuplicateSize(repeatedSize.Key));
 
         entry.SetEdits(list.AsReadOnly());
+        entry.SetSizes(sizeList.AsReadOnly());
         UpdatedAt = now;
     }
 

@@ -13,6 +13,7 @@ using DesignApp.Infrastructure.Background;
 using DesignApp.Infrastructure.Database;
 using DesignApp.Infrastructure.FileStorage;
 using DesignApp.Infrastructure.Library;
+using DesignApp.Infrastructure.Palettes;
 using DesignApp.Infrastructure.Photos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -49,6 +50,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IPhotoProcessor, SkiaPhotoProcessor>();
         builder.Services.AddSingleton<IRoomImaging, SkiaRoomImaging>();
         builder.Services.AddSingleton<ILibrary, EmbeddedLibrary>();
+        builder.Services.AddSingleton<IPaletteCatalog, EmbeddedPaletteCatalog>();
 
         AddAiPipeline(builder);
         return builder;

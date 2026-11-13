@@ -626,6 +626,13 @@ public static class Constants
         public const string ClaudeUsageSuffix = ".claude-usage.json";
     }
 
+    /// <summary>The paint palettes, embedded in this assembly as <c>Palettes/&lt;id&gt;.json</c>.</summary>
+    public static class Palettes
+    {
+        /// <summary>Starts the resource name of every palette file (set as LogicalName in the project file).</summary>
+        public const string ResourcePrefix = "DesignApp.Palettes/";
+    }
+
     /// <summary>The built-in library's files, embedded in this assembly under <c>Library/&lt;design&gt;/</c>.</summary>
     public static class Library
     {
