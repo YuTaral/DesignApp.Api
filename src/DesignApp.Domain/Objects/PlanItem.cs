@@ -1,0 +1,112 @@
+using DesignApp.Domain.Exceptions;
+using DesignApp.Domain.Extensions;
+
+using static DesignApp.Domain.Constants;
+
+namespace DesignApp.Domain.Objects;
+
+/// <summary>
+/// One object placed in a room the user builds: what it is, where it stands on the floor plan, how big it is, and its
+/// color. Positions are the object's middle, in centimetres from the room's top-left corner as seen from above.
+/// A window or door is in a wall instead, and a picture or wall box hangs on one: <see cref="X"/> is its middle along that
+/// wall, from the wall's left end as seen from inside the room facing it, <see cref="Elevation"/> is how high its bottom
+/// is above the floor, and <see cref="Depth"/> is its frame's thickness, or how far a hung object sticks out.
+/// </summary>
+public sealed record PlanItem
+{
+    /// <summary>What it is, such as "sofa".</summary>
+    public string Label { get; }
+
+    /// <summary>How it is drawn in 3D.</summary>
+    public ItemShape Shape { get; }
+
+    /// <summary>Its middle, across the room, in centimetres.</summary>
+    public double X { get; }
+
+    /// <summary>Its middle, along the room, in centimetres.</summary>
+    public double Y { get; }
+
+    /// <summary>Its width, in centimetres (before turning).</summary>
+    public double Width { get; }
+
+    /// <summary>Its depth, in centimetres (before turning).</summary>
+    public double Depth { get; }
+
+    /// <summary>Its height, in centimetres.</summary>
+    public double Height { get; }
+
+    /// <summary>How far it is turned, clockwise from above: 0, 90, 180 or 270 degrees.</summary>
+    public int Rotation { get; }
+
+    /// <summary>Its color.</summary>
+    public HexColor Color { get; }
+
+    /// <summary>The number of the wall a window, door or hung object is on (see <see cref="RoomOutline"/>); <c>null</c> for an object standing on the floor.</summary>
+    public int? Wall { get; }
+
+    /// <summary>How high its bottom is above the floor, in centimetres (a window's sill or a hung object's bottom; 0 for everything else).</summary>
+    public double Elevation { get; }
+
+    /// <summary>Its outline seen from above: a rectangle, an L or an ellipse in its width × depth.</summary>
+    public ItemForm Form { get; }
+
+    /// <summary>The sizes of an L- or P-shaped object's parts (its back run, corner leg and a P's chaise); <c>null</c> for other outlines.</summary>
+    public ItemParts? Parts { get; }
+
+    /// <summary>The small things the user put on it (cushions, a vase...), shown on it in the photo.</summary>
+    public ItemDecorations Decorations { get; }
+
+    /// <summary>Creates an object.</summary>
+    /// <param name="label">What it is.</param>
+    /// <param name="shape">How it is drawn.</param>
+    /// <param name="x">Its middle, across the room, in centimetres.</param>
+    /// <param name="y">Its middle, along the room, in centimetres.</param>
+    /// <param name="width">Its width, in centimetres.</param>
+    /// <param name="depth">Its depth, in centimetres.</param>
+    /// <param name="height">Its height, in centimetres.</param>
+    /// <param name="rotation">Its turn: 0, 90, 180 or 270 degrees.</param>
+    /// <param name="color">Its color.</param>
+    /// <param name="wall">The number of the wall a window, door or hung object is on; <c>null</c> for other objects.</param>
+    /// <param name="elevation">A window's or hung object's height above the floor, in centimetres; 0 for other objects.</param>
+    /// <param name="form">Its outline from above: L-shaped for sofas, tables and boxes, P-shaped for sofas, round for tables and rugs.</param>
+    /// <param name="parts">An L- or P-shaped object's parts (the usual ones when missing); <c>null</c> for other outlines.</param>
+    /// <param name="decorations">The small things on it, such as cushions; none when missing.</param>
+    /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline or a part is invalid.</exception>
+    public PlanItem(string label, ItemShape shape, double x, double y, double width, double depth, double height, int rotation, HexColor color,
+        int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null)
+    {
+        var fits = form switch
+        {
+            ItemForm.Standard => true,
+            ItemForm.LShaped => shape is ItemShape.Sofa or ItemShape.Table or ItemShape.Box,
+            ItemForm.PShaped => shape is ItemShape.Sofa,
+            ItemForm.Round => shape is ItemShape.Table or ItemShape.Rug,
+            _ => false,
+        };
+        if (!fits)
+            throw new DomainException(Constants.Messages.PlanItemForm);
+        if (string.IsNullOrWhiteSpace(label) || label.Trim().Length > Constants.Plans.MaxLabelLength)
+            throw new DomainException(Constants.Messages.PlanItemLabel);
+        if (!new[] { width, depth, height }.All(side => side is >= Constants.Plans.MinItemCentimetres and <= Constants.Plans.MaxItemCentimetres))
+            throw new DomainException(Constants.Messages.PlanItemSize);
+        if (!double.IsFinite(x) || !double.IsFinite(y) || !Enum.IsDefined(shape) || rotation % Constants.Plans.RotationStep != 0 || rotation is < 0 or >= 360)
+            throw new DomainException(Constants.Messages.PlanItemPlacement);
+        if (shape.IsOnWall() != wall.HasValue || wall < 0)
+            throw new DomainException(Constants.Messages.PlanWallPlacement);
+        var raised = shape is ItemShape.Window || shape.IsMounted();
+        if (!double.IsFinite(elevation) || elevation < 0 || elevation > Constants.Plans.MaxItemCentimetres || (!raised && elevation != 0))
+            throw new DomainException(Constants.Messages.PlanItemPlacement);
+        if (shape.IsMounted() && depth > Constants.Plans.MaxMountedDepth)
+            throw new DomainException(Constants.Messages.PlanMountedDepth);
+        (Label, Shape, X, Y, Width, Depth, Height, Rotation, Color) = (label.Trim(), shape, x, y, width, depth, height, rotation, color);
+        var hasParts = form is ItemForm.LShaped or ItemForm.PShaped;
+        if (!hasParts && parts is not null)
+            throw new DomainException(Constants.Messages.PlanItemParts);
+        if (hasParts)
+        {
+            parts ??= ItemParts.Default(form, width, depth);
+            parts.Check(form, width, depth);
+        }
+        (Wall, Elevation, Form, Parts, Decorations) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None);
+    }
+}

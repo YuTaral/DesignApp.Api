@@ -87,6 +87,76 @@ public static class Constants
         public const double MaxMetres = 50;
     }
 
+    /// <summary>Limits of a room the user builds from scratch: its walls and the objects placed in it.</summary>
+    public static class Plans
+    {
+        /// <summary>The longest plan name, after trimming.</summary>
+        public const int MaxNameLength = 80;
+
+        /// <summary>The shortest wall, in metres.</summary>
+        public const double MinWallMetres = 1;
+
+        /// <summary>The longest wall, in metres.</summary>
+        public const double MaxWallMetres = 30;
+
+        /// <summary>The lowest ceiling, in metres.</summary>
+        public const double MinHeightMetres = 2;
+
+        /// <summary>The highest ceiling, in metres.</summary>
+        public const double MaxHeightMetres = 6;
+
+        /// <summary>The most objects one room may hold.</summary>
+        public const int MaxItems = 60;
+
+        /// <summary>The longest object name.</summary>
+        public const int MaxLabelLength = 60;
+
+        /// <summary>The smallest object side, in centimetres.</summary>
+        public const double MinItemCentimetres = 1;
+
+        /// <summary>The largest object side, in centimetres.</summary>
+        public const double MaxItemCentimetres = 3000;
+
+        /// <summary>Objects turn in quarter turns, in degrees.</summary>
+        public const int RotationStep = 90;
+
+        /// <summary>How deep an L-shaped object's runs are, as a share of its smaller side.</summary>
+        public const double LegShare = 0.5;
+
+        /// <summary>How wide a P-shaped object's chaise is, as a multiple of how deep its runs are (at most its width).</summary>
+        public const double ChaiseShare = 1.7;
+
+        /// <summary>How deep a P-shaped object's runs are, as a share of its smaller side (thinner than an L's, so its leg has length).</summary>
+        public const double PLegShare = 0.4;
+
+        /// <summary>The smallest part of an L- or P-shaped object (its run, leg or chaise), in centimetres.</summary>
+        public const double MinPartCentimetres = 20;
+
+        /// <summary>The most decorations one object may have.</summary>
+        public const int MaxDecorations = 8;
+
+        /// <summary>The longest name of one decoration.</summary>
+        public const int MaxDecorationLength = 60;
+
+        /// <summary>How high a window's bottom usually is above the floor, in centimetres.</summary>
+        public const double WindowSill = 90;
+
+        /// <summary>How high a new object hung on a wall usually starts above the floor, in centimetres.</summary>
+        public const double MountedElevation = 140;
+
+        /// <summary>The most an object hung on a wall may stick out into the room, in centimetres.</summary>
+        public const double MaxMountedDepth = 70;
+
+        /// <summary>How far a window or door may reach past its wall's ends or the ceiling (rounding), in centimetres.</summary>
+        public const double WallTolerance = 1;
+
+        /// <summary>The most corners a room's outline may have.</summary>
+        public const int MaxCorners = 20;
+
+        /// <summary>The shortest wall of a room's outline, in centimetres.</summary>
+        public const double MinWallSegmentCentimetres = 20;
+    }
+
     /// <summary>The messages shown when a domain rule is broken.</summary>
     public static class Messages
     {
@@ -131,6 +201,60 @@ public static class Constants
 
         /// <summary>A tone that names a paint but has no color.</summary>
         public const string TonePaintNeedsColor = "A tone with a paint needs that paint's color.";
+
+        /// <summary>A built room's walls outside the allowed sizes.</summary>
+        public static readonly string PlanWalls =
+            $"Walls are {Plans.MinWallMetres} to {Plans.MaxWallMetres} m long, and the ceiling {Plans.MinHeightMetres} to {Plans.MaxHeightMetres} m high.";
+
+        /// <summary>A built room's name that is too long.</summary>
+        public static readonly string PlanName = $"A room's name has at most {Plans.MaxNameLength} characters.";
+
+        /// <summary>Too many objects in a built room.</summary>
+        public static readonly string PlanItems = $"A room holds at most {Plans.MaxItems} objects.";
+
+        /// <summary>An object without a usable name.</summary>
+        public static readonly string PlanItemLabel = $"Give each object a name of up to {Plans.MaxLabelLength} characters.";
+
+        /// <summary>An object with a side outside the allowed range.</summary>
+        public static readonly string PlanItemSize = $"An object's sides are {Plans.MinItemCentimetres} to {Plans.MaxItemCentimetres} cm.";
+
+        /// <summary>An object that isn't turned in quarter turns, or has no valid position or shape.</summary>
+        public const string PlanItemPlacement = "An object has a position, a known shape and a turn of 0, 90, 180 or 270 degrees.";
+
+        /// <summary>A window, door or hung object that isn't on a wall, or a floor object that is.</summary>
+        public const string PlanWallPlacement = "Windows, doors and things hung on walls go on one of the room's walls, and other objects stand on the floor.";
+
+        /// <summary>A hung object that sticks out too far.</summary>
+        public static readonly string PlanMountedDepth = $"Something hung on a wall sticks out at most {Plans.MaxMountedDepth:0} cm.";
+
+        /// <summary>A room outline that isn't a valid room.</summary>
+        public static readonly string PlanOutline =
+            $"A room's walls must run straight across or down the plan and turn at right angles, each at least {Plans.MinWallSegmentCentimetres:0} cm " +
+            $"long and none crossing another, with at most {Plans.MaxCorners} corners and the room {Plans.MinWallMetres} to {Plans.MaxWallMetres} m across.";
+
+        /// <summary>An object's decorations are too many, too long, empty or repeated.</summary>
+        public static readonly string PlanItemDecorations =
+            $"An object may have up to {Plans.MaxDecorations} different decorations, each named in up to {Plans.MaxDecorationLength} characters.";
+
+        /// <summary>A corner object's parts don't fit it.</summary>
+        public static readonly string PlanItemParts =
+            $"The parts of a corner object must each be at least {Plans.MinPartCentimetres:0} cm and fit inside it, and a chaise at least as wide as the leg.";
+
+        /// <summary>An object's outline doesn't suit its shape.</summary>
+        public const string PlanItemForm = "Only sofas, tables and cabinets can be L-shaped, only sofas P-shaped, and only tables and rugs round.";
+
+        /// <summary>A window, door or hung object that doesn't fit on its wall.</summary>
+        /// <param name="label">Its name.</param>
+        public static string PlanWallItem(string label)
+        {
+            return $"The {label} doesn't fit on its wall: keep it between the wall's ends and under the ceiling.";
+        }
+
+        /// <summary>A floor type or view that isn't one of the choices.</summary>
+        public const string PlanLook = "Choose one of the floor types and one of the room's walls to look at.";
+
+        /// <summary>A built room type or shape that doesn't exist.</summary>
+        public const string UnknownRoomType = "Pick the room's type from the list.";
 
         /// <summary>A surface width or height outside the allowed range.</summary>
         public static readonly string SurfaceSize = $"Sizes must be between {Surfaces.MinMetres} and {Surfaces.MaxMetres} metres.";
@@ -284,6 +408,8 @@ public static class Constants
     /// <summary>The steps a room goes through, from upload to editable.</summary>
     public enum RoomStatus
     {
+        /// <summary>The photo is stored, and the analysis (which costs money with the real AI) waits until the user starts it.</summary>
+        Waiting,
         /// <summary>The photo is stored; analysis hasn't started.</summary>
         Uploaded,
         /// <summary>The AI is listing the objects in the photo.</summary>
@@ -339,5 +465,158 @@ public static class Constants
         NoDoorsOrWindows,
         /// <summary>Only objects: furniture, cabinets, textiles, lamps and decor; no walls, floor, ceiling, doors or windows.</summary>
         ObjectsOnly,
+    }
+
+    /// <summary>The kinds of room the user can build, each with its own list of common objects.</summary>
+    public enum RoomType
+    {
+        /// <summary>A living room.</summary>
+        LivingRoom,
+        /// <summary>A bedroom.</summary>
+        Bedroom,
+        /// <summary>A kitchen.</summary>
+        Kitchen,
+        /// <summary>A bathroom.</summary>
+        Bathroom,
+        /// <summary>A dining room.</summary>
+        DiningRoom,
+        /// <summary>A home office.</summary>
+        HomeOffice,
+        /// <summary>A child's room.</summary>
+        KidsRoom,
+    }
+
+    /// <summary>How a built room's object is drawn in 3D: a few simple shapes cover everyday furniture.</summary>
+    public enum ItemShape
+    {
+        /// <summary>A plain block: cabinets, wardrobes, shelves, appliances.</summary>
+        Box,
+        /// <summary>A block with soft edges: ottomans, mattresses, cushions.</summary>
+        Rounded,
+        /// <summary>A round shape: round tables, stools, bins, pots.</summary>
+        Cylinder,
+        /// <summary>A seat with a back and arms: sofas and armchairs.</summary>
+        Sofa,
+        /// <summary>A bed with a headboard.</summary>
+        Bed,
+        /// <summary>A top on four legs: tables and desks.</summary>
+        Table,
+        /// <summary>A seat with a back on four legs.</summary>
+        Chair,
+        /// <summary>A flat piece on the floor: rugs and mats.</summary>
+        Rug,
+        /// <summary>A plant in a pot.</summary>
+        Plant,
+        /// <summary>A lamp: a stand with a shade.</summary>
+        Lamp,
+        /// <summary>A window in a wall: a frame with glass, at a height above the floor.</summary>
+        Window,
+        /// <summary>A door in a wall, standing on the floor.</summary>
+        Door,
+        /// <summary>A flat thing hung on a wall: paintings, mirrors, a wall TV.</summary>
+        Picture,
+        /// <summary>A block hung on a wall: upper kitchen cabinets, wall shelves, a cooker hood, a mirror cabinet.</summary>
+        WallBox,
+    }
+
+    /// <summary>
+    /// The outline of a built room's object seen from above, within its width × depth: most are rectangles, but a corner
+    /// sofa or desk is L-shaped and a round table or rug is an ellipse.
+    /// </summary>
+    public enum ItemForm
+    {
+        /// <summary>The object fills its width × depth.</summary>
+        Standard,
+        /// <summary>
+        /// An L: a run along its whole back, <see cref="Plans.LegShare"/> of its smaller side deep, and a leg of the same
+        /// width running forward from the back run at its right end as seen from above before turning (sofas, tables, boxes).
+        /// </summary>
+        LShaped,
+        /// <summary>
+        /// A P: an L with thinner runs (<see cref="Plans.PLegShare"/> of its smaller side deep) whose leg widens at its
+        /// front end into a chaise, <see cref="Plans.ChaiseShare"/> times as wide as the runs are deep and as deep (corner sofas).
+        /// </summary>
+        PShaped,
+        /// <summary>An ellipse in its width × depth: round when they are equal (tables and rugs).</summary>
+        Round,
+    }
+
+    /// <summary>
+    /// The sides of a built room's floor plan seen from above: Back at the top, Front at the bottom, Left and Right at the
+    /// sides. Each wall of a room's outline is on one of them (see <see cref="Objects.OutlineWall.Side"/>); a rectangle's
+    /// walls are numbered in this order, so <c>(int)PlanWall.Left</c> is its left wall.
+    /// </summary>
+    public enum PlanWall
+    {
+        /// <summary>The wall at the top of the plan.</summary>
+        Back,
+        /// <summary>The wall on the right of the plan.</summary>
+        Right,
+        /// <summary>The wall at the bottom of the plan.</summary>
+        Front,
+        /// <summary>The wall on the left of the plan.</summary>
+        Left,
+    }
+
+    /// <summary>
+    /// Where the 3D view's camera stands to look at the wall in view: straight across from its middle, or in one of the
+    /// near corners, turned to look diagonally across the room (as most room photos are taken).
+    /// </summary>
+    public enum ViewCorner
+    {
+        /// <summary>Straight across the room from the middle of the wall in view, looking straight at it.</summary>
+        None,
+        /// <summary>In the near left corner, looking towards the far right corner.</summary>
+        Left,
+        /// <summary>In the near right corner, looking towards the far left corner.</summary>
+        Right,
+    }
+
+    /// <summary>The interior style a built room's photo is made in: its materials and finishes, not its layout.</summary>
+    public enum PhotoStyle
+    {
+        /// <summary>No style: the materials the objects' names and colors suggest.</summary>
+        AsBuilt,
+        /// <summary>Clean lines, smooth surfaces, a few bold accents.</summary>
+        Modern,
+        /// <summary>Light wood, white, wool and linen, cosy and simple.</summary>
+        Scandinavian,
+        /// <summary>Rattan, macramé, layered patterned textiles, warm earthy tones.</summary>
+        Boho,
+        /// <summary>Exposed brick and concrete, black metal, leather and reclaimed wood.</summary>
+        Industrial,
+        /// <summary>Japanese calm with Scandinavian warmth: low pale wood, paper and stone.</summary>
+        Japandi,
+        /// <summary>Tapered wooden legs, walnut, curved shapes, 1950s and 60s details.</summary>
+        MidCentury,
+        /// <summary>Rustic wood, shiplap, linen and wrought iron.</summary>
+        Farmhouse,
+        /// <summary>Breezy whites and blues, light wood, rope and linen.</summary>
+        Coastal,
+        /// <summary>Very few things, plain surfaces, no clutter.</summary>
+        Minimalist,
+        /// <summary>Classic moulding, turned wood, rich fabrics and patterns.</summary>
+        Traditional,
+        /// <summary>Geometric patterns, brass, velvet and lacquer.</summary>
+        ArtDeco,
+    }
+
+    /// <summary>What a built room's floor is made of.</summary>
+    public enum FloorType
+    {
+        /// <summary>Wooden planks.</summary>
+        Wood,
+        /// <summary>Wooden parquet in a herringbone pattern.</summary>
+        Parquet,
+        /// <summary>Ceramic tiles.</summary>
+        Tiles,
+        /// <summary>Large stone or marble slabs.</summary>
+        Stone,
+        /// <summary>Polished concrete.</summary>
+        Concrete,
+        /// <summary>Wall-to-wall carpet.</summary>
+        Carpet,
+        /// <summary>Vinyl planks.</summary>
+        Vinyl,
     }
 }

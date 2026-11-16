@@ -75,6 +75,11 @@ internal static class RoomEndpoints
             .WithDescription("Starts from `baseRevision`; Claude lists the parts and SAM 3 outlines them, and the object's pixels they cover become the parts in a new label map version that becomes current. With the real AI this is paid, so it is rate-limited.")
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
+        rooms.MapPost(Constants.Routes.RoomAnalysis, StartAnalysisAsync)
+            .WithName("StartRoomAnalysis")
+            .WithSummary("Starts the analysis of a room that waits for it (a photo made by the room builder).")
+            .WithDescription("The room's AI (fake or real, chosen when it was made) analyzes it as after an upload; follow it with `GET /api/rooms/{id}` or the live updates.");
+
         rooms.MapPost(Constants.Routes.RoomMerges, MergePartAsync)
             .WithName("MergeRoomPart")
             .WithSummary("Merges a part (`objectIndex`) back into the object it is a part of: its pixels become the object's again.")
@@ -259,6 +264,18 @@ internal static class RoomEndpoints
     {
         var outcome = await mergePart.MergeAsync(id, request.BaseRevision, request.ObjectIndex, cancellationToken);
         return ToResponse(outcome, Constants.Titles.MergeFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/analysis</c>: starts the analysis of a room that waits for it.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="startAnalysis">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room (now queued), 400 when it isn't waiting, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> StartAnalysisAsync(
+        Guid id, StartRoomAnalysis startAnalysis, CancellationToken cancellationToken)
+    {
+        var outcome = await startAnalysis.HandleAsync(id, cancellationToken);
+        return ToResponse(outcome, Constants.Titles.AnalysisFailed);
     }
 
     /// <summary><c>POST /api/rooms/{id}/removals</c>: removes objects from the photo together.</summary>

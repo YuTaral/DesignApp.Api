@@ -13,6 +13,7 @@ using DesignApp.Infrastructure.Background;
 using DesignApp.Infrastructure.Database;
 using DesignApp.Infrastructure.FileStorage;
 using DesignApp.Infrastructure.Library;
+using DesignApp.Infrastructure.Builder;
 using DesignApp.Infrastructure.Palettes;
 using DesignApp.Infrastructure.Photos;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,8 @@ public static class DependencyInjection
             configureDbContextOptions: options => options.UseSnakeCaseNamingConvention());
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IDesignRepository, DesignRepository>();
+        builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+        builder.Services.AddSingleton<IObjectCatalog, EmbeddedObjectCatalog>();
 
         builder.Services.AddOptions<StorageOptions>()
             .Bind(builder.Configuration.GetSection(Constants.Config.StorageSection))
@@ -79,6 +82,8 @@ public static class DependencyInjection
         builder.Services.AddSingleton<FakeInventoryProvider>();
         builder.Services.AddSingleton<FakeSegmentationProvider>();
         builder.Services.AddSingleton<FakeObjectRemovalProvider>();
+        builder.Services.AddSingleton<FakeRoomBuilderAi>();
+        builder.Services.AddSingleton<FakeImageGenerator>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
         builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
 
@@ -90,6 +95,7 @@ public static class DependencyInjection
         {
             builder.Services.AddSingleton<IClaudeCodeRunner, ClaudeCodeRunner>();
             builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeCodeInventoryProvider>(Constants.Ai.RealKey);
+            builder.Services.AddKeyedSingleton<IRoomBuilderAi, ClaudeCodeRoomBuilderAi>(Constants.Ai.RealKey);
         }
         else
         {
@@ -114,6 +120,7 @@ public static class DependencyInjection
                 });
         });
         builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(Constants.Ai.RealKey);
+        builder.Services.AddKeyedSingleton<IRoomBuilderAi, ClaudeRoomBuilderAi>(Constants.Ai.RealKey);
     }
 
     /// <summary>SAM 3 and the object eraser on fal.ai, with the fal.ai key.</summary>
@@ -122,6 +129,8 @@ public static class DependencyInjection
     {
         AddFalClient<FalSegmentationProvider>(builder);
         AddFalEraserClient(builder);
+        AddFalImagesClient(builder);
+        builder.Services.AddKeyedSingleton<IImageGenerator>(Constants.Ai.RealKey, (sp, _) => sp.GetRequiredService<FalImageGenerator>());
         builder.Services.AddKeyedSingleton<IObjectRemovalProvider>(Constants.Ai.RealKey, (sp, _) => sp.GetRequiredService<FalObjectRemovalProvider>());
         builder.Services.AddKeyedSingleton<ISegmentationProvider>(Constants.Ai.RealKey, (sp, _) => new RecordingSegmentationProvider(
             sp.GetRequiredService<FalSegmentationProvider>(),
@@ -141,6 +150,21 @@ public static class DependencyInjection
                 http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
             .RemoveAllResilienceHandlers()
             .AddResilienceHandler(Constants.Ai.Removal.ResilienceName, resilience => resilience.AddTimeout(Constants.Ai.Removal.CallTimeout));
+#pragma warning restore EXTEXP0001
+    }
+
+    /// <summary>
+    /// The image model's HTTP client, set up like the eraser's: the fal.ai key and a timeout per call, but no retries,
+    /// since each submit is a paid job.
+    /// </summary>
+    /// <param name="builder">The host builder.</param>
+    private static void AddFalImagesClient(IHostApplicationBuilder builder)
+    {
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
+        builder.Services.AddHttpClient<FalImageGenerator>((sp, http) =>
+                http.DefaultRequestHeaders.Authorization = new(Constants.Ai.FalAuthScheme, sp.GetRequiredService<IOptions<AiOptions>>().Value.FalKey))
+            .RemoveAllResilienceHandlers()
+            .AddResilienceHandler(Constants.Ai.Images.ResilienceName, resilience => resilience.AddTimeout(Constants.Ai.Images.CallTimeout));
 #pragma warning restore EXTEXP0001
     }
 

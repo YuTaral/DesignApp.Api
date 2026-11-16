@@ -46,6 +46,20 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
             : services.GetKeyedService<IObjectRemovalProvider>(Constants.Ai.RealKey) ?? throw NotSetUp();
     }
 
+    public IRoomBuilderAi Builder(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeRoomBuilderAi>()
+            : services.GetKeyedService<IRoomBuilderAi>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
+
+    public IImageGenerator Images(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakeImageGenerator>()
+            : services.GetKeyedService<IImageGenerator>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
+
     private static InvalidOperationException NotSetUp()
     {
         return new(Constants.Config.RealAiNotSetUp);

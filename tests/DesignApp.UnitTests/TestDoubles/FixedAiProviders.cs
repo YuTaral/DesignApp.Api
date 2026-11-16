@@ -9,7 +9,9 @@ namespace DesignApp.UnitTests;
 /// <param name="inventory">Step 1.</param>
 /// <param name="segmentation">Step 2.</param>
 /// <param name="removal">Removing objects from photos; none unless a test needs it.</param>
-internal sealed class FixedAiProviders(IObjectInventoryProvider inventory, ISegmentationProvider segmentation, IObjectRemovalProvider? removal = null)
+internal sealed class FixedAiProviders(
+    IObjectInventoryProvider inventory, ISegmentationProvider segmentation, IObjectRemovalProvider? removal = null,
+    IRoomBuilderAi? builder = null, IImageGenerator? images = null)
     : IAiProviders
 {
     /// <inheritdoc/>
@@ -35,5 +37,16 @@ internal sealed class FixedAiProviders(IObjectInventoryProvider inventory, ISegm
     public IObjectRemovalProvider Removal(AiMode mode)
     {
         return removal ?? throw new InvalidOperationException("This test has no object remover.");
+    }
+
+    public IRoomBuilderAi Builder(AiMode mode)
+    {
+        Asked.Add(mode);
+        return builder ?? throw new InvalidOperationException("This test has no room builder AI.");
+    }
+
+    public IImageGenerator Images(AiMode mode)
+    {
+        return images ?? throw new InvalidOperationException("This test has no image generator.");
     }
 }

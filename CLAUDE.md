@@ -8,7 +8,7 @@ picture; this file is the working agreement.
 
 ```bash
 dotnet build DesignApp.slnx                     # warnings are errors; every public member needs an XML doc
-dotnet test DesignApp.slnx                      # 248 unit + 58 API tests; Docker must run (Testcontainers)
+dotnet test DesignApp.slnx                      # 294 unit + 61 API tests; Docker must run (Testcontainers)
 dotnet ef migrations add <Name> --project src/DesignApp.Infrastructure --startup-project src/DesignApp.Infrastructure --output-dir Database/Migrations
 cd tools/docs && npm install && npm run docs    # regenerate both Word files in the parent DesignApp folder
 dotnet run --project tools/AiLab -- record <photo> <folder>   # PAID (ask first): record one real AI run
@@ -44,12 +44,12 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
 - **One type per file**, named after it. Only `Objects/Result.cs` pairs `Result<T>` with its `Result` helper.
 - **Folders: Domain, Application and Api are grouped by type** (one folder per kind of class, not per entity):
   - Domain: `Entities/`, `Objects/` (value objects and records), `Extensions/`, `Exceptions/`.
-  - Application: `Interfaces/` (every port), `UseCases/` (one sealed class per use case, in `Designs/` or
-    `Rooms/` by the entity it changes), `Objects/` (records, `StoredFile`, `Result`), `Helpers/` (shared pieces that aren't
+  - Application: `Interfaces/` (every port), `UseCases/` (one sealed class per use case, in `Designs/`,
+    `Plans/` or `Rooms/` by the entity it changes), `Objects/` (records, `StoredFile`, `Result`), `Helpers/` (shared pieces that aren't
     use cases, such as `RoomRemover`).
   - Api: `Endpoints/`, `Requests/`, `Responses/`, `Hubs/`, `Interfaces/`, `Services/`, `Middleware/`, `Setup/`, `Helpers/`.
   - `Constants`, `DependencyInjection` and `Program` stay at the project roots. A new class goes in the folder of its kind.
-- **Infrastructure is grouped by technology:** `Ai/`, `Analysis/`, `Background/` (the hosted services), `Database/`
+- **Infrastructure is grouped by technology:** `Ai/`, `Analysis/`, `Background/` (the hosted services), `Builder/` (the room builder's catalog), `Database/`
   (with `Configurations/`, `Objects/`, `Repository/`, `Migrations/`), `FileStorage/`, `Identity/` and `Photos/`; inside
   them, interfaces go in `Interfaces/` and records and static helpers in `Objects/`.
 - **Namespaces:** a top-level folder is a namespace (`DesignApp.Application.UseCases`, `DesignApp.Infrastructure.Database`).

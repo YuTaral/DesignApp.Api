@@ -57,7 +57,7 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     public async Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken)
     {
         return await db.Rooms
-            .Where(r => r.Status != RoomStatus.Ready && r.Status != RoomStatus.Failed)
+            .Where(r => r.Status != RoomStatus.Ready && r.Status != RoomStatus.Failed && r.Status != RoomStatus.Waiting)
             .OrderBy(r => r.CreatedAt)
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);

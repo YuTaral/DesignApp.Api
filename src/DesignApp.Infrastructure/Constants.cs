@@ -89,6 +89,14 @@ public static class Constants
             public const string RemovalEndpoint = "https://queue.fal.run/fal-ai/bria/eraser";
 
             /// <summary>
+            /// The room builder's image model on fal.ai's queue: FLUX 3 Image Klein's editing, $0.009 a 1K photo, about
+            /// 5 s. In a side-by-side test of the 3D view and of adding decorations (November 2026) it kept the camera,
+            /// sizes and colors best of FLUX Kontext dev, Seedream 5.5, MAI-Image-2.5, Muse Image and H3-Image, and was the
+            /// cheapest. Another model that takes the same request (a list of images, a size) can go in this column.
+            /// </summary>
+            public const string ImageEndpoint = "https://queue.fal.run/blackforestlabs/flux-3/klein/edit-image";
+
+            /// <summary>
             /// The quality tier of fal's own eraser (Best $0.024 a removal, Low $0.006); Bria's and Ideogram's ignore it.
             /// </summary>
             public const RemovalQuality RemovalQuality = Constants.RemovalQuality.Best;
@@ -524,6 +532,160 @@ public static class Constants
             }
         }
 
+        /// <summary>The room builder's language model: Claude Haiku turns descriptions into objects and plans into prompts.</summary>
+        public static class RoomBuilder
+        {
+            /// <summary>The model: fast and cheap, and these are short text tasks.</summary>
+            public const string Model = "claude-haiku-5-5";
+
+            /// <summary>The most tokens one answer may have.</summary>
+            public const int MaxTokens = 1024;
+
+            /// <summary>The label a described object gets when Claude gives none.</summary>
+            public const string CustomKey = "custom";
+
+            /// <summary>The instructions for turning a description into an object.</summary>
+            public const string DescribeSystem =
+                "You turn a person's description of a piece of furniture or decor into an object for a simple 3D room planner. " +
+                "Give a short name (one to four words, lower case), the closest shape from the list, its real-world width, " +
+                "depth and height in centimetres (use the sizes the person gives; otherwise typical sizes), and its main color " +
+                "as #RRGGBB (oak is about #B8864B, walnut #6B4A2E, white #F2F0EB, black #2A2A2A). Width is the side facing " +
+                "the room, depth goes back towards the wall. Things hung on a wall are Picture when flat (paintings, mirrors, a wall " +
+                "TV) or WallBox (upper cabinets, wall shelves, a cooker hood); their depth is how far they stick out from the wall.";
+
+            /// <summary>The message with the person's description.</summary>
+            /// <param name="roomType">The room it is for.</param>
+            /// <param name="description">The person's words.</param>
+            /// <returns>The text.</returns>
+            public static string DescribeMessage(string roomType, string description)
+            {
+                return $"Room: {roomType}. Object: {description}";
+            }
+
+            /// <summary>The answer's field names for a described object.</summary>
+            public static class Fields
+            {
+                /// <summary>Its name.</summary>
+                public const string Label = "label";
+                /// <summary>Its shape.</summary>
+                public const string Shape = "shape";
+                /// <summary>Its width.</summary>
+                public const string Width = "width";
+                /// <summary>Its depth.</summary>
+                public const string Depth = "depth";
+                /// <summary>Its height.</summary>
+                public const string Height = "height";
+                /// <summary>Its color.</summary>
+                public const string Color = "color";
+            }
+
+            /// <summary>What the user is told when the language model fails.</summary>
+            public static class Messages
+            {
+                /// <summary>A description that gave no usable object.</summary>
+                public const string DescribeFailed = "The AI couldn't make that object. Try describing it differently.";
+            }
+        }
+
+        /// <summary>Turning a built room's 3D view into a realistic photo with an image model on fal.ai (FLUX 3 Image Klein).</summary>
+        public static class Images
+        {
+            /// <summary>The photo's width, the same as the 3D view the browser draws (<c>BUILDER.guide</c>).</summary>
+            public const int Width = 1024;
+
+            /// <summary>The photo's height, the same as the 3D view the browser draws.</summary>
+            public const int Height = 768;
+
+            /// <summary>The photo's format.</summary>
+            public const string OutputFormat = "jpeg";
+
+            /// <summary>
+            /// Whether the model may rewrite the prompt first: off, since the prompt is written to the centimetre from the
+            /// plan, and a rewrite could add things to the room.
+            /// </summary>
+            public const bool PromptExpansion = false;
+
+            /// <summary>The 3D view sent inline starts with this.</summary>
+            public const string PngDataUri = "data:image/png;base64,";
+
+            /// <summary>A photo to decorate, sent inline, starts with this.</summary>
+            public const string JpegDataUri = "data:image/jpeg;base64,";
+
+            /// <summary>How often the queued job is checked.</summary>
+            public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
+
+            /// <summary>How long a job may take before it is given up.</summary>
+            public static readonly TimeSpan MaxWait = TimeSpan.FromMinutes(3);
+
+            /// <summary>The longest one call to the queue may take.</summary>
+            public static readonly TimeSpan CallTimeout = TimeSpan.FromSeconds(30);
+
+            /// <summary>The name of the image client's resilience handler.</summary>
+            public const string ResilienceName = "fal-images";
+
+            /// <summary>The most failed status checks in a row before the job is given up.</summary>
+            public const int MaxStatusErrors = 5;
+
+            /// <summary>The queue's status of a finished job.</summary>
+            public const string Completed = "COMPLETED";
+
+            /// <summary>The wire names of the request and the answers.</summary>
+            public static class Json
+            {
+                /// <summary>The instruction.</summary>
+                public const string Prompt = "prompt";
+                /// <summary>The images to start from: the 3D view, or the photo to decorate.</summary>
+                public const string ImageUrls = "image_urls";
+                /// <summary>The photo's size.</summary>
+                public const string ImageSize = "image_size";
+                /// <summary>A size's width.</summary>
+                public const string Width = "width";
+                /// <summary>A size's height.</summary>
+                public const string Height = "height";
+                /// <summary>The photo's format.</summary>
+                public const string OutputFormat = "output_format";
+                /// <summary>Whether the model may rewrite the prompt.</summary>
+                public const string PromptExpansion = "enable_prompt_expansion";
+                /// <summary>The seed that makes a photo repeatable.</summary>
+                public const string Seed = "seed";
+                /// <summary>The objects to draw inside given boxes.</summary>
+                public const string BoundingBoxes = "bounding_boxes";
+                /// <summary>A box's object id.</summary>
+                public const string Label = "label";
+                /// <summary>A box's object in words.</summary>
+                public const string Description = "description";
+                /// <summary>A box's place.</summary>
+                public const string Box = "box";
+                /// <summary>A box's left edge.</summary>
+                public const string XMin = "x_min";
+                /// <summary>A box's top edge.</summary>
+                public const string YMin = "y_min";
+                /// <summary>A box's right edge.</summary>
+                public const string XMax = "x_max";
+                /// <summary>A box's bottom edge.</summary>
+                public const string YMax = "y_max";
+                /// <summary>Where the job's status is.</summary>
+                public const string StatusUrl = "status_url";
+                /// <summary>Where the job's result is.</summary>
+                public const string ResponseUrl = "response_url";
+                /// <summary>The job's status.</summary>
+                public const string Status = "status";
+                /// <summary>Why the job failed.</summary>
+                public const string Error = "error";
+                /// <summary>The photos.</summary>
+                public const string Images = "images";
+                /// <summary>A photo's address.</summary>
+                public const string Url = "url";
+            }
+
+            /// <summary>What the user is told when the image model fails.</summary>
+            public static class Messages
+            {
+                /// <summary>A photo that couldn't be made.</summary>
+                public const string Failed = "The photo couldn't be made right now. Try again in a moment.";
+            }
+        }
+
         /// <summary>Removing an object from a photo with fal.ai's eraser.</summary>
         public static class Removal
         {
@@ -650,6 +812,13 @@ public static class Constants
 
         /// <summary>The Claude token usage of a recording.</summary>
         public const string ClaudeUsageSuffix = ".claude-usage.json";
+    }
+
+    /// <summary>The room builder's catalog of common objects, embedded in this assembly.</summary>
+    public static class Builder
+    {
+        /// <summary>The catalog's resource name.</summary>
+        public const string CatalogResource = "DesignApp.Builder/catalog.json";
     }
 
     /// <summary>The paint palettes, embedded in this assembly as <c>Palettes/&lt;id&gt;.json</c>.</summary>

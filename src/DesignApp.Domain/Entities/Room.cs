@@ -72,9 +72,10 @@ public sealed class Room
     /// <param name="now">The upload time.</param>
     /// <param name="scope">Which objects the analysis looks for.</param>
     /// <param name="aiMode">Which AI analyzes the photo.</param>
+    /// <param name="waitForUser">Leave the room <see cref="RoomStatus.Waiting"/> until the user starts its analysis.</param>
     /// <exception cref="DomainException">The id is empty or the size isn't positive.</exception>
     public static Room Upload(Guid id, string ownerId, string photoKey, int width, int height, DateTimeOffset now,
-        AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake)
+        AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake, bool waitForUser = false)
     {
         if (id == Guid.Empty)
             throw new DomainException(Constants.Messages.RoomNeedsId);
@@ -90,7 +91,7 @@ public sealed class Room
             PhotoKey = photoKey,
             Width = width,
             Height = height,
-            Status = RoomStatus.Uploaded,
+            Status = waitForUser ? RoomStatus.Waiting : RoomStatus.Uploaded,
             CreatedAt = now,
             Scope = Enum.IsDefined(scope) ? scope : throw new DomainException(Constants.Messages.UnknownScope(scope)),
             AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException(Constants.Messages.UnknownAiMode(aiMode)),
@@ -131,6 +132,13 @@ public sealed class Room
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(newOwnerId);
         OwnerId = newOwnerId;
+    }
+
+    /// <summary>Waiting → Uploaded: the user asked for the analysis, so it is queued.</summary>
+    /// <exception cref="DomainException">The room isn't waiting for the user.</exception>
+    public void QueueAnalysis()
+    {
+        MoveTo(RoomStatus.Uploaded, from: RoomStatus.Waiting);
     }
 
     /// <summary>Uploaded → Analyzing: the AI starts listing the objects.</summary>

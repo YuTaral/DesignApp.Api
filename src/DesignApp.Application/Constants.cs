@@ -1,3 +1,5 @@
+using static DesignApp.Domain.Constants;
+
 namespace DesignApp.Application;
 
 /// <summary>
@@ -46,6 +48,514 @@ public static class Constants
     {
         /// <summary>The most objects one removal may take out together (a sofa with its cushions and throw).</summary>
         public const int MaxObjects = 20;
+    }
+
+    /// <summary>Limits of the room builder.</summary>
+    public static class Builder
+    {
+        /// <summary>The longest description of an object the AI turns into one.</summary>
+        public const int MaxDescriptionLength = 300;
+
+        /// <summary>The largest 3D view the browser may send for a photo.</summary>
+        public const int MaxGuideBytes = 10 * 1024 * 1024;
+
+        /// <summary>The longest extra instructions the user may add for the photo.</summary>
+        public const int MaxInstructionsLength = 500;
+
+        /// <summary>The start of an object's id in the layout sent to the image model ("object1", "object2"...).</summary>
+        public const string BoxLabel = "object";
+
+        /// <summary>
+        /// The 3D view's camera, as the browser draws it (<c>scene-3d.ts</c> and <c>BUILDER.scene</c> in DesignApp.Web,
+        /// which must match): the photo prompt describes only what this camera sees. Lengths in centimetres.
+        /// </summary>
+        public static class Camera
+        {
+            /// <summary>The camera's height above the floor.</summary>
+            public const double EyeHeight = 145;
+            /// <summary>The least room left between the camera and the ceiling.</summary>
+            public const double CeilingGap = 30;
+            /// <summary>How far in front of the near wall the camera stands.</summary>
+            public const double Inset = 5;
+            /// <summary>The least distance to the far wall used to fit the lens.</summary>
+            public const double MinFitDistance = 50;
+            /// <summary>
+            /// Where the lens is fitted: the room's whole width shows from this share of the way to the far wall, so the
+            /// side walls and what stands by them are in the picture (fitting only the far wall left them out).
+            /// </summary>
+            public const double FitDepthShare = 0.5;
+            /// <summary>The narrowest horizontal view, in degrees.</summary>
+            public const double MinFov = 80;
+            /// <summary>The widest horizontal view, in degrees (a real-estate photographer's widest lens).</summary>
+            public const double MaxFov = 100;
+            /// <summary>How much taller the frame the picture is cut from is (its lower part is shown).</summary>
+            public const double LensShift = 0.28;
+            /// <summary>The picture's width over its height.</summary>
+            public const double Aspect = 4.0 / 3.0;
+            /// <summary>How many points are checked along each side of an object, to tell whether the camera sees it.</summary>
+            public const int Samples = 5;
+            /// <summary>
+            /// The horizontal view from a near corner, in degrees: turned by <see cref="CornerTurn"/>, it reaches from the
+            /// side wall the camera stands by to the near wall, so the whole room ahead is in the picture.
+            /// </summary>
+            public const double CornerFov = 90;
+            /// <summary>How far a corner camera is turned from looking straight at the wall in view, in degrees (towards the room).</summary>
+            public const double CornerTurn = 45;
+        }
+
+        /// <summary>
+        /// The design rules a new room's starting layout follows (see <c>Helpers/StarterLayout</c>), in centimetres unless
+        /// said otherwise.
+        /// </summary>
+        public static class Layout
+        {
+            /// <summary>A window's height above the floor in a living room, bedroom, dining room, office or kids' room.</summary>
+            public const double Sill = 90;
+            /// <summary>A window's height above the floor in a kitchen or bathroom (above the worktop and the bath).</summary>
+            public const double WetSill = 110;
+            /// <summary>The usual daylight rule: window glass of a tenth of the floor area.</summary>
+            public const double GlassShare = 0.10;
+            /// <summary>A bathroom's glass share, smaller for privacy.</summary>
+            public const double BathroomGlassShare = 0.06;
+            /// <summary>A window's usual height.</summary>
+            public const double WindowHeight = 140;
+            /// <summary>The wall kept above a window, up to the ceiling.</summary>
+            public const double WindowHead = 30;
+            /// <summary>The widest single window.</summary>
+            public const double MaxWindowWidth = 160;
+            /// <summary>The narrowest window.</summary>
+            public const double MinWindowWidth = 60;
+            /// <summary>The wall kept between windows and at the corners.</summary>
+            public const double WindowGap = 40;
+            /// <summary>How far the door is from the front corner.</summary>
+            public const double DoorMargin = 15;
+            /// <summary>A main walkway's width.</summary>
+            public const double Walkway = 90;
+            /// <summary>The space kept at the ends of a sofa or a run of furniture.</summary>
+            public const double SideGap = 30;
+            /// <summary>From a sofa's front to its coffee table.</summary>
+            public const double SofaToTable = 45;
+            /// <summary>The space beside a bed.</summary>
+            public const double BedSide = 60;
+            /// <summary>A kitchen aisle between the worktop and the island.</summary>
+            public const double KitchenAisle = 110;
+            /// <summary>The space behind a dining chair, to pull it out and walk past.</summary>
+            public const double BehindChair = 45;
+            /// <summary>The table edge each seat takes.</summary>
+            public const double PlaceWidth = 60;
+            /// <summary>The shortest run of cabinets worth placing.</summary>
+            public const double MinRun = 40;
+            /// <summary>The smallest rug side worth placing.</summary>
+            public const double MinRug = 60;
+            /// <summary>How far an object is moved at a time when its place along a wall is taken.</summary>
+            public const double Step = 10;
+            /// <summary>How near a wall an object must be to count as standing against it.</summary>
+            public const double WallTouch = 5;
+        }
+
+        /// <summary>
+        /// Named colors the photo prompt calls a color by (the nearest one, with its code): image models follow words far
+        /// better than codes.
+        /// </summary>
+        public static readonly (string Name, string Hex)[] ColorNames =
+        [
+            ("white", "#FFFFFF"), ("off-white", "#F4F1EA"), ("cream", "#EFE6CF"), ("beige", "#D8C3A5"), ("sand", "#C9B48F"),
+            ("light grey", "#C8C8C8"), ("grey", "#8A8A8A"), ("warm grey", "#8A8580"), ("charcoal", "#3A3A3A"), ("black", "#1E1E1E"),
+            ("light oak", "#C9A27E"), ("oak", "#B8864B"), ("walnut", "#6B4A2E"), ("dark brown", "#4A3424"), ("tan", "#B89B7A"),
+            ("terracotta", "#B5543C"), ("brick red", "#8C3B2E"), ("red", "#C0392B"), ("pink", "#E8B4B8"), ("blush", "#E9CFC7"),
+            ("mustard", "#D9A93A"), ("yellow", "#F2D46B"), ("sage green", "#A8B89A"), ("olive", "#7D8B6A"), ("forest green", "#4F6B3A"),
+            ("green", "#5B9A5B"), ("teal", "#3E7C7B"), ("light blue", "#9DB4C0"), ("blue", "#4A78A8"), ("slate blue", "#4A6274"),
+            ("navy", "#2E4057"), ("lavender", "#B8A9C9"), ("plum", "#6E5A7E"),
+        ];
+
+        /// <summary>The wording of the photo prompt (see <c>Helpers/PlanPrompt</c>).</summary>
+        public static class Prompt
+        {
+            /// <summary>
+            /// What to make, and that nothing may be added. Said as what the photo holds rather than a list of things not to
+            /// add, which FLUX Kontext ignored (it added curtains, a TV and a rug), and with the framing kept (it zoomed out).
+            /// </summary>
+            /// <param name="room">The room type in words.</param>
+            public static string Intro(string room)
+            {
+                return $"Turn this simple 3D render into a realistic photograph of the same {room} interior, from exactly the same " +
+                    "camera position, angle and framing, with level vertical lines; do not zoom out or show more of the room. " +
+                    "Turn each plain shape into the real object it stands for, keeping its place, outline, size and exactly the " +
+                    "color it has in the render.";
+            }
+
+            /// <summary>Without decorations: only what is in the render.</summary>
+            public const string Undecorated =
+                "Everything in the photo is already in the render: keep the rest of the room empty, with bare walls and a bare floor.";
+
+            /// <summary>
+            /// Instead of <see cref="Undecorated"/> when an object in view has decorations: those, named with their
+            /// objects, are added, and nothing else. FLUX 3 Image Klein draws them in the same step that makes the photo
+            /// (FLUX Kontext dropped them; a second editing step drew them too, at twice the cost, and was compared in
+            /// November 2026: one step got every decoration, and once pulled the camera back slightly).
+            /// </summary>
+            public const string WithDecorations =
+                "Everything in the photo is already in the render, apart from the decorations named with their objects below, " +
+                "each resting on or hanging at the one object it is named with and on no other object: keep the rest of the " +
+                "room empty, with bare walls and a bare floor.";
+
+            /// <summary>An object's decorations, after its description.</summary>
+            /// <param name="names">Their names, such as "cushions and throw blanket".</param>
+            public static string Decorated(string names)
+            {
+                return $", decorated with {names}";
+            }
+
+            /// <summary>The room's size as the photo sees it.</summary>
+            /// <param name="across">From the left wall to the right wall, in cm.</param>
+            /// <param name="deep">From the camera to the far wall, in cm.</param>
+            /// <param name="height">From the floor to the ceiling, in cm.</param>
+            public static string Room(string across, string deep, string height)
+            {
+                return $"The room is {across} cm wide from the left wall to the right wall, {deep} cm deep from the camera to the far wall, " +
+                    $"and {height} cm from floor to ceiling.";
+            }
+
+            /// <summary>The walls, ceiling and floor.</summary>
+            /// <param name="wall">The walls' color.</param>
+            /// <param name="floor">The floor's material.</param>
+            /// <param name="floorColor">The floor's color.</param>
+            public static string Surfaces(string wall, string floor, string floorColor)
+            {
+                return $"The walls are painted {wall} with a white ceiling, and the floor is {floor} in {floorColor}.";
+            }
+
+            /// <summary>
+            /// The style the photo is made in, as words for the image model: the details that make it (handles, legs,
+            /// fronts, trims, hardware, upholstery), never colors (a style that named "light oak" turned a dark brown table
+            /// light). Said only as materials and textures, most styles barely showed: every object kept its plain look.
+            /// </summary>
+            /// <param name="style">The style.</param>
+            /// <returns>The sentence, or empty for no style.</returns>
+            public static string Style(PhotoStyle style)
+            {
+                var words = style switch
+                {
+                    PhotoStyle.Modern => "modern: flat handleless fronts, sleek lacquered surfaces, thin metal legs and frames, crisp edges",
+                    PhotoStyle.Scandinavian => "Scandinavian: rounded edges, solid wood legs and knobs, wool and linen upholstery, simple shapes",
+                    PhotoStyle.Boho => "boho: rattan and cane panels, woven textures, macramé and fringes, turned wood",
+                    PhotoStyle.Industrial => "industrial: steel frames and legs, exposed rivets and bolts, metal mesh, leather, reclaimed wood tops",
+                    PhotoStyle.Japandi => "Japandi: low profiles, slatted wooden panels, paper and linen, rounded wooden handles, calm minimal details",
+                    PhotoStyle.MidCentury => "mid-century modern: tapered splayed wooden legs, rounded corners, recessed finger-pull handles, tufted upholstery",
+                    PhotoStyle.Farmhouse => "farmhouse: shaker panel fronts, cup pull handles, wrought iron hardware, distressed wood, turned legs",
+                    PhotoStyle.Coastal => "coastal: rope and rattan details, louvred fronts, weathered wood, linen slipcovers",
+                    PhotoStyle.Minimalist => "minimalist: perfectly flat handleless fronts, hidden legs, seamless surfaces, nothing extra",
+                    PhotoStyle.Traditional => "traditional: raised-panel fronts, carved trims and mouldings, turned legs, ornate knobs, tufted upholstery",
+                    PhotoStyle.ArtDeco => "Art Deco: fluted and ribbed panels, geometric inlays, polished metal handles and trims, curved velvet upholstery",
+                    _ => "",
+                };
+                return words.Length == 0
+                    ? ""
+                    : $"Style every object as {words}. Give each object the handles, legs, fronts, trims and textures of this style, " +
+                      "so the style is clearly visible, while it keeps its place, outline and size. Each object's own color comes " +
+                      "first: where the style's usual materials or finishes would change it, the object keeps its color and takes " +
+                      "only the style's shapes and details. Appliances are not styled.";
+            }
+
+            /// <summary>
+            /// The words in an object's name that make it an appliance, which the style leaves alone (a style made a fridge
+            /// rattan, louvred or riveted).
+            /// </summary>
+            public static readonly string[] ApplianceWords =
+                ["fridge", "freezer", "cooker", "oven", "hob", "dishwasher", "washing machine", "dryer", "microwave", "extractor"];
+
+            /// <summary>
+            /// Right after the style: the appliances in view by name, which stay plain. A general rule ("appliances are not
+            /// styled") left a fridge riveted in the industrial style; naming the room's own appliances is clearer.
+            /// </summary>
+            /// <param name="names">The appliances, such as "the fridge and the cooker".</param>
+            /// <param name="count">How many there are.</param>
+            public static string PlainAppliances(string names, int count)
+            {
+                return count == 1 ? $"Whatever the style, {names} stays a plain, modern appliance." : $"Whatever the style, {names} stay plain, modern appliances.";
+            }
+
+            /// <summary>
+            /// Right after the style: each object in view with the color it keeps. A general rule ("each object's own color
+            /// comes first") still let the style turn a white cabinet into metal or a light grey wardrobe into wood.
+            /// </summary>
+            /// <param name="list">Each object with its color, such as "the tall cabinet stays white, the island stays slate blue".</param>
+            public static string KeptColors(string list)
+            {
+                return $"Whatever the style, {list}.";
+            }
+
+            /// <summary>
+            /// A picture (a painting, mirror or wall TV) with its color, which is its frame's: "painting in a black (#2F2C2A)
+            /// frame". Named "black painting", the image model painted the canvas black.
+            /// </summary>
+            /// <param name="label">Its name.</param>
+            /// <param name="color">Its color.</param>
+            public static string Framed(string label, string color)
+            {
+                return $"{label} in a {color} frame";
+            }
+
+            /// <summary>The part of a picture whose color it is, for <see cref="KeepsColor"/>: "painting's frame".</summary>
+            /// <param name="label">The picture's name.</param>
+            public static string FrameOf(string label)
+            {
+                return $"{label}'s frame";
+            }
+
+            /// <summary>One object keeping its color, for <see cref="KeptColors"/>.</summary>
+            /// <param name="label">The object's name.</param>
+            /// <param name="color">Its color in words.</param>
+            public static string KeepsColor(string label, string color)
+            {
+                return $"the {label} stays {color}";
+            }
+
+            /// <summary>After an appliance's description: it stays a plain, modern appliance whatever the style.</summary>
+            public const string Appliance = ", a plain modern appliance in this color, not styled";
+
+            /// <summary>
+            /// The user's own extra instructions (such as the light), right after the style: said at the end of the
+            /// prompt, "warm evening light" was ignored.
+            /// </summary>
+            /// <param name="instructions">Their words.</param>
+            public static string Extra(string instructions)
+            {
+                return $"The photo must also show: {instructions}.";
+            }
+
+            /// <summary>
+            /// Said last, after the objects: every color stays as listed (a white bookcase came out in wood). It names no
+            /// material: a version that said "even where the style suggests wood" turned a white wardrobe and a beige
+            /// headboard into wood.
+            /// </summary>
+            public const string KeepColors =
+                "Every object keeps exactly the color listed for it and shown in the render.";
+
+            /// <summary>Where the camera is.</summary>
+            public const string Camera = "The camera stands at the middle of the near wall at eye height, looking straight at the far wall.";
+
+            /// <summary>
+            /// Where the camera is when it stands in a near corner, and which wall shows on which side of the photo. The
+            /// walls keep the names they have seen from the middle of the near wall, which every distance uses.
+            /// </summary>
+            /// <param name="left">Whether it stands in the near left corner (else the near right one).</param>
+            public static string CornerCamera(bool left)
+            {
+                var (stands, looks, onLeft, onRight) = left
+                    ? ("left", "right", "far wall", "right wall")
+                    : ("right", "left", "left wall", "far wall");
+                return $"The camera stands in the near {stands} corner at eye height, looking diagonally across the room towards " +
+                    $"the far {looks} corner, so the {onLeft} fills the left of the photo and the {onRight} its right. The left, " +
+                    "right, near and far walls below are named as seen from the middle of the near wall, not by the photo's sides.";
+            }
+
+            /// <summary>Before the objects on the floor.</summary>
+            public const string ObjectsHeading =
+                "In the photo (distances in cm to each object's middle; sizes in cm left to right × front to back × high): ";
+
+            /// <summary>An object on the floor, its color first (the image model kept colors better so).</summary>
+            /// <param name="label">Its name.</param>
+            /// <param name="color">Its color.</param>
+            /// <param name="fromLeft">Its middle's distance from the left wall.</param>
+            /// <param name="fromFar">Its middle's distance from the far wall.</param>
+            /// <param name="size">Its size.</param>
+            public static string Standing(string label, string color, string fromLeft, string fromFar, string size)
+            {
+                return $"{color} {label}: middle {fromLeft} cm from the left wall and {fromFar} cm from the far wall, {size}";
+            }
+
+            /// <summary>An object or opening the camera sees only part of.</summary>
+            /// <param name="edges">The photo's edges it crosses, such as "left" and "bottom".</param>
+            public static string CutBy(IReadOnlyList<string> edges)
+            {
+                return $", partly cut off by the {string.Join(" and ", edges)} edge{(edges.Count > 1 ? "s" : "")} of the photo";
+            }
+
+            /// <summary>The photo's left edge.</summary>
+            public const string LeftEdge = "left";
+            /// <summary>The photo's right edge.</summary>
+            public const string RightEdge = "right";
+            /// <summary>The photo's bottom edge.</summary>
+            public const string BottomEdge = "bottom";
+            /// <summary>The photo's top edge.</summary>
+            public const string TopEdge = "top";
+
+            /// <summary>An object's size.</summary>
+            /// <param name="across">Left to right.</param>
+            /// <param name="deep">Front to back.</param>
+            /// <param name="height">How high.</param>
+            public static string Size(string across, string deep, string height)
+            {
+                return $"{across} × {deep} × {height} cm";
+            }
+
+            /// <summary>An L-shaped object's outline: its back run and its corner leg.</summary>
+            /// <param name="run">How deep the back run is.</param>
+            /// <param name="leg">How wide the corner leg is.</param>
+            /// <param name="fromLeft">The leg's middle's distance from the left wall.</param>
+            /// <param name="fromFar">The leg's middle's distance from the far wall.</param>
+            public static string LShaped(string run, string leg, string fromLeft, string fromFar)
+            {
+                return $", L-shaped (its back run, across its whole width, is {run} cm deep; its corner leg is {leg} cm wide, its middle " +
+                    $"{fromLeft} cm from the left wall and {fromFar} cm from the far wall)";
+            }
+
+            /// <summary>A P-shaped object's outline: an L whose leg widens into a chaise at its front end.</summary>
+            /// <param name="run">How deep the back run is.</param>
+            /// <param name="leg">How wide the corner leg is.</param>
+            /// <param name="legLeft">The leg's middle's distance from the left wall.</param>
+            /// <param name="legFar">The leg's middle's distance from the far wall.</param>
+            /// <param name="chaiseWidth">How wide the chaise is.</param>
+            /// <param name="chaiseDepth">How deep the chaise is.</param>
+            /// <param name="chaiseLeft">The chaise's middle's distance from the left wall.</param>
+            /// <param name="chaiseFar">The chaise's middle's distance from the far wall.</param>
+            public static string PShaped(string run, string leg, string legLeft, string legFar, string chaiseWidth, string chaiseDepth, string chaiseLeft, string chaiseFar)
+            {
+                return $", P-shaped (its back run, across its whole width, is {run} cm deep; its corner leg is {leg} cm wide, its middle {legLeft} cm " +
+                    $"from the left wall and {legFar} cm from the far wall; at its front end the leg widens into a chaise {chaiseWidth} × {chaiseDepth} cm, " +
+                    $"its middle {chaiseLeft} cm from the left wall and {chaiseFar} cm from the far wall)";
+            }
+
+            /// <summary>A round object's outline.</summary>
+            public const string RoundForm = ", round seen from above";
+
+            /// <summary>An oval object's outline.</summary>
+            public const string OvalForm = ", oval seen from above";
+
+            /// <summary>A flat object's size (a rug).</summary>
+            /// <param name="across">Left to right.</param>
+            /// <param name="deep">Front to back.</param>
+            public static string FlatSize(string across, string deep)
+            {
+                return $"{across} × {deep} cm, flat on the floor";
+            }
+
+            /// <summary>An object whose front faces the camera.</summary>
+            public const string FacingCamera = "facing the camera";
+            /// <summary>An object whose front faces the far wall.</summary>
+            public const string FacingAway = "facing the far wall";
+            /// <summary>An object whose front faces right.</summary>
+            public const string FacingRight = "facing right";
+            /// <summary>An object whose front faces left.</summary>
+            public const string FacingLeft = "facing left";
+            /// <summary>An object whose front faces the near wall (a corner view, where "the camera" is to one side).</summary>
+            public const string FacingNearWall = "facing the near wall";
+            /// <summary>An object whose front faces the right wall (a corner view).</summary>
+            public const string FacingRightWall = "facing the right wall";
+            /// <summary>An object whose front faces the left wall (a corner view).</summary>
+            public const string FacingLeftWall = "facing the left wall";
+
+            /// <summary>Before the windows and doors.</summary>
+            public const string OpeningsHeading = "Windows and doors, and no others: ";
+
+            /// <summary>When no window or door is in view.</summary>
+            public const string NoOpenings = "There are no windows or doors in view.";
+
+            /// <summary>Where a window or door on the far wall is.</summary>
+            /// <param name="fromLeft">Its middle's distance from the left wall.</param>
+            public static string OnFarWall(string fromLeft)
+            {
+                return $"on the far wall, its middle {fromLeft} cm from the left wall";
+            }
+
+            /// <summary>Where a window or door on a side wall is.</summary>
+            /// <param name="left">Whether it is the left wall.</param>
+            /// <param name="fromFar">Its middle's distance from the far wall.</param>
+            public static string OnSideWall(bool left, string fromFar)
+            {
+                return $"on the {(left ? "left" : "right")} wall, its middle {fromFar} cm from the far wall";
+            }
+
+            /// <summary>A window or door.</summary>
+            /// <param name="label">Its name.</param>
+            /// <param name="color">Its color.</param>
+            /// <param name="where">Which wall, and where along it.</param>
+            /// <param name="width">Its width.</param>
+            /// <param name="height">Its height.</param>
+            /// <param name="bottom">Its bottom's height above the floor.</param>
+            public static string Opening(string label, string color, string where, string width, string height, string bottom)
+            {
+                return $"{color} {label}, {where}, {width} cm wide and {height} cm high, its bottom {bottom} cm above the floor";
+            }
+
+            /// <summary>The list of things hung on the walls in view.</summary>
+            public const string MountedHeading = "Hung on the walls, and nothing else: ";
+
+            /// <summary>A thing hung on a wall: a painting, a mirror, a wall TV, an upper cabinet, a shelf or a hood.</summary>
+            /// <param name="name">It in words, with its color (see <see cref="Framed"/> for pictures).</param>
+            /// <param name="where">Which wall, and where along it.</param>
+            /// <param name="width">Its width.</param>
+            /// <param name="height">Its height.</param>
+            /// <param name="bottom">Its bottom's height above the floor.</param>
+            /// <param name="depth">How far it sticks out from the wall.</param>
+            public static string Mounted(string name, string where, string width, string height, string bottom, string depth)
+            {
+                return $"{name}, {where}, {width} cm wide and {height} cm high, its bottom {bottom} cm above the floor, sticking out {depth} cm";
+            }
+
+            /// <summary>Where a window, door or hung thing is on a wall facing the camera, in front of the far wall (rooms that aren't rectangles).</summary>
+            /// <param name="fromFar">The wall's distance in front of the far wall.</param>
+            /// <param name="fromLeft">Its middle's distance from the left wall.</param>
+            public static string OnStepWall(string fromFar, string fromLeft)
+            {
+                return $"on the wall facing the camera {fromFar} cm in front of the far wall, its middle {fromLeft} cm from the left wall";
+            }
+
+            /// <summary>Where a window, door or hung thing is on a side wall of a room that isn't a rectangle.</summary>
+            /// <param name="left">Whether the wall is on the photo's left.</param>
+            /// <param name="wallFromLeft">The wall's distance from the left wall.</param>
+            /// <param name="fromFar">Its middle's distance from the far wall.</param>
+            public static string OnSideWallAt(bool left, string wallFromLeft, string fromFar)
+            {
+                return $"on the {(left ? "left-hand" : "right-hand")} wall {wallFromLeft} cm from the left wall, its middle {fromFar} cm from the far wall";
+            }
+
+            /// <summary>The walls of a room that isn't a rectangle, besides the far wall, as the photo sees them.</summary>
+            /// <param name="walls">Each wall in words.</param>
+            public static string Shape(string walls)
+            {
+                return $"The room is not a plain rectangle; besides the far wall, the walls in view are: {walls}.";
+            }
+
+            /// <summary>A wall facing the camera in front of the far wall.</summary>
+            /// <param name="fromFar">Its distance in front of the far wall.</param>
+            /// <param name="from">Where it starts, from the left wall.</param>
+            /// <param name="to">Where it ends, from the left wall.</param>
+            public static string StepWall(string fromFar, string from, string to)
+            {
+                return $"a wall facing the camera {fromFar} cm in front of the far wall, from {from} to {to} cm from the left wall";
+            }
+
+            /// <summary>A side wall of a room that isn't a rectangle.</summary>
+            /// <param name="left">Whether it faces right (it is on the photo's left side of the floor).</param>
+            /// <param name="fromLeft">Its distance from the left wall.</param>
+            /// <param name="from">Where it starts, from the far wall.</param>
+            /// <param name="to">Where it ends, from the far wall.</param>
+            public static string SideWall(bool left, string fromLeft, string from, string to)
+            {
+                return $"a {(left ? "left-hand" : "right-hand")} wall {fromLeft} cm from the left wall, from {from} to {to} cm from the far wall";
+            }
+
+            /// <summary>The words for a thing a wall of the room partly hides from the camera.</summary>
+            public const string PartlyHidden = ", partly hidden behind a corner of the room";
+
+            /// <summary>A floor material in words.</summary>
+            /// <param name="type">The floor type.</param>
+            public static string FloorWords(FloorType type)
+            {
+                return type switch
+                {
+                    FloorType.Parquet => "herringbone wooden parquet",
+                    FloorType.Tiles => "ceramic floor tiles",
+                    FloorType.Stone => "large stone slabs",
+                    FloorType.Concrete => "polished concrete",
+                    FloorType.Carpet => "wall-to-wall carpet",
+                    FloorType.Vinyl => "vinyl plank flooring",
+                    _ => "wooden plank flooring",
+                };
+            }
+        }
     }
 
     /// <summary>Limits for the parts the AI finds on an object.</summary>
@@ -251,8 +761,35 @@ public static class Constants
             return $"Look for parts on the whole {parent} instead.";
         }
 
+        /// <summary>Starting the analysis of a room that isn't waiting for it.</summary>
+        public const string NotWaiting = "This room's analysis has already started.";
+
         /// <summary>Merging an object that isn't a part.</summary>
         public const string NotAPart = "Only a part can be merged back into its object.";
+
+        /// <summary>A description of an object that is empty or too long.</summary>
+        public static readonly string ObjectDescription = $"Describe the object in up to {Builder.MaxDescriptionLength} characters.";
+
+        /// <summary>Extra instructions for the photo that are too long.</summary>
+        public static readonly string PhotoInstructions = $"Keep the extra instructions for the photo to {Builder.MaxInstructionsLength} characters.";
+
+        /// <summary>Object boxes that aren't on the plan's objects or inside the picture.</summary>
+        public const string PhotoBoxes = "Each object box must name one of the room's objects and lie inside the picture.";
+
+        /// <summary>A photo asked for from a wall the room doesn't have, or a camera spot that isn't one of the choices.</summary>
+        public const string PhotoShot = "Choose one of the room's walls and where the photo is taken from.";
+
+        /// <summary>A photo seed below zero.</summary>
+        public const string PhotoSeed = "A photo's seed is a whole number from 0 up.";
+
+        /// <summary>A photo style that isn't one of the choices.</summary>
+        public const string UnknownPhotoStyle = "Choose one of the styles.";
+
+        /// <summary>A 3D view for a photo that is missing or too large.</summary>
+        public const string GuideImage = "The 3D view of the room didn't arrive. Try again.";
+
+        /// <summary>A photo asked for a built room without objects.</summary>
+        public const string EmptyPlan = "Put at least one object in the room first.";
 
         /// <summary>A room that has used up its object numbers.</summary>
         public const string TooManyObjects = "This room can't hold any more objects.";

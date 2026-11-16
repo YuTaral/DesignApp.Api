@@ -79,6 +79,7 @@ api.MapDesignEndpoints();
 api.MapRoomEndpoints();
 api.MapLibraryEndpoints();
 api.MapPaletteEndpoints();
+api.MapPlanEndpoints();
 if (app.Environment.IsDevelopment())
     api.MapDevEndpoints();
 app.MapHub<RoomHub>(DesignApp.Api.Constants.Hub.Path);

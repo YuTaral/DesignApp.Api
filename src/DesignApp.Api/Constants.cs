@@ -69,6 +69,9 @@ public static class Constants
         /// <summary>Removing objects from a room's photo, one or several together.</summary>
         public const string RoomRemovals = "/{id:guid}/removals";
 
+        /// <summary>Starting the analysis of a room that waits for it.</summary>
+        public const string RoomAnalysis = "/{id:guid}/analysis";
+
         /// <summary>Merging a part back into the object it is a part of.</summary>
         public const string RoomMerges = "/{id:guid}/merges";
 
@@ -80,6 +83,18 @@ public static class Constants
 
         /// <summary>The paint palettes, under <see cref="Api"/>.</summary>
         public const string Palettes = "/palettes";
+
+        /// <summary>The room builder's common objects of a room type, under <see cref="Api"/>.</summary>
+        public const string BuilderCatalog = "/builder/catalog/{roomType}";
+
+        /// <summary>The rooms users build, under <see cref="Api"/>.</summary>
+        public const string Plans = "/plans";
+
+        /// <summary>Turning a description into an object for a built room.</summary>
+        public const string PlanDescribe = "/{id:guid}/describe";
+
+        /// <summary>Making a photo of a built room.</summary>
+        public const string PlanGenerate = "/{id:guid}/generate";
 
         /// <summary>The built-in library of ready-made designs.</summary>
         public const string Library = "/library";
@@ -147,6 +162,14 @@ public static class Constants
         public static string RoomUrl(Guid id)
         {
             return $"{Api}{Rooms}/{id}";
+        }
+
+        /// <summary>The URL of a built room.</summary>
+        /// <param name="id">The plan's id.</param>
+        /// <returns>The path of the plan.</returns>
+        public static string PlanUrl(Guid id)
+        {
+            return $"{Api}{Plans}/{id}";
         }
 
         /// <summary>The URL of a room's photo.</summary>
@@ -298,6 +321,12 @@ public static class Constants
         /// <summary>The cache header of library photos and palettes: the same for everyone, and changed only by a new release.</summary>
         public const string LibraryCache = "public, max-age=86400";
 
+        /// <summary>
+        /// The cache header of the room builder's catalog: checked with the server every time (it is small), so a new
+        /// release's objects show at once instead of a day later.
+        /// </summary>
+        public const string CatalogCache = "no-cache";
+
         /// <summary>The content type of a library export.</summary>
         public const string Zip = "application/zip";
 
@@ -332,6 +361,9 @@ public static class Constants
         /// <summary>The palette endpoint's tag.</summary>
         public const string PalettesTag = "Palettes";
 
+        /// <summary>The room builder endpoints' tag.</summary>
+        public const string PlansTag = "Room builder";
+
         /// <summary>The library endpoints' tag.</summary>
         public const string LibraryTag = "Library";
 
@@ -344,6 +376,12 @@ public static class Constants
     {
         /// <summary>A request the domain or the framework rejected.</summary>
         public const string InvalidRequest = "Invalid request";
+
+        /// <summary>An object couldn't be made from a description.</summary>
+        public const string DescribeFailed = "Can't make the object";
+
+        /// <summary>A photo of a built room couldn't be made.</summary>
+        public const string GenerateFailed = "Can't make the photo";
 
         /// <summary>Sign-up failed.</summary>
         public const string SignUpFailed = "Couldn't sign up";
@@ -377,6 +415,9 @@ public static class Constants
 
         /// <summary>An object couldn't be removed from the photo.</summary>
         public const string RemovalFailed = "Can't remove the object";
+
+        /// <summary>A room's analysis couldn't be started.</summary>
+        public const string AnalysisFailed = "Can't start the analysis";
 
         /// <summary>A part couldn't be merged back into its object.</summary>
         public const string MergeFailed = "Can't merge the part";

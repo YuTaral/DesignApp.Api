@@ -89,6 +89,18 @@ public class RoomTests
     }
 
     [Fact]
+    public void A_waiting_room_is_analyzed_only_once_the_user_starts_it()
+    {
+        var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now, waitForUser: true);
+
+        Assert.Equal(RoomStatus.Waiting, room.Status);
+        Assert.Throws<DomainException>(room.StartAnalysis);
+        room.QueueAnalysis();
+        Assert.Equal(RoomStatus.Uploaded, room.Status);
+        Assert.Throws<DomainException>(room.QueueAnalysis);
+    }
+
+    [Fact]
     public void Analysis_stops_after_the_maximum_attempts()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);

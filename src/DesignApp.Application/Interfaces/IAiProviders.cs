@@ -23,4 +23,14 @@ public interface IAiProviders
     /// <summary>Removes objects from photos with the given AI: the free fake or the real eraser.</summary>
     /// <param name="mode">The room's AI mode.</param>
     IObjectRemovalProvider Removal(AiMode mode);
+
+    /// <summary>The room builder's language model of a mode: the fake or Claude Haiku.</summary>
+    /// <param name="mode">The plan's AI mode.</param>
+    /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
+    IRoomBuilderAi Builder(AiMode mode);
+
+    /// <summary>The image model that turns a built room's 3D view into a photo: the fake or one on fal.ai.</summary>
+    /// <param name="mode">The plan's AI mode.</param>
+    /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
+    IImageGenerator Images(AiMode mode);
 }

@@ -33,6 +33,8 @@ using static DesignApp.Domain.Constants;
 
 if (args.Length > 0 && args[0] == "generate")
     return await AiLab.Generator.RunAsync(args);
+if (args.Length > 0 && args[0] == "compare-images")
+    return await AiLab.ImageComparer.RunAsync(args);
 
 if (args.Length < 2 || args[0] is not ("record" or "replay"))
 {

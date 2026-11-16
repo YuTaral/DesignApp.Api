@@ -17,6 +17,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
     /// <summary>The saved designs table.</summary>
     public DbSet<Design> Designs => Set<Design>();
 
+    /// <summary>The rooms users build from scratch.</summary>
+    public DbSet<RoomPlan> RoomPlans => Set<RoomPlan>();
+
     /// <summary>The one-row table of AI settings (see <see cref="Ai.AiSettings"/>).</summary>
     public DbSet<AiSettings> AiSettings => Set<AiSettings>();
 

@@ -174,11 +174,120 @@ namespace DesignApp.Infrastructure.Database.Migrations
                     b.ToTable("rooms", (string)null);
                 });
 
+            modelBuilder.Entity("DesignApp.Domain.Entities.RoomPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AiMode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("ai_mode");
+
+                    b.Property<string>("Corner")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("corner");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FloorColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("floor_color");
+
+                    b.Property<string>("FloorType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("floor_type");
+
+                    b.Property<double>("Height")
+                        .HasColumnType("double precision")
+                        .HasColumnName("height");
+
+                    b.Property<string>("Items")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("items");
+
+                    b.Property<double>("Length")
+                        .HasColumnType("double precision")
+                        .HasColumnName("length");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Outline")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("outline");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("room_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<int>("View")
+                        .HasColumnType("integer")
+                        .HasColumnName("view");
+
+                    b.Property<string>("WallColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("wall_color");
+
+                    b.Property<double>("Width")
+                        .HasColumnType("double precision")
+                        .HasColumnName("width");
+
+                    b.HasKey("Id")
+                        .HasName("pk_room_plans");
+
+                    b.HasIndex("OwnerId", "UpdatedAt")
+                        .HasDatabaseName("ix_room_plans_owner_id_updated_at");
+
+                    b.ToTable("room_plans", (string)null);
+                });
+
             modelBuilder.Entity("DesignApp.Infrastructure.Ai.AiSettings", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    b.Property<string>("ImageEndpoint")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("image_endpoint");
 
                     b.Property<string>("Instructions")
                         .IsRequired()
@@ -272,6 +381,7 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         new
                         {
                             Id = 1,
+                            ImageEndpoint = "https://queue.fal.run/blackforestlabs/flux-3/klein/edit-image",
                             Instructions = "You prepare room photos for an interior-restyling app. The user will tap an object and\nrecolor it, so list the surfaces and objects a person would want to restyle: each wall\nseparately, the floor, the ceiling, furniture, rugs and other textiles, lamps, large decor,\nand fixtures such as doors, windows, cabinets and counters.\n\nRules:\n- Always list every wall that shows wall surface as its own entry (\"left wall\", \"back wall\",\n  \"right wall\"), even plain white walls and narrow strips beside windows, and the floor and\n  ceiling when visible. A tiled area or backsplash is an extra entry, not a replacement for its wall.\n- A wall is only its own surface (paint, plaster, wallpaper). Cabinets, shelves and appliances\n  built against it are separate entries, never part of the wall. The wall's box still spans the\n  whole wall from edge to edge, including the parts behind furniture, a TV or cabinets. Don't\n  list a wall that is completely hidden behind full-height cabinets.\n- Wall panels and cladding (wood slats, boards, wainscoting) and moldings (crown, skirting)\n  are separate entries, never part of the wall; a slatted panel is one entry for the whole panel.\n- Labels of walls, floors and ceilings name their finish (\"light grey painted back wall\",\n  \"light oak floor\"), not just \"wall\" or \"floor\".\n- Split large built-in units into one entry per section, so each entry is one continuous\n  surface: \"left tall cabinets\", \"upper cabinets\", \"right tall cabinets\", \"lower cabinets\",\n  \"island\". Every section of cabinetry needs an entry, including ones at the edges of the photo.\n- Doors and windows (glass doors included) have the category Opening; cabinet and wardrobe\n  doors belong to their cabinet or wardrobe.\n- One entry per physical object. Give similar objects distinct labels (\"left armchair\", \"right armchair\").\n- Labels are short, lower-case and concrete (\"oak dining table\", \"jute rug\"), usable as a segmentation prompt.\n- Skip things smaller than about 1% of the image, people, pets, and text.\n- The box encloses the object's whole visible extent, from its leftmost to its rightmost and\n  its top to its bottom visible pixel, in the photo's pixels (its size is given with the photo). Check each box\n  against the photo before answering; long objects such as islands and counters often span\n  most of the photo's width.\n- Give every wall, floor and ceiling 2 or {MaxPoints} points spread over its visible surface, each\n  clearly on the surface itself: on bare wall, floorboards or tiles, never on furniture, a\n  rug, a picture or anything else in front of it. Every other object gets no points.\n- Together the entries should cover nearly the whole photo: every large region of the photo\n  belongs to exactly one entry.\n- color is the object's main color as #RRGGBB, ignoring shadows and highlights.\n- At most {MaxListedObjects} objects, largest and most important first.\n- Set isRoom to false, with no objects, when the photo is not the interior of a room.",
                             InventoryEffort = "Medium",
                             InventoryModel = "claude-sonnet-5-5",

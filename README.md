@@ -6,7 +6,7 @@ The React frontend lives in the separate `DesignApp.Web` repository.
 
 ## How the AI pipeline works
 
-An upload returns at once; a background worker then analyzes the room and pushes each step to the browser over SignalR (`Uploaded → Analyzing → Segmenting → Ready`, or `Failed` with a reason the user can read).
+An upload returns at once; a background worker then analyzes the room and pushes each step to the browser over SignalR (`Uploaded → Analyzing → Segmenting → Ready`, or `Failed` with a reason the user can read). A photo made by the room builder starts as `Waiting` instead: its analysis costs money with the real AI, so it runs only once the user asks for it (`POST /api/rooms/{id}/analysis`).
 
 1. **Claude Sonnet 5.5 (vision)** lists the objects in the photo as structured JSON (a schema the answer must match): label, category, main color and a rough bounding box. It also says when a photo isn't of a room.
 2. **SAM 3 (Segment Anything 3) on fal.ai** outlines every object in one request: all of Claude's boxes at once, one mask per box. A box alone outlines a large surface in patches, so Claude also puts 2-3 points on each wall, floor and ceiling, and they go in the same request. A surface without points, or any object whose mask doesn't fit its box, gets a request of its own with its label as the text prompt.
@@ -106,6 +106,12 @@ The full list, with request and response shapes, is in the Scalar docs at `/scal
 | `POST` | `/api/rooms/{id}/outline` | Fix an object's outline with a brush stroke |
 | `POST` | `/api/rooms/{id}/objects` | Add an object marked by hand, or a part of one (`parentIndex`: a chair's seat, drawn on the chair) |
 | `POST` | `/api/rooms/{id}/parts` | Ask the room's AI for an object's parts (a chair's seat, backrest and legs); paid with the real AI |
+| `GET` | `/api/builder/catalog/{roomType}` | The room builder's windows and doors and things to hang on walls (every room: a painting, a mirror, a wall shelf; and the room type's own, such as upper cabinets and a cooker hood in a kitchen) and the 10 most common objects of a room type, each in three variations (sizes and shapes: L-shaped and P-shaped corner sofas, round tables and rugs...), with usual sizes (cm), colors and a window's or hung thing's height above the floor |
+| `POST` | `/api/plans` | Start a room to build: type, walls (m), colors and floor type (`?ai=` Fake or Real). Unless `furnish` is false it starts with a suggested layout sized for the room: a door, windows with glass of about a tenth of the floor area, and the room type's main furniture with the usual clearances |
+| `GET`, `PUT` | `/api/plans/{id}` | A built room: read it, or save its name, walls, colors, floor type, the number of the wall its photo looks at (`view`) and where the camera stands to look at it (`corner`: `None` straight across from its middle, or the near `Left` or `Right` corner, looking diagonally across the room), and objects (positions and sizes in cm; a window, door or hung thing has a `wall` number, its place along it and its `elevation`, and a hung thing's `depth` is how far it sticks out). Its `outline` is its walls' corners in cm, clockwise from the top-left one at 0, 0, with walls that turn at right angles (L, T and U rooms, alcoves); walls are numbered from that corner, so a rectangle's are 0 back, 1 right, 2 front, 3 left. A save without an `outline` makes a `width` × `length` rectangle |
+| `POST` | `/api/plans/{id}/describe` | Turn a description into an object to place (Claude Haiku with the real AI) |
+| `POST` | `/api/plans/{id}/generate` | Turn the room's 3D view (multipart `guide`) into a photo and make it a new room: the prompt is written from the plan with every size and place as the photo sees them, and forbids anything else; optional `style` (Boho, Scandinavian…) and `instructions` fields add the user's choice; `boxes` (a JSON list of each object's box in the 3D view, as the app sends it) keeps the image model to the plan's layout; `seed` makes the photo repeatable, to compare changes fairly; `view` and `corner` make it of another view than the room's own (the app makes photos of several views at once this way; the room keeps its own view); FLUX 3 Image Klein on fal.ai draws it, with each object's decorations |
+| `POST` | `/api/rooms/{id}/analysis` | Start the analysis of a room that waits for it (a photo made by the room builder) |
 | `POST` | `/api/rooms/{id}/merges` | Merge a part back into the object it is a part of |
 | `GET` | `/api/palettes` | The paint palettes (RAL Classic) with each paint's code, name and on-screen color |
 | `GET` | `/api/library` | The built-in sample houses with their rooms |
@@ -202,6 +208,7 @@ How the real AI is tuned lives in the database, in the one-row `ai_settings` tab
 | `min_fit` | 0.5 | How well (0 to 1) a mask must fit Claude's box before asking again. |
 | `min_share_inside_box` | 0.8 | How much of a mask (0 to 1) must lie inside the box to count as a piece. |
 | `min_fill` | 0.2 | How much of Claude's box (0 to 1) a mask must fill before its fit counts in full, so a mask that only frames or edges the object gets its own request. |
+| `image_endpoint` | `https://queue.fal.run/blackforestlabs/flux-3/klein/edit-image` | The room builder's image model, which turns the 3D view into a photo with the objects' decorations. FLUX 3 Image Klein is $0.009 a photo, decorations included, and kept the camera, sizes and colors best in a November 2026 test against FLUX Kontext dev, Seedream 5.5, MAI-Image-2.5, Muse Image and H3-Image. Another model must take the same request (`image_urls`, `image_size`). |
 
 Until there is an admin app, change it in pgAdmin (the Aspire dashboard shows the database's connection details). For example:
 

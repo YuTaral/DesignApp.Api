@@ -65,6 +65,9 @@ public sealed class AiSettings
     /// <summary>How many pixels fal's own eraser grows the object's mask by; other erasers ignore it.</summary>
     public int RemovalMaskExpansion { get; set; } = Constants.Ai.Defaults.RemovalMaskExpansion;
 
+    /// <summary>The room builder's image model (its queue address on fal.ai) that turns a 3D view into a photo.</summary>
+    public string ImageEndpoint { get; set; } = Constants.Ai.Defaults.ImageEndpoint;
+
     /// <summary>How many pixels the mask of an object marked by hand is grown before any eraser gets it.</summary>
     public int RemovalHandMaskGrowth { get; set; } = Constants.Ai.Defaults.RemovalHandMaskGrowth;
 
@@ -107,6 +110,8 @@ public sealed class AiSettings
         Check(MinFill is >= 0 and <= 1, nameof(MinFill), Constants.Ai.Rules.Fraction);
         Check(Uri.TryCreate(RemovalEndpoint, UriKind.Absolute, out var removal) && removal.Scheme == Uri.UriSchemeHttps,
             nameof(RemovalEndpoint), Constants.Ai.Rules.HttpsUrl);
+        Check(Uri.TryCreate(ImageEndpoint, UriKind.Absolute, out var image) && image.Scheme == Uri.UriSchemeHttps,
+            nameof(ImageEndpoint), Constants.Ai.Rules.HttpsUrl);
         Check(Enum.IsDefined(RemovalQuality), nameof(RemovalQuality), Constants.Ai.Rules.RemovalQuality);
         Check(RemovalMaskExpansion is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalMaskExpansion), Constants.Ai.Rules.MaskExpansion);
         Check(RemovalHandMaskGrowth is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalHandMaskGrowth), Constants.Ai.Rules.MaskExpansion);

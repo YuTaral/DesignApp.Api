@@ -43,6 +43,8 @@
   <ItemGroup>
     <!-- The paint palettes the editor offers, one file each (palettes/<id>.json). -->
     <EmbeddedResource Include="Palettes\*.json" LogicalName="DesignApp.Palettes/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Builder\catalog.json" LogicalName="DesignApp.Builder/catalog.json" />
+    <UpToDateCheckInput Include="Builder\catalog.json" />
     <UpToDateCheckInput Include="Palettes\*.json" />
   </ItemGroup>
 

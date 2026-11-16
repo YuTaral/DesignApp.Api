@@ -1,0 +1,445 @@
+{
+  "everyRoom": [
+    { "key": "window", "shape": "Window", "color": "#F4F1EA", "variants": [
+      {"key": "standard", "name": "Standard", "label": "window", "width": 120, "depth": 10, "height": 140, "elevation": 90},
+      {"key": "small", "name": "Small", "label": "small window", "width": 80, "depth": 10, "height": 100, "elevation": 110},
+      {"key": "tall", "name": "Tall", "label": "tall window", "width": 100, "depth": 10, "height": 180, "elevation": 60}
+    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blind", "plants on the sill"] },
+    { "key": "wide-window", "shape": "Window", "color": "#F4F1EA", "variants": [
+      {"key": "standard", "name": "Wide", "label": "wide window", "width": 200, "depth": 10, "height": 150, "elevation": 80},
+      {"key": "panoramic", "name": "Panoramic", "label": "panoramic window", "width": 300, "depth": 10, "height": 160, "elevation": 70},
+      {"key": "ribbon", "name": "Ribbon", "label": "ribbon window", "width": 240, "depth": 10, "height": 60, "elevation": 150}
+    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blinds", "plants on the sill"] },
+    { "key": "french-window", "shape": "Window", "color": "#F4F1EA", "variants": [
+      {"key": "standard", "name": "Two-leaf", "label": "French window", "width": 140, "depth": 10, "height": 220, "elevation": 0},
+      {"key": "single", "name": "Single", "label": "single French window", "width": 80, "depth": 10, "height": 220, "elevation": 0},
+      {"key": "sliding", "name": "Sliding", "label": "sliding glass door", "width": 240, "depth": 10, "height": 220, "elevation": 0}
+    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "vertical blinds", "roller blinds"] },
+    { "key": "door", "shape": "Door", "color": "#F4F1EA", "variants": [
+      {"key": "standard", "name": "Standard", "label": "door", "width": 90, "depth": 5, "height": 210, "elevation": 0},
+      {"key": "narrow", "name": "Narrow", "label": "narrow door", "width": 80, "depth": 5, "height": 200, "elevation": 0},
+      {"key": "wide", "name": "Wide", "label": "wide door", "width": 100, "depth": 5, "height": 210, "elevation": 0}
+    ], "decorations": ["wreath", "door mat", "coat hooks", "nameplate", "full-length mirror"] },
+    { "key": "double-door", "shape": "Door", "color": "#B8864B", "variants": [
+      {"key": "standard", "name": "Standard", "label": "double door", "width": 150, "depth": 5, "height": 210, "elevation": 0},
+      {"key": "wide", "name": "Wide", "label": "wide double door", "width": 180, "depth": 5, "height": 220, "elevation": 0},
+      {"key": "tall", "name": "Tall", "label": "tall double door", "width": 150, "depth": 5, "height": 240, "elevation": 0}
+    ], "decorations": ["wreath", "door mat", "garland", "nameplate", "potted plants on each side"] },
+    { "key": "painting", "shape": "Picture", "color": "#2F2C2A", "variants": [
+      {"key": "standard", "name": "Standard", "label": "painting", "width": 80, "depth": 3, "height": 60, "elevation": 130},
+      {"key": "large", "name": "Large", "label": "large painting", "width": 120, "depth": 3, "height": 80, "elevation": 120},
+      {"key": "tall", "name": "Tall", "label": "tall painting", "width": 50, "depth": 3, "height": 90, "elevation": 120}
+    ], "decorations": ["abstract art", "landscape", "botanical print", "black and white photo", "gallery wall"] },
+    { "key": "mirror", "shape": "Picture", "color": "#C9A27E", "variants": [
+      {"key": "standard", "name": "Standard", "label": "mirror", "width": 60, "depth": 3, "height": 90, "elevation": 110},
+      {"key": "round", "name": "Round", "label": "round mirror", "width": 70, "depth": 3, "height": 70, "elevation": 130},
+      {"key": "full-length", "name": "Full length", "label": "full-length mirror", "width": 50, "depth": 3, "height": 170, "elevation": 20}
+    ], "decorations": ["brass frame", "wooden frame", "black frame", "frameless", "fairy lights around it"] },
+    { "key": "wall-shelf", "shape": "WallBox", "color": "#B8864B", "variants": [
+      {"key": "standard", "name": "Standard", "label": "wall shelf", "width": 80, "depth": 25, "height": 4, "elevation": 150},
+      {"key": "long", "name": "Long", "label": "long wall shelf", "width": 140, "depth": 25, "height": 4, "elevation": 150},
+      {"key": "box", "name": "Box", "label": "box shelf", "width": 60, "depth": 25, "height": 30, "elevation": 140}
+    ], "decorations": ["books", "plants", "framed photos", "candles", "vases"] }
+  ],
+  "rooms": {
+    "LivingRoom": [
+      { "key": "sofa", "shape": "Sofa", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Three-seat", "label": "three-seat sofa", "width": 220, "depth": 95, "height": 85},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped corner sofa", "width": 270, "depth": 170, "height": 85, "form": "LShaped"},
+        {"key": "p-shaped", "name": "P-shaped", "label": "P-shaped corner sofa", "width": 300, "depth": 240, "height": 85, "form": "PShaped"}
+      ], "decorations": ["cushions", "throw blanket", "lumbar pillow", "faux fur throw", "open book"] },
+      { "key": "armchair", "shape": "Sofa", "color": "#A8B89A", "variants": [
+        {"key": "standard", "name": "Classic", "label": "armchair", "width": 85, "depth": 85, "height": 85},
+        {"key": "wingback", "name": "Wingback", "label": "wingback armchair", "width": 80, "depth": 90, "height": 110},
+        {"key": "club", "name": "Club", "label": "club chair", "width": 90, "depth": 90, "height": 75}
+      ], "decorations": ["cushion", "throw blanket", "sheepskin", "lumbar pillow", "open book"] },
+      { "key": "coffee-table", "shape": "Table", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "coffee table", "width": 110, "depth": 60, "height": 42},
+        {"key": "round", "name": "Round", "label": "round coffee table", "width": 90, "depth": 90, "height": 40, "form": "Round"},
+        {"key": "oval", "name": "Oval", "label": "oval coffee table", "width": 120, "depth": 70, "height": 40, "form": "Round"}
+      ], "decorations": ["vase with flowers", "stack of books", "candles", "decorative tray", "small plant"] },
+      { "key": "tv-stand", "shape": "Box", "color": "#3A3633", "variants": [
+        {"key": "standard", "name": "Low", "label": "TV stand", "width": 160, "depth": 40, "height": 50},
+        {"key": "wide", "name": "Wide", "label": "wide TV stand", "width": 220, "depth": 45, "height": 45},
+        {"key": "media", "name": "Media unit", "label": "TV media unit", "width": 240, "depth": 40, "height": 180}
+      ], "decorations": ["TV", "soundbar", "small plant", "picture frames", "books"] },
+      { "key": "rug", "shape": "Rug", "color": "#D8C3A5", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "rug", "width": 200, "depth": 300, "height": 1},
+        {"key": "round", "name": "Round", "label": "round rug", "width": 240, "depth": 240, "height": 1, "form": "Round"},
+        {"key": "large", "name": "Large", "label": "large rug", "width": 250, "depth": 350, "height": 1}
+      ] },
+      { "key": "bookshelf", "shape": "Box", "color": "#E8DCC8", "variants": [
+        {"key": "standard", "name": "Tall", "label": "bookshelf", "width": 80, "depth": 35, "height": 190},
+        {"key": "wide", "name": "Wide", "label": "wide bookshelf", "width": 160, "depth": 35, "height": 190},
+        {"key": "low", "name": "Low", "label": "low bookshelf", "width": 120, "depth": 35, "height": 90}
+      ], "decorations": ["books", "small plants", "vases", "picture frames", "storage baskets"] },
+      { "key": "side-table", "shape": "Cylinder", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Round", "label": "side table", "width": 45, "depth": 45, "height": 55},
+        {"key": "square", "name": "Square", "label": "square side table", "width": 45, "depth": 45, "height": 55, "shape": "Box"},
+        {"key": "tall", "name": "Tall", "label": "tall side table", "width": 35, "depth": 35, "height": 65}
+      ], "decorations": ["table lamp", "vase with flowers", "books", "candle", "small plant"] },
+      { "key": "floor-lamp", "shape": "Lamp", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Standard", "label": "floor lamp", "width": 40, "depth": 40, "height": 160},
+        {"key": "arc", "name": "Arc", "label": "arc floor lamp", "width": 120, "depth": 40, "height": 200},
+        {"key": "tripod", "name": "Tripod", "label": "tripod floor lamp", "width": 60, "depth": 60, "height": 150}
+      ] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Medium", "label": "potted plant", "width": 50, "depth": 50, "height": 120},
+        {"key": "small", "name": "Small", "label": "small potted plant", "width": 30, "depth": 30, "height": 50},
+        {"key": "tall", "name": "Tall", "label": "tall potted plant", "width": 70, "depth": 70, "height": 180}
+      ] },
+      { "key": "sideboard", "shape": "Box", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "sideboard", "width": 180, "depth": 45, "height": 80},
+        {"key": "short", "name": "Short", "label": "short sideboard", "width": 120, "depth": 45, "height": 80},
+        {"key": "highboard", "name": "Highboard", "label": "highboard", "width": 120, "depth": 45, "height": 130}
+      ], "decorations": ["table lamp", "vase with flowers", "picture frames", "fruit bowl", "candles"] },
+      { "key": "wall-tv", "shape": "Picture", "color": "#2A2A2A", "variants": [
+        {"key": "standard", "name": "55 inch", "label": "wall TV", "width": 123, "depth": 5, "height": 71, "elevation": 100},
+        {"key": "large", "name": "65 inch", "label": "large wall TV", "width": 145, "depth": 5, "height": 83, "elevation": 95},
+        {"key": "small", "name": "43 inch", "label": "small wall TV", "width": 98, "depth": 5, "height": 57, "elevation": 110}
+      ], "decorations": ["soundbar below", "backlight", "artwork on screen", "hidden cables", "floating shelf below"] }
+    ],
+    "Bedroom": [
+      { "key": "double-bed", "shape": "Bed", "color": "#E8DCC8", "variants": [
+        {"key": "standard", "name": "Double", "label": "double bed", "width": 160, "depth": 210, "height": 100},
+        {"key": "king", "name": "King-size", "label": "king-size bed", "width": 180, "depth": 210, "height": 100},
+        {"key": "single", "name": "Single", "label": "single bed", "width": 90, "depth": 200, "height": 90}
+      ], "decorations": ["decorative pillows", "throw blanket", "bedspread", "cushions", "breakfast tray"] },
+      { "key": "wardrobe", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Two-door", "label": "wardrobe", "width": 150, "depth": 60, "height": 220},
+        {"key": "three-door", "name": "Three-door", "label": "three-door wardrobe", "width": 200, "depth": 60, "height": 220},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped corner wardrobe", "width": 180, "depth": 180, "height": 220, "form": "LShaped"}
+      ], "decorations": ["storage boxes on top", "plants on top", "baskets on top", "hat boxes", "mirror on the door"] },
+      { "key": "nightstand", "shape": "Box", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Standard", "label": "nightstand", "width": 45, "depth": 40, "height": 55},
+        {"key": "round", "name": "Round", "label": "round nightstand", "width": 45, "depth": 45, "height": 55, "shape": "Cylinder"},
+        {"key": "wide", "name": "Wide", "label": "wide nightstand", "width": 60, "depth": 40, "height": 55}
+      ], "decorations": ["table lamp", "alarm clock", "books", "small plant", "glass of water"] },
+      { "key": "dresser", "shape": "Box", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "chest of drawers", "width": 100, "depth": 45, "height": 85},
+        {"key": "tall", "name": "Tall", "label": "tall chest of drawers", "width": 80, "depth": 45, "height": 120},
+        {"key": "wide", "name": "Wide", "label": "wide dresser", "width": 160, "depth": 45, "height": 80}
+      ], "decorations": ["mirror", "jewelry box", "vase with flowers", "perfume bottles", "picture frames"] },
+      { "key": "rug", "shape": "Rug", "color": "#D8C3A5", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "rug", "width": 160, "depth": 230, "height": 1},
+        {"key": "round", "name": "Round", "label": "round rug", "width": 200, "depth": 200, "height": 1, "form": "Round"},
+        {"key": "runner", "name": "Runner", "label": "runner rug", "width": 80, "depth": 250, "height": 1}
+      ] },
+      { "key": "desk", "shape": "Table", "color": "#E8DCC8", "variants": [
+        {"key": "standard", "name": "Standard", "label": "desk", "width": 120, "depth": 60, "height": 75},
+        {"key": "small", "name": "Small", "label": "small desk", "width": 90, "depth": 50, "height": 75},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped corner desk", "width": 140, "depth": 120, "height": 75, "form": "LShaped"}
+      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
+      { "key": "chair", "shape": "Chair", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Standard", "label": "chair", "width": 45, "depth": 50, "height": 85},
+        {"key": "upholstered", "name": "Upholstered", "label": "upholstered chair", "width": 50, "depth": 55, "height": 90},
+        {"key": "swivel", "name": "Swivel", "label": "swivel chair", "width": 60, "depth": 60, "height": 100}
+      ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
+      { "key": "armchair", "shape": "Sofa", "color": "#9DB4C0", "variants": [
+        {"key": "standard", "name": "Reading", "label": "reading armchair", "width": 80, "depth": 80, "height": 90},
+        {"key": "wingback", "name": "Wingback", "label": "wingback armchair", "width": 80, "depth": 90, "height": 110},
+        {"key": "chaise", "name": "Chaise longue", "label": "chaise longue", "width": 70, "depth": 150, "height": 85}
+      ], "decorations": ["cushion", "throw blanket", "sheepskin", "lumbar pillow", "open book"] },
+      { "key": "floor-lamp", "shape": "Lamp", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Standard", "label": "floor lamp", "width": 40, "depth": 40, "height": 155},
+        {"key": "arc", "name": "Arc", "label": "arc floor lamp", "width": 120, "depth": 40, "height": 200},
+        {"key": "tripod", "name": "Tripod", "label": "tripod floor lamp", "width": 60, "depth": 60, "height": 150}
+      ] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Medium", "label": "potted plant", "width": 45, "depth": 45, "height": 100},
+        {"key": "small", "name": "Small", "label": "small potted plant", "width": 30, "depth": 30, "height": 50},
+        {"key": "tall", "name": "Tall", "label": "tall potted plant", "width": 70, "depth": 70, "height": 180}
+      ] },
+      { "key": "wall-tv", "shape": "Picture", "color": "#2A2A2A", "variants": [
+        {"key": "standard", "name": "43 inch", "label": "wall TV", "width": 98, "depth": 5, "height": 57, "elevation": 110},
+        {"key": "large", "name": "55 inch", "label": "large wall TV", "width": 123, "depth": 5, "height": 71, "elevation": 100},
+        {"key": "small", "name": "32 inch", "label": "small wall TV", "width": 72, "depth": 5, "height": 43, "elevation": 120}
+      ], "decorations": ["backlight", "artwork on screen", "hidden cables", "floating shelf below", "plants beside it"] }
+    ],
+    "Kitchen": [
+      { "key": "base-cabinets", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Straight", "label": "base cabinets", "width": 240, "depth": 60, "height": 90},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped base cabinets", "width": 240, "depth": 180, "height": 90, "form": "LShaped"},
+        {"key": "short", "name": "Short", "label": "short base cabinets", "width": 120, "depth": 60, "height": 90}
+      ], "decorations": ["fruit bowl", "coffee machine", "potted herbs", "cutting boards", "utensil holder"] },
+      { "key": "tall-cabinets", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Single", "label": "tall cabinet", "width": 60, "depth": 60, "height": 220},
+        {"key": "double", "name": "Double", "label": "double tall cabinet", "width": 120, "depth": 60, "height": 220},
+        {"key": "pantry", "name": "Pantry", "label": "pantry cabinet", "width": 90, "depth": 60, "height": 220}
+      ], "decorations": ["glass jars", "plants on top", "cookbooks", "under-cabinet lights", "baskets on top"] },
+      { "key": "fridge", "shape": "Box", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Standard", "label": "fridge", "width": 60, "depth": 65, "height": 185},
+        {"key": "american", "name": "American", "label": "American fridge freezer", "width": 90, "depth": 75, "height": 180},
+        {"key": "under-counter", "name": "Under-counter", "label": "under-counter fridge", "width": 60, "depth": 60, "height": 85}
+      ], "decorations": ["magnets", "photos", "children's drawings", "plant on top", "baskets on top"] },
+      { "key": "cooker", "shape": "Box", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "cooker", "width": 60, "depth": 60, "height": 90},
+        {"key": "range", "name": "Range", "label": "range cooker", "width": 90, "depth": 60, "height": 90},
+        {"key": "large-range", "name": "Large range", "label": "large range cooker", "width": 110, "depth": 60, "height": 90}
+      ], "decorations": ["kettle", "pots", "frying pan", "tea towel", "utensil holder"] },
+      { "key": "island", "shape": "Box", "color": "#4A6274", "variants": [
+        {"key": "standard", "name": "Standard", "label": "kitchen island", "width": 180, "depth": 90, "height": 90},
+        {"key": "large", "name": "Large", "label": "large kitchen island", "width": 240, "depth": 100, "height": 90},
+        {"key": "small", "name": "Small", "label": "small kitchen island", "width": 120, "depth": 70, "height": 90}
+      ], "decorations": ["fruit bowl", "vase with flowers", "cookbooks", "potted herbs", "decorative tray"] },
+      { "key": "dining-table", "shape": "Table", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "kitchen table", "width": 140, "depth": 80, "height": 75},
+        {"key": "round", "name": "Round", "label": "round kitchen table", "width": 100, "depth": 100, "height": 75, "form": "Round"},
+        {"key": "bistro", "name": "Bistro", "label": "small square table", "width": 70, "depth": 70, "height": 75}
+      ], "decorations": ["vase with flowers", "candlesticks", "table runner", "fruit bowl", "place settings"] },
+      { "key": "chair", "shape": "Chair", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "chair", "width": 45, "depth": 50, "height": 85},
+        {"key": "armchair", "name": "With arms", "label": "dining armchair", "width": 55, "depth": 55, "height": 85},
+        {"key": "folding", "name": "Folding", "label": "folding chair", "width": 44, "depth": 48, "height": 80}
+      ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
+      { "key": "stool", "shape": "Cylinder", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Bar stool", "label": "bar stool", "width": 40, "depth": 40, "height": 75},
+        {"key": "counter", "name": "Counter", "label": "counter stool", "width": 40, "depth": 40, "height": 65},
+        {"key": "backed", "name": "With back", "label": "bar stool with back", "width": 45, "depth": 45, "height": 100, "shape": "Chair"}
+      ], "decorations": ["seat cushion", "sheepskin", "stack of books", "small plant", "folded towel"] },
+      { "key": "bin", "shape": "Cylinder", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Round", "label": "bin", "width": 30, "depth": 30, "height": 65},
+        {"key": "square", "name": "Square", "label": "square bin", "width": 30, "depth": 30, "height": 75, "shape": "Box"},
+        {"key": "recycling", "name": "Recycling", "label": "recycling bin", "width": 60, "depth": 35, "height": 65, "shape": "Box"}
+      ] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Small", "label": "potted plant", "width": 30, "depth": 30, "height": 50},
+        {"key": "herbs", "name": "Herb pot", "label": "herb pot", "width": 20, "depth": 20, "height": 25},
+        {"key": "medium", "name": "Medium", "label": "medium potted plant", "width": 45, "depth": 45, "height": 100}
+      ] },
+      { "key": "upper-cabinets", "shape": "WallBox", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Double", "label": "upper cabinets", "width": 120, "depth": 35, "height": 70, "elevation": 145},
+        {"key": "single", "name": "Single", "label": "upper cabinet", "width": 60, "depth": 35, "height": 70, "elevation": 145},
+        {"key": "glass", "name": "Glass front", "label": "glass-front upper cabinets", "width": 120, "depth": 35, "height": 70, "elevation": 145}
+      ], "decorations": ["under-cabinet lights", "glass doors", "plants on top", "baskets on top", "open end shelf"] },
+      { "key": "cooker-hood", "shape": "WallBox", "color": "#B9B9B9", "variants": [
+        {"key": "standard", "name": "Chimney", "label": "cooker hood", "width": 60, "depth": 50, "height": 60, "elevation": 150},
+        {"key": "wide", "name": "Wide", "label": "wide cooker hood", "width": 90, "depth": 50, "height": 60, "elevation": 150},
+        {"key": "canopy", "name": "Canopy", "label": "canopy hood", "width": 90, "depth": 55, "height": 80, "elevation": 140}
+      ], "decorations": [] }
+    ],
+    "Bathroom": [
+      { "key": "bathtub", "shape": "Rounded", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Built-in", "label": "bathtub", "width": 170, "depth": 75, "height": 58},
+        {"key": "freestanding", "name": "Freestanding", "label": "freestanding bathtub", "width": 170, "depth": 80, "height": 60},
+        {"key": "small", "name": "Small", "label": "small bathtub", "width": 150, "depth": 70, "height": 55}
+      ], "decorations": ["bath tray", "candles", "rolled towels", "small plant", "bath salts jar"] },
+      { "key": "shower", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Square", "label": "shower tray", "width": 90, "depth": 90, "height": 5},
+        {"key": "rectangular", "name": "Rectangular", "label": "rectangular shower tray", "width": 120, "depth": 80, "height": 5},
+        {"key": "walk-in", "name": "Walk-in", "label": "walk-in shower", "width": 140, "depth": 90, "height": 5}
+      ], "decorations": ["shampoo bottles", "small plant", "towel on the door", "shower caddy", "loofah"] },
+      { "key": "toilet", "shape": "Rounded", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Floor-standing", "label": "toilet", "width": 38, "depth": 65, "height": 75},
+        {"key": "wall-hung", "name": "Wall-hung", "label": "wall-hung toilet", "width": 36, "depth": 54, "height": 40},
+        {"key": "back-to-wall", "name": "Back-to-wall", "label": "back-to-wall toilet", "width": 36, "depth": 60, "height": 80}
+      ], "decorations": ["spare toilet rolls", "small plant", "candle", "reed diffuser", "magazines"] },
+      { "key": "vanity", "shape": "Box", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Single", "label": "vanity unit", "width": 80, "depth": 46, "height": 85},
+        {"key": "double", "name": "Double", "label": "double vanity unit", "width": 140, "depth": 46, "height": 85},
+        {"key": "small", "name": "Small", "label": "small vanity unit", "width": 60, "depth": 40, "height": 85}
+      ], "decorations": ["soap dispenser", "toothbrush cup", "small plant", "folded towels", "candle"] },
+      { "key": "tall-cabinet", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Narrow", "label": "tall cabinet", "width": 40, "depth": 35, "height": 170},
+        {"key": "wide", "name": "Wide", "label": "wide tall cabinet", "width": 60, "depth": 35, "height": 170},
+        {"key": "low", "name": "Low", "label": "low cabinet", "width": 40, "depth": 35, "height": 90}
+      ], "decorations": ["folded towels", "baskets", "plant on top", "glass jars", "candles"] },
+      { "key": "towel-rail", "shape": "Box", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Standard", "label": "towel radiator", "width": 50, "depth": 10, "height": 120},
+        {"key": "tall", "name": "Tall", "label": "tall towel radiator", "width": 50, "depth": 10, "height": 170},
+        {"key": "wide", "name": "Wide", "label": "wide towel radiator", "width": 80, "depth": 10, "height": 80}
+      ], "decorations": ["bath towels", "hand towel", "bathrobe", "washcloths", "beach towel"] },
+      { "key": "bath-mat", "shape": "Rug", "color": "#E8DCC8", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "bath mat", "width": 80, "depth": 50, "height": 1},
+        {"key": "round", "name": "Round", "label": "round bath mat", "width": 60, "depth": 60, "height": 1, "form": "Round"},
+        {"key": "long", "name": "Long", "label": "long bath mat", "width": 120, "depth": 50, "height": 1}
+      ] },
+      { "key": "laundry-basket", "shape": "Cylinder", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Round", "label": "laundry basket", "width": 40, "depth": 40, "height": 55},
+        {"key": "square", "name": "Square", "label": "square laundry basket", "width": 40, "depth": 40, "height": 60, "shape": "Box"},
+        {"key": "sorter", "name": "Sorter", "label": "laundry sorter", "width": 70, "depth": 35, "height": 60, "shape": "Box"}
+      ] },
+      { "key": "stool", "shape": "Cylinder", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Round", "label": "stool", "width": 35, "depth": 35, "height": 45},
+        {"key": "square", "name": "Square", "label": "square stool", "width": 35, "depth": 35, "height": 45, "shape": "Box"},
+        {"key": "step", "name": "Step", "label": "step stool", "width": 40, "depth": 30, "height": 25, "shape": "Box"}
+      ], "decorations": ["seat cushion", "sheepskin", "stack of books", "small plant", "folded towel"] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Small", "label": "potted plant", "width": 30, "depth": 30, "height": 60},
+        {"key": "tiny", "name": "Tiny", "label": "small plant", "width": 20, "depth": 20, "height": 25},
+        {"key": "tall", "name": "Tall", "label": "tall plant", "width": 40, "depth": 40, "height": 100}
+      ] },
+      { "key": "mirror-cabinet", "shape": "WallBox", "color": "#F2F0EB", "variants": [
+        {"key": "standard", "name": "Standard", "label": "mirror cabinet", "width": 60, "depth": 15, "height": 70, "elevation": 120},
+        {"key": "wide", "name": "Wide", "label": "wide mirror cabinet", "width": 90, "depth": 15, "height": 70, "elevation": 120},
+        {"key": "lit", "name": "With light", "label": "lit mirror cabinet", "width": 80, "depth": 15, "height": 75, "elevation": 120}
+      ], "decorations": ["LED light strip", "toiletries on the shelf", "plants", "glass shelf", "towel hooks below"] }
+    ],
+    "DiningRoom": [
+      { "key": "dining-table", "shape": "Table", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Six-seat", "label": "dining table", "width": 180, "depth": 90, "height": 75},
+        {"key": "eight-seat", "name": "Eight-seat", "label": "eight-seat dining table", "width": 240, "depth": 100, "height": 75},
+        {"key": "oval", "name": "Oval", "label": "oval dining table", "width": 200, "depth": 110, "height": 75, "form": "Round"}
+      ], "decorations": ["vase with flowers", "candlesticks", "table runner", "fruit bowl", "place settings"] },
+      { "key": "chair", "shape": "Chair", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Standard", "label": "dining chair", "width": 45, "depth": 52, "height": 88},
+        {"key": "armchair", "name": "With arms", "label": "dining armchair", "width": 55, "depth": 55, "height": 88},
+        {"key": "upholstered", "name": "Upholstered", "label": "upholstered dining chair", "width": 50, "depth": 58, "height": 95}
+      ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
+      { "key": "sideboard", "shape": "Box", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "sideboard", "width": 180, "depth": 45, "height": 80},
+        {"key": "short", "name": "Short", "label": "short sideboard", "width": 120, "depth": 45, "height": 80},
+        {"key": "highboard", "name": "Highboard", "label": "highboard", "width": 120, "depth": 45, "height": 130}
+      ], "decorations": ["table lamp", "vase with flowers", "picture frames", "fruit bowl", "candles"] },
+      { "key": "rug", "shape": "Rug", "color": "#D8C3A5", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "rug", "width": 200, "depth": 300, "height": 1},
+        {"key": "round", "name": "Round", "label": "round rug", "width": 250, "depth": 250, "height": 1, "form": "Round"},
+        {"key": "large", "name": "Large", "label": "large rug", "width": 250, "depth": 350, "height": 1}
+      ] },
+      { "key": "display-cabinet", "shape": "Box", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "display cabinet", "width": 90, "depth": 40, "height": 190},
+        {"key": "wide", "name": "Wide", "label": "wide display cabinet", "width": 140, "depth": 40, "height": 190},
+        {"key": "low", "name": "Low", "label": "low display cabinet", "width": 120, "depth": 40, "height": 90}
+      ], "decorations": ["glassware", "fine china", "vases", "books", "candles"] },
+      { "key": "bench", "shape": "Box", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Standard", "label": "bench", "width": 140, "depth": 38, "height": 45},
+        {"key": "long", "name": "Long", "label": "long bench", "width": 180, "depth": 38, "height": 45},
+        {"key": "settee", "name": "With back", "label": "dining settee", "width": 140, "depth": 55, "height": 85, "shape": "Sofa"}
+      ], "decorations": ["cushions", "sheepskin", "throw blanket", "basket", "stack of books"] },
+      { "key": "round-table", "shape": "Cylinder", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Four-seat", "label": "round dining table", "width": 120, "depth": 120, "height": 75},
+        {"key": "small", "name": "Small", "label": "small round table", "width": 90, "depth": 90, "height": 75},
+        {"key": "large", "name": "Large", "label": "large round table", "width": 150, "depth": 150, "height": 75}
+      ], "decorations": ["vase with flowers", "table lamp", "books", "candle", "small plant"] },
+      { "key": "floor-lamp", "shape": "Lamp", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "floor lamp", "width": 40, "depth": 40, "height": 160},
+        {"key": "arc", "name": "Arc", "label": "arc floor lamp", "width": 120, "depth": 40, "height": 200},
+        {"key": "tripod", "name": "Tripod", "label": "tripod floor lamp", "width": 60, "depth": 60, "height": 150}
+      ] },
+      { "key": "bar-cart", "shape": "Table", "color": "#D9C27A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "bar cart", "width": 70, "depth": 40, "height": 80},
+        {"key": "wide", "name": "Wide", "label": "wide bar cart", "width": 90, "depth": 45, "height": 85},
+        {"key": "cabinet", "name": "Cabinet", "label": "drinks cabinet", "width": 80, "depth": 45, "height": 120, "shape": "Box"}
+      ], "decorations": ["bottles", "glasses", "cocktail shaker", "small plant", "ice bucket"] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Medium", "label": "potted plant", "width": 50, "depth": 50, "height": 130},
+        {"key": "small", "name": "Small", "label": "small potted plant", "width": 30, "depth": 30, "height": 50},
+        {"key": "tall", "name": "Tall", "label": "tall potted plant", "width": 70, "depth": 70, "height": 180}
+      ] }
+    ],
+    "HomeOffice": [
+      { "key": "desk", "shape": "Table", "color": "#E8DCC8", "variants": [
+        {"key": "standard", "name": "Standard", "label": "desk", "width": 140, "depth": 70, "height": 75},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped corner desk", "width": 160, "depth": 140, "height": 75, "form": "LShaped"},
+        {"key": "standing", "name": "Standing", "label": "standing desk", "width": 140, "depth": 70, "height": 110}
+      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
+      { "key": "office-chair", "shape": "Chair", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "office chair", "width": 60, "depth": 60, "height": 110},
+        {"key": "executive", "name": "Executive", "label": "executive chair", "width": 70, "depth": 70, "height": 125},
+        {"key": "task", "name": "Task", "label": "small task chair", "width": 55, "depth": 55, "height": 95}
+      ], "decorations": ["seat cushion", "jacket on the back", "lumbar pillow", "throw blanket", "headphones"] },
+      { "key": "bookshelf", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Tall", "label": "bookshelf", "width": 80, "depth": 35, "height": 190},
+        {"key": "wide", "name": "Wide", "label": "wide bookshelf", "width": 160, "depth": 35, "height": 190},
+        {"key": "low", "name": "Low", "label": "low bookshelf", "width": 120, "depth": 35, "height": 90}
+      ], "decorations": ["books", "small plants", "vases", "picture frames", "storage baskets"] },
+      { "key": "filing-cabinet", "shape": "Box", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Two-drawer", "label": "filing cabinet", "width": 45, "depth": 60, "height": 70},
+        {"key": "four-drawer", "name": "Four-drawer", "label": "four-drawer filing cabinet", "width": 45, "depth": 60, "height": 130},
+        {"key": "lateral", "name": "Lateral", "label": "lateral filing cabinet", "width": 80, "depth": 45, "height": 70}
+      ], "decorations": ["small plant", "desk organizer", "printer", "books", "desk lamp"] },
+      { "key": "armchair", "shape": "Sofa", "color": "#A8B89A", "variants": [
+        {"key": "standard", "name": "Classic", "label": "armchair", "width": 80, "depth": 80, "height": 85},
+        {"key": "wingback", "name": "Wingback", "label": "wingback armchair", "width": 80, "depth": 90, "height": 110},
+        {"key": "club", "name": "Club", "label": "club chair", "width": 90, "depth": 90, "height": 75}
+      ], "decorations": ["cushion", "throw blanket", "sheepskin", "lumbar pillow", "open book"] },
+      { "key": "rug", "shape": "Rug", "color": "#9DB4C0", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "rug", "width": 160, "depth": 230, "height": 1},
+        {"key": "round", "name": "Round", "label": "round rug", "width": 200, "depth": 200, "height": 1, "form": "Round"},
+        {"key": "runner", "name": "Runner", "label": "runner rug", "width": 80, "depth": 250, "height": 1}
+      ] },
+      { "key": "floor-lamp", "shape": "Lamp", "color": "#2F2C2A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "floor lamp", "width": 40, "depth": 40, "height": 160},
+        {"key": "arc", "name": "Arc", "label": "arc floor lamp", "width": 120, "depth": 40, "height": 200},
+        {"key": "tripod", "name": "Tripod", "label": "tripod floor lamp", "width": 60, "depth": 60, "height": 150}
+      ] },
+      { "key": "sofa-bed", "shape": "Sofa", "color": "#8A8580", "variants": [
+        {"key": "standard", "name": "Standard", "label": "sofa bed", "width": 190, "depth": 90, "height": 85},
+        {"key": "large", "name": "Large", "label": "large sofa bed", "width": 220, "depth": 95, "height": 85},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped sofa bed", "width": 240, "depth": 160, "height": 85, "form": "LShaped"}
+      ], "decorations": ["cushions", "throw blanket", "lumbar pillow", "faux fur throw", "open book"] },
+      { "key": "side-table", "shape": "Cylinder", "color": "#B8864B", "variants": [
+        {"key": "standard", "name": "Round", "label": "side table", "width": 45, "depth": 45, "height": 55},
+        {"key": "square", "name": "Square", "label": "square side table", "width": 45, "depth": 45, "height": 55, "shape": "Box"},
+        {"key": "tall", "name": "Tall", "label": "tall side table", "width": 35, "depth": 35, "height": 65}
+      ], "decorations": ["table lamp", "vase with flowers", "books", "candle", "small plant"] },
+      { "key": "plant", "shape": "Plant", "color": "#4F6B3A", "variants": [
+        {"key": "standard", "name": "Medium", "label": "potted plant", "width": 45, "depth": 45, "height": 110},
+        {"key": "small", "name": "Small", "label": "small potted plant", "width": 30, "depth": 30, "height": 50},
+        {"key": "tall", "name": "Tall", "label": "tall potted plant", "width": 70, "depth": 70, "height": 180}
+      ] },
+      { "key": "pinboard", "shape": "Picture", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "pinboard", "width": 90, "depth": 2, "height": 60, "elevation": 110},
+        {"key": "large", "name": "Large", "label": "large pinboard", "width": 120, "depth": 2, "height": 90, "elevation": 100},
+        {"key": "small", "name": "Small", "label": "small pinboard", "width": 60, "depth": 2, "height": 45, "elevation": 120}
+      ], "decorations": ["notes and photos", "postcards", "calendar", "string lights", "colour swatches"] }
+    ],
+    "KidsRoom": [
+      { "key": "single-bed", "shape": "Bed", "color": "#9DB4C0", "variants": [
+        {"key": "standard", "name": "Single", "label": "single bed", "width": 90, "depth": 200, "height": 90},
+        {"key": "bunk", "name": "Bunk bed", "label": "bunk bed", "width": 95, "depth": 205, "height": 160},
+        {"key": "toddler", "name": "Toddler", "label": "toddler bed", "width": 75, "depth": 145, "height": 60}
+      ], "decorations": ["cushions", "stuffed animals", "throw blanket", "patterned duvet", "pillow"] },
+      { "key": "wardrobe", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Two-door", "label": "wardrobe", "width": 100, "depth": 55, "height": 180},
+        {"key": "small", "name": "Small", "label": "small wardrobe", "width": 80, "depth": 50, "height": 150},
+        {"key": "wide", "name": "Wide", "label": "wide wardrobe", "width": 140, "depth": 55, "height": 180}
+      ], "decorations": ["storage boxes on top", "plants on top", "baskets on top", "hat boxes", "mirror on the door"] },
+      { "key": "desk", "shape": "Table", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Standard", "label": "desk", "width": 100, "depth": 55, "height": 70},
+        {"key": "small", "name": "Small", "label": "small children's desk", "width": 80, "depth": 50, "height": 60},
+        {"key": "corner", "name": "L-shaped", "label": "L-shaped desk", "width": 120, "depth": 110, "height": 70, "form": "LShaped"}
+      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
+      { "key": "chair", "shape": "Chair", "color": "#D9C27A", "variants": [
+        {"key": "standard", "name": "Standard", "label": "chair", "width": 40, "depth": 45, "height": 75},
+        {"key": "small", "name": "Small", "label": "small child's chair", "width": 32, "depth": 32, "height": 55},
+        {"key": "swivel", "name": "Swivel", "label": "swivel desk chair", "width": 50, "depth": 50, "height": 90}
+      ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
+      { "key": "toy-box", "shape": "Box", "color": "#B5543C", "variants": [
+        {"key": "standard", "name": "Chest", "label": "toy chest", "width": 80, "depth": 40, "height": 45},
+        {"key": "large", "name": "Large", "label": "large toy chest", "width": 100, "depth": 50, "height": 50},
+        {"key": "storage", "name": "Storage unit", "label": "toy storage unit", "width": 110, "depth": 35, "height": 80}
+      ], "decorations": ["stuffed animals", "toys", "books", "night light", "toy car"] },
+      { "key": "bookcase", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Low", "label": "low bookcase", "width": 100, "depth": 30, "height": 90},
+        {"key": "tall", "name": "Tall", "label": "tall bookcase", "width": 80, "depth": 30, "height": 180},
+        {"key": "small", "name": "Small", "label": "small bookcase", "width": 60, "depth": 30, "height": 60}
+      ], "decorations": ["books", "toys", "small plants", "picture frames", "storage baskets"] },
+      { "key": "rug", "shape": "Rug", "color": "#A8B89A", "variants": [
+        {"key": "standard", "name": "Rectangular", "label": "play rug", "width": 140, "depth": 200, "height": 1},
+        {"key": "round", "name": "Round", "label": "round play rug", "width": 150, "depth": 150, "height": 1, "form": "Round"},
+        {"key": "large", "name": "Large", "label": "large play rug", "width": 200, "depth": 300, "height": 1}
+      ] },
+      { "key": "nightstand", "shape": "Box", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Standard", "label": "nightstand", "width": 40, "depth": 35, "height": 50},
+        {"key": "round", "name": "Round", "label": "round nightstand", "width": 40, "depth": 40, "height": 50, "shape": "Cylinder"},
+        {"key": "wide", "name": "Wide", "label": "wide nightstand", "width": 55, "depth": 35, "height": 50}
+      ], "decorations": ["table lamp", "alarm clock", "books", "small plant", "glass of water"] },
+      { "key": "beanbag", "shape": "Rounded", "color": "#6E5A7E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "beanbag", "width": 70, "depth": 70, "height": 60},
+        {"key": "large", "name": "Large", "label": "large beanbag", "width": 100, "depth": 100, "height": 70},
+        {"key": "lounger", "name": "Lounger", "label": "beanbag lounger", "width": 80, "depth": 130, "height": 50}
+      ], "decorations": ["cushion", "stuffed animal", "blanket", "open book", "toy"] },
+      { "key": "floor-lamp", "shape": "Lamp", "color": "#F4F1EA", "variants": [
+        {"key": "standard", "name": "Standard", "label": "floor lamp", "width": 35, "depth": 35, "height": 140},
+        {"key": "arc", "name": "Arc", "label": "arc floor lamp", "width": 90, "depth": 35, "height": 170},
+        {"key": "tripod", "name": "Tripod", "label": "tripod floor lamp", "width": 50, "depth": 50, "height": 130}
+      ] },
+      { "key": "pinboard", "shape": "Picture", "color": "#C9A27E", "variants": [
+        {"key": "standard", "name": "Standard", "label": "pinboard", "width": 90, "depth": 2, "height": 60, "elevation": 100},
+        {"key": "large", "name": "Large", "label": "large pinboard", "width": 120, "depth": 2, "height": 90, "elevation": 90},
+        {"key": "small", "name": "Small", "label": "small pinboard", "width": 60, "depth": 2, "height": 45, "elevation": 110}
+      ], "decorations": ["children's drawings", "postcards", "calendar", "string lights", "certificates"] }
+    ]
+  }
+}
