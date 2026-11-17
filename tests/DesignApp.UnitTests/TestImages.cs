@@ -17,14 +17,18 @@ internal static class TestImages
     public static byte[] Create(int width, int height, SKEncodedImageFormat format = SKEncodedImageFormat.Jpeg)
     {
         using var bitmap = new SKBitmap(width, height);
+
         using (var canvas = new SKCanvas(bitmap))
         {
             canvas.Clear(Blue);
             using var paint = new SKPaint { Color = Red };
+
             canvas.DrawRect(0, 0, width / 2f, height / 2f, paint);
         }
+
         using var image = SKImage.FromBitmap(bitmap);
         using var data = image.Encode(format, 95);
+
         return data.ToArray();
     }
 
@@ -45,11 +49,13 @@ internal static class TestImages
         var length = 2 + exifHeader.Length + tiff.Length;
 
         using var output = new MemoryStream();
+
         output.Write(jpeg, 0, 2); // SOI marker
         output.Write([0xFF, 0xE1, (byte)(length >> 8), (byte)length]);
         output.Write(exifHeader);
         output.Write(tiff);
         output.Write(jpeg, 2, jpeg.Length - 2);
+
         return output.ToArray();
     }
 
@@ -68,6 +74,7 @@ internal static class TestImages
         var pixelBytes = rowSize * height;
         using var output = new MemoryStream();
         using var writer = new BinaryWriter(output);
+
         writer.Write((byte)'B');
         writer.Write((byte)'M');
         writer.Write(54 + pixelBytes); // file size
@@ -86,6 +93,7 @@ internal static class TestImages
         writer.Write(0);
         writer.Write(new byte[pixelBytes]);
         writer.Flush();
+
         return output.ToArray();
     }
 

@@ -51,11 +51,13 @@ public class FalEraserTests
     public void A_hand_marked_mask_grows_in_every_direction_and_nothing_else_changes()
     {
         using var bitmap = new SKBitmap(new SKImageInfo(40, 40, SKColorType.Gray8, SKAlphaType.Opaque));
+
         using (var canvas = new SKCanvas(bitmap))
         {
             canvas.Clear(SKColors.Black);
             canvas.DrawRect(18, 18, 4, 4, new SKPaint { Color = SKColors.White }); // pixels 18..21
         }
+
         var png = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100).ToArray();
 
         using var grown = SKBitmap.Decode(MaskGrowth.Grow(png, 5));
@@ -121,23 +123,33 @@ public class FalEraserTests
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var path = request.RequestUri!.AbsolutePath;
+
             if (request.Method == HttpMethod.Post)
             {
                 Submits++;
                 SubmitBody = await request.Content!.ReadAsStringAsync(cancellationToken);
+
                 return Json("""{"request_id":"r1","status_url":"https://queue.fal.run/fal-ai/object-removal/requests/r1/status","response_url":"https://queue.fal.run/fal-ai/object-removal/requests/r1"}""");
             }
+
             if (path.EndsWith("/status", StringComparison.Ordinal))
             {
                 var state = states.Length == 0 ? "IN_QUEUE" : states[Math.Min(StatusChecks, states.Length - 1)];
+
                 StatusChecks++;
+
                 if (statusFails)
+                {
                     return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                }
+
                 return Json(error is not null && state == "COMPLETED"
                     ? $$"""{"status":"COMPLETED","error":"{{error}}"}"""
                     : $$"""{"status":"{{state}}"}""");
             }
+
             ResultFetches++;
+
             return Json(singleImage
                 ? $$$"""{"image":{"url":"data:image/png;base64,{{{Convert.ToBase64String(Result)}}}"}}"""
                 : $$"""{"images":[{"url":"data:image/jpeg;base64,{{Convert.ToBase64String(Result)}}"}]}""");

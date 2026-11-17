@@ -25,36 +25,61 @@ public sealed class MergeRoomPart(IRoomRepository rooms, ICurrentUser currentUse
     public async Task<Result<Room>?> MergeAsync(Guid roomId, int baseRevision, int objectIndex, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
+
         if (room.Status is not RoomStatus.Ready)
+        {
             return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
+        }
+
         if (!room.HasLabelMapRevision(baseRevision))
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownRevision);
+        }
+
         var part = room.Objects.FirstOrDefault(o => o.Index == objectIndex);
+
         if (part is null)
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownStrokeObject);
+        }
+
         if (part.ParentIndex is not int parent)
+        {
             return Result.Failure<Room>(Constants.Messages.NotAPart);
+        }
 
         byte[] labelMap;
+
         await using (var stored = await storage.OpenReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken)
             ?? throw new InvalidOperationException($"Label map {baseRevision} of room {room.Id} is missing from storage."))
         {
             using var buffer = new MemoryStream();
+
             await stored.Content.CopyToAsync(buffer, cancellationToken);
             labelMap = buffer.ToArray();
         }
+
         var merged = imaging.MergePart(labelMap, part.Index, parent, part.Label);
+
         if (!merged.Succeeded)
+        {
             return Result.Failure<Room>(merged.Error);
+        }
 
         // The new version is stored before the room points at it, so a failed save leaves only an unused file.
         var revision = room.LatestLabelMapRevision + 1;
+
         using (var content = new MemoryStream(merged.Value, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
+
         room.MergePart(part.Index, baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
+
         return room;
     }
 }

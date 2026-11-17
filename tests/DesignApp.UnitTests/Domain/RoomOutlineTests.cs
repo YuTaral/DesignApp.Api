@@ -75,8 +75,12 @@ public class RoomOutlineTests
     {
         // A staircase down the right-hand side: 11 steps make 24 corners.
         var corners = new List<double> { 0, 0 };
+
         for (var i = 0; i < 11; i++)
+        {
             corners.AddRange([1100 - i * 50, i * 50, 1100 - i * 50, (i + 1) * 50]);
+        }
+
         corners.AddRange([0, 550]);
 
         Assert.Throws<DomainException>(() => Outline([.. corners]));
@@ -87,6 +91,7 @@ public class RoomOutlineTests
     {
         var plan = RoomPlan.Create(Guid.NewGuid(), "u", "", RoomType.LivingRoom, 4, 5, 2.6, HexColor.Parse("#E8E2D6"), HexColor.Parse("#B89B7A"), FloorType.Wood, AiMode.Fake, Now);
         var (wall, floor, white) = (HexColor.Parse("#E8E2D6"), HexColor.Parse("#B89B7A"), HexColor.Parse("#F4F1EA"));
+
         PlanItem Window(int on, double x)
         {
             return new PlanItem("window", ItemShape.Window, x, 0, 120, 10, 140, 0, white, on, 90);

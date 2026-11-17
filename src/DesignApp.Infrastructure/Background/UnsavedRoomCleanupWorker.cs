@@ -21,6 +21,7 @@ internal sealed partial class UnsavedRoomCleanupWorker(IServiceScopeFactory scop
         {
             await Task.Delay(Constants.Workers.CleanupFirstRunDelay, stoppingToken);
             using var timer = new PeriodicTimer(Constants.Workers.CleanupInterval);
+
             do
             {
                 await RunOnceAsync(stoppingToken);
@@ -40,12 +41,17 @@ internal sealed partial class UnsavedRoomCleanupWorker(IServiceScopeFactory scop
         try
         {
             int deleted;
+
             do
             {
                 await using var scope = scopes.CreateAsyncScope();
+
                 deleted = await scope.ServiceProvider.GetRequiredService<DeleteUnsavedRooms>().HandleAsync(cancellationToken);
+
                 if (deleted > 0)
+                {
                     LogDeleted(deleted);
+                }
             }
             while (deleted == Application.Constants.Rooms.CleanupBatchSize);
         }

@@ -32,6 +32,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var browser = factory.CreateClient();
         var email = NewEmail();
         var room = await UploadAsync(browser);
+
         Assert.False((await AccountAsync(browser)).SignedIn);
 
         using var signUp = await browser.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password });
@@ -41,6 +42,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync($"/api/rooms/{room}")).StatusCode);
 
         using var signOut = await browser.PostAsync("/api/account/sign-out", null);
+
         Assert.Equal(HttpStatusCode.NoContent, signOut.StatusCode);
         Assert.False((await AccountAsync(browser)).SignedIn);
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/api/rooms/{room}")).StatusCode);
@@ -52,6 +54,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var email = NewEmail();
         using var laptop = factory.CreateClient();
         var first = await UploadAsync(laptop);
+
         (await laptop.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })).EnsureSuccessStatusCode();
 
         using var phone = factory.CreateClient();
@@ -59,6 +62,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var signIn = await phone.PostAsJsonAsync("/api/account/sign-in", new { email = $"  {email.ToUpperInvariant()} ", password = Password });
 
         Assert.Equal(HttpStatusCode.OK, signIn.StatusCode);
+
         foreach (var browser in new[] { laptop, phone })
         {
             Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync($"/api/rooms/{first}")).StatusCode);
@@ -71,9 +75,11 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         var email = NewEmail();
         using var browser = factory.CreateClient();
+
         (await browser.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })).EnsureSuccessStatusCode();
 
         using var again = factory.CreateClient();
+
         Assert.Equal(DesignApp.Api.Constants.Messages.EmailTaken,
             await ProblemAsync(await again.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })));
         Assert.Equal(DesignApp.Api.Constants.Messages.PasswordTooShort,
@@ -89,11 +95,14 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         var email = NewEmail();
         using var owner = factory.CreateClient();
+
         (await owner.PostAsJsonAsync("/api/account/sign-up", new { email, password = Password })).EnsureSuccessStatusCode();
 
         using var stranger = factory.CreateClient();
+
         Assert.Equal(DesignApp.Api.Constants.Messages.WrongCredentials,
             await ProblemAsync(await stranger.PostAsJsonAsync("/api/account/sign-in", new { email = NewEmail(), password = Password })));
+
         for (var attempt = 1; attempt < 5; attempt++)
         {
             Assert.Equal(DesignApp.Api.Constants.Messages.WrongCredentials,
@@ -101,8 +110,10 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         }
 
         using var fifth = await stranger.PostAsJsonAsync("/api/account/sign-in", new { email, password = "guess number 5" });
+
         Assert.Equal(HttpStatusCode.TooManyRequests, fifth.StatusCode);
         using var evenRight = await stranger.PostAsJsonAsync("/api/account/sign-in", new { email, password = Password });
+
         Assert.Equal(HttpStatusCode.TooManyRequests, evenRight.StatusCode);
         Assert.False((await AccountAsync(stranger)).SignedIn);
     }
@@ -118,10 +129,13 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<Guid> UploadAsync(HttpClient browser)
     {
         using var content = new ByteArrayContent(TestImages.Create(800, 600));
+
         content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
         using var response = await browser.PostAsync("/api/rooms", form);
+
         response.EnsureSuccessStatusCode();
+
         return (await response.Content.ReadFromJsonAsync<IdDto>())!.Id;
     }
 
@@ -139,6 +153,7 @@ public class AccountApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using (response)
         {
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
             return (await response.Content.ReadFromJsonAsync<ProblemDto>())?.Detail;
         }
     }

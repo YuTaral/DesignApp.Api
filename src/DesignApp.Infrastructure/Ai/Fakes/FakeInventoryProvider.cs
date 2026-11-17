@@ -29,6 +29,7 @@ internal sealed class FakeInventoryProvider(IOptions<AiOptions> options) : IObje
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
+
         return Result.Success(SampleRooms.Match(image)?.Inventory() ?? Layout);
     }
 
@@ -44,15 +45,17 @@ internal sealed class FakeInventoryProvider(IOptions<AiOptions> options) : IObje
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
         var label = whole.Label.ToLowerInvariant();
+        var box = whole.Box;
         (string Name, double Top, double Bottom)[] bands = Seating.Any(label.Contains)
             ? [("backrest", 0, 0.45), ("seat", 0.45, 0.7), ("legs", 0.7, 1)]
             : Tables.Any(label.Contains)
                 ? [("top", 0, 0.3), ("base", 0.3, 1)]
                 : [("upper part", 0, 0.5), ("lower part", 0.5, 1)];
-        var box = whole.Box;
+
         return Result.Success<IReadOnlyList<InventoryItem>>([.. bands.Select(b =>
         {
             var part = new BoundingBox(box.X, box.Y + box.Height * b.Top, box.Width, box.Height * (b.Bottom - b.Top));
+
             return new InventoryItem(b.Name, whole.Category, part, whole.DominantColor,
                 [new ImagePoint(part.X + part.Width / 2, part.Y + part.Height / 2)]);
         })]);

@@ -249,6 +249,7 @@ public static class Constants
                     PhotoStyle.ArtDeco => "Art Deco: fluted and ribbed panels, geometric inlays, polished metal handles and trims, curved velvet upholstery",
                     _ => "",
                 };
+
                 return words.Length == 0
                     ? ""
                     : $"Style every object as {words}. Give each object the handles, legs, fronts, trims and textures of this style, " +
@@ -345,6 +346,7 @@ public static class Constants
                 var (stands, looks, onLeft, onRight) = left
                     ? ("left", "right", "far wall", "right wall")
                     : ("right", "left", "left wall", "far wall");
+
                 return $"The camera stands in the near {stands} corner at eye height, looking diagonally across the room towards " +
                     $"the far {looks} corner, so the {onLeft} fills the left of the photo and the {onRight} its right. The left, " +
                     "right, near and far walls below are named as seen from the middle of the near wall, not by the photo's sides.";

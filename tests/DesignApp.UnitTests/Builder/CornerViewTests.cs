@@ -25,7 +25,9 @@ public class CornerViewTests
         var plan = RoomPlan.Create(Guid.CreateVersion7(Now), "user-1", "", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, Now);
         var plant = new PlanItem("plant", ItemShape.Plant, 370, 470, 40, 40, 120, 0, Grey);
         var sofa = new PlanItem("sofa", ItemShape.Box, 200, 100, 200, 90, 80, 0, Grey);
+
         plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, [plant, sofa], Now, corner);
+
         return plan;
     }
 

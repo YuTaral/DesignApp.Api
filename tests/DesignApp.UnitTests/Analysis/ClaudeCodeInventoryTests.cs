@@ -35,6 +35,7 @@ public class ClaudeCodeInventoryTests
                 ["claude-sonnet-5-5"] = new { inputTokens = 5500, outputTokens = 1300, cacheReadInputTokens = 0, cacheCreationInputTokens = 0 },
             },
         });
+
         return "{\"type\":\"system\",\"subtype\":\"init\"}\n{\"type\":\"assistant\"}\n" + result + "\n";
     }
 
@@ -49,15 +50,18 @@ public class ClaudeCodeInventoryTests
 
         Assert.True(listed.Succeeded);
         var sofa = Assert.Single(listed.Value);
+
         Assert.Equal("grey sofa", sofa.Label);
         Assert.Equal(0.05, sofa.Box.X, 3);   // pixels became fractions of the 400 x 200 photo
         var args = claudeCode.Arguments;
+
         Assert.Equal("claude-haiku-5-5", args[args.ToList().IndexOf(Ai.ClaudeCode.Flags.Model) + 1]);
         Assert.Equal("low", args[args.ToList().IndexOf(Ai.ClaudeCode.Flags.Effort) + 1]);
         Assert.Equal(Ai.ClaudeCode.Flags.NoTools, args[args.ToList().IndexOf(Ai.ClaudeCode.Flags.Tools) + 1]);
         Assert.Equal(settings.SystemPrompt(), claudeCode.SystemPrompt);
         using var message = JsonDocument.Parse(claudeCode.Input);
         var content = message.RootElement.GetProperty("message").GetProperty("content");
+
         Assert.Equal("image", content[0].GetProperty("type").GetString());
         Assert.Equal(settings.UserMessage, content[1].GetProperty("text").GetString());
     }

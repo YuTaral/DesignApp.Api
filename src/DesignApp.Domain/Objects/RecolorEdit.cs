@@ -39,9 +39,15 @@ public sealed record RecolorEdit : EditOperation
         : base(objectIndex)
     {
         if (strength is < Constants.Colors.MinStrength or > Constants.Colors.MaxStrength || double.IsNaN(strength))
+        {
             throw new DomainException(Constants.Messages.StrengthRange);
+        }
+
         if (paint is not null && !IsPaintReference(paint))
+        {
             throw new DomainException(Constants.Messages.PaintReference);
+        }
+
         Color = color;
         Strength = strength;
         Paint = paint;
@@ -68,13 +74,25 @@ public sealed record RecolorEdit : EditOperation
     private static List<ToneRecolor> CheckTones(IReadOnlyList<ToneRecolor> tones)
     {
         if (tones.Count == 0)
+        {
             return [];
+        }
+
         if (tones.Count is < Constants.Tones.Min or > Constants.Tones.Max)
+        {
             throw new DomainException(Constants.Messages.ToneCount);
+        }
+
         if (tones.Select(t => t.Center).Distinct().Count() != tones.Count)
+        {
             throw new DomainException(Constants.Messages.DuplicateTones);
+        }
+
         if (tones.Sum(t => t.Share) > 1 + Constants.Tones.ShareTolerance)
+        {
             throw new DomainException(Constants.Messages.ToneShare);
+        }
+
         return [.. tones];
     }
 
@@ -83,6 +101,7 @@ public sealed record RecolorEdit : EditOperation
     internal static bool IsPaintReference(string paint)
     {
         var separator = paint.IndexOf(Constants.Colors.PaintSeparator);
+
         return paint.Length <= Constants.Colors.MaxPaintLength && separator > 0 && separator < paint.Length - 1
             && !paint.Any(char.IsWhiteSpace);
     }

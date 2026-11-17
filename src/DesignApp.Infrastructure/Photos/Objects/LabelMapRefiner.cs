@@ -35,8 +35,11 @@ internal static class LabelMapRefiner
         RemoveFragments(labels, width, height);
         FillEnclosedHoles(labels, width, height);
         GrowIntoGaps(labels, width, height, rgba, isSurface);
+
         if (fillGaps)
+        {
             FillRemainingGaps(labels, width, height, rgba, reach);
+        }
     }
 
     /// <summary>Clears every piece of an object that is small and isn't the object's largest piece.</summary>
@@ -48,14 +51,21 @@ internal static class LabelMapRefiner
         var minPixels = Math.Max(Constants.Refiner.MinFragmentPixels, (int)(Constants.Refiner.FragmentFraction * width * height));
         var pieces = Components(labels, width, height, keep: label => label != 0);
         var largest = new Dictionary<byte, int>();
+
         foreach (var piece in pieces)
+        {
             largest[piece.Label] = Math.Max(largest.GetValueOrDefault(piece.Label), piece.Pixels.Count);
+        }
 
         foreach (var piece in pieces)
         {
             if (piece.Pixels.Count < minPixels && piece.Pixels.Count < largest[piece.Label])
+            {
                 foreach (var p in piece.Pixels)
+                {
                     labels[p] = 0;
+                }
+            }
         }
     }
 
@@ -66,13 +76,20 @@ internal static class LabelMapRefiner
     internal static void FillEnclosedHoles(byte[] labels, int width, int height)
     {
         var maxPixels = (int)(Constants.Refiner.MaxHoleFraction * width * height);
+
         foreach (var gap in Components(labels, width, height, keep: label => label == 0))
         {
             if (gap.Pixels.Count > maxPixels || gap.TouchesBorder || gap.Neighbors.Count != 1)
+            {
                 continue;
+            }
+
             var owner = gap.Neighbors.First();
+
             foreach (var p in gap.Pixels)
+            {
                 labels[p] = owner;
+            }
         }
     }
 
@@ -97,16 +114,25 @@ internal static class LabelMapRefiner
         var queue = new PriorityQueue<(int Pixel, byte Label, int Steps), float>();
         var surfaceGrowth = Math.Max(Constants.Refiner.MaxObjectGrowth, (int)(Constants.Refiner.MaxSurfaceGrowthFraction * Math.Max(width, height)));
         var limit = new int[Constants.Imaging.ByteValues];
+
         for (var label = 1; label < Constants.Imaging.ByteValues; label++)
+        {
             limit[label] = isSurface((byte)label) ? (unlimited ? int.MaxValue : surfaceGrowth) : Constants.Refiner.MaxObjectGrowth;
+        }
 
         void Offer(int from, int to, int steps, ReadOnlySpan<byte> photo)
         {
             if (labels[to] != 0 || steps > limit[labels[from]] || !CanReach(reach, labels[from], to, width))
+            {
                 return;
+            }
+
             var step = Distance(photo, from, to);
+
             if (step <= Constants.Refiner.MaxStepDistance)
+            {
                 queue.Enqueue((to, labels[from], steps), step);
+            }
         }
 
         for (var y = 0; y < height; y++)
@@ -114,26 +140,65 @@ internal static class LabelMapRefiner
             for (var x = 0; x < width; x++)
             {
                 var p = y * width + x;
+
                 if (labels[p] == 0)
+                {
                     continue;
-                if (x > 0) Offer(p, p - 1, 1, rgba);
-                if (x < width - 1) Offer(p, p + 1, 1, rgba);
-                if (y > 0) Offer(p, p - width, 1, rgba);
-                if (y < height - 1) Offer(p, p + width, 1, rgba);
+                }
+
+                if (x > 0)
+                {
+                    Offer(p, p - 1, 1, rgba);
+                }
+
+                if (x < width - 1)
+                {
+                    Offer(p, p + 1, 1, rgba);
+                }
+
+                if (y > 0)
+                {
+                    Offer(p, p - width, 1, rgba);
+                }
+
+                if (y < height - 1)
+                {
+                    Offer(p, p + width, 1, rgba);
+                }
             }
         }
 
         while (queue.TryDequeue(out var next, out _))
         {
             var (p, label, steps) = next;
+
             if (labels[p] != 0)
+            {
                 continue;
+            }
+
             labels[p] = label;
             var (x, y) = (p % width, p / width);
-            if (x > 0) Offer(p, p - 1, steps + 1, rgba);
-            if (x < width - 1) Offer(p, p + 1, steps + 1, rgba);
-            if (y > 0) Offer(p, p - width, steps + 1, rgba);
-            if (y < height - 1) Offer(p, p + width, steps + 1, rgba);
+
+            if (x > 0)
+            {
+                Offer(p, p - 1, steps + 1, rgba);
+            }
+
+            if (x < width - 1)
+            {
+                Offer(p, p + 1, steps + 1, rgba);
+            }
+
+            if (y > 0)
+            {
+                Offer(p, p - width, steps + 1, rgba);
+            }
+
+            if (y < height - 1)
+            {
+                Offer(p, p + width, steps + 1, rgba);
+            }
         }
     }
 
@@ -152,32 +217,66 @@ internal static class LabelMapRefiner
     /// <param name="reach">Per label, the only area it may take (<c>null</c>, or no array: anywhere).</param>
     internal static void FillRemainingGaps(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, PixelRect?[]? reach = null)
     {
+        var sums = new double[Constants.Imaging.ByteValues, 4];
+
         GrowIntoGaps(labels, width, height, rgba, _ => true, unlimited: true, reach: reach);
 
-        var sums = new double[Constants.Imaging.ByteValues, 4];
         for (var p = 0; p < labels.Length; p++)
         {
             var label = labels[p];
-            if (label == 0) continue;
+
+            if (label == 0)
+            {
+                continue;
+            }
+
             sums[label, 0] += rgba[p * 4]; sums[label, 1] += rgba[p * 4 + 1]; sums[label, 2] += rgba[p * 4 + 2]; sums[label, 3]++;
         }
+
         foreach (var gap in Components(labels, width, height, keep: label => label == 0))
         {
-            if (gap.Neighbors.Count == 0) continue;
+            if (gap.Neighbors.Count == 0)
+            {
+                continue;
+            }
+
             double r = 0, g = 0, b = 0;
-            foreach (var p in gap.Pixels) { r += rgba[p * 4]; g += rgba[p * 4 + 1]; b += rgba[p * 4 + 2]; }
-            (r, g, b) = (r / gap.Pixels.Count, g / gap.Pixels.Count, b / gap.Pixels.Count);
             byte owner = 0; var closest = double.MaxValue;
+
+            foreach (var p in gap.Pixels)
+            {
+                r += rgba[p * 4];
+                g += rgba[p * 4 + 1];
+                b += rgba[p * 4 + 2];
+            }
+
+            (r, g, b) = (r / gap.Pixels.Count, g / gap.Pixels.Count, b / gap.Pixels.Count);
+
             foreach (var n in gap.Neighbors)
             {
                 if (!gap.Pixels.TrueForAll(p => CanReach(reach, n, p, width)))
+                {
                     continue;
+                }
+
                 var count = sums[n, 3];
                 var d = Math.Sqrt(Math.Pow(sums[n, 0] / count - r, 2) + Math.Pow(sums[n, 1] / count - g, 2) + Math.Pow(sums[n, 2] / count - b, 2));
-                if (d < closest) (owner, closest) = (n, d);
+
+                if (d < closest)
+                {
+                    (owner, closest) = (n, d);
+                }
             }
-            if (closest > Constants.Refiner.MaxGapColorDistance) continue;
-            foreach (var p in gap.Pixels) labels[p] = owner;
+
+            if (closest > Constants.Refiner.MaxGapColorDistance)
+            {
+                continue;
+            }
+
+            foreach (var p in gap.Pixels)
+            {
+                labels[p] = owner;
+            }
         }
     }
 
@@ -189,7 +288,10 @@ internal static class LabelMapRefiner
     private static bool CanReach(PixelRect?[]? reach, byte label, int pixel, int width)
     {
         if (reach is null || label >= reach.Length || reach[label] is not { } area)
+        {
             return true;
+        }
+
         return area.Contains(pixel % width, pixel / width);
     }
 
@@ -200,6 +302,7 @@ internal static class LabelMapRefiner
     private static float Distance(ReadOnlySpan<byte> rgba, int a, int b)
     {
         int dr = rgba[a * 4] - rgba[b * 4], dg = rgba[a * 4 + 1] - rgba[b * 4 + 1], db = rgba[a * 4 + 2] - rgba[b * 4 + 2];
+
         return MathF.Sqrt(dr * dr + dg * dg + db * db);
     }
 
@@ -224,10 +327,14 @@ internal static class LabelMapRefiner
         for (var start = 0; start < labels.Length; start++)
         {
             if (seen[start] || !keep(labels[start]))
+            {
                 continue;
+            }
+
             var label = labels[start];
             var component = new Component(label, [], [], false);
             var touchesBorder = false;
+
             seen[start] = true;
             stack.Push(start);
 
@@ -235,8 +342,11 @@ internal static class LabelMapRefiner
             {
                 component.Pixels.Add(p);
                 var (x, y) = (p % width, p / width);
+
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+                {
                     touchesBorder = true;
+                }
 
                 void Visit(int q)
                 {
@@ -254,13 +364,30 @@ internal static class LabelMapRefiner
                     }
                 }
 
-                if (x > 0) Visit(p - 1);
-                if (x < width - 1) Visit(p + 1);
-                if (y > 0) Visit(p - width);
-                if (y < height - 1) Visit(p + width);
+                if (x > 0)
+                {
+                    Visit(p - 1);
+                }
+
+                if (x < width - 1)
+                {
+                    Visit(p + 1);
+                }
+
+                if (y > 0)
+                {
+                    Visit(p - width);
+                }
+
+                if (y < height - 1)
+                {
+                    Visit(p + width);
+                }
             }
+
             result.Add(component with { TouchesBorder = touchesBorder });
         }
+
         return result;
     }
 }

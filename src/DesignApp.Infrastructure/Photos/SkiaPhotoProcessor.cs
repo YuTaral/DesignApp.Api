@@ -11,20 +11,33 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
     public Result<ProcessedPhoto> Process(Stream upload)
     {
         using var buffer = new MemoryStream();
+
         upload.CopyTo(buffer);
+
         if (buffer.Length == 0)
+        {
             return Result.Failure<ProcessedPhoto>(Constants.Messages.EmptyFile);
+        }
 
         using var data = SKData.CreateCopy(buffer.GetBuffer().AsSpan(0, (int)buffer.Length));
         using var codec = SKCodec.Create(data);
+
         if (codec?.EncodedFormat is not (SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Png or SKEncodedImageFormat.Webp))
+        {
             return Result.Failure<ProcessedPhoto>(Constants.Messages.UnsupportedPhoto);
+        }
 
         var source = codec.Info.Size;
+
         if ((long)source.Width * source.Height > Application.Constants.Photos.MaxSourcePixels)
+        {
             return Result.Failure<ProcessedPhoto>(Constants.Messages.TooManyPixels);
+        }
+
         if (Math.Min(source.Width, source.Height) < Application.Constants.Photos.MinShortEdge)
+        {
             return Result.Failure<ProcessedPhoto>(Constants.Messages.PhotoTooSmall);
+        }
 
         // Phones store photos sideways and record how to turn them in EXIF. Bake that in, because
         // the metadata is about to be dropped and the AI and the editor need the upright image.
@@ -39,24 +52,32 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
             Math.Max(1, (int)Math.Round(upright.Height * scale)));
 
         using var decoded = Decode(codec, scale);
+
         if (decoded is null)
+        {
             return Result.Failure<ProcessedPhoto>(Constants.Messages.DamagedPhoto);
+        }
+
         using var output = new SKBitmap(new SKImageInfo(target.Width, target.Height, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb()));
+
         using (var canvas = new SKCanvas(output))
         {
+            var (uprightWidth, uprightHeight) = sideways ? (decoded.Height, decoded.Width) : (decoded.Width, decoded.Height);
+            var orientation = OrientationMatrix(origin, decoded.Width, decoded.Height);
+
             // JPEG has no transparency, so transparent areas of a PNG become white rather than black.
             canvas.Clear(SKColors.White);
-            var (uprightWidth, uprightHeight) = sideways ? (decoded.Height, decoded.Width) : (decoded.Width, decoded.Height);
             canvas.Scale((float)target.Width / uprightWidth, (float)target.Height / uprightHeight);
-            var orientation = OrientationMatrix(origin, decoded.Width, decoded.Height);
             canvas.Concat(in orientation);
             using var image = SKImage.FromBitmap(decoded);
+
             canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), null);
         }
 
         // Re-encoding writes no metadata, so EXIF (including GPS location) never reaches storage.
         using var encodedImage = SKImage.FromBitmap(output);
         using var encoded = encodedImage.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
+
         return new ProcessedPhoto(encoded.ToArray(), target.Width, target.Height);
     }
 
@@ -70,17 +91,23 @@ internal sealed class SkiaPhotoProcessor : IPhotoProcessor
     private static SKBitmap? Decode(SKCodec codec, float scale)
     {
         var size = codec.GetScaledDimensions(scale);
+
         if (size.Width < codec.Info.Width * scale || size.Height < codec.Info.Height * scale)
+        {
             size = codec.Info.Size;
+        }
 
         var info = new SKImageInfo(size.Width, size.Height, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
         var bitmap = new SKBitmap(info);
         var result = codec.GetPixels(info, bitmap.GetPixels());
+
         if (result != SKCodecResult.Success)
         {
             bitmap.Dispose();
+
             return null;
         }
+
         return bitmap;
     }
 

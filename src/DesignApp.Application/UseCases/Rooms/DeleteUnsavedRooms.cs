@@ -19,8 +19,12 @@ public sealed class DeleteUnsavedRooms(IRoomRepository rooms, RoomRemover remove
     public async Task<int> HandleAsync(CancellationToken cancellationToken)
     {
         var expired = await rooms.ListUnsavedBeforeAsync(clock.GetUtcNow() - Constants.Rooms.UnsavedLifetime, Constants.Rooms.CleanupBatchSize, cancellationToken);
+
         if (expired.Count > 0)
+        {
             await remover.DeleteAsync(expired, cancellationToken);
+        }
+
         return expired.Count;
     }
 }

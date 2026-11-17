@@ -28,8 +28,12 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
     {
         ArgumentNullException.ThrowIfNull(points);
         var list = points.ToList();
+
         if (!IsValid(list))
+        {
             throw new DomainException(Constants.Messages.PlanOutline);
+        }
+
         Points = list.AsReadOnly();
         Walls = list.Select((p, i) => new OutlineWall(p, list[(i + 1) % list.Count])).ToList().AsReadOnly();
     }
@@ -41,6 +45,7 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
     public static RoomOutline Rectangle(double widthMetres, double lengthMetres)
     {
         var (w, l) = (Math.Round(widthMetres * 100), Math.Round(lengthMetres * 100));
+
         return new RoomOutline([new(0, 0), new(w, 0), new(w, l), new(0, l)]);
     }
 
@@ -66,9 +71,13 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
     public bool Contains(double x, double y)
     {
         if (Walls.Any(w => OnSegment(w, x, y)))
+        {
             return true;
+        }
+
         // Count the vertical walls a ray to the right crosses.
         var crossings = Walls.Count(w => w.Dx == 0 && w.Start.X > x && y >= Math.Min(w.Start.Y, w.End.Y) && y < Math.Max(w.Start.Y, w.End.Y));
+
         return crossings % 2 == 1;
     }
 
@@ -92,6 +101,7 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
             .OrderBy(w => w.Distance)
             .Select(w => ((int Wall, double Distance)?)(w.Index, w.Distance))
             .FirstOrDefault();
+
         return facing;
     }
 
@@ -107,13 +117,18 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
         ArgumentNullException.ThrowIfNull(to);
         const double margin = 0.5;
         var (dx, dy) = (to.X - from.X, to.Y - from.Y);
+
         foreach (var wall in Walls)
         {
             double t, along, low, high;
+
             if (wall.Dx == 0)
             {
                 if (dx == 0)
+                {
                     continue;
+                }
+
                 t = (wall.Start.X - from.X) / dx;
                 along = from.Y + t * dy;
                 (low, high) = (Math.Min(wall.Start.Y, wall.End.Y), Math.Max(wall.Start.Y, wall.End.Y));
@@ -121,16 +136,24 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
             else
             {
                 if (dy == 0)
+                {
                     continue;
+                }
+
                 t = (wall.Start.Y - from.Y) / dy;
                 along = from.X + t * dx;
                 (low, high) = (Math.Min(wall.Start.X, wall.End.X), Math.Max(wall.Start.X, wall.End.X));
             }
+
             var length = Math.Sqrt(dx * dx + dy * dy);
             var inside = t * length > margin && (1 - t) * length > margin;
+
             if (inside && along > low + margin && along < high - margin)
+            {
                 return false;
+            }
         }
+
         return true;
     }
 
@@ -157,41 +180,69 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
     private static bool IsValid(List<OutlinePoint> points)
     {
         if (points.Count < 4 || points.Count > Constants.Plans.MaxCorners || points.Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y)))
+        {
             return false;
+        }
+
         if (points.Any(p => p.X != Math.Round(p.X) || p.Y != Math.Round(p.Y)))
+        {
             return false;
+        }
+
         var (minX, minY) = (points.Min(p => p.X), points.Min(p => p.Y));
         var (maxX, maxY) = (points.Max(p => p.X), points.Max(p => p.Y));
         var (min, max) = (Constants.Plans.MinWallMetres * 100, Constants.Plans.MaxWallMetres * 100);
+
         if (minX != 0 || minY != 0 || maxX < min || maxX > max || maxY < min || maxY > max)
+        {
             return false;
+        }
+
         // It starts at the top-left corner: the topmost row's leftmost point.
         if (points[0] != points.Where(p => p.Y == 0).MinBy(p => p.X))
+        {
             return false;
+        }
+
         var walls = points.Select((p, i) => new OutlineWall(p, points[(i + 1) % points.Count])).ToList();
+
         for (var i = 0; i < walls.Count; i++)
         {
             var (wall, next) = (walls[i], walls[(i + 1) % walls.Count]);
             // Each wall runs straight across or down, at least a little, and turns a right angle into the next.
             var straight = (wall.Dx == 0) != (wall.Dy == 0);
+
             if (!straight || wall.Length < Constants.Plans.MinWallSegmentCentimetres || (wall.Dx == 0) == (next.Dx == 0))
+            {
                 return false;
+            }
         }
+
         // Clockwise on the plan (y down): the shoelace sum is positive.
         var area = points.Select((p, i) => p.X * points[(i + 1) % points.Count].Y - points[(i + 1) % points.Count].X * p.Y).Sum();
+
         if (area <= 0)
+        {
             return false;
+        }
+
         // No two walls that don't meet at a corner touch or cross.
         for (var i = 0; i < walls.Count; i++)
         {
             for (var j = i + 2; j < walls.Count; j++)
             {
                 if (i == 0 && j == walls.Count - 1)
+                {
                     continue;
+                }
+
                 if (Touch(walls[i], walls[j]))
+                {
                     return false;
+                }
             }
         }
+
         return true;
     }
 
@@ -204,6 +255,7 @@ public sealed class RoomOutline : IEquatable<RoomOutline>
         var (aMinY, aMaxY) = (Math.Min(a.Start.Y, a.End.Y), Math.Max(a.Start.Y, a.End.Y));
         var (bMinX, bMaxX) = (Math.Min(b.Start.X, b.End.X), Math.Max(b.Start.X, b.End.X));
         var (bMinY, bMaxY) = (Math.Min(b.Start.Y, b.End.Y), Math.Max(b.Start.Y, b.End.Y));
+
         return aMinX <= bMaxX && bMinX <= aMaxX && aMinY <= bMaxY && bMinY <= aMaxY;
     }
 

@@ -31,8 +31,10 @@ public static class StarterLayout
     {
         ArgumentNullException.ThrowIfNull(catalog);
         var room = new Room(width * 100, length * 100, height * 100, catalog);
+
         room.Door();
         room.Windows(type is RoomType.Kitchen or RoomType.Bathroom ? SL.WetSill : SL.Sill, type is RoomType.Bathroom ? SL.BathroomGlassShare : SL.GlassShare);
+
         switch (type)
         {
             case RoomType.LivingRoom:
@@ -57,6 +59,7 @@ public static class StarterLayout
                 KidsRoom(room);
                 break;
         }
+
         return room.Items;
     }
 
@@ -70,19 +73,25 @@ public static class StarterLayout
         var sofaY = Math.Max(sofa.Width / 2 + SL.SideGap, free / 2);
         var sofaPlaced = room.Against("sofa", PlanWall.Left, sofaY, sofa.Width);
         var depth = room.Get("sofa")?.Depth ?? 95;
+
         if (sofaPlaced is { } s)
         {
             var tableLength = Math.Clamp(sofa.Width * 0.6, 80, 120);
             var tableX = depth + SL.SofaToTable + 30;
             var tvDepth = room.Get("tv-stand")?.Depth ?? 40;
+
             // The table only goes in when a walkway is left between it and the TV.
             if (w - (tableX + 30) - tvDepth >= SL.Walkway)
+            {
                 room.Place("coffee-table", tableX, s.Y, 90, width: tableLength);
+            }
+
             room.Rug("rug", (depth - 20 + w - tvDepth - 30) / 2, s.Y, Math.Min(w - depth - tvDepth - 10, 200), Math.Min(sofa.Width + 60, l - 60));
             room.Against("tv-stand", PlanWall.Right, s.Y, Math.Clamp(sofa.Width * 0.7, 100, 180));
             room.Against("side-table", PlanWall.Left, s.Y - sofa.Width / 2 - 30);
             room.Corner("floor-lamp", PlanWall.Back, PlanWall.Left);
         }
+
         room.Against("armchair", PlanWall.Back, w - 100);
         room.Corner("plant", PlanWall.Back, PlanWall.Right);
         room.Against("bookshelf", PlanWall.Right, l - 70);
@@ -99,12 +108,14 @@ public static class StarterLayout
         var bedLength = w - 210 >= SL.Walkway + 60 ? 210 : 200;
         var bedY = Math.Max(bedWidth / 2 + nightstand + 10, Math.Min(l * 0.42, room.FreeAlongLeft - bedWidth / 2));
         var bed = room.Against("double-bed", PlanWall.Right, bedY, bedWidth, bedLength, bedWidth == 160 ? null : bedWidth == 120 ? "small double bed" : "single bed");
+
         if (bed is { } b)
         {
             room.Against("nightstand", PlanWall.Right, b.Y - bedWidth / 2 - 5 - nightstand / 2);
             room.Against("nightstand", PlanWall.Right, b.Y + bedWidth / 2 + 5 + nightstand / 2);
             room.Rug("rug", w - bedLength * 0.55, b.Y, Math.Min(230, w - 100), Math.Min(bedWidth + 90, l - 60));
         }
+
         room.Against("wardrobe", PlanWall.Left, 30 + 75, Math.Clamp(room.FreeAlongLeft - 60, 80, 150));
         room.Against("dresser", PlanWall.Back, w * 0.4);
         room.Against("armchair", PlanWall.Back, 110);
@@ -116,30 +127,38 @@ public static class StarterLayout
     private static void Kitchen(Room room)
     {
         var (w, l) = (room.Width, room.Length);
-        var fridge = room.Against("fridge", PlanWall.Back, w - 32);
+        var islandY = 60 + SL.KitchenAisle + 45;
+        var islandLength = Math.Clamp(w - 2 * SL.KitchenAisle, 120, 180);
+        var tableLength = Math.Clamp(w - 2 * 100, 80, 140);
+        var tableY = (60 + SL.KitchenAisle + l) / 2;
         var cooker = room.Get("cooker")?.Width ?? 60;
         var cookerX = Math.Clamp(w * 0.4, cooker / 2 + 40, w - 70 - cooker);
-        room.Against("cooker", PlanWall.Back, cookerX);
+        var fridge = room.Against("fridge", PlanWall.Back, w - 32);
         // The worktop fills the rest of the back wall, on both sides of the cooker.
         var right = fridge is { } f ? f.X - 32 : w;
+
+        room.Against("cooker", PlanWall.Back, cookerX);
         room.Run("base-cabinets", PlanWall.Back, 0, cookerX - cooker / 2);
         room.Run("base-cabinets", PlanWall.Back, cookerX + cooker / 2, right);
         room.Against("tall-cabinets", PlanWall.Left, 60 + 30);
         room.Against("bin", PlanWall.Left, 60 + 60 + 25);
 
-        var islandY = 60 + SL.KitchenAisle + 45;
-        var islandLength = Math.Clamp(w - 2 * SL.KitchenAisle, 120, 180);
         if (w >= islandLength + 2 * SL.KitchenAisle && l >= islandY + 45 + 50 + SL.Walkway && room.Place("island", w / 2, islandY, 0, width: islandLength) is not null)
         {
             var stools = (int)(islandLength / 60);
+
             for (var i = 0; i < stools; i++)
+            {
                 room.Place("stool", w / 2 - islandLength / 2 + islandLength / stools * (i + 0.5), islandY + 45 + 25, 0);
+            }
+
             return;
         }
-        var tableLength = Math.Clamp(w - 2 * 100, 80, 140);
-        var tableY = (60 + SL.KitchenAisle + l) / 2;
+
         if (room.Place("dining-table", w / 2, tableY, 0, width: tableLength) is not null)
+        {
             room.Chairs("chair", w / 2, tableY, tableLength, room.Get("dining-table")?.Depth ?? 80, 0);
+        }
     }
 
     /// <summary>A bathtub (or a shower in a small room) and a vanity on the back wall, the toilet on the right wall, a tall cabinet, a towel rail and a bath mat.</summary>
@@ -149,8 +168,12 @@ public static class StarterLayout
         var (w, l) = (room.Width, room.Length);
         var bath = w >= 170 + 80 + 20 ? room.Against("bathtub", PlanWall.Back, Math.Clamp(w - 80 - 20, 150, 170) / 2, Math.Clamp(w - 80 - 20, 150, 170)) : null;
         var wet = bath ?? room.Corner("shower", PlanWall.Back, PlanWall.Left);
+
         if (wet is { } t)
+        {
             room.Rug("bath-mat", t.X, t.Y + t.Depth / 2 + 30, 80, 50);
+        }
+
         room.Against("vanity", PlanWall.Back, w - 45);
         room.Against("toilet", PlanWall.Right, Math.Max(l * 0.5, 100));
         room.Against("tall-cabinet", PlanWall.Right, l - 40);
@@ -171,18 +194,22 @@ public static class StarterLayout
         var rotation = along ? 90 : 0;
         var fits = tableLength >= 120 && shortSide >= tableDepth + 2 * (chairDepth + SL.BehindChair);
         var middle = (x: w / 2, y: (l + (room.Get("sideboard")?.Depth ?? 45)) / 2);
+
         if (fits && room.Place("dining-table", middle.x, middle.y, rotation, width: tableLength) is not null)
         {
             var (spanX, spanY) = along ? (tableDepth, tableLength) : (tableLength, tableDepth);
+
             room.Rug("rug", middle.x, middle.y, Math.Min(spanX + 2 * 60, w - 40), Math.Min(spanY + 2 * 60, l - 40));
             room.Chairs("chair", middle.x, middle.y, tableLength, tableDepth, rotation);
         }
         else if (room.Place("round-table", middle.x, middle.y, 0) is not null)
         {
             var diameter = room.Get("round-table")?.Width ?? 120;
+
             room.Rug("rug", middle.x, middle.y, Math.Min(diameter + 120, w - 40), Math.Min(diameter + 120, l - 40));
             room.Chairs("chair", middle.x, middle.y, diameter, diameter, 0);
         }
+
         room.Against("sideboard", PlanWall.Back, w / 2);
         room.Against("display-cabinet", PlanWall.Right, 70);
         room.Corner("plant", PlanWall.Back, PlanWall.Left);
@@ -196,16 +223,22 @@ public static class StarterLayout
         var (w, l) = (room.Width, room.Length);
         var deskWidth = Math.Clamp(w * 0.45, 100, 160);
         var deskDepth = room.Get("desk")?.Depth ?? 70;
+
         if (room.Against("desk", PlanWall.Back, w / 2, deskWidth) is { } desk)
         {
             room.Place("office-chair", desk.X, deskDepth + 35, 180);
             room.Against("filing-cabinet", PlanWall.Back, desk.X + deskWidth / 2 + 30);
             room.Rug("rug", desk.X, deskDepth + 80, Math.Min(deskWidth + 40, w - 60), Math.Min(160, l - deskDepth - 60));
         }
+
         room.Against("bookshelf", PlanWall.Right, 60);
         var sofaFits = room.FreeAlongLeft >= 190 + 2 * SL.SideGap && w >= 90 + SL.Walkway + deskDepth;
+
         if (!sofaFits || room.Against("sofa-bed", PlanWall.Left, room.FreeAlongLeft / 2) is null)
+        {
             room.Against("armchair", PlanWall.Left, room.FreeAlongLeft / 2);
+        }
+
         room.Corner("plant", PlanWall.Back, PlanWall.Left);
         room.Against("floor-lamp", PlanWall.Right, 60 + 40 + 30);
     }
@@ -216,12 +249,17 @@ public static class StarterLayout
     {
         var (w, l) = (room.Width, room.Length);
         var bedLength = room.Get("single-bed")?.Depth ?? 200;
+
         room.Place("single-bed", w - 45, bedLength / 2, 0);
         room.Against("nightstand", PlanWall.Back, w - 90 - 5 - 20);
         room.Against("wardrobe", PlanWall.Left, 60);
         room.Against("toy-box", PlanWall.Left, 60 + 50 + 60);
+
         if (room.Against("desk", PlanWall.Back, Math.Max(150, w * 0.4)) is { } desk)
+        {
             room.Place("chair", desk.X, (room.Get("desk")?.Depth ?? 55) + 30, 180);
+        }
+
         room.Against("bookcase", PlanWall.Right, bedLength + 10 + 50);
         room.Rug("rug", w / 2 - 20, l * 0.55, Math.Min(140, w - 200), Math.Min(200, l - 160));
         room.Place("beanbag", 100, l - 160, 0);
@@ -266,14 +304,20 @@ public static class StarterLayout
         public void Door()
         {
             var door = Catalog.FirstOrDefault(o => o.Shape == ItemShape.Door);
+
             FreeAlongLeft = Length;
+
             if (door is null || Length < door.Width + 2 * SL.DoorMargin)
+            {
                 return;
+            }
+
             var height = Math.Min(door.Height, Height - 20);
             // Along the left wall, its left end (facing it from inside) is the front corner.
             var along = SL.DoorMargin + door.Width / 2;
-            Items.Add(new PlanItem(door.Label, door.Shape, along, 0, door.Width, door.Depth, height, 0, door.Color, (int)PlanWall.Left));
             var (from, to) = (Length - SL.DoorMargin - door.Width, Length - SL.DoorMargin);
+
+            Items.Add(new PlanItem(door.Label, door.Shape, along, 0, door.Width, door.Depth, height, 0, door.Color, (int)PlanWall.Left));
             _openings.Add((PlanWall.Left, from, to, 0));
             _taken.Add((0, from, door.Width, to));
             FreeAlongLeft = from - SL.SideGap;
@@ -288,26 +332,49 @@ public static class StarterLayout
         public void Windows(double sill, double share)
         {
             var window = Catalog.FirstOrDefault(o => o.Key == "window") ?? Catalog.FirstOrDefault(o => o.Shape == ItemShape.Window);
+
             if (window is null)
+            {
                 return;
+            }
+
             var height = Math.Min(SL.WindowHeight, Height - sill - SL.WindowHead);
+
             if (height < 60)
+            {
                 return;
+            }
+
             var wanted = Width * Length * share / height;
             var count = Math.Max(1, (int)Math.Ceiling(wanted / SL.MaxWindowWidth));
             var each = Math.Clamp(wanted / count, SL.MinWindowWidth, SL.MaxWindowWidth);
+
             while (count > 1 && count * each + (count + 1) * SL.WindowGap > Width)
+            {
                 count--;
+            }
+
             each = Math.Min(each, Width - 2 * SL.WindowGap);
+
             if (each < SL.MinWindowWidth)
+            {
                 return;
+            }
+
             each = Math.Round(each / 10) * 10;
             var step = Width / count;
+
             for (var i = 0; i < count; i++)
+            {
                 AddWindow(window, PlanWall.Back, step * (i + 0.5), each, height, sill);
+            }
+
             var missing = wanted - count * each;
+
             if (missing >= SL.MinWindowWidth && Length >= missing + 2 * SL.WindowGap)
+            {
                 AddWindow(window, PlanWall.Right, Length * 0.35, Math.Round(Math.Min(missing, SL.MaxWindowWidth) / 10) * 10, height, sill);
+            }
         }
 
         /// <summary>Adds a window.</summary>
@@ -334,11 +401,16 @@ public static class StarterLayout
         public PlanItem? Against(string key, PlanWall wall, double at, double? width = null, double? depth = null, string? label = null)
         {
             var o = Get(key);
+
             if (o is null)
+            {
                 return null;
+            }
+
             var (w, d) = (width ?? o.Width, depth ?? o.Depth);
             var sideways = wall is PlanWall.Left or PlanWall.Right;
             var length = sideways ? Length : Width;
+
             // Try the point first, then further and further either side of it.
             for (var shift = 0.0; shift <= length; shift += SL.Step)
             {
@@ -352,10 +424,14 @@ public static class StarterLayout
                         PlanWall.Left => (d / 2, point, 270),
                         _ => (Width - d / 2, point, 90),
                     };
+
                     if (Place(key, x, y, turn, w, d, label) is { } placed)
+                    {
                         return placed;
+                    }
                 }
             }
+
             return null;
         }
 
@@ -367,10 +443,15 @@ public static class StarterLayout
         public PlanItem? Corner(string key, PlanWall back, PlanWall side)
         {
             var o = Get(key);
+
             if (o is null)
+            {
                 return null;
+            }
+
             var x = side == PlanWall.Left ? o.Width / 2 + 5 : Width - o.Width / 2 - 5;
             var y = back == PlanWall.Back ? o.Depth / 2 + 5 : Length - o.Depth / 2 - 5;
+
             return Place(key, x, y, back == PlanWall.Back ? 0 : 180);
         }
 
@@ -382,7 +463,9 @@ public static class StarterLayout
         public void Run(string key, PlanWall wall, double from, double to)
         {
             if (to - from >= SL.MinRun)
+            {
                 Against(key, wall, (from + to) / 2, Math.Round(to - from));
+            }
         }
 
         /// <summary>A rug: flat under the furniture, kept inside the room.</summary>
@@ -394,7 +477,10 @@ public static class StarterLayout
         public void Rug(string key, double x, double y, double across, double down)
         {
             if (across < SL.MinRug || down < SL.MinRug)
+            {
                 return;
+            }
+
             Place(key, Math.Clamp(x, across / 2, Width - across / 2), Math.Clamp(y, down / 2, Length - down / 2), 0, Math.Round(across), Math.Round(down));
         }
 
@@ -408,13 +494,20 @@ public static class StarterLayout
         public void Chairs(string key, double x, double y, double length, double depth, int rotation)
         {
             var chair = Get(key);
+
             if (chair is null)
+            {
                 return;
+            }
+
             var perSide = Math.Max(1, (int)(length / SL.PlaceWidth));
             var reach = depth / 2 + chair.Depth / 2;
+            var end = length / 2 + chair.Depth / 2;
+
             for (var i = 0; i < perSide; i++)
             {
                 var offset = -length / 2 + length / perSide * (i + 0.5);
+
                 if (rotation == 0)
                 {
                     Place(key, x + offset, y - reach, 0);
@@ -426,7 +519,7 @@ public static class StarterLayout
                     Place(key, x + reach, y + offset, 90);
                 }
             }
-            var end = length / 2 + chair.Depth / 2;
+
             if (rotation == 0)
             {
                 Place(key, x - end, y, 270);
@@ -454,25 +547,45 @@ public static class StarterLayout
         public PlanItem? Place(string key, double x, double y, int rotation, double? width = null, double? depth = null, string? label = null)
         {
             var o = Get(key);
+
             if (o is null)
+            {
                 return null;
+            }
+
             var (w, d) = (Math.Round(width ?? o.Width), Math.Round(depth ?? o.Depth));
             var h = Math.Min(o.Height, Height - 5);
             var turned = rotation % 180 != 0;
             var (across, down) = turned ? (d, w) : (w, d);
             var box = (X1: x - across / 2, Y1: y - down / 2, X2: x + across / 2, Y2: y + down / 2);
             const double edge = 0.5;
+
             if (box.X1 < -edge || box.Y1 < -edge || box.X2 > Width + edge || box.Y2 > Length + edge)
+            {
                 return null;
+            }
+
             var rug = o.Shape == ItemShape.Rug;
+
             if (!rug && _taken.Any(t => box.X1 < t.X2 - edge && t.X1 < box.X2 - edge && box.Y1 < t.Y2 - edge && t.Y1 < box.Y2 - edge))
+            {
                 return null;
+            }
+
             if (!rug && _openings.Any(opening => Blocks(box, h, opening)))
+            {
                 return null;
+            }
+
             var item = new PlanItem(label ?? o.Label, o.Shape, Math.Round(x), Math.Round(y), w, d, h, rotation, o.Color);
+
             Items.Add(item);
+
             if (!rug)
+            {
                 _taken.Add(box);
+            }
+
             return item;
         }
 
@@ -494,6 +607,7 @@ public static class StarterLayout
                 PlanWall.Left => box.X1 < SL.WallTouch,
                 _ => box.X2 > Width - SL.WallTouch,
             };
+
             return touches && from < opening.To && opening.From < to && height > opening.Bottom;
         }
     }

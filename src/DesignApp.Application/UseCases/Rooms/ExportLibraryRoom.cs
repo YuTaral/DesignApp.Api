@@ -23,13 +23,20 @@ public sealed class ExportLibraryRoom(IRoomRepository rooms, IFileStorage storag
     public async Task<byte[]?> HandleAsync(Guid roomId, string libraryRoomId, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null || room.Status is not RoomStatus.Ready || room.LabelMapKey is null)
+        {
             return null;
+        }
 
         var photo = await ReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersion), cancellationToken);
         var labelMap = await ReadAsync(room.LabelMapKey, cancellationToken);
+
         if (photo is null || labelMap is null)
+        {
             return null;
+        }
+
         return library.Pack(new LibraryExport(libraryRoomId, photo, labelMap, room.Width, room.Height, room.Objects));
     }
 
@@ -40,10 +47,16 @@ public sealed class ExportLibraryRoom(IRoomRepository rooms, IFileStorage storag
     private async Task<byte[]?> ReadAsync(string key, CancellationToken cancellationToken)
     {
         await using var file = await storage.OpenReadAsync(key, cancellationToken);
+
         if (file is null)
+        {
             return null;
+        }
+
         using var buffer = new MemoryStream();
+
         await file.Content.CopyToAsync(buffer, cancellationToken);
+
         return buffer.ToArray();
     }
 }

@@ -33,6 +33,7 @@ public sealed record PlanResponse(
             .Select(i => new PlanItemRequest(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation, i.Form, ItemPartsRequest.From(i.Parts), i.Decorations.Names))
             .ToList();
         var outline = plan.Outline.Points.Select(p => new OutlinePointRequest(p.X, p.Y)).ToList();
+
         return new(plan.Id, plan.Name, plan.RoomType, plan.Width, plan.Length, plan.Height, plan.WallColor.Value, plan.FloorColor.Value,
             plan.FloorType, plan.View, plan.AiMode, items, plan.UpdatedAt, outline, plan.Corner);
     }

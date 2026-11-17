@@ -35,6 +35,7 @@ public sealed class GetDesigns(IDesignRepository designs, IRoomRepository rooms,
     public async Task<IReadOnlyDictionary<Guid, int>> PhotoVersionsAsync(CancellationToken cancellationToken)
     {
         var owned = await rooms.ListByOwnerAsync(currentUser.Id, cancellationToken);
+
         return owned.ToDictionary(r => r.Id, r => r.PhotoVersion);
     }
 }

@@ -40,9 +40,11 @@ public class AnalyzeRoomTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 1200, 800, Now);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(1200, 800), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
+
         return room;
     }
 
@@ -65,6 +67,7 @@ public class AnalyzeRoomTests
     public async Task A_photo_that_is_not_a_room_fails_with_the_reason()
     {
         var room = await UploadedRoomAsync();
+
         _inventory = new StubInventory(Result.Failure<IReadOnlyList<InventoryItem>>("Not a room."));
 
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
@@ -78,6 +81,7 @@ public class AnalyzeRoomTests
     public async Task A_provider_error_fails_the_room_without_exposing_details()
     {
         var room = await UploadedRoomAsync();
+
         _segmentation = new ThrowingSegmentation();
 
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
@@ -91,6 +95,7 @@ public class AnalyzeRoomTests
     public async Task No_outlines_means_nothing_found()
     {
         var room = await UploadedRoomAsync();
+
         _segmentation = new EmptySegmentation();
 
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
@@ -104,6 +109,7 @@ public class AnalyzeRoomTests
     public async Task An_interrupted_analysis_runs_again()
     {
         var room = await UploadedRoomAsync();
+
         room.StartAnalysis(); // as if the API stopped half-way
 
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
@@ -116,6 +122,7 @@ public class AnalyzeRoomTests
     public async Task A_room_that_keeps_getting_interrupted_is_failed()
     {
         var room = await UploadedRoomAsync();
+
         for (var i = 0; i < DesignApp.Domain.Constants.Rooms.MaxAnalysisAttempts; i++)
         {
             room.StartAnalysis();
@@ -132,6 +139,7 @@ public class AnalyzeRoomTests
     public async Task A_finished_room_is_left_alone()
     {
         var room = await UploadedRoomAsync();
+
         await CreateHandler().HandleAsync(room.Id, CancellationToken.None);
         _notifier.Sent.Clear();
 
@@ -145,6 +153,7 @@ public class AnalyzeRoomTests
     {
         var room = await UploadedRoomAsync();
         using var shutdown = new CancellationTokenSource();
+
         _inventory = new CancellingInventory(shutdown);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => CreateHandler().HandleAsync(room.Id, shutdown.Token));

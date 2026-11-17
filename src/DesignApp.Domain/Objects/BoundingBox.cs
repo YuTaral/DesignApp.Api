@@ -24,7 +24,10 @@ public readonly record struct BoundingBox
     public BoundingBox(double x, double y, double width, double height)
     {
         if (x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 1 + Constants.Boxes.Tolerance || y + height > 1 + Constants.Boxes.Tolerance)
+        {
             throw new DomainException(Constants.Messages.BoxOutside(x, y, width, height));
+        }
+
         (X, Y, Width, Height) = (x, y, width, height);
     }
 }

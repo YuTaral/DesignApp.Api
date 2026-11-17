@@ -35,8 +35,12 @@ public sealed class UploadRoom(
         AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake, bool analyze = true)
     {
         var processed = photoProcessor.Process(upload);
+
         if (!processed.Succeeded)
+        {
             return Result.Failure<Room>(processed.Error);
+        }
+
         var photo = processed.Value;
 
         var now = clock.GetUtcNow();
@@ -48,6 +52,7 @@ public sealed class UploadRoom(
             await storage.SaveAsync(photoKey, content, Constants.ContentTypes.Jpeg, cancellationToken);
 
         rooms.Add(room);
+
         try
         {
             await rooms.SaveChangesAsync(cancellationToken);
@@ -64,11 +69,15 @@ public sealed class UploadRoom(
             {
                 throw new AggregateException(saveError, cleanupError);
             }
+
             throw;
         }
 
         if (analyze)
+        {
             analysisScheduler.Schedule(room.Id);
+        }
+
         return room;
     }
 }

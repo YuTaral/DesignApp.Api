@@ -13,13 +13,17 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     public AnalysisImage PrepareForAnalysis(Stream photo)
     {
         using var buffer = new MemoryStream();
+
         photo.CopyTo(buffer);
         var jpeg = buffer.ToArray();
 
         using var source = SKBitmap.Decode(jpeg) ?? throw new InvalidOperationException("The stored photo can't be decoded.");
         var scale = Math.Min(1f, (float)Application.Constants.Analysis.MaxLongEdge / Math.Max(source.Width, source.Height));
+
         if (scale >= 1f)
+        {
             return new AnalysisImage(jpeg, source.Width, source.Height);
+        }
 
         var info = new SKImageInfo(
             Math.Max(1, (int)Math.Round(source.Width * scale)),
@@ -28,6 +32,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         using var scaled = source.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
         using var image = SKImage.FromBitmap(scaled);
         using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
+
         return new AnalysisImage(encoded.ToArray(), info.Width, info.Height);
     }
 
@@ -35,10 +40,18 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     public LabelMap BuildLabelMap(AnalysisImage image, IReadOnlyList<SegmentedObject> objects)
     {
         if (objects.Count > Domain.Constants.Rooms.MaxObjectIndex)
+        {
             objects = [.. objects.Take(Domain.Constants.Rooms.MaxObjectIndex)];
+        }
+
         var (width, height) = (image.Width, image.Height);
         var labels = new byte[width * height];
-
+        var minPixels = Application.Constants.Analysis.MinAreaFraction * width * height;
+        var painted = new int[objects.Count + 1];
+        var surfaces = objects.Select(o => o.Item.Category.IsSurface()).ToArray();
+        var reach = Reach(objects, width, height);
+        var renumber = new byte[objects.Count + 1];
+        var detected = new List<DetectedObject>();
         // Paint the largest outlines first, so smaller objects in front of them stay on top.
         // Paint ids are list positions + 1; objects are renumbered once we know which survive.
         var paintOrder = objects
@@ -46,24 +59,29 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             .Where(p => p.Area > 0)
             .OrderByDescending(p => p.Area / (double)(p.Object.Mask.Width * p.Object.Mask.Height))
             .ToList();
+
         foreach (var (o, paintId, _) in paintOrder)
+        {
             Paint(labels, width, height, o.Mask, paintId);
+        }
 
         // Objects too small to keep are cleared before the cleanup, so they can't grow.
-        var minPixels = Application.Constants.Analysis.MinAreaFraction * width * height;
-        var painted = new int[objects.Count + 1];
         foreach (var label in labels)
+        {
             painted[label]++;
+        }
+
         for (var p = 0; p < labels.Length; p++)
         {
             if (painted[labels[p]] < minPixels)
+            {
                 labels[p] = 0;
+            }
         }
 
         using var photo = DecodeRgba(image);
         var pixels = photo.GetPixelSpan();
-        var surfaces = objects.Select(o => o.Item.Category.IsSurface()).ToArray();
-        var reach = Reach(objects, width, height);
+
         // Without walls, floors or ceilings the background stays unassigned instead of going to the objects.
         LabelMapRefiner.Refine(labels, width, height, pixels, label => label <= surfaces.Length && surfaces[label - 1], reach,
             fillGaps: surfaces.Any(s => s));
@@ -71,24 +89,29 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var stats = Measure(labels, width, height, objects.Count, pixels);
 
         // Keep Claude's order (most important first) for the final indexes.
-        var renumber = new byte[objects.Count + 1];
-        var detected = new List<DetectedObject>();
         for (var i = 0; i < objects.Count; i++)
         {
             var s = stats[i + 1];
+
             if (s.Pixels < minPixels)
+            {
                 continue;
+            }
+
             var index = detected.Count + 1;
-            renumber[i + 1] = (byte)index;
+            var item = objects[i].Item;
             var box = new BoundingBox(
                 s.MinX / (double)width, s.MinY / (double)height,
                 (s.MaxX - s.MinX + 1) / (double)width, (s.MaxY - s.MinY + 1) / (double)height);
-            var item = objects[i].Item;
+
+            renumber[i + 1] = (byte)index;
             detected.Add(new DetectedObject(index, item.Label, item.Category, box, s.MedianColor()));
         }
 
         for (var p = 0; p < labels.Length; p++)
+        {
             labels[p] = renumber[labels[p]];
+        }
 
         return new LabelMap(EncodeGrayPng(labels, width, height), detected);
     }
@@ -105,20 +128,27 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         var minMargin = Constants.Refiner.BoxReachFraction * Math.Max(width, height);
         var reach = new PixelRect?[objects.Count + 1];
+
         for (var i = 0; i < objects.Count; i++)
         {
             var item = objects[i].Item;
+
             if (item.Category.IsSurface())
+            {
                 continue;
+            }
+
             var box = item.Box;
             var marginX = (int)Math.Ceiling(Math.Max(minMargin, Constants.Refiner.BoxReachOwnFraction * box.Width * width));
             var marginY = (int)Math.Ceiling(Math.Max(minMargin, Constants.Refiner.BoxReachOwnFraction * box.Height * height));
+
             reach[i + 1] = new PixelRect(
                 Math.Max(0, (int)Math.Floor(box.X * width) - marginX),
                 Math.Max(0, (int)Math.Floor(box.Y * height) - marginY),
                 Math.Min(width, (int)Math.Ceiling((box.X + box.Width) * width) + marginX),
                 Math.Min(height, (int)Math.Ceiling((box.Y + box.Height) * height) + marginY));
         }
+
         return reach;
     }
 
@@ -139,30 +169,42 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         // Only visit the part of the label map under the mask's own bounding box.
         var (minX, minY, maxX, maxY) = (mask.Width, mask.Height, -1, -1);
+
         for (var y = 0; y < mask.Height; y++)
         {
             for (var x = 0; x < mask.Width; x++)
             {
                 if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
+                {
                     continue;
+                }
+
                 (minX, minY) = (Math.Min(minX, x), Math.Min(minY, y));
                 (maxX, maxY) = (Math.Max(maxX, x), Math.Max(maxY, y));
             }
         }
+
         if (maxX < 0)
+        {
             return;
+        }
 
         var (sx, sy) = (mask.Width / (double)width, mask.Height / (double)height);
         var (fromX, toX) = ((int)(minX / sx), Math.Min(width - 1, (int)Math.Ceiling((maxX + 1) / sx)));
         var (fromY, toY) = ((int)(minY / sy), Math.Min(height - 1, (int)Math.Ceiling((maxY + 1) / sy)));
+
         for (var y = fromY; y <= toY; y++)
         {
             var my = Math.Min(mask.Height - 1, (int)((y + 0.5) * sy));
+
             for (var x = fromX; x <= toX; x++)
             {
                 var mx = Math.Min(mask.Width - 1, (int)((x + 0.5) * sx));
+
                 if (mask.Coverage[my * mask.Width + mx] >= Constants.Imaging.CoverageThreshold)
+                {
                     labels[y * width + x] = paintId;
+                }
             }
         }
     }
@@ -177,18 +219,25 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     private static ObjectStats[] Measure(byte[] labels, int width, int height, int count, ReadOnlySpan<byte> pixels)
     {
         var stats = new ObjectStats[count + 1];
+
         for (var i = 0; i < stats.Length; i++)
+        {
             stats[i] = new ObjectStats();
+        }
 
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
             {
                 var p = y * width + x;
+
                 if (labels[p] != 0)
+                {
                     stats[labels[p]].Add(x, y, pixels[p * 4], pixels[p * 4 + 1], pixels[p * 4 + 2]);
+                }
             }
         }
+
         return stats;
     }
 
@@ -198,6 +247,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         using var codec = SKCodec.Create(new MemoryStream(image.Jpeg));
         var info = new SKImageInfo(image.Width, image.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
+
         return SKBitmap.Decode(codec, info) ?? throw new InvalidOperationException("The analysis image can't be decoded.");
     }
 
@@ -206,6 +256,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var changed = OutlineBrush.Apply(labels, width, height, stroke);
+
         return changed.Succeeded ? EncodeGrayPng(labels, width, height) : Result.Failure<byte[]>(changed.Error);
     }
 
@@ -214,20 +265,28 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var marked = ObjectMarker.Apply(labels, width, height, mark);
+
         if (!marked.Succeeded)
+        {
             return Result.Failure<MarkedObject>(marked.Error);
+        }
 
         using var pixels = PhotoAtMapSize(photo, width, height);
         var colors = pixels.GetPixelSpan();
         var stats = new ObjectStats();
+
         for (var p = 0; p < labels.Length; p++)
         {
             if (labels[p] == mark.Index)
+            {
                 stats.Add(p % width, p / width, colors[p * 4], colors[p * 4 + 1], colors[p * 4 + 2]);
+            }
         }
+
         var box = new BoundingBox(
             stats.MinX / (double)width, stats.MinY / (double)height,
             (stats.MaxX - stats.MinX + 1) / (double)width, (stats.MaxY - stats.MinY + 1) / (double)height);
+
         return new MarkedObject(EncodeGrayPng(labels, width, height), box, stats.MedianColor());
     }
 
@@ -237,60 +296,81 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var parent = (byte)whole.Index;
         var inWhole = labels.Count(l => l == parent);
+        var minimum = Math.Max(1, (int)(inWhole * Constants.Imaging.MinPartShare));
         // Each part takes from the object as it was, so a smaller part can sit on top of a larger one (a seat on a frame).
         var original = (byte[])labels.Clone();
-
+        var stats = parts.Select(_ => new ObjectStats()).ToArray();
+        var renumber = new byte[Constants.Imaging.ByteValues];
+        var found = new List<DetectedObject>();
         // Larger parts first, so a smaller one (a seat cushion on a seat) ends up on top of it.
         var ordered = parts.Select((part, i) => (Part: part, Index: (byte)(firstIndex + i), Area: part.Mask.Coverage.Count(c => c >= Constants.Imaging.CoverageThreshold)))
             .OrderByDescending(p => p.Area).ToList();
+
         foreach (var (part, index, _) in ordered)
         {
             var mask = part.Mask;
+
             for (var p = 0; p < labels.Length; p++)
             {
                 if (original[p] != parent)
+                {
                     continue;
+                }
+
                 // The masks are at the analysis size, which is the label map's; scale anyway in case they differ.
                 var (mx, my) = (p % width * mask.Width / width, p / width * mask.Height / height);
+
                 if (mask.Coverage[my * mask.Width + mx] >= Constants.Imaging.CoverageThreshold)
+                {
                     labels[p] = index;
+                }
             }
         }
 
         using var pixels = PhotoAtMapSize(photo, width, height);
         var colors = pixels.GetPixelSpan();
-        var stats = parts.Select(_ => new ObjectStats()).ToArray();
+
         for (var p = 0; p < labels.Length; p++)
         {
             var slot = labels[p] - firstIndex;
+
             if (slot >= 0 && slot < stats.Length)
+            {
                 stats[slot].Add(p % width, p / width, colors[p * 4], colors[p * 4 + 1], colors[p * 4 + 2]);
+            }
         }
 
         // Parts too small to color are given back to the object; the others are numbered on from firstIndex.
-        var minimum = Math.Max(1, (int)(inWhole * Constants.Imaging.MinPartShare));
-        var renumber = new byte[Constants.Imaging.ByteValues];
-        var found = new List<DetectedObject>();
         for (var slot = 0; slot < stats.Length; slot++)
         {
             var s = stats[slot];
+
             if (s.Pixels < minimum)
             {
                 renumber[firstIndex + slot] = parent;
                 continue;
             }
+
             var index = firstIndex + found.Count;
-            renumber[firstIndex + slot] = (byte)index;
             var box = new BoundingBox(s.MinX / (double)width, s.MinY / (double)height, (s.MaxX - s.MinX + 1) / (double)width, (s.MaxY - s.MinY + 1) / (double)height);
+
+            renumber[firstIndex + slot] = (byte)index;
             found.Add(new DetectedObject(index, parts[slot].Item.Label, whole.Category, box, s.MedianColor(), ParentIndex: whole.Index));
         }
+
         if (found.Count == 0)
+        {
             return Result.Failure<LabelMap>(Constants.Messages.NoPartsInside(whole.Label));
+        }
+
         for (var p = 0; p < labels.Length; p++)
         {
             if (labels[p] >= firstIndex && labels[p] < firstIndex + stats.Length)
+            {
                 labels[p] = renumber[labels[p]];
+            }
         }
+
         return new LabelMap(EncodeGrayPng(labels, width, height), found);
     }
 
@@ -299,13 +379,18 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var merged = 0;
+
         for (var p = 0; p < labels.Length; p++)
         {
             if (labels[p] != partIndex)
+            {
                 continue;
+            }
+
             labels[p] = (byte)parentIndex;
             merged++;
         }
+
         return merged == 0 ? Result.Failure<byte[]>(Constants.Messages.NothingToMerge(partLabel)) : EncodeGrayPng(labels, width, height);
     }
 
@@ -314,21 +399,33 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var gone = new bool[Constants.Imaging.ByteValues];
+
         foreach (var index in indexes)
+        {
             gone[index] = true;
+        }
+
         if (!labels.Any(l => gone[l]))
+        {
             return null;
+        }
+
         // The label map can be smaller than the photo (the analysis size): each photo pixel takes the label under it.
         var mask = new byte[photoWidth * photoHeight];
+
         for (var y = 0; y < photoHeight; y++)
         {
             var row = Math.Min(height - 1, y * height / photoHeight) * width;
+
             for (var x = 0; x < photoWidth; x++)
             {
                 if (gone[labels[row + Math.Min(width - 1, x * width / photoWidth)]])
+                {
                     mask[y * photoWidth + x] = Constants.Imaging.FullCoverage;
+                }
             }
         }
+
         return EncodeGrayPng(mask, photoWidth, photoHeight);
     }
 
@@ -348,7 +445,9 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var mapInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
         using var atMapSize = photo.Resize(mapInfo, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
             ?? throw new InvalidOperationException("The new photo can't be scaled.");
+
         RemovalRefill.Apply(labels, width, height, atMapSize.GetPixelSpan(), indexes);
+
         return new RemovedObject(jpeg.ToArray(), EncodeGrayPng(labels, width, height));
     }
 
@@ -361,6 +460,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     {
         using var source = SKBitmap.Decode(photo) ?? throw new InvalidOperationException("The stored photo can't be decoded.");
         var info = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
+
         return source.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
             ?? throw new InvalidOperationException("The stored photo can't be scaled.");
     }
@@ -375,6 +475,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var (width, height) = (codec.Info.Width, codec.Info.Height);
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque))
             ?? throw new InvalidOperationException("The label map can't be decoded.");
+
         return (bitmap.GetPixelSpan().ToArray(), width, height);
     }
 
@@ -385,9 +486,11 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     private static byte[] EncodeGrayPng(byte[] labels, int width, int height)
     {
         using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         labels.CopyTo(bitmap.GetPixelSpan());
         using var image = SKImage.FromBitmap(bitmap);
         using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
+
         return png.ToArray();
     }
 
@@ -436,12 +539,17 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         private int Median(int[] histogram)
         {
             var half = Pixels / 2;
+
             for (int value = 0, seen = 0; value < Constants.Imaging.ByteValues; value++)
             {
                 seen += histogram[value];
+
                 if (seen > half)
+                {
                     return value;
+                }
             }
+
             return 255;
         }
     }

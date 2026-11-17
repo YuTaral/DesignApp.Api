@@ -34,6 +34,7 @@ internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<StorageOptions> optio
         try
         {
             var response = await s3.GetObjectAsync(_bucket, key, cancellationToken);
+
             return new StoredFile(response.ResponseStream, response.Headers.ContentType, response.Headers.ContentLength);
         }
         catch (AmazonS3Exception e) when (e.StatusCode == HttpStatusCode.NotFound)
@@ -53,6 +54,8 @@ internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<StorageOptions> optio
     public async Task EnsureBucketExistsAsync(CancellationToken cancellationToken)
     {
         if (!await AmazonS3Util.DoesS3BucketExistV2Async(s3, _bucket))
+        {
             await s3.PutBucketAsync(_bucket, cancellationToken);
+        }
     }
 }

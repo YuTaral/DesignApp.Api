@@ -21,7 +21,9 @@ internal sealed class CannedClaudeCode(string printed) : IClaudeCodeRunner
         Arguments = arguments;
         Input = input;
         var file = arguments.SkipWhile(a => a != "--system-prompt-file").Skip(1).First();
+
         SystemPrompt = File.ReadAllText(file);
+
         return Task.FromResult(printed);
     }
 }

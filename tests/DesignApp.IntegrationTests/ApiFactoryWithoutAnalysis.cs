@@ -17,7 +17,9 @@ public sealed class ApiFactoryWithoutAnalysis : ApiFactory
         builder.ConfigureServices(services =>
         {
             foreach (var worker in services.Where(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "RoomAnalysisWorker").ToList())
+            {
                 services.Remove(worker);
+            }
         });
     }
 }

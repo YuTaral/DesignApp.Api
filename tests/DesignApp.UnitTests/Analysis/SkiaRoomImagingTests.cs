@@ -19,6 +19,7 @@ public class SkiaRoomImagingTests
 
         Assert.Equal((DesignApp.Application.Constants.Analysis.MaxLongEdge, DesignApp.Application.Constants.Analysis.MaxLongEdge / 2), (image.Width, image.Height));
         using var decoded = TestImages.Decode(image.Jpeg);
+
         Assert.Equal((image.Width, image.Height), (decoded.Width, decoded.Height));
     }
 
@@ -45,6 +46,7 @@ public class SkiaRoomImagingTests
 
         Assert.Equal(["sofa", "wall"], map.Objects.Select(o => o.Label));
         var labels = DecodeLabels(map.Png);
+
         Assert.Equal(1, labels[60 * 200 + 100]); // inside the sofa
         Assert.Equal(2, labels[10 * 200 + 10]);  // wall around it
     }
@@ -59,6 +61,7 @@ public class SkiaRoomImagingTests
         var map = _imaging.BuildLabelMap(image, [new(Item("rug", ObjectCategory.Textile), Rect(200, 100, 0, 0, 100, 50))]);
 
         var box = Assert.Single(map.Objects).Box;
+
         Assert.Equal((0, 0, 0.5, 0.5), (Math.Round(box.X, 2), Math.Round(box.Y, 2), Math.Round(box.Width, 2), Math.Round(box.Height, 2)));
     }
 
@@ -80,6 +83,7 @@ public class SkiaRoomImagingTests
         var map = _imaging.BuildLabelMap(image, [new(Item("cushion", ObjectCategory.Textile), Rect(200, 100, 0, 0, 100, 50))]);
 
         var color = SKColor.Parse(Assert.Single(map.Objects).DominantColor.Value);
+
         Assert.InRange(color.Red, TestImages.Red.Red - 30, 255);
         Assert.InRange(color.Blue, 0, TestImages.Red.Blue + 30);
     }
@@ -96,6 +100,7 @@ public class SkiaRoomImagingTests
         ]);
 
         var labels = DecodeLabels(map.Png);
+
         Assert.Equal(1, labels[50 * 200 + 50]);
         Assert.Equal(2, labels[50 * 200 + 150]);
     }
@@ -107,13 +112,19 @@ public class SkiaRoomImagingTests
         // ragged gap; the gap is blue too, so the wall takes it. The red quadrant has a real edge.
         var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
         var ragged = Rect(200, 100, 100, 0, 100, 100);
+
         for (var y = 0; y < 100; y++)
+        {
             for (var x = 100; x < 130; x++)
+            {
                 ragged.Coverage[y * 200 + x] = (byte)((x + y) % 3 == 0 ? 0 : 255);
+            }
+        }
 
         var map = _imaging.BuildLabelMap(image, [new(Item("wall", ObjectCategory.Wall), ragged)]);
 
         var labels = DecodeLabels(map.Png);
+
         Assert.All(Enumerable.Range(100, 30), x => Assert.Equal(1, labels[10 * 200 + x])); // the ragged strip, filled
         Assert.Equal(1, labels[80 * 200 + 95]);   // blue just past the mask
         Assert.Equal(1, labels[80 * 200 + 20]);   // blue far from the mask: same color all the way, so the wall's too
@@ -129,12 +140,14 @@ public class SkiaRoomImagingTests
             [new(Item("floor lamp", ObjectCategory.Lighting), Rect(200, 100, 50, 10, 4, 80)), new(Item("sofa", ObjectCategory.Furniture), Rect(200, 100, 120, 60, 60, 30))]);
 
         var labels = DecodeLabels(map.Png);
+
         Assert.Equal(1, labels[50 * 200 + 51]);   // the stand
         Assert.Equal(2, labels[75 * 200 + 150]);  // the sofa
         Assert.Equal(0, labels[50 * 200 + 20]);   // the wall beside the lamp: nobody's
         Assert.Equal(0, labels[30 * 200 + 150]);  // the wall above the sofa: nobody's
         // At most the usual few pixels of edge growth around the 4 x 80 stand (nothing stops it on flat gray).
         var growth = DesignApp.Infrastructure.Constants.Refiner.MaxObjectGrowth;
+
         Assert.True(labels.Count(l => l == 1) <= (4 + 2 * growth) * (80 + 2 * growth), "the lamp took more than its edges");
     }
 
@@ -144,9 +157,14 @@ public class SkiaRoomImagingTests
         // A mirror whose mask has a hole where it reflects something of a very different color.
         var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
         var mirror = Rect(200, 100, 110, 10, 80, 80);
+
         for (var y = 40; y < 60; y++)
+        {
             for (var x = 140; x < 160; x++)
+            {
                 mirror.Coverage[y * 200 + x] = 0;
+            }
+        }
 
         var map = _imaging.BuildLabelMap(image, [new(Item("mirror", ObjectCategory.Decor), mirror)]);
 
@@ -159,13 +177,19 @@ public class SkiaRoomImagingTests
         // A blanket with a 3x3 speck far away from it, on a different color.
         var image = new AnalysisImage(TestImages.Create(200, 100), 200, 100);
         var blanket = Rect(200, 100, 0, 0, 100, 50);
+
         for (var y = 80; y < 83; y++)
+        {
             for (var x = 180; x < 183; x++)
+            {
                 blanket.Coverage[y * 200 + x] = 255;
+            }
+        }
 
         var map = _imaging.BuildLabelMap(image, [new(Item("blanket", ObjectCategory.Textile), blanket)]);
 
         var labels = DecodeLabels(map.Png);
+
         Assert.Equal(0, labels[81 * 200 + 181]);
         Assert.Equal(1, labels[25 * 200 + 50]);
     }
@@ -176,8 +200,10 @@ public class SkiaRoomImagingTests
     private static AnalysisImage Image(int width, int height)
     {
         using var bitmap = new SKBitmap(width, height);
+
         bitmap.Erase(SKColors.Gray);
         using var encoded = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Jpeg, 90);
+
         return new AnalysisImage(encoded.ToArray(), width, height);
     }
 
@@ -199,8 +225,12 @@ public class SkiaRoomImagingTests
     private static ObjectMask Rect(int width, int height, int x, int y, int w, int h)
     {
         var coverage = new byte[width * height];
+
         for (var row = y; row < y + h; row++)
+        {
             Array.Fill(coverage, (byte)255, row * width + x, w);
+        }
+
         return new ObjectMask(width, height, coverage);
     }
 
@@ -211,6 +241,7 @@ public class SkiaRoomImagingTests
         using var codec = SKCodec.Create(new MemoryStream(png));
         var info = new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque);
         using var bitmap = SKBitmap.Decode(codec, info);
+
         return bitmap.GetPixelSpan().ToArray();
     }
 }

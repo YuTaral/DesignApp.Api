@@ -16,7 +16,9 @@ public class SkiaPhotoProcessorTests
     private ProcessedPhoto Process(byte[] file)
     {
         var result = _processor.Process(new MemoryStream(file));
+
         Assert.True(result.Succeeded, result.Error);
+
         return result.Value;
     }
 
@@ -26,7 +28,9 @@ public class SkiaPhotoProcessorTests
     private string Reject(byte[] file)
     {
         var result = _processor.Process(new MemoryStream(file));
+
         Assert.False(result.Succeeded, "The file should have been refused.");
+
         return result.Error;
     }
 
@@ -40,6 +44,7 @@ public class SkiaPhotoProcessorTests
 
         Assert.Equal((800, 600), (photo.Width, photo.Height));
         using var decoded = TestImages.Decode(photo.Content);
+
         Assert.Equal((800, 600), (decoded.Width, decoded.Height));
         Assert.Equal(SKEncodedImageFormat.Jpeg, SKCodec.Create(new MemoryStream(photo.Content)).EncodedFormat);
     }
@@ -62,6 +67,7 @@ public class SkiaPhotoProcessorTests
 
         Assert.Equal((300, 400), (photo.Width, photo.Height));
         using var decoded = TestImages.Decode(photo.Content);
+
         // The red top-left quadrant ends up top-right after a clockwise turn.
         AssertClose(TestImages.Red, decoded.GetPixel(290, 10));
         AssertClose(TestImages.Blue, decoded.GetPixel(10, 10));
@@ -71,6 +77,7 @@ public class SkiaPhotoProcessorTests
     public void Metadata_such_as_exif_is_removed()
     {
         var withExif = TestImages.WithExifOrientation(TestImages.Create(400, 300), orientation: 1);
+
         Assert.Contains("Exif", Encoding.ASCII.GetString(withExif), StringComparison.Ordinal);
 
         var photo = Process(withExif);
@@ -82,6 +89,7 @@ public class SkiaPhotoProcessorTests
     public void Too_small_photos_are_rejected()
     {
         var error = Reject(TestImages.Create(200, 600));
+
         Assert.Contains("too small", error, StringComparison.Ordinal);
     }
 

@@ -16,6 +16,7 @@ public class ClientDisconnectedFilterTests
     {
         using var aborted = new CancellationTokenSource();
         var http = new DefaultHttpContext { RequestAborted = aborted.Token };
+
         await aborted.CancelAsync();
 
         var result = await new ClientDisconnectedFilter().InvokeAsync(

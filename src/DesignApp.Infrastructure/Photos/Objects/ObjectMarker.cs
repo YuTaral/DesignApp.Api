@@ -20,24 +20,33 @@ internal static class ObjectMarker
     public static Result<int> Apply(byte[] labels, int width, int height, NewObjectMark mark)
     {
         var mask = new bool[labels.Length];
+        var target = (byte)mark.Index;
+        var marked = 0;
+
         foreach (var stroke in mark.Strokes)
         {
             var value = stroke.Mode is OutlineBrushMode.Paint;
+
             StrokeCover.Walk(width, height, stroke.Shape, stroke.Radius, stroke.Points, p => mask[p] = value);
         }
 
-        var target = (byte)mark.Index;
-        var marked = 0;
         for (var p = 0; p < labels.Length; p++)
         {
             // A part only takes its object's pixels.
             if (!mask[p] || (mark.ParentIndex is int parent && labels[p] != parent))
+            {
                 continue;
+            }
+
             labels[p] = target;
             marked++;
         }
+
         if (marked == 0)
+        {
             return Result.Failure<int>(mark.ParentIndex is null ? Constants.Messages.EmptyMark : Constants.Messages.PartOutsideParent(mark.ParentLabel ?? ""));
+        }
+
         return marked;
     }
 }

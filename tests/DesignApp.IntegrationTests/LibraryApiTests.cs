@@ -21,17 +21,21 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.False(string.IsNullOrWhiteSpace(design.Name));
         using var cover = await browser.GetAsync(design.CoverUrl);
+
         Assert.Equal(HttpStatusCode.OK, cover.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, cover.Content.Headers.ContentType?.MediaType);
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/library/no-such-design/cover")).StatusCode);
         var room = Assert.IsType<LibraryRoomDto>(design.Rooms[0]);
         var layout = Assert.IsType<LibraryLayoutDto>(room.Layouts[0]);
+
         Assert.True(layout.ObjectCount > 0);
         using var photo = await browser.GetAsync(layout.PhotoUrl);
+
         Assert.Equal(HttpStatusCode.OK, photo.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, photo.Content.Headers.ContentType?.MediaType);
         Assert.True(photo.Headers.CacheControl?.Public);
         using var thumbnail = await browser.GetAsync(layout.ThumbnailUrl);
+
         Assert.Equal(HttpStatusCode.OK, thumbnail.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, thumbnail.Content.Headers.ContentType?.MediaType);
         Assert.True(thumbnail.Content.Headers.ContentLength < photo.Content.Headers.ContentLength / 4, "The thumbnail is much smaller than the photo.");
@@ -50,6 +54,7 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.Created, copied.StatusCode);
         var room = await copied.Content.ReadFromJsonAsync<JsonElement>();
+
         Assert.Equal("Ready", room.GetProperty("status").GetString());
         Assert.Equal($"{design.Id}/{source.Id}/{layout.Id}", room.GetProperty("libraryRoom").GetString());
         Assert.Equal(layout.ObjectCount, room.GetProperty("objects").GetArrayLength());
@@ -57,9 +62,11 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         // The copy is the guest's own room: its files are served like an upload's.
         var id = room.GetProperty("id").GetGuid();
+
         Assert.Equal(HttpStatusCode.OK, (await guest.GetAsync(room.GetProperty("photoUrl").GetString())).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await guest.GetAsync(room.GetProperty("labelMapUrl").GetString())).StatusCode);
         using var other = factory.CreateClient();
+
         Assert.Equal(HttpStatusCode.NotFound, (await other.GetAsync($"/api/rooms/{id}")).StatusCode);
     }
 
@@ -91,25 +98,33 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         using var guest = factory.CreateClient();
         var design = await FirstDesignAsync(guest);
+
         Assert.Equal(HttpStatusCode.Unauthorized, (await guest.PostAsync($"/api/library/{design.Id}/copy", null)).StatusCode);
 
         using var account = factory.CreateClient();
+
         (await account.PostAsJsonAsync("/api/account/sign-up", new { email = $"library-{Guid.NewGuid():N}@example.com", password = Password })).EnsureSuccessStatusCode();
         using var copied = await account.PostAsync($"/api/library/{design.Id}/copy", null);
 
         Assert.Equal(HttpStatusCode.Created, copied.StatusCode);
         var saved = await copied.Content.ReadFromJsonAsync<JsonElement>();
+
         Assert.Equal(design.Name, saved.GetProperty("name").GetString());
         var rooms = saved.GetProperty("rooms").EnumerateArray().Select(r => r.GetProperty("roomId").GetGuid()).ToList();
+
         Assert.Equal(design.Rooms.Count, rooms.Count);
+
         foreach (var (id, source) in rooms.Zip(design.Rooms))
         {
             var room = await account.GetFromJsonAsync<JsonElement>($"/api/rooms/{id}");
+
             Assert.Equal("Ready", room.GetProperty("status").GetString());
             // A whole house uses each room's first layout.
             Assert.Equal($"{design.Id}/{source.Id}/{source.Layouts[0].Id}", room.GetProperty("libraryRoom").GetString());
         }
+
         var designs = await account.GetFromJsonAsync<JsonElement>("/api/designs");
+
         Assert.Equal(1, designs.GetArrayLength());
     }
 
@@ -129,7 +144,9 @@ public class LibraryApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<LibraryDesignDto> FirstDesignAsync(HttpClient browser)
     {
         var designs = await browser.GetFromJsonAsync<List<LibraryDesignDto>>("/api/library");
+
         Assert.NotNull(designs);
+
         return Assert.IsType<LibraryDesignDto>(designs.FirstOrDefault(), exactMatch: false);
     }
 

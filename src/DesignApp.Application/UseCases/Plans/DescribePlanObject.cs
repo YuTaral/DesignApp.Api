@@ -20,11 +20,19 @@ public sealed class DescribePlanObject(IPlanRepository plans, ICurrentUser curre
     public async Task<Result<CatalogObject>?> HandleAsync(Guid planId, string? description, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(planId, currentUser.Id, cancellationToken);
+
         if (plan is null)
+        {
             return null;
+        }
+
         var words = description?.Trim() ?? "";
+
         if (words.Length is 0 or > Constants.Builder.MaxDescriptionLength)
+        {
             return Result.Failure<CatalogObject>(Constants.Messages.ObjectDescription);
+        }
+
         return await ai.Builder(plan.AiMode).DescribeObjectAsync(plan.RoomType, words, cancellationToken);
     }
 }

@@ -45,8 +45,11 @@ internal sealed partial class RoomAnalysisWorker(
     {
         await using var scope = scopes.CreateAsyncScope();
         var rooms = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
+
         foreach (var id in await rooms.ListUnfinishedAsync(cancellationToken))
+        {
             scheduler.Schedule(id);
+        }
     }
 
     /// <summary>Analyzes one room in its own scope. Errors are logged so the worker keeps running.</summary>
@@ -55,10 +58,14 @@ internal sealed partial class RoomAnalysisWorker(
     private async ValueTask AnalyzeAsync(Guid roomId, CancellationToken cancellationToken)
     {
         if (!_inFlight.TryAdd(roomId, 0))
+        {
             return;
+        }
+
         try
         {
             await using var scope = scopes.CreateAsyncScope();
+
             await scope.ServiceProvider.GetRequiredService<AnalyzeRoom>().HandleAsync(roomId, cancellationToken);
         }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)

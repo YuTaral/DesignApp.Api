@@ -28,14 +28,22 @@ public sealed class SaveRoomColors(IRoomRepository rooms, IDesignRepository desi
     {
         checks.Check(edits);
         var design = await designs.FindAsync(designId, currentUser.Id, cancellationToken);
+
         if (design is null || design.Rooms.All(r => r.RoomId != roomId))
+        {
             return null;
+        }
+
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
 
         design.SetRoomEdits(room, edits, sizes, clock.GetUtcNow());
         await designs.SaveChangesAsync(cancellationToken);
+
         return design;
     }
 }

@@ -24,6 +24,7 @@ internal static class RateLimitPolicies
         RateLimitPartition<string> PerAddress(HttpContext context, int permits, TimeSpan window)
         {
             var address = context.Connection.RemoteIpAddress?.ToString() ?? Constants.RateLimits.UnknownAddress;
+
             if (!enabled)
             {
                 return RateLimitPartition.GetNoLimiter(address);

@@ -33,44 +33,78 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
         StrokeShape shape, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
+
         if (room.Status is not RoomStatus.Ready)
+        {
             return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
+        }
+
         if (!room.HasLabelMapRevision(baseRevision))
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownRevision);
+        }
+
         var target = room.Objects.FirstOrDefault(o => o.Index == objectIndex);
+
         if (target is null)
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownStrokeObject);
+        }
+
         if (points.Count is 0 or > Constants.Strokes.MaxPoints)
+        {
             return Result.Failure<Room>(Constants.Messages.StrokePoints);
+        }
+
         if (double.IsNaN(radius) || radius is < Constants.Strokes.MinRadius or > Constants.Strokes.MaxRadius)
+        {
             return Result.Failure<Room>(Constants.Messages.BrushRadius);
+        }
+
         if (points.Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y) || p.X is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint || p.Y is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint))
+        {
             return Result.Failure<Room>(Constants.Messages.StrokeOutside);
+        }
+
         var badShape = StrokeShapes.Check(shape, points);
+
         if (badShape is not null)
+        {
             return Result.Failure<Room>(badShape);
+        }
 
         byte[] labelMap;
+
         await using (var stored = await storage.OpenReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken)
             ?? throw new InvalidOperationException($"Label map {baseRevision} of room {room.Id} is missing from storage."))
         {
             using var buffer = new MemoryStream();
+
             await stored.Content.CopyToAsync(buffer, cancellationToken);
             labelMap = buffer.ToArray();
         }
 
         var painted = imaging.PaintOutline(labelMap, new OutlineStroke(target.Index, target.Label, mode, radius, points, shape, target.ParentIndex));
+
         if (!painted.Succeeded)
+        {
             return Result.Failure<Room>(painted.Error);
+        }
 
         // The new version is stored before the room points at it, so a failed save leaves only an unused file.
         var revision = room.LatestLabelMapRevision + 1;
+
         using (var content = new MemoryStream(painted.Value, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
+
         room.AddLabelMapRevision(baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
+
         return room;
     }
 
@@ -82,15 +116,23 @@ public sealed class FixRoomOutline(IRoomRepository rooms, ICurrentUser currentUs
     public async Task<Result<Room>?> UseRevisionAsync(Guid roomId, int revision, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
+
         if (!room.HasLabelMapRevision(revision))
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownRevision);
+        }
+
         if (room.LabelMapRevision != revision)
         {
             room.UseLabelMapRevision(revision, r => Constants.Rooms.LabelMapKey(room.Id, r));
             await rooms.SaveChangesAsync(cancellationToken);
         }
+
         return room;
     }
 }

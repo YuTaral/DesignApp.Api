@@ -34,35 +34,54 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
+
         var parent = parentIndex is int index ? room.Objects.FirstOrDefault(o => o.Index == index && o.ParentIndex is null) : null;
+
         if (parentIndex is not null && parent is null)
+        {
             return Result.Failure<Room>(Constants.Messages.PartParent);
+        }
+
         // A part is the same kind of thing as its object.
         category = parent?.Category ?? category;
         var invalid = Check(room, baseRevision, label, category, strokes);
+
         if (invalid is not null)
+        {
             return Result.Failure<Room>(invalid);
+        }
 
         var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         Result<MarkedObject> marked;
+
         await using (var photo = await storage.OpenReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken)
             ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
         {
             marked = imaging.MarkObject(labelMap, photo.Content, new NewObjectMark(room.NextObjectIndex, strokes, parent?.Index, parent?.Label));
         }
+
         if (!marked.Succeeded)
+        {
             return Result.Failure<Room>(marked.Error);
+        }
 
         // The new version is stored before the room points at it, so a failed save leaves only an unused file.
         var revision = room.LatestLabelMapRevision + 1;
+
         using (var content = new MemoryStream(marked.Value.LabelMapPng, writable: false))
             await storage.SaveAsync(Constants.Rooms.LabelMapKey(room.Id, revision), content, Constants.ContentTypes.Png, cancellationToken);
+
         var detected = new DetectedObject(
             room.NextObjectIndex, label!.Trim(), category, marked.Value.Box, marked.Value.DominantColor, MarkedByHand: true, parent?.Index);
+
         room.AddObject(detected, baseRevision, r => Constants.Rooms.LabelMapKey(room.Id, r));
         await rooms.SaveChangesAsync(cancellationToken);
+
         return room;
     }
 
@@ -75,24 +94,51 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
     private static string? Check(Room room, int baseRevision, string? label, ObjectCategory category, IReadOnlyList<MarkStroke> strokes)
     {
         if (room.Status is not RoomStatus.Ready)
+        {
             return Constants.Messages.OutlinesNotReady;
+        }
+
         if (!room.HasLabelMapRevision(baseRevision))
+        {
             return Constants.Messages.UnknownRevision;
+        }
+
         if (room.NextObjectIndex > Domain.Constants.Rooms.MaxObjectIndex)
+        {
             return Constants.Messages.TooManyObjects;
+        }
+
         if (string.IsNullOrWhiteSpace(label) || label.Trim().Length > Constants.Marks.MaxLabelLength)
+        {
             return Constants.Messages.ObjectName;
+        }
+
         if (!Enum.IsDefined(category))
+        {
             return Constants.Messages.UnknownObjectType;
+        }
+
         if (strokes.Count is 0 or > Constants.Marks.MaxStrokes)
+        {
             return Constants.Messages.MarkStrokes;
+        }
+
         if (strokes.Any(s => s.Points is null || s.Points.Count is 0 or > Constants.Strokes.MaxPoints))
+        {
             return Constants.Messages.StrokePoints;
+        }
+
         if (strokes.Any(s => double.IsNaN(s.Radius) || s.Radius is < Constants.Strokes.MinRadius or > Constants.Strokes.MaxRadius))
+        {
             return Constants.Messages.BrushRadius;
+        }
+
         if (strokes.SelectMany(s => s.Points).Any(p => !double.IsFinite(p.X) || !double.IsFinite(p.Y)
             || p.X is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint || p.Y is < Constants.Strokes.MinPoint or > Constants.Strokes.MaxPoint))
+        {
             return Constants.Messages.StrokeOutside;
+        }
+
         return strokes.Select(s => StrokeShapes.Check(s.Shape, s.Points)).FirstOrDefault(error => error is not null);
     }
 
@@ -105,7 +151,9 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         await using var stored = await storage.OpenReadAsync(key, cancellationToken)
             ?? throw new InvalidOperationException($"The file {key} is missing from storage.");
         using var buffer = new MemoryStream();
+
         await stored.Content.CopyToAsync(buffer, cancellationToken);
+
         return buffer.ToArray();
     }
 }

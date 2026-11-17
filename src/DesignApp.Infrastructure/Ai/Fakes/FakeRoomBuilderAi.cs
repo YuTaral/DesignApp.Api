@@ -41,14 +41,19 @@ internal sealed class FakeRoomBuilderAi(IOptions<AiOptions> options) : IRoomBuil
         var shape = Shapes.FirstOrDefault(s => words.Contains(s.Word, StringComparison.Ordinal));
         var (kind, width, depth, height) = shape.Word is null ? (ItemShape.Box, 80, 50, 80) : (shape.Shape, shape.Width, shape.Depth, shape.Height);
         var sized = System.Text.RegularExpressions.Regex.Match(words, @"(\d{2,4})\s*cm");
+
         if (sized.Success)
         {
             var scale = double.Parse(sized.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) / width;
+
             (width, depth) = (width * scale, kind is ItemShape.Cylinder ? width * scale : depth);
         }
+
         var color = Colors.FirstOrDefault(c => words.Contains(c.Word, StringComparison.Ordinal)).Color ?? "#A0A0A0";
         var label = description.Trim();
+
         label = label.Length <= Domain.Constants.Plans.MaxLabelLength ? label : label[..Domain.Constants.Plans.MaxLabelLength];
+
         return new CatalogObject(Constants.Ai.RoomBuilder.CustomKey, label, kind, Math.Round(width), Math.Round(depth), height, HexColor.Parse(color), kind.UsualElevation());
     }
 }

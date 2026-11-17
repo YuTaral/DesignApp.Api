@@ -33,14 +33,21 @@ public sealed partial class AnalyzeRoom(
     public async Task HandleAsync(Guid roomId, CancellationToken cancellationToken)
     {
         var room = await rooms.GetForAnalysisAsync(roomId, cancellationToken);
+
         if (room is null || room.Status is RoomStatus.Ready or RoomStatus.Failed)
+        {
             return;
+        }
 
         if (room.Status is not RoomStatus.Uploaded)
+        {
             room.RestartAnalysis(); // a previous run was cut off
+        }
+
         if (room.AnalysisAttempts >= Domain.Constants.Rooms.MaxAnalysisAttempts)
         {
             await FailAsync(room, Constants.Messages.UnexpectedFailure, cancellationToken);
+
             return;
         }
 
@@ -54,9 +61,12 @@ public sealed partial class AnalyzeRoom(
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         {
             LogAnalysisFailed(error, room.Id);
+
             // If the failure came after the room was finished (a save that failed), there is nothing left to mark.
             if (room.Status is not (RoomStatus.Ready or RoomStatus.Failed))
+            {
                 await FailAsync(room, Constants.Messages.UnexpectedFailure, CancellationToken.None);
+            }
         }
     }
 
@@ -66,6 +76,7 @@ public sealed partial class AnalyzeRoom(
     private async Task RunPipelineAsync(Room room, CancellationToken cancellationToken)
     {
         AnalysisImage image;
+
         await using (var photo = await storage.OpenReadAsync(room.PhotoKey, cancellationToken)
             ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
         {
@@ -73,16 +84,21 @@ public sealed partial class AnalyzeRoom(
         }
 
         var listed = await ai.Inventory(room.AiMode).ListObjectsAsync(image, cancellationToken);
+
         if (!listed.Succeeded)
         {
             await FailAsync(room, listed.Error, cancellationToken);
+
             return;
         }
+
         // Objects outside the scope the user chose are never outlined, which also saves their SAM 3 requests.
         var items = listed.Value.Where(item => room.Scope.Includes(item.Category)).Take(Constants.Analysis.MaxObjects).ToList();
+
         if (items.Count == 0)
         {
             await FailAsync(room, Constants.Messages.NothingFound, cancellationToken);
+
             return;
         }
 
@@ -95,13 +111,16 @@ public sealed partial class AnalyzeRoom(
             .Select(pair => new SegmentedObject(pair.First, pair.Second!))
             .ToList();
         var labelMap = imaging.BuildLabelMap(image, outlined);
+
         if (labelMap.Objects.Count == 0)
         {
             await FailAsync(room, Constants.Messages.NothingFound, cancellationToken);
+
             return;
         }
 
         var key = Constants.Rooms.LabelMapKey(room.Id);
+
         using (var content = new MemoryStream(labelMap.Png, writable: false))
             await storage.SaveAsync(key, content, Constants.ContentTypes.Png, cancellationToken);
 
@@ -125,6 +144,7 @@ public sealed partial class AnalyzeRoom(
     private async Task SaveAndNotifyAsync(Room room, CancellationToken cancellationToken)
     {
         await rooms.SaveChangesAsync(cancellationToken);
+
         try
         {
             await notifier.RoomChangedAsync(room, cancellationToken);

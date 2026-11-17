@@ -32,6 +32,7 @@ internal sealed partial class ClaudeCodeInventoryProvider(
     public async Task<Result<IReadOnlyList<InventoryItem>>> ListObjectsAsync(AnalysisImage image, CancellationToken cancellationToken)
     {
         var settings = await settingsStore.GetAsync(cancellationToken);
+
         return await AskAsync(image, settings, settings.SystemPrompt(), settings.UserMessage, cancellationToken);
     }
 
@@ -42,6 +43,7 @@ internal sealed partial class ClaudeCodeInventoryProvider(
         var box = whole.Box;
         var message = Constants.Ai.Claude.PartsMessage(whole.Label,
             (int)(box.X * image.Width), (int)(box.Y * image.Height), (int)(box.Width * image.Width), (int)(box.Height * image.Height), instructions);
+
         return await AskAsync(image, settings, Constants.Ai.Claude.PartsSystemPrompt, message, cancellationToken);
     }
 
@@ -55,6 +57,7 @@ internal sealed partial class ClaudeCodeInventoryProvider(
         AnalysisImage image, AiSettings settings, string system, string text, CancellationToken cancellationToken)
     {
         var promptFile = Path.GetTempFileName();
+
         try
         {
             await File.WriteAllTextAsync(promptFile, system, cancellationToken);
@@ -64,9 +67,11 @@ internal sealed partial class ClaudeCodeInventoryProvider(
             var elapsed = Stopwatch.GetElapsedTime(started);
 
             var result = Read(printed);
+
             // Claude Code caches the prompt itself; all of it counts as input, as on the uncached API route.
             LogUsage(result.Model, settings.InventoryEffort,
                 result.InputTokens + result.CacheReadTokens + result.CacheWriteTokens, result.OutputTokens, elapsed.TotalSeconds);
+
             return InventoryJson.Parse(result.Answer, settings.MaxPoints, image.Width, image.Height);
         }
         finally
@@ -133,6 +138,7 @@ internal sealed partial class ClaudeCodeInventoryProvider(
                     new JsonObject { [W.Type] = W.Text, [W.Text] = Constants.Ai.Claude.ImageSize(image.Width, image.Height) }),
             },
         };
+
         return message.ToJsonString();
     }
 
@@ -147,29 +153,38 @@ internal sealed partial class ClaudeCodeInventoryProvider(
         using var document = JsonDocument.Parse(line);
         var root = document.RootElement;
         var failed = root.TryGetProperty(F.IsError, out var isError) && isError.GetBoolean();
+
         if (failed || !root.TryGetProperty(F.StructuredOutput, out var answer) || answer.ValueKind != JsonValueKind.Object)
         {
             var reason = root.TryGetProperty(F.Result, out var text) ? text.ToString() : printed;
+
             throw new InvalidOperationException(CC.Messages.Failed(reason));
         }
 
+        long input = 0, output = -1, cacheRead = 0, cacheWrite = 0;
         // The model that did the work is the one with the most output (Claude Code may use another for side tasks).
         string model = "";
-        long input = 0, output = -1, cacheRead = 0, cacheWrite = 0;
+
         if (root.TryGetProperty(F.ModelUsage, out var usage) && usage.ValueKind == JsonValueKind.Object)
         {
             foreach (var entry in usage.EnumerateObject())
             {
                 var outTokens = Tokens(entry.Value, F.OutputTokens);
+
                 if (outTokens <= output)
+                {
                     continue;
+                }
+
                 (model, output) = (entry.Name, outTokens);
                 input = Tokens(entry.Value, F.InputTokens);
                 cacheRead = Tokens(entry.Value, F.CacheReadTokens);
                 cacheWrite = Tokens(entry.Value, F.CacheWriteTokens);
             }
         }
+
         var cost = root.TryGetProperty(F.CostUsd, out var c) && c.ValueKind == JsonValueKind.Number ? c.GetDouble() : 0;
+
         return new ClaudeCodeResult(answer.GetRawText(), model, input, Math.Max(output, 0), cacheRead, cacheWrite, cost);
     }
 
@@ -178,10 +193,14 @@ internal sealed partial class ClaudeCodeInventoryProvider(
     private static bool IsResultLine(string line)
     {
         if (!line.StartsWith('{'))
+        {
             return false;
+        }
+
         try
         {
             using var document = JsonDocument.Parse(line);
+
             return document.RootElement.TryGetProperty(F.Type, out var type) && type.GetString() == F.ResultType;
         }
         catch (JsonException)

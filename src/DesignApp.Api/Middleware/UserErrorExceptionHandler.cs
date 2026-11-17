@@ -24,10 +24,14 @@ internal sealed class UserErrorExceptionHandler(IProblemDetailsService problemDe
             BadHttpRequestException e => (e.StatusCode, Constants.Titles.InvalidRequest),
             _ => (0, ""),
         };
+
         if (status == 0)
+        {
             return false;
+        }
 
         httpContext.Response.StatusCode = status;
+
         return await problemDetails.TryWriteAsync(new()
         {
             HttpContext = httpContext,

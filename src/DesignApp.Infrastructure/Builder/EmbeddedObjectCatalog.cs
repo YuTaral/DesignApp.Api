@@ -29,6 +29,7 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
             ?? throw new InvalidDataException($"The resource {Constants.Builder.CatalogResource} is missing.");
         var file = JsonSerializer.Deserialize<CatalogFile>(stream, Options)
             ?? throw new InvalidDataException("The object catalog is empty.");
+
         _byRoom = Enum.GetValues<RoomType>().ToDictionary(
             type => type,
             type => (IReadOnlyList<CatalogObject>)file.EveryRoom
@@ -54,6 +55,7 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
             .ToList()
             .AsReadOnly();
         var first = variants.FirstOrDefault() ?? throw new InvalidDataException($"The catalog's {o.Key} has no variations.");
+
         return new CatalogObject(o.Key, first.Label, first.Shape, first.Width, first.Depth, first.Height, HexColor.Parse(o.Color), first.Elevation, first.Form, variants,
             (o.Decorations ?? []).AsReadOnly());
     }

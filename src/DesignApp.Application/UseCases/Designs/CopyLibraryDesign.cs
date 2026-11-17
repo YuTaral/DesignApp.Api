@@ -25,21 +25,32 @@ public sealed class CopyLibraryDesign(ILibrary library, LibraryCopier copier, ID
     public async Task<Design?> HandleAsync(string designId, AiMode aiMode, CancellationToken cancellationToken)
     {
         var source = library.FindDesign(designId);
+
         if (source is null)
+        {
             return null;
+        }
 
         try
         {
             var copies = new List<Room>();
+
             foreach (var room in source.Rooms)
+            {
                 copies.Add(await copier.CopyAsync(source, room, room.Layouts[0], aiMode, cancellationToken));
+            }
 
             var now = clock.GetUtcNow();
             var design = Design.Create(copies[0], currentUser.Id, source.Name, source.Description, [], now);
+
             foreach (var room in copies.Skip(1))
+            {
                 design.AddRoom(room, now);
+            }
+
             designs.Add(design);
             await designs.SaveChangesAsync(cancellationToken); // the rooms are saved with it
+
             return design;
         }
         catch

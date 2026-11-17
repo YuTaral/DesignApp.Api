@@ -21,10 +21,15 @@ public sealed class EditDesignDetails(IDesignRepository designs, ICurrentUser cu
     public async Task<Design?> HandleAsync(Guid id, string name, string? description, CancellationToken cancellationToken)
     {
         var design = await designs.FindAsync(id, currentUser.Id, cancellationToken);
+
         if (design is null)
+        {
             return null;
+        }
+
         design.Rename(name, description, clock.GetUtcNow());
         await designs.SaveChangesAsync(cancellationToken);
+
         return design;
     }
 }

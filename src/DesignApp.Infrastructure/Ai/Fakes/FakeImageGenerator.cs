@@ -16,6 +16,7 @@ internal sealed class FakeImageGenerator(IOptions<AiOptions> options) : IImageGe
     public async Task<Result<byte[]>> GenerateAsync(byte[] image, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
+
         return image;
     }
 }

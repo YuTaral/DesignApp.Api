@@ -20,7 +20,10 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     public async Task DeleteAsync(IReadOnlyList<Room> doomed, CancellationToken cancellationToken)
     {
         foreach (var room in doomed)
+        {
             rooms.Remove(room);
+        }
+
         await rooms.SaveChangesAsync(cancellationToken);
 
         foreach (var room in doomed)
@@ -44,10 +47,16 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     private static IEnumerable<string> FilesOf(Room room)
     {
         yield return room.PhotoKey;
+
         for (var version = 1; version <= room.LatestPhotoVersion; version++)
+        {
             yield return Constants.Rooms.PhotoKey(room.Id, version);
+        }
+
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
+        {
             yield return Constants.Rooms.LabelMapKey(room.Id, revision);
+        }
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Couldn't delete the file {Key} of a deleted room")]

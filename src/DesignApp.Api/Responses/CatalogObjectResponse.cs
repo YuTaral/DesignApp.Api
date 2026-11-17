@@ -24,6 +24,7 @@ public sealed record CatalogObjectResponse(string Key, string Label, ItemShape S
     public static CatalogObjectResponse From(CatalogObject o)
     {
         var variants = (o.Variants ?? []).Select(CatalogVariantResponse.From).ToList();
+
         return new(o.Key, o.Label, o.Shape, o.Width, o.Depth, o.Height, o.Color.Value, o.Elevation, o.Form, variants, o.Decorations ?? []);
     }
 }

@@ -27,6 +27,7 @@ internal sealed class FakePlans : IPlanRepository
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         Saves++;
+
         return Task.CompletedTask;
     }
 }

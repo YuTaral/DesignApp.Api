@@ -27,6 +27,7 @@ public class AiProviderTests
             """);
 
         var item = Assert.Single(result.Value);
+
         Assert.Equal(("grey sofa", ObjectCategory.Furniture, "#8A8A8A"), (item.Label, item.Category, item.Color.Value));
         Assert.Equal(new BoundingBox(0.2, 0.4, 0.5, 0.3), item.Box);
     }
@@ -43,6 +44,7 @@ public class AiProviderTests
             """);
 
         var rug = Assert.Single(result.Value);
+
         Assert.Equal(0.4, rug.Box.Width, 6);
         Assert.Equal(0.2, rug.Box.Height, 6);
         Assert.Equal("#808080", rug.Color.Value); // an unreadable color falls back to gray
@@ -99,6 +101,7 @@ public class AiProviderTests
         Assert.Single(fal.Bodies, b => b.GetProperty("prompt").GetString() == "oak floor");
         var wall = fal.Bodies.First(b => b.GetProperty("prompt").GetString() == "grey wall");
         var box = Assert.Single(wall.GetProperty("box_prompts").EnumerateArray());
+
         Assert.Equal((100, 100, 300, 150), (box.GetProperty("x_min").GetInt32(), box.GetProperty("y_min").GetInt32(),
             box.GetProperty("x_max").GetInt32(), box.GetProperty("y_max").GetInt32()));
         Assert.False(box.TryGetProperty("object_id", out _));
@@ -126,6 +129,7 @@ public class AiProviderTests
         Assert.All(masks, Assert.NotNull);
         Assert.Equal(1, requests.Value);
         var shared = Assert.Single(fal.Bodies);
+
         Assert.Equal("", shared.GetProperty("prompt").GetString());
         Assert.Equal([1, 2, 3], shared.GetProperty("box_prompts").EnumerateArray().Select(b => b.GetProperty("object_id").GetInt32()));
         Assert.Equal(3, shared.GetProperty("max_masks").GetInt32());
@@ -147,9 +151,11 @@ public class AiProviderTests
 
         Assert.All(masks, Assert.NotNull);
         var shared = Assert.Single(fal.Bodies);
+
         Assert.Equal(2, shared.GetProperty("box_prompts").GetArrayLength());
         var points = shared.GetProperty("point_prompts").EnumerateArray()
             .Select(p => (p.GetProperty("x").GetInt32(), p.GetProperty("y").GetInt32(), p.GetProperty("label").GetInt32(), p.GetProperty("object_id").GetInt32()));
+
         Assert.Equal([(40, 100, 1, 2), (160, 180, 1, 2)], points);
     }
 
@@ -269,9 +275,15 @@ public class AiProviderTests
     private static ObjectMask Block(int width, int height, int x, int y, int w, int h)
     {
         var coverage = new byte[width * height];
+
         for (var row = y; row < y + h; row++)
+        {
             for (var col = x; col < x + w; col++)
+            {
                 coverage[row * width + col] = 255;
+            }
+        }
+
         return new ObjectMask(width, height, coverage);
     }
 
@@ -301,7 +313,9 @@ public class AiProviderTests
     private static FalSegmentationProvider Provider(StubFal fal)
     {
         var http = new HttpClient(fal);
+
         http.DefaultRequestHeaders.Authorization = new("Key", "test-key");
+
         return new FalSegmentationProvider(http, new FixedAiSettings(), NullLogger<FalSegmentationProvider>.Instance);
     }
 
@@ -311,11 +325,19 @@ public class AiProviderTests
     private static byte[] MaskPng(int width, int height)
     {
         using var bitmap = new SKBitmap(width, height);
+
         bitmap.Erase(SKColors.Black);
+
         for (var y = 0; y < height; y++)
+        {
             for (var x = 0; x < width / 2; x++)
+            {
                 bitmap.SetPixel(x, y, SKColors.White);
+            }
+        }
+
         using var png = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100);
+
         return png.ToArray();
     }
 
@@ -337,19 +359,25 @@ public class AiProviderTests
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(cancellationToken)).RootElement.Clone();
+
             lock (_gate)
             {
                 Requests.Add((request.Headers.Authorization?.ToString(), request.RequestUri!.AbsolutePath));
                 Bodies.Add(body);
             }
+
             var boxes = body.GetProperty("box_prompts").GetArrayLength();
+
             if (boxes > 1 && sharedFails)
+            {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
 
             var url = mask is null ? "" : $"data:image/png;base64,{Convert.ToBase64String(mask)}";
             var count = mask is null ? 0 : Math.Max(1, boxes);
             var masks = string.Join(",", Enumerable.Range(0, count).Select(_ => $$"""{"url": "{{url}}"}"""));
             var metadata = string.Join(",", Enumerable.Range(0, count).Select(i => $$"""{"index": {{i}}, "score": 0.9}"""));
+
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent($$"""{"masks": [{{masks}}], "metadata": [{{metadata}}]}""", Encoding.UTF8, "application/json"),

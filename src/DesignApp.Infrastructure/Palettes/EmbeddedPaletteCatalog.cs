@@ -31,8 +31,12 @@ internal sealed class EmbeddedPaletteCatalog : IPaletteCatalog
             .Where(n => n.StartsWith(Constants.Palettes.ResourcePrefix, StringComparison.Ordinal))
             .Order(StringComparer.Ordinal)
             .Select(n => Read(assembly, n))];
+
         if (Palettes.GroupBy(p => p.Id).FirstOrDefault(g => g.Count() > 1) is { } repeated)
+        {
             throw new InvalidDataException($"Two palettes have the id '{repeated.Key}'.");
+        }
+
         _paints = Palettes
             .SelectMany(palette => palette.Paints.Select(paint => (Reference: palette.ReferenceTo(paint), Paint: paint)))
             .ToDictionary(p => p.Reference, p => p.Paint, StringComparer.Ordinal);
@@ -55,11 +59,19 @@ internal sealed class EmbeddedPaletteCatalog : IPaletteCatalog
     {
         using var stream = assembly.GetManifestResourceStream(resource)!;
         var file = JsonSerializer.Deserialize<PaletteFile>(stream, Options);
+
         if (file is null || string.IsNullOrWhiteSpace(file.Id) || file.Paints is null)
+        {
             throw new InvalidDataException($"The palette file {resource} is malformed.");
+        }
+
         var paints = file.Paints.Select(p => new Paint(p.Id, p.Code, p.Name, HexColor.Parse(p.Hex))).ToList();
+
         if (paints.GroupBy(p => p.Id).FirstOrDefault(g => g.Count() > 1) is { } repeated)
+        {
             throw new InvalidDataException($"The palette {file.Id} has two paints with the id '{repeated.Key}'.");
+        }
+
         return new Palette(file.Id, file.Name, file.Notice ?? "", paints.AsReadOnly());
     }
 

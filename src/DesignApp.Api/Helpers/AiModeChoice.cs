@@ -16,14 +16,21 @@ internal static class AiModeChoice
     public static ProblemHttpResult? TryResolve(string? ai, AiAvailability availability, out AiMode mode)
     {
         mode = availability.Default;
+
         if (!string.IsNullOrWhiteSpace(ai) && (!Enum.TryParse(ai, ignoreCase: true, out mode) || !Enum.IsDefined(mode)))
+        {
             return TypedResults.Problem(Constants.Messages.UnknownAi(ai), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidAi);
+        }
+
         if (availability.Allows(mode))
+        {
             return null;
+        }
 
         var why = mode is AiMode.Real && !availability.RealAvailable
             ? Constants.Messages.RealAiNotSetUp
             : Constants.Messages.OnlyAi(availability.Default.ToString());
+
         return TypedResults.Problem(why, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.AiNotAvailable);
     }
 }

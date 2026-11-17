@@ -26,12 +26,20 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
     private SKPath Path()
     {
         using var builder = new SKPathBuilder();
+
         if (Polygon is { } polygon)
+        {
             builder.AddPoly(Points(polygon), close: true);
+        }
         else if (Ellipse is [var cx, var cy, var rx, var ry])
+        {
             builder.AddOval(new SKRect(cx - rx, cy - ry, cx + rx, cy + ry));
+        }
         else if (Line is { } line)
+        {
             builder.AddPoly(Points(line), close: false);
+        }
+
         return builder.Detach();
     }
 
@@ -43,9 +51,12 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
         {
             // Mask brightness becomes coverage on the alpha-only canvas.
             using var maskPaint = new SKPaint { ColorFilter = SKColorFilter.CreateLumaColor() };
+
             canvas.DrawImage(mask, SKRect.Create(PhotoSize), new SKSamplingOptions(SKFilterMode.Nearest), maskPaint);
+
             return;
         }
+
         using var path = Path();
         using var paint = new SKPaint
         {
@@ -56,6 +67,7 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
             StrokeCap = SKStrokeCap.Butt,
             StrokeJoin = SKStrokeJoin.Round,
         };
+
         canvas.DrawPath(path, paint);
     }
 
@@ -63,11 +75,18 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
     public SKRect Bounds()
     {
         if (MaskImage is { } mask)
+        {
             return MaskBounds(mask);
+        }
+
         using var path = Path();
         var bounds = path.Bounds;
+
         if (Line is not null)
+        {
             bounds.Inflate(Width / 2, Width / 2);
+        }
+
         return bounds;
     }
 
@@ -77,18 +96,27 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
     {
         using var bitmap = SKBitmap.FromImage(mask);
         var (minX, minY, maxX, maxY) = (mask.Width, mask.Height, -1, -1);
+
         for (var y = 0; y < mask.Height; y++)
         {
             for (var x = 0; x < mask.Width; x++)
             {
                 if (bitmap.GetPixel(x, y).Red < Constants.Imaging.CoverageThreshold)
+                {
                     continue;
+                }
+
                 (minX, minY, maxX, maxY) = (Math.Min(minX, x), Math.Min(minY, y), Math.Max(maxX, x), Math.Max(maxY, y));
             }
         }
+
         if (maxX < 0)
+        {
             return SKRect.Empty;
+        }
+
         var (sx, sy) = (PhotoSize.Width / mask.Width, PhotoSize.Height / mask.Height);
+
         return new SKRect(minX * sx, minY * sy, (maxX + 1) * sx, (maxY + 1) * sy);
     }
 

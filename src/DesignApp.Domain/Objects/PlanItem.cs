@@ -83,30 +83,59 @@ public sealed record PlanItem
             ItemForm.Round => shape is ItemShape.Table or ItemShape.Rug,
             _ => false,
         };
+
         if (!fits)
+        {
             throw new DomainException(Constants.Messages.PlanItemForm);
+        }
+
         if (string.IsNullOrWhiteSpace(label) || label.Trim().Length > Constants.Plans.MaxLabelLength)
+        {
             throw new DomainException(Constants.Messages.PlanItemLabel);
+        }
+
         if (!new[] { width, depth, height }.All(side => side is >= Constants.Plans.MinItemCentimetres and <= Constants.Plans.MaxItemCentimetres))
+        {
             throw new DomainException(Constants.Messages.PlanItemSize);
+        }
+
         if (!double.IsFinite(x) || !double.IsFinite(y) || !Enum.IsDefined(shape) || rotation % Constants.Plans.RotationStep != 0 || rotation is < 0 or >= 360)
+        {
             throw new DomainException(Constants.Messages.PlanItemPlacement);
+        }
+
         if (shape.IsOnWall() != wall.HasValue || wall < 0)
+        {
             throw new DomainException(Constants.Messages.PlanWallPlacement);
+        }
+
         var raised = shape is ItemShape.Window || shape.IsMounted();
+
         if (!double.IsFinite(elevation) || elevation < 0 || elevation > Constants.Plans.MaxItemCentimetres || (!raised && elevation != 0))
+        {
             throw new DomainException(Constants.Messages.PlanItemPlacement);
+        }
+
         if (shape.IsMounted() && depth > Constants.Plans.MaxMountedDepth)
+        {
             throw new DomainException(Constants.Messages.PlanMountedDepth);
-        (Label, Shape, X, Y, Width, Depth, Height, Rotation, Color) = (label.Trim(), shape, x, y, width, depth, height, rotation, color);
+        }
+
         var hasParts = form is ItemForm.LShaped or ItemForm.PShaped;
+
+        (Label, Shape, X, Y, Width, Depth, Height, Rotation, Color) = (label.Trim(), shape, x, y, width, depth, height, rotation, color);
+
         if (!hasParts && parts is not null)
+        {
             throw new DomainException(Constants.Messages.PlanItemParts);
+        }
+
         if (hasParts)
         {
             parts ??= ItemParts.Default(form, width, depth);
             parts.Check(form, width, depth);
         }
+
         (Wall, Elevation, Form, Parts, Decorations) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None);
     }
 }

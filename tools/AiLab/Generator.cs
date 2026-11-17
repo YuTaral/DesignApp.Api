@@ -27,8 +27,10 @@ internal static class Generator
         if (args.Length < 3)
         {
             Console.Error.WriteLine("Usage: generate <prompts.json> <folder> [--rooms a,b] [--candidates n] [--reference <photo>] [--yes]");
+
             return 2;
         }
+
         var prompts = JsonSerializer.Deserialize<HousePrompts>(await File.ReadAllTextAsync(args[1]), Json)
             ?? throw new InvalidDataException("The prompts file is empty.");
         var folder = Path.GetFullPath(args[2]);
@@ -36,6 +38,7 @@ internal static class Generator
         var candidates = 3;
         string? reference = null;
         var paid = false;
+
         for (var i = 3; i < args.Length; i++)
         {
             switch (args[i])
@@ -47,31 +50,43 @@ internal static class Generator
                 default: Console.Error.WriteLine($"Unknown option {args[i]}"); return 2;
             }
         }
+
         if (rooms.Count == 0 || candidates is < 1 or > 4)
         {
             Console.Error.WriteLine("No rooms chosen, or --candidates is not 1 to 4.");
+
             return 2;
         }
 
         var images = rooms.Count * candidates;
+
         Console.WriteLine($"{rooms.Count} room(s) x {candidates} candidate(s) = {images} image(s) with " +
             $"{(reference is null ? prompts.Model : prompts.EditModel)} at {prompts.Resolution}: about ${images * prompts.PricePerImage:0.00}.");
+
         foreach (var room in rooms)
+        {
             Console.WriteLine($"  {room.Id}: {Prompt(prompts, room, reference is not null)}");
+        }
+
         if (!paid)
         {
             Console.WriteLine("Nothing was generated. Add --yes to run it (paid).");
+
             return 0;
         }
 
         var key = new ConfigurationBuilder().AddUserSecrets(typeof(Generator).Assembly, optional: true).Build()["Ai:FalKey"];
+
         if (string.IsNullOrWhiteSpace(key))
         {
             Console.Error.WriteLine("Ai:FalKey is not in the user secrets.");
+
             return 1;
         }
+
         Directory.CreateDirectory(folder);
         using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+
         http.DefaultRequestHeaders.Authorization = new(DesignApp.Infrastructure.Constants.Ai.FalAuthScheme, key);
         var referenceUri = reference is null ? null : DataUri(reference);
 
@@ -85,26 +100,36 @@ internal static class Generator
                 ["resolution"] = prompts.Resolution,
                 ["output_format"] = "jpeg",
             };
-            if (referenceUri is not null)
-                body["image_urls"] = new[] { referenceUri };
             var endpoint = $"https://fal.run/{(referenceUri is null ? prompts.Model : prompts.EditModel)}";
 
+            if (referenceUri is not null)
+            {
+                body["image_urls"] = new[] { referenceUri };
+            }
+
             using var response = await http.PostAsJsonAsync(endpoint, body);
+
             if (!response.IsSuccessStatusCode)
             {
                 Console.Error.WriteLine($"{room.Id}: fal answered {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+
                 return 1;
             }
+
             var result = await response.Content.ReadFromJsonAsync<JsonElement>();
             var n = 0;
+
             foreach (var image in result.GetProperty("images").EnumerateArray())
             {
                 var file = Path.Combine(folder, $"{room.Id}-{++n}.jpg");
+
                 await File.WriteAllBytesAsync(file, await http.GetByteArrayAsync(image.GetProperty("url").GetString()));
                 Console.WriteLine($"{room.Id}: saved {file}");
             }
+
             await File.WriteAllTextAsync(Path.Combine(folder, $"{room.Id}.prompt.txt"), (string)body["prompt"]);
         }
+
         return 0;
     }
 
@@ -117,6 +142,7 @@ internal static class Generator
         var start = fromReference
             ? $"{prompts.SameHouse} Show the {room.Title.ToLowerInvariant()} of this house."
             : $"Show the {room.Title.ToLowerInvariant()} of a home.";
+
         return $"{start} {room.Prompt} {prompts.Style}";
     }
 
@@ -125,6 +151,7 @@ internal static class Generator
     private static string DataUri(string path)
     {
         var type = Path.GetExtension(path).ToLowerInvariant() is ".png" ? "image/png" : "image/jpeg";
+
         return $"data:{type};base64,{Convert.ToBase64String(File.ReadAllBytes(path))}";
     }
 

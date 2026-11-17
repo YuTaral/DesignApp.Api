@@ -38,6 +38,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.Equal(DesignApp.Api.Constants.Routes.RoomLabelMapUrl(room.Id, 0), room.LabelMapUrl);
         Assert.Equal((0, "WholeRoom", "Fake"), (room.LabelMapRevision, room.Scope, room.AiMode));
         var sofa = room.Objects.Single(o => o.GetProperty("label").GetString() == "sofa");
+
         Assert.Equal("Furniture", sofa.GetProperty("category").GetString());
         Assert.Matches("^#[0-9A-F]{6}$", sofa.GetProperty("dominantColor").GetString());
     }
@@ -52,9 +53,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Png, response.Content.Headers.ContentType?.MediaType);
         using var codec = SKCodec.Create(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
+
         Assert.Equal((1200, 800), (codec.Info.Width, codec.Info.Height));
         using var labels = SKBitmap.Decode(codec, new SKImageInfo(1200, 800, SKColorType.Gray8, SKAlphaType.Opaque));
         var indexes = labels.GetPixelSpan().ToArray().Where(v => v != 0).Distinct().Order();
+
         Assert.Equal(room.Objects.Select(o => (byte)o.GetProperty("index").GetInt32()).Order(), indexes);
     }
 
@@ -113,6 +116,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
 
         using var fix = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
             new { baseRevision = 0, objectIndex = sofa, mode = "Paint", radius = 2, points = new[] { new { x, y } } });
+
         fix.EnsureSuccessStatusCode();
         var fixedRoom = (await fix.Content.ReadFromJsonAsync<RoomDto>())!;
 
@@ -122,13 +126,16 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.Equal(before, await LabelsAsync($"/api/rooms/{room.Id}/labels/0"));
 
         using var undo = await Client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
+
         undo.EnsureSuccessStatusCode();
         Assert.Equal(0, (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.LabelMapRevision);
 
         using var again = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline",
             new { baseRevision = 0, objectIndex = sofa, mode = "Erase", radius = 0.5, points = new[] { new { x, y } } });
+
         Assert.Equal(HttpStatusCode.BadRequest, again.StatusCode); // that spot isn't the sofa's in version 0
         using var missing = await Client.GetAsync($"/api/rooms/{room.Id}/labels/7");
+
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
 
@@ -145,9 +152,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 0, objectIndex = sofa, mode = "Paint", radius = 2, shape = "Box",
             points = new[] { new { x = 100.0 / 1200, y = 100.0 / 800 }, new { x = 140.0 / 1200, y = 130.0 / 800 } },
         });
+
         box.EnsureSuccessStatusCode();
         var boxed = (await box.Content.ReadFromJsonAsync<RoomDto>())!;
         var labels = await LabelsAsync(boxed.LabelMapUrl!);
+
         Assert.All(new[] { 100 * 1200 + 100, 129 * 1200 + 139, 115 * 1200 + 120 }, p => Assert.Equal(sofa, labels[p]));
 
         using var lasso = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/objects", new
@@ -158,8 +167,10 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
                 new { mode = "Paint", radius = 6, shape = "Lasso", points = new[] { new { x = 600.0 / 1200, y = 100.0 / 800 }, new { x = 700.0 / 1200, y = 100.0 / 800 }, new { x = 650.0 / 1200, y = 200.0 / 800 } } },
             },
         });
+
         lasso.EnsureSuccessStatusCode();
         var marked = (await lasso.Content.ReadFromJsonAsync<RoomDto>())!;
+
         Assert.Equal(next, (await LabelsAsync(marked.LabelMapUrl!))[130 * 1200 + 650]);
 
         using var threeCorners = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/outline", new
@@ -167,6 +178,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 2, objectIndex = sofa, mode = "Paint", radius = 2, shape = "Box",
             points = new[] { new { x = 0.1, y = 0.1 }, new { x = 0.2, y = 0.2 }, new { x = 0.3, y = 0.1 } },
         });
+
         Assert.Equal(HttpStatusCode.BadRequest, threeCorners.StatusCode);
     }
 
@@ -176,9 +188,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var room = await WaitForStatusAsync((await UploadAsync()).Id, "Ready");
         var target = room.Objects.First(o => o.GetProperty("category").GetString() is not ("Wall" or "Floor" or "Ceiling"));
         var index = target.GetProperty("index").GetInt32();
+
         Assert.Contains((byte)index, await LabelsAsync(room.LabelMapUrl!));
 
         using var remove = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/removals", new { baseRevision = 0, objectIndexes = new[] { index } });
+
         remove.EnsureSuccessStatusCode();
         var removed = (await remove.Content.ReadFromJsonAsync<RoomDto>())!;
 
@@ -187,9 +201,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.Equal([0, 1], removed.PhotoVersions);
         Assert.DoesNotContain((byte)index, await LabelsAsync(removed.LabelMapUrl!));
         using var photo = await Client.GetAsync(removed.PhotoUrl);
+
         Assert.Equal(("image/jpeg", true), (photo.Content.Headers.ContentType?.MediaType, (await photo.Content.ReadAsByteArrayAsync()).Length > 0));
 
         using var undo = await Client.PutAsJsonAsync($"/api/rooms/{room.Id}/labels/current", new { revision = 0 });
+
         undo.EnsureSuccessStatusCode();
         Assert.Equal($"/api/rooms/{room.Id}/photo", (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{room.Id}"))!.PhotoUrl);
 
@@ -198,8 +214,10 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 0,
             objectIndexes = new[] { room.Objects.First(o => o.GetProperty("category").GetString() == "Wall").GetProperty("index").GetInt32() },
         });
+
         Assert.Equal(HttpStatusCode.BadRequest, wall.StatusCode);
         using var missing = await Client.GetAsync($"/api/rooms/{room.Id}/photo/5");
+
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
 
@@ -215,11 +233,13 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 0, label = "side lamp", category = "Lighting",
             strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
         });
+
         add.EnsureSuccessStatusCode();
         var withLamp = (await add.Content.ReadFromJsonAsync<RoomDto>())!;
 
         Assert.Equal(1, withLamp.LabelMapRevision);
         var lamp = withLamp.Objects.Single(o => o.GetProperty("index").GetInt32() == next);
+
         Assert.Equal(("side lamp", "Lighting"), (lamp.GetProperty("label").GetString(), lamp.GetProperty("category").GetString()));
         Assert.Matches("^#[0-9A-F]{6}$", lamp.GetProperty("dominantColor").GetString());
         Assert.Equal(next, (await LabelsAsync(withLamp.LabelMapUrl!))[200 * 1200 + 300]);
@@ -229,12 +249,14 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 1, label = " ", category = "Other",
             strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
         });
+
         Assert.Equal(HttpStatusCode.BadRequest, unnamed.StatusCode);
         using var unknown = await Client.PostAsJsonAsync($"/api/rooms/{Guid.NewGuid()}/objects", new
         {
             baseRevision = 0, label = "lamp", category = "Other",
             strokes = new[] { new { mode = "Paint", radius = 6, points = new[] { new { x, y } } } },
         });
+
         Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
     }
 
@@ -256,9 +278,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 0, label = "seat", category = "Other", parentIndex = parent,
             strokes = new[] { new { mode = "Paint", radius = 2, points = new[] { point } } },
         });
+
         add.EnsureSuccessStatusCode();
         var withSeat = (await add.Content.ReadFromJsonAsync<RoomDto>())!;
         var seat = withSeat.Objects[^1];
+
         Assert.Equal((parent, "Furniture"), (seat.GetProperty("parentIndex").GetInt32(), seat.GetProperty("category").GetString()));
         Assert.Equal(seat.GetProperty("index").GetInt32(), (await LabelsAsync(withSeat.LabelMapUrl!))[y * 1200 + x]);
 
@@ -267,15 +291,19 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
             baseRevision = 1, label = "lamp", category = "Other", parentIndex = parent,
             strokes = new[] { new { mode = "Paint", radius = 2, points = new[] { new { x = 0.0005, y = 0.0005 } } } },
         });
+
         Assert.Equal(HttpStatusCode.BadRequest, outside.StatusCode);
 
         using var merge = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/merges", new { baseRevision = 1, objectIndex = seat.GetProperty("index").GetInt32() });
+
         merge.EnsureSuccessStatusCode();
         var merged = (await merge.Content.ReadFromJsonAsync<RoomDto>())!;
+
         Assert.Equal(2, merged.LabelMapRevision);
         Assert.Equal(parent, (await LabelsAsync(merged.LabelMapUrl!))[y * 1200 + x]);
 
         using var whole = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/merges", new { baseRevision = 2, objectIndex = parent });
+
         Assert.Equal(HttpStatusCode.BadRequest, whole.StatusCode);
     }
 
@@ -286,20 +314,26 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var sofa = room.Objects.First(o => o.GetProperty("category").GetString() == "Furniture").GetProperty("index").GetInt32();
 
         using var tooLong = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 0, objectIndex = sofa, instructions = new string('x', 501) });
+
         Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
         using var find = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 0, objectIndex = sofa, instructions = "the cushions on their own" });
+
         find.EnsureSuccessStatusCode();
         var withParts = (await find.Content.ReadFromJsonAsync<RoomDto>())!;
 
         Assert.Equal(1, withParts.LabelMapRevision);
         var parts = withParts.Objects.Where(o => o.TryGetProperty("parentIndex", out var p) && p.ValueKind == JsonValueKind.Number && p.GetInt32() == sofa).ToList();
+
         Assert.NotEmpty(parts);
         var labels = await LabelsAsync(withParts.LabelMapUrl!);
+
         Assert.All(parts, p => Assert.Contains((byte)p.GetProperty("index").GetInt32(), labels));
 
         using var ofPart = await Client.PostAsJsonAsync($"/api/rooms/{room.Id}/parts", new { baseRevision = 1, objectIndex = parts[0].GetProperty("index").GetInt32() });
+
         Assert.Equal(HttpStatusCode.BadRequest, ofPart.StatusCode);
         using var unknown = await Client.PostAsJsonAsync($"/api/rooms/{Guid.NewGuid()}/parts", new { baseRevision = 0, objectIndex = sofa });
+
         Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
     }
 
@@ -311,19 +345,28 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         // Like the editor: upload first, then connect, so the connection carries the browser's guest cookie.
         var created = await UploadAsync();
         await using var hub = ConnectToHub();
+
         hub.On<JsonElement>("RoomChanged", room =>
         {
             var status = room.GetProperty("status").GetString()!;
+
             lock (statuses)
                 statuses.Add(status);
+
             if (status is "Ready" or "Failed")
+            {
                 finished.TrySetResult();
+            }
         });
         await hub.StartAsync();
 
         var current = await hub.InvokeAsync<JsonElement>("Watch", created.Id);
+
         if (current.GetProperty("status").GetString() == "Ready")
+        {
             finished.TrySetResult(); // finished before we started watching; Watch returned the final state
+        }
+
         await finished.Task.WaitAsync(Timeout);
 
         Assert.DoesNotContain("Failed", statuses);
@@ -333,9 +376,11 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     public async Task Watching_a_missing_room_is_refused()
     {
         await using var hub = ConnectToHub();
+
         await hub.StartAsync();
 
         var error = await Assert.ThrowsAsync<HubException>(() => hub.InvokeAsync<JsonElement>("Watch", Guid.NewGuid()));
+
         Assert.Contains("couldn't find", error.Message, StringComparison.Ordinal);
     }
 
@@ -357,7 +402,9 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     private async Task<RoomDto> UploadAsync(string? scope = null)
     {
         using var response = await PostPhotoAsync(scope);
+
         response.EnsureSuccessStatusCode();
+
         return (await response.Content.ReadFromJsonAsync<RoomDto>())!;
     }
 
@@ -367,12 +414,20 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     private async Task<HttpResponseMessage> PostPhotoAsync(string? scope, string? ai = null)
     {
         using var content = new ByteArrayContent(TestImages.Create(1200, 800));
+
         content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
+
         if (scope is not null)
+        {
             form.Add(new StringContent(scope), "scope");
+        }
+
         if (ai is not null)
+        {
             form.Add(new StringContent(ai), "ai");
+        }
+
         return await Client.PostAsync("/api/rooms", form);
     }
 
@@ -382,6 +437,7 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     {
         using var codec = SKCodec.Create(new MemoryStream(await Client.GetByteArrayAsync(url)));
         using var labels = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         return labels.GetPixelSpan().ToArray();
     }
 
@@ -392,13 +448,21 @@ public class RoomAnalysisApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     private async Task<RoomDto> WaitForStatusAsync(Guid id, string status)
     {
         var deadline = DateTime.UtcNow + Timeout;
+
         while (true)
         {
             var room = (await Client.GetFromJsonAsync<RoomDto>($"/api/rooms/{id}"))!;
+
             if (room.Status == status)
+            {
                 return room;
+            }
+
             if (room.Status == "Failed" || DateTime.UtcNow > deadline)
+            {
                 throw new TimeoutException($"Room {id} is {room.Status} ({room.FailureReason}), expected {status}.");
+            }
+
             await Task.Delay(100);
         }
     }

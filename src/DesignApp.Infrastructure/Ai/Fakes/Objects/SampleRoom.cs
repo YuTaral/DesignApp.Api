@@ -25,7 +25,10 @@ internal sealed record SampleRoom(string Name, int Width, int Height, string Fin
     private static IReadOnlyList<SampleObject> WithPhotoSize(IReadOnlyList<SampleObject> objects, int width, int height)
     {
         foreach (var shape in objects.SelectMany(o => o.Shapes))
+        {
             shape.PhotoSize = new SKSize(width, height);
+        }
+
         return objects;
     }
 
@@ -43,17 +46,25 @@ internal sealed record SampleRoom(string Name, int Width, int Height, string Fin
     public ObjectMask? Outline(string label, int width, int height)
     {
         var sampleObject = Objects.FirstOrDefault(o => o.Label == label);
+
         if (sampleObject is null)
+        {
             return null;
+        }
 
         using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Alpha8, SKAlphaType.Premul));
+
         using (var canvas = new SKCanvas(bitmap))
         {
             canvas.Clear(SKColors.Transparent);
             canvas.Scale(width / (float)Width, height / (float)Height);
+
             foreach (var shape in sampleObject.Shapes)
+            {
                 shape.Draw(canvas);
+            }
         }
+
         return new ObjectMask(width, height, bitmap.GetPixelSpan().ToArray());
     }
 }

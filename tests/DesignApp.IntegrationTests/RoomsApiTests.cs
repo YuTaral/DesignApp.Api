@@ -20,6 +20,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var room = await response.Content.ReadFromJsonAsync<RoomDto>();
+
         Assert.NotNull(room);
         Assert.Equal("Uploaded", room.Status);
         Assert.Equal((1200, 800), (room.Width, room.Height));
@@ -35,15 +36,18 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var created = await upload.Content.ReadFromJsonAsync<RoomDto>();
 
         var room = await _client.GetFromJsonAsync<RoomDto>($"/api/rooms/{created!.Id}");
+
         Assert.Equal(created.Id, room!.Id);
         Assert.Equal((4096, 2048), (room.Width, room.Height));
 
         using var photo = await _client.GetAsync(room.PhotoUrl);
+
         Assert.Equal(HttpStatusCode.OK, photo.StatusCode);
         Assert.Equal(DesignApp.Application.Constants.ContentTypes.Jpeg, photo.Content.Headers.ContentType?.MediaType);
         Assert.True(photo.Headers.CacheControl?.Private);
         Assert.Contains("Origin", photo.Headers.Vary);
         using var decoded = TestImages.Decode(await photo.Content.ReadAsByteArrayAsync());
+
         Assert.Equal((4096, 2048), (decoded.Width, decoded.Height));
     }
 
@@ -55,6 +59,7 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         var problem = await response.Content.ReadFromJsonAsync<JsonElement>();
+
         Assert.Equal(DesignApp.Api.Constants.Titles.InvalidPhoto, problem.GetProperty("title").GetString());
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.UnsupportedPhoto, problem.GetProperty("detail").GetString());
     }
@@ -94,8 +99,10 @@ public class RoomsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private async Task<HttpResponseMessage> UploadAsync(byte[] file, string fileName = "room.jpg", string contentType = DesignApp.Application.Constants.ContentTypes.Jpeg)
     {
         using var content = new ByteArrayContent(file);
+
         content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         using var form = new MultipartFormDataContent { { content, "photo", fileName } };
+
         return await _client.PostAsync("/api/rooms", form);
     }
 

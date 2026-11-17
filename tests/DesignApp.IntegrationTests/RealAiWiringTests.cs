@@ -22,12 +22,16 @@ public class RealAiWiringTests(ApiFactory factory) : IClassFixture<ApiFactory>
             builder.UseSetting("Ai:UseFakes", "false");
             builder.UseSetting("Ai:AnthropicApiKey", "sk-ant-placeholder");
             builder.UseSetting("Ai:FalKey", "placeholder:placeholder");
+
             if (workspaceId is not null)
+            {
                 builder.UseSetting("Ai:AnthropicWorkspaceId", workspaceId);
+            }
         });
 
         using var scope = app.Services.CreateScope();
         var ai = scope.ServiceProvider.GetRequiredService<IAiProviders>();
+
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<AnalyzeRoom>());
 
         Assert.Equal("ClaudeInventoryProvider", ai.Inventory(AiMode.Real).GetType().Name);

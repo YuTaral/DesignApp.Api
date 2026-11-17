@@ -31,10 +31,15 @@ public sealed class SavePlan(IPlanRepository plans, ICurrentUser currentUser, Ti
         HexColor wallColor, HexColor floorColor, FloorType floorType, int view, IReadOnlyList<PlanItem> items, ViewCorner corner, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(id, currentUser.Id, cancellationToken);
+
         if (plan is null)
+        {
             return null;
+        }
+
         plan.Update(name, outline, height, wallColor, floorColor, floorType, view, items, clock.GetUtcNow(), corner);
         await plans.SaveChangesAsync(cancellationToken);
+
         return plan;
     }
 }

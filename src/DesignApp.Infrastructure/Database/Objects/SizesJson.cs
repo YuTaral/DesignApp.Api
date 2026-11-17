@@ -34,6 +34,7 @@ internal static class SizesJson
     private static ReadOnlyCollection<SurfaceSize> Deserialize(string json)
     {
         var stored = JsonSerializer.Deserialize<List<StoredSize>>(json, Options) ?? [];
+
         return stored.Select(s => new SurfaceSize(s.ObjectIndex, s.Width, s.Height)).ToList().AsReadOnly();
     }
 

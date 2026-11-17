@@ -33,8 +33,12 @@ public class NewObjectTests
     private static byte[] Labels()
     {
         var labels = new byte[W * H];
+
         for (var p = 0; p < W * H; p++)
+        {
             labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
+        }
+
         return labels;
     }
 
@@ -129,21 +133,25 @@ public class NewObjectTests
 
         Assert.True(result!.Succeeded, result.Error);
         var added = room.Objects[^1];
+
         Assert.Equal((count + 1, next, "side lamp", ObjectCategory.Lighting, true), (room.Objects.Count, added.Index, added.Label, added.Category, added.MarkedByHand));
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
         Assert.InRange(added.Box.X, 94.0 / width, 96.0 / width);
         Assert.InRange(added.Box.Width, 9.0 / width, 11.0 / width);
         var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+
         Assert.Equal(next, labels[100 * width + 100]);
         Assert.DoesNotContain((byte)next, DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content));
 
         // Undo shows version 0 again; the object stays listed, with no pixels there, and redo brings it back.
         var undo = new FixRoomOutline(_rooms, new FixedUser("user-1"), _storage, imaging);
+
         Assert.True((await undo.UseRevisionAsync(room.Id, 0, CancellationToken.None))!.Succeeded);
         Assert.Equal(count + 1, room.Objects.Count);
 
         // A second object on version 0 never reuses the first one's index.
         var second = await adder.AddAsync(room.Id, 0, "picture", ObjectCategory.Decor, dab, null, CancellationToken.None);
+
         Assert.True(second!.Succeeded, second.Error);
         Assert.Equal(next + 1, room.Objects[^1].Index);
     }
@@ -185,6 +193,7 @@ public class NewObjectTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
@@ -194,6 +203,7 @@ public class NewObjectTests
             new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
             .HandleAsync(room.Id, CancellationToken.None);
         Assert.Equal(RoomStatus.Ready, room.Status);
+
         return room;
     }
 
@@ -203,6 +213,7 @@ public class NewObjectTests
     {
         using var codec = SKCodec.Create(new MemoryStream(png));
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         return bitmap.GetPixelSpan().ToArray();
     }
 }

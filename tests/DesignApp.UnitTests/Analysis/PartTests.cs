@@ -35,8 +35,12 @@ public class PartTests
     private static byte[] Labels()
     {
         var labels = new byte[W * H];
+
         for (var p = 0; p < W * H; p++)
+        {
             labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
+        }
+
         return labels;
     }
 
@@ -74,6 +78,7 @@ public class PartTests
     public void Brushing_a_part_takes_only_its_objects_pixels_and_erasing_gives_them_back()
     {
         var labels = Labels();
+
         labels[5 * W + 2] = 3; // the part, inside object 1
 
         var painted = OutlineBrush.Apply(labels, W, H, new OutlineStroke(3, "seat", OutlineBrushMode.Paint, 0.6,
@@ -98,6 +103,7 @@ public class PartTests
 
         Assert.Throws<DomainException>(() => ReadyRoom([chair, cushion with { Index = 2, ParentIndex = 5 }]));
         var room = ReadyRoom([chair, seat]);
+
         Assert.Throws<DomainException>(() => room.AddObject(cushion, 0, r => $"labels/{r}"));
         Assert.Throws<DomainException>(() => room.MergePart(1, 0, r => $"labels/{r}"));
         Assert.Equal(1, room.MergePart(2, 0, r => $"labels/{r}"));
@@ -133,17 +139,22 @@ public class PartTests
 
         Assert.True(added!.Succeeded, added.Error);
         var seat = room.Objects[^1];
+
         Assert.Equal((chair.Index, chair.Category, "seat"), (seat.ParentIndex, seat.Category, seat.Label));
         var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+
         Assert.Equal(seat.Index, LabelAt(labels, point));
 
         // A part has no parts, and is merged back rather than removed on its own.
         var ofPart = await adder.AddAsync(room.Id, 1, "stitching", ObjectCategory.Other, dab, seat.Index, CancellationToken.None);
+
         Assert.Equal(DesignApp.Application.Constants.Messages.PartParent, ofPart!.Error);
         var removed = await Remover().RemoveAsync(room.Id, 1, [seat.Index], CancellationToken.None);
+
         Assert.Equal(DesignApp.Application.Constants.Messages.PartRemoval("seat", chair.Label), removed!.Error);
 
         var merger = new MergeRoomPart(_rooms, new FixedUser("user-1"), _storage, imaging);
+
         Assert.Equal(DesignApp.Application.Constants.Messages.NotAPart, (await merger.MergeAsync(room.Id, 1, chair.Index, CancellationToken.None))!.Error);
         var merged = await merger.MergeAsync(room.Id, 1, seat.Index, CancellationToken.None);
 
@@ -165,6 +176,7 @@ public class PartTests
 
         Assert.True(found!.Succeeded, found.Error);
         var parts = room.Objects.Where(o => o.ParentIndex == sofa.Index).ToList();
+
         Assert.NotEmpty(parts);
         Assert.Equal(Enumerable.Range(next, parts.Count), parts.Select(p => p.Index));
         Assert.All(parts, p => Assert.Equal(sofa.Category, p.Category));
@@ -172,6 +184,7 @@ public class PartTests
         // The parts only took the sofa's pixels; everything else is as it was.
         var after = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
         var partIndexes = parts.Select(p => (byte)p.Index).ToHashSet();
+
         Assert.All(Enumerable.Range(0, after.Length).Where(p => after[p] != before[p]), p =>
         {
             Assert.Equal(sofa.Index, before[p]);
@@ -180,6 +193,7 @@ public class PartTests
 
         // Parts have no parts of their own.
         var ofPart = await Finder().FindAsync(room.Id, 1, parts[0].Index, null, CancellationToken.None);
+
         Assert.Equal(DesignApp.Application.Constants.Messages.PartsOfPart(sofa.Label), ofPart!.Error);
         Assert.Null(await new FindRoomParts(_rooms, new FixedUser("someone-else"), _storage, new SkiaRoomImaging(), Ai()).FindAsync(room.Id, 1, sofa.Index, null, CancellationToken.None));
     }
@@ -189,12 +203,15 @@ public class PartTests
     {
         // Object 1 covers the whole 20x10 map; the AI's "frame" covers all of it and its "seat" the left half.
         using var bitmap = new SKBitmap(new SKImageInfo(W, H, SKColorType.Gray8, SKAlphaType.Opaque));
+
         bitmap.GetPixelSpan().Fill(1);
         using var png = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100);
         var chair = new DetectedObject(1, "chair", ObjectCategory.Furniture, new BoundingBox(0, 0, 1, 1), HexColor.Parse("#202020"));
+
         SegmentedObject Part(string label, Func<int, bool> covers)
         {
             var coverage = Enumerable.Range(0, W * H).Select(p => covers(p % W) ? (byte)255 : (byte)0).ToArray();
+
             return new(new InventoryItem(label, ObjectCategory.Furniture, new BoundingBox(0, 0, 1, 1), HexColor.Parse("#202020")), new ObjectMask(W, H, coverage));
         }
 
@@ -204,6 +221,7 @@ public class PartTests
         Assert.True(added.Succeeded, added.Error);
         Assert.Equal(["frame", "seat"], added.Value.Objects.Select(o => o.Label));
         var labels = SkiaRoomImaging.DecodeGrayPng(added.Value.Png).Labels;
+
         Assert.Equal([3, 2], new[] { labels[5 * W + 2], labels[5 * W + 15] }.Select(l => (int)l));
     }
 
@@ -226,6 +244,7 @@ public class PartTests
     {
         var chair = new DetectedObject(1, "chair", ObjectCategory.Furniture, Box, HexColor.Parse("#806040"));
         var room = ReadyRoom([chair]);
+
         DetectedObject Part(int index, int parent)
         {
             return new(index, "seat", ObjectCategory.Furniture, Box, HexColor.Parse("#A08060"), ParentIndex: parent);
@@ -243,6 +262,7 @@ public class PartTests
         var (room, chair, point) = await RoomWithObjectAsync();
         var added = await new AddRoomObject(_rooms, new FixedUser("user-1"), _storage, new SkiaRoomImaging())
             .AddAsync(room.Id, 0, "seat", ObjectCategory.Other, [new(OutlineBrushMode.Paint, 2, [point])], chair.Index, CancellationToken.None);
+
         Assert.True(added!.Succeeded, added.Error);
         var seat = room.Objects[^1];
 
@@ -250,6 +270,7 @@ public class PartTests
 
         Assert.True(removed!.Succeeded, removed.Error);
         var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+
         Assert.DoesNotContain((byte)chair.Index, labels);
         Assert.DoesNotContain((byte)seat.Index, labels);
     }
@@ -258,9 +279,11 @@ public class PartTests
     private static Room ReadyRoom(IEnumerable<DetectedObject> objects)
     {
         var room = Room.Upload(Guid.CreateVersion7(Now), "user-1", "photo", 600, 400, Now);
+
         room.StartAnalysis();
         room.StartSegmentation();
         room.MarkReady(objects, "labels/0");
+
         return room;
     }
 
@@ -269,6 +292,7 @@ public class PartTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
@@ -280,17 +304,25 @@ public class PartTests
 
         // The first removable object with a pixel whose neighbours are all its own, so a small dab stays inside it.
         var labels = DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content);
+
         foreach (var candidate in room.Objects.Where(o => !o.Category.IsSurface()))
         {
             for (var p = 0; p < labels.Length; p++)
             {
                 var (x, y) = (p % 600, p / 600);
+
                 if (x < 3 || y < 3 || x > 596 || y > 396 || labels[p] != candidate.Index)
+                {
                     continue;
+                }
+
                 if (Enumerable.Range(-3, 7).All(d => labels[p + d] == candidate.Index && labels[p + d * 600] == candidate.Index))
+                {
                     return (room, candidate, new StrokePoint((x + 0.5) / 600, (y + 0.5) / 400));
+                }
             }
         }
+
         throw new InvalidOperationException("The fake analysis found no object to use.");
     }
 
@@ -324,6 +356,7 @@ public class PartTests
     {
         using var codec = SKCodec.Create(new MemoryStream(png));
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         return bitmap.GetPixelSpan().ToArray();
     }
 }

@@ -25,7 +25,10 @@ public sealed record SurfaceSize
     public SurfaceSize(int objectIndex, double width, double height)
     {
         if (!InRange(width) || !InRange(height))
+        {
             throw new DomainException(Constants.Messages.SurfaceSize);
+        }
+
         (ObjectIndex, Width, Height) = (objectIndex, width, height);
     }
 

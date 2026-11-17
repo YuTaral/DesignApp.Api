@@ -19,14 +19,24 @@ public sealed class SaveGuestRooms(IRoomRepository rooms)
     public async Task<int> HandleAsync(string? guestId, string userId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
         if (guestId is null || !GuestIds.IsGuest(guestId) || GuestIds.IsGuest(userId))
+        {
             return 0;
+        }
 
         var owned = await rooms.ListByOwnerAsync(guestId, cancellationToken);
+
         foreach (var room in owned)
+        {
             room.TransferTo(userId);
+        }
+
         if (owned.Count > 0)
+        {
             await rooms.SaveChangesAsync(cancellationToken);
+        }
+
         return owned.Count;
     }
 }

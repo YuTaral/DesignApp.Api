@@ -66,12 +66,16 @@ internal sealed class FakeRooms : IRoomRepository
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         if (FailOnSave)
+        {
             throw new InvalidOperationException("Database is down.");
+        }
+
         Saved.AddRange(_pending);
         _pending.Clear();
         Saved.RemoveAll(_removed.Contains);
         _removed.Clear();
         SaveCount++;
+
         return Task.CompletedTask;
     }
 }

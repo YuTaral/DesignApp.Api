@@ -24,9 +24,11 @@ public class RoomTests
     internal static Room ReadyRoom(string ownerId = "user-1")
     {
         var room = Room.Upload(Guid.CreateVersion7(), ownerId, "rooms/photo.jpg", 1600, 1200, Now);
+
         room.StartAnalysis();
         room.StartSegmentation();
         room.MarkReady([Sofa(1), Sofa(2) with { Label = "wall", Category = ObjectCategory.Wall }], LabelMapKey);
+
         return room;
     }
 
@@ -104,6 +106,7 @@ public class RoomTests
     public void Analysis_stops_after_the_maximum_attempts()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
         for (var i = 0; i < DesignApp.Domain.Constants.Rooms.MaxAnalysisAttempts; i++)
         {
             room.StartAnalysis();
@@ -117,8 +120,10 @@ public class RoomTests
     private static Room Segmenting()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
         room.StartAnalysis();
         room.StartSegmentation();
+
         return room;
     }
 
@@ -126,6 +131,7 @@ public class RoomTests
     public void Cannot_skip_the_segmentation_stage()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
         room.StartAnalysis();
 
         Assert.Throws<DomainException>(() => room.MarkReady([Sofa()], LabelMapKey));
@@ -135,6 +141,7 @@ public class RoomTests
     public void Ready_requires_unique_object_indexes()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
         room.StartAnalysis();
         room.StartSegmentation();
 
@@ -145,6 +152,7 @@ public class RoomTests
     public void Failing_records_the_reason()
     {
         var room = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/photo.jpg", 1600, 1200, Now);
+
         room.StartAnalysis();
 
         room.MarkFailed("Segmentation provider timed out");

@@ -41,6 +41,14 @@ While the user's Visual Studio F5 run is active its `bin` folders are locked: bu
 - **Block bodies for methods:** a method, local function or constructor uses `{ return ...; }`, never `=>`. Name an
   awaited or nested step in a local variable (`var outcome = await ...; return ToResponse(outcome, ...);`) so no
   line mixes an `await` with a mapping. Properties and lambdas may keep `=>`.
+- **Declarations first:** a block's variables are declared at its top (after any guard clauses), then the logic. A
+  value that needs an earlier step (an `await`, a call that changes something, a check) is declared right after that
+  step, not further down. Tests are step by step: each result is declared right after its step.
+- **Empty lines:** one empty line after every group of declarations; one before every `return`, unless it is the
+  first statement of its block; and one before and after each `if` (with its `else`s), `for`, `foreach`, `while`,
+  `do`, `switch`, `try`, `using` and `lock`, unless it is the first or last statement of its block.
+- **Braces on every body:** `if`, `else`, `for`, `foreach` and `while` always take braces, each on its own line, even
+  for a single statement (`if (x is null)` / `{` / `return;` / `}`).
 - **One type per file**, named after it. Only `Objects/Result.cs` pairs `Result<T>` with its `Result` helper.
 - **Folders: Domain, Application and Api are grouped by type** (one folder per kind of class, not per entity):
   - Domain: `Entities/`, `Objects/` (value objects and records), `Extensions/`, `Exceptions/`.

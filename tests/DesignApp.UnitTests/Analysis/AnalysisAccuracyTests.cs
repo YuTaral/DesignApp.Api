@@ -25,6 +25,7 @@ public class AnalysisAccuracyTests
             """, maxPoints: 3, width: 1536, height: 2048);
 
         var tv = result.Value[0];
+
         Assert.Equal(688 / 1536.0, tv.Box.X, 6);
         Assert.Equal(985 / 2048.0, tv.Box.Y, 6);
         Assert.Equal(266 / 2048.0, tv.Box.Height, 6);
@@ -77,21 +78,38 @@ public class AnalysisAccuracyTests
         const int width = 60, height = 20;
         var rgba = new byte[width * height * 4];
         var labels = new byte[width * height];
+
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
             {
                 var p = y * width + x;
                 (byte r, byte g, byte b) color = x < 30 ? ((byte)180, (byte)180, (byte)180) : ((byte)40, (byte)40, (byte)40);
-                if (x is >= 10 and < 12) color = (0, 0, 0);                     // an edge no step crosses
-                if (x < 10) color = (182, 178, 181);                             // the grey gap, behind it
-                if (x is >= 40 and < 50 && y is >= 5 and < 15) color = (230, 20, 20); // the red gap
+
+                if (x is >= 10 and < 12)
+                {
+                    color = (0, 0, 0); // an edge no step crosses
+                }
+
+                if (x < 10)
+                {
+                    color = (182, 178, 181); // the grey gap, behind it
+                }
+
+                if (x is >= 40 and < 50 && y is >= 5 and < 15)
+                {
+                    color = (230, 20, 20); // the red gap
+                }
+
                 (rgba[p * 4], rgba[p * 4 + 1], rgba[p * 4 + 2], rgba[p * 4 + 3]) = (color.r, color.g, color.b, 255);
                 labels[p] = x < 10 || x is >= 40 and < 50 && y is >= 5 and < 15 ? (byte)0 : x < 30 ? (byte)1 : (byte)2;
             }
         }
+
         for (var y = 0; y < height; y++)
+        {
             labels[y * width + 10] = labels[y * width + 11] = 1; // the black edge belongs to object 1
+        }
 
         LabelMapRefiner.FillRemainingGaps(labels, width, height, rgba);
 
@@ -107,20 +125,32 @@ public class AnalysisAccuracyTests
         // it; with its reach (x 5-19) it stops at x 5 and never passes x 19, where the wall takes over.
         const int width = 60, height = 10;
         var rgba = Enumerable.Repeat((byte)240, width * height * 4).ToArray();
+
         byte[] Labels()
         {
             var labels = new byte[width * height];
+
             for (var y = 0; y < height; y++)
             {
-                for (var x = 10; x < 15; x++) labels[y * width + x] = 1;
-                for (var x = 40; x < width; x++) labels[y * width + x] = 2;
+                for (var x = 10; x < 15; x++)
+                {
+                    labels[y * width + x] = 1;
+                }
+
+                for (var x = 40; x < width; x++)
+                {
+                    labels[y * width + x] = 2;
+                }
             }
+
             return labels;
         }
 
         var free = Labels();
+
         LabelMapRefiner.FillRemainingGaps(free, width, height, rgba);
         var limited = Labels();
+
         LabelMapRefiner.FillRemainingGaps(limited, width, height, rgba, [null, new PixelRect(5, 0, 20, height), null]);
 
         Assert.Equal(1, free[5 * width + 0]);       // unlimited: the teapot spread to the photo's edge
@@ -134,9 +164,15 @@ public class AnalysisAccuracyTests
     private static ObjectMask Mask(int width, int height, Func<int, int, bool> on)
     {
         var coverage = new byte[width * height];
+
         for (var y = 0; y < height; y++)
+        {
             for (var x = 0; x < width; x++)
+            {
                 coverage[y * width + x] = on(x, y) ? (byte)255 : (byte)0;
+            }
+        }
+
         return new ObjectMask(width, height, coverage);
     }
 }

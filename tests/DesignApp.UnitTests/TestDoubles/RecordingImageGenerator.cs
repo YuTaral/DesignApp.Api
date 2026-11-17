@@ -13,6 +13,7 @@ internal sealed class RecordingImageGenerator : IImageGenerator
     public Task<Result<byte[]>> GenerateAsync(byte[] image, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, CancellationToken cancellationToken)
     {
         Calls.Add((image, prompt, seed, boxes));
+
         return Task.FromResult<Result<byte[]>>(image);
     }
 }

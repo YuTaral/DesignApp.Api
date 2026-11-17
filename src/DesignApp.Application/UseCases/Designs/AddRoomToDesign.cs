@@ -29,15 +29,23 @@ public sealed class AddRoomToDesign(IRoomRepository rooms, IDesignRepository des
         checks.Check(edits);
         var design = await designs.FindAsync(designId, currentUser.Id, cancellationToken);
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (design is null || room is null)
+        {
             return null;
+        }
+
         if (await designs.IsRoomInADesignAsync(room.Id, cancellationToken))
+        {
             throw new DomainException(Constants.Messages.RoomInADesign);
+        }
 
         var now = clock.GetUtcNow();
+
         design.AddRoom(room, now);
         design.SetRoomEdits(room, edits, sizes, now);
         await designs.SaveChangesAsync(cancellationToken);
+
         return design;
     }
 }

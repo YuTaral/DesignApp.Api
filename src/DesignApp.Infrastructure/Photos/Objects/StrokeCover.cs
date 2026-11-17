@@ -48,10 +48,13 @@ internal static class StrokeCover
         var x1 = Math.Min(width - 1, (int)Math.Floor(Math.Max(ax, bx) - 0.5));
         var y0 = Math.Max(0, (int)Math.Ceiling(Math.Min(ay, by) - 0.5));
         var y1 = Math.Min(height - 1, (int)Math.Floor(Math.Max(ay, by) - 0.5));
+
         for (var y = y0; y <= y1; y++)
         {
             for (var x = x0; x <= x1; x++)
+            {
                 onPixel(y * width + x);
+            }
         }
     }
 
@@ -67,30 +70,41 @@ internal static class StrokeCover
     {
         var xs = new double[points.Count];
         var ys = new double[points.Count];
+        var crossings = new List<double>();
+
         for (var i = 0; i < points.Count; i++)
         {
             xs[i] = points[i].X * width;
             ys[i] = points[i].Y * height;
         }
 
-        var crossings = new List<double>();
         for (var y = 0; y < height; y++)
         {
             var cy = y + 0.5;
+
             crossings.Clear();
+
             for (int i = 0, j = points.Count - 1; i < points.Count; j = i++)
             {
                 if (ys[i] <= cy == ys[j] <= cy)
+                {
                     continue;
+                }
+
                 crossings.Add(xs[j] + (cy - ys[j]) * (xs[i] - xs[j]) / (ys[i] - ys[j]));
             }
+
             crossings.Sort();
+
             for (var k = 0; k + 1 < crossings.Count; k += 2)
             {
                 var x0 = Math.Max(0, (int)Math.Ceiling(crossings[k] - 0.5));
                 var x1 = Math.Min(width - 1, (int)Math.Ceiling(crossings[k + 1] - 0.5) - 1);
+
                 for (var x = x0; x <= x1; x++)
+                {
                     onPixel(y * width + x);
+                }
             }
         }
     }

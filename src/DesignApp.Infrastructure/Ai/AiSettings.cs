@@ -88,10 +88,13 @@ public sealed class AiSettings
     public IReadOnlyList<string> Problems()
     {
         var problems = new List<string>();
+
         void Check(bool ok, string field, string rule)
         {
             if (!ok)
+            {
                 problems.Add(Constants.Messages.InvalidAiSetting(field, rule));
+            }
         }
 
         Check(!string.IsNullOrWhiteSpace(InventoryModel), nameof(InventoryModel), Constants.Ai.Rules.NotEmpty);
@@ -115,6 +118,7 @@ public sealed class AiSettings
         Check(Enum.IsDefined(RemovalQuality), nameof(RemovalQuality), Constants.Ai.Rules.RemovalQuality);
         Check(RemovalMaskExpansion is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalMaskExpansion), Constants.Ai.Rules.MaskExpansion);
         Check(RemovalHandMaskGrowth is >= 0 and <= Constants.Ai.Removal.MaxMaskExpansion, nameof(RemovalHandMaskGrowth), Constants.Ai.Rules.MaskExpansion);
+
         return problems;
     }
 }

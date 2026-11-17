@@ -29,6 +29,7 @@ internal static class GuestCookie
     {
         // TryGetValue: a SignalR connection's copy of the request throws for a missing key.
         var issued = http.Items.TryGetValue(Constants.Cookies.GuestIssuedItem, out var value) ? value as string : null;
+
         return issued ?? GuestIds.FromToken(http.Request.Cookies[Constants.Cookies.Guest]);
     }
 
@@ -37,12 +38,19 @@ internal static class GuestCookie
     public static string GetOrIssue(HttpContext http)
     {
         if (Read(http) is { } existing)
+        {
             return existing;
+        }
 
         var id = GuestIds.New();
+
         http.Items[Constants.Cookies.GuestIssuedItem] = id;
+
         if (!http.Response.HasStarted)
+        {
             http.Response.Cookies.Append(Constants.Cookies.Guest, GuestIds.ToToken(id), Options);
+        }
+
         return id;
     }
 

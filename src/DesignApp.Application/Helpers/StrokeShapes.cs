@@ -14,11 +14,20 @@ public static class StrokeShapes
     public static string? Check(StrokeShape shape, IReadOnlyList<StrokePoint> points)
     {
         if (!Enum.IsDefined(shape))
+        {
             return Constants.Messages.UnknownStrokeShape;
+        }
+
         if (shape is StrokeShape.Box && points.Count != 2)
+        {
             return Constants.Messages.BoxPoints;
+        }
+
         if (shape is StrokeShape.Lasso && points.Count < 3)
+        {
             return Constants.Messages.LassoPoints;
+        }
+
         return null;
     }
 }

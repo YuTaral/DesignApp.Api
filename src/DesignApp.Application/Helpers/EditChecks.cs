@@ -19,8 +19,11 @@ public sealed class EditChecks(IPaletteCatalog palettes)
         foreach (var edit in edits.OfType<RecolorEdit>())
         {
             CheckPaint(edit.Paint, edit.Color);
+
             foreach (var tone in edit.Tones)
+            {
                 CheckPaint(tone.Paint, tone.Color);
+            }
         }
     }
 
@@ -31,9 +34,15 @@ public sealed class EditChecks(IPaletteCatalog palettes)
     private void CheckPaint(string? reference, HexColor? color)
     {
         if (reference is null)
+        {
             return;
+        }
+
         var paint = palettes.Find(reference) ?? throw new DomainException(Constants.Messages.UnknownPaint(reference));
+
         if (paint.Color != color)
+        {
             throw new DomainException(Constants.Messages.PaintColorMismatch(paint.Code));
+        }
     }
 }

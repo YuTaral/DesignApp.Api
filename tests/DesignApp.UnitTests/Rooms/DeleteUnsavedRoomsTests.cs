@@ -20,6 +20,7 @@ public class DeleteUnsavedRoomsTests
         var old = await AddAsync(rooms, storage, Now.AddHours(-25), outlineFixes: 2);
         var recent = await AddAsync(rooms, storage, Now.AddHours(-23));
         var saved = await AddAsync(rooms, storage, Now.AddDays(-30));
+
         rooms.InDesigns.Add(saved.Id);
 
         var deleted = await UseCase(rooms, storage).HandleAsync(CancellationToken.None);
@@ -36,6 +37,7 @@ public class DeleteUnsavedRoomsTests
     public async Task Nothing_to_delete_saves_nothing()
     {
         var rooms = new FakeRooms();
+
         await AddAsync(rooms, new FakeStorage(), Now.AddHours(-1));
         var saves = rooms.SaveCount;
 
@@ -54,17 +56,27 @@ public class DeleteUnsavedRoomsTests
     {
         var id = Guid.CreateVersion7(uploaded);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 800, 600, uploaded);
+
         room.StartAnalysis();
         room.StartSegmentation();
         room.MarkReady([new DetectedObject(1, "wall", ObjectCategory.Wall, new BoundingBox(0, 0, 1, 1), DesignApp.Domain.Objects.HexColor.Parse("#FFFFFF"))],
             DesignApp.Application.Constants.Rooms.LabelMapKey(id));
+
         for (var i = 0; i < outlineFixes; i++)
+        {
             room.AddLabelMapRevision(room.LabelMapRevision, revision => DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision));
+        }
+
         rooms.Add(room);
         await rooms.SaveChangesAsync(CancellationToken.None);
+
         for (var revision = 0; revision <= room.LatestLabelMapRevision; revision++)
+        {
             await storage.SaveAsync(DesignApp.Application.Constants.Rooms.LabelMapKey(id, revision), new MemoryStream([1]), DesignApp.Application.Constants.ContentTypes.Png, CancellationToken.None);
+        }
+
         await storage.SaveAsync(room.PhotoKey, new MemoryStream([1]), DesignApp.Application.Constants.ContentTypes.Jpeg, CancellationToken.None);
+
         return room;
     }
 }

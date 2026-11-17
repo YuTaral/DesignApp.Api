@@ -22,14 +22,21 @@ public sealed class StartRoomAnalysis(IRoomRepository rooms, ICurrentUser curren
     public async Task<Result<Room>?> HandleAsync(Guid roomId, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         if (room is null)
+        {
             return null;
+        }
+
         if (room.Status is not RoomStatus.Waiting)
+        {
             return Result.Failure<Room>(Constants.Messages.NotWaiting);
+        }
 
         room.QueueAnalysis();
         await rooms.SaveChangesAsync(cancellationToken);
         analysisScheduler.Schedule(room.Id);
+
         return room;
     }
 }

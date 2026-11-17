@@ -15,6 +15,7 @@ internal sealed class RecordingNotifier : IRoomNotifier
     public Task RoomChangedAsync(Room room, CancellationToken cancellationToken)
     {
         Sent.Add(room.Status);
+
         return Task.CompletedTask;
     }
 }

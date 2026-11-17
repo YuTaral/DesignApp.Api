@@ -64,6 +64,7 @@ internal static class DesignEndpoints
     {
         var designs = await getDesigns.AllAsync(cancellationToken);
         var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+
         return TypedResults.Ok(designs.Select(d => DesignResponse.From(d, photoVersions)).ToList());
     }
 
@@ -78,9 +79,14 @@ internal static class DesignEndpoints
     {
         var design = await createDesign.HandleAsync(
             request.RoomId, request.Name ?? "", request.Description, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
+
         if (design is null)
+        {
             return TypedResults.NotFound();
+        }
+
         var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+
         return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, photoVersions));
     }
 
@@ -91,6 +97,7 @@ internal static class DesignEndpoints
     private static async Task<Results<Ok<DesignResponse>, NotFound>> GetAsync(Guid id, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await getDesigns.OneAsync(id, cancellationToken);
+
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -104,6 +111,7 @@ internal static class DesignEndpoints
         Guid id, EditDesignRequest request, EditDesignDetails editDesign, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await editDesign.HandleAsync(id, request.Name ?? "", request.Description, cancellationToken);
+
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -114,6 +122,7 @@ internal static class DesignEndpoints
     private static async Task<Results<NoContent, NotFound>> DeleteAsync(Guid id, DeleteDesign deleteDesign, CancellationToken cancellationToken)
     {
         var deleted = await deleteDesign.HandleAsync(id, cancellationToken);
+
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
@@ -127,6 +136,7 @@ internal static class DesignEndpoints
         Guid id, AddDesignRoomRequest request, AddRoomToDesign addRoom, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await addRoom.HandleAsync(id, request.RoomId, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
+
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -141,6 +151,7 @@ internal static class DesignEndpoints
         Guid id, Guid roomId, RoomColorsRequest request, SaveRoomColors saveColors, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await saveColors.HandleAsync(id, roomId, ToEdits(request.Edits), ToSizes(request.Sizes), cancellationToken);
+
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -154,6 +165,7 @@ internal static class DesignEndpoints
         Guid id, Guid roomId, RemoveRoomFromDesign removeRoom, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var design = await removeRoom.HandleAsync(id, roomId, cancellationToken);
+
         return await FoundAsync(design, getDesigns, cancellationToken);
     }
 
@@ -164,8 +176,12 @@ internal static class DesignEndpoints
     private static async Task<Results<Ok<DesignResponse>, NotFound>> FoundAsync(Design? design, GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         if (design is null)
+        {
             return TypedResults.NotFound();
+        }
+
         var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+
         return TypedResults.Ok(DesignResponse.From(design, photoVersions));
     }
 
@@ -175,6 +191,7 @@ internal static class DesignEndpoints
     private static List<EditOperation> ToEdits(List<EditRequest>? edits)
     {
         var sent = edits ?? [];
+
         return [.. sent.Select(e => new RecolorEdit(e.ObjectIndex, HexColor.Parse(e.Color ?? ""), e.Strength, e.Paint, e.Tones?.Select(ToTone).ToList()))];
     }
 
@@ -184,6 +201,7 @@ internal static class DesignEndpoints
     private static ToneRecolor ToTone(ToneRequest tone)
     {
         var color = tone.Color is null ? (HexColor?)null : HexColor.Parse(tone.Color);
+
         return new ToneRecolor(HexColor.Parse(tone.Center ?? ""), tone.Share, color, tone.Strength, tone.Paint);
     }
 
@@ -193,6 +211,7 @@ internal static class DesignEndpoints
     private static List<SurfaceSize> ToSizes(List<SizeRequest>? sizes)
     {
         var sent = sizes ?? [];
+
         return [.. sent.Select(s => new SurfaceSize(s.ObjectIndex, s.Width, s.Height))];
     }
 }

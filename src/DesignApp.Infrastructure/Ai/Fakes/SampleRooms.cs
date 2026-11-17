@@ -28,10 +28,14 @@ internal static class SampleRooms
     {
         var aspect = image.Width / (double)image.Height;
         var candidates = All.Where(s => Math.Abs(s.Width / (double)s.Height / aspect - 1) <= Constants.Samples.MaxAspectDifference).ToList();
+
         if (candidates.Count == 0)
+        {
             return null;
+        }
 
         var fingerprint = Fingerprint(image.Jpeg);
+
         return candidates
             .Select(s => (Sample: s, Difference: Difference(fingerprint, s.FingerprintBytes)))
             .Where(c => c.Difference <= Constants.Samples.MaxDifference)
@@ -50,22 +54,24 @@ internal static class SampleRooms
         using var codec = SKCodec.Create(new MemoryStream(encoded)) ?? throw new ArgumentException("Not an image.", nameof(encoded));
         var info = new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul, SKColorSpace.CreateSrgb());
         using var bitmap = SKBitmap.Decode(codec, info);
+        var cells = new byte[Constants.Samples.Grid * Constants.Samples.Grid];
         var pixels = bitmap.GetPixelSpan();
         var (w, h) = (info.Width, info.Height);
 
-        var cells = new byte[Constants.Samples.Grid * Constants.Samples.Grid];
         for (var cy = 0; cy < Constants.Samples.Grid; cy++)
         {
             for (var cx = 0; cx < Constants.Samples.Grid; cx++)
             {
                 var (x0, x1, y0, y1) = (cx * w / Constants.Samples.Grid, (cx + 1) * w / Constants.Samples.Grid, cy * h / Constants.Samples.Grid, (cy + 1) * h / Constants.Samples.Grid);
                 var total = 0.0;
+
                 for (var y = y0; y < y1; y++)
                 {
                     for (var x = x0; x < x1; x++)
                     {
                         var p = (y * w + x) * 4;
                         var a = pixels[p + 3] / 255.0;
+
                         double Over(byte c)
                         {
                             return c * a + 255 * (1 - a);
@@ -73,9 +79,11 @@ internal static class SampleRooms
                         total += 0.299 * Over(pixels[p]) + 0.587 * Over(pixels[p + 1]) + 0.114 * Over(pixels[p + 2]);
                     }
                 }
+
                 cells[cy * Constants.Samples.Grid + cx] = (byte)Math.Round(total / ((x1 - x0) * (y1 - y0)));
             }
         }
+
         return cells;
     }
 
@@ -94,6 +102,7 @@ internal static class SampleRooms
     private static List<SampleRoom> Load()
     {
         var assembly = typeof(SampleRooms).Assembly;
+
         return [.. assembly.GetManifestResourceNames()
             .Where(n => n.Contains(Constants.Samples.ResourceFolder, StringComparison.Ordinal) && n.EndsWith(Constants.Samples.Extension, StringComparison.Ordinal))
             .Select(n =>
@@ -101,6 +110,7 @@ internal static class SampleRooms
                 using var stream = assembly.GetManifestResourceStream(n)!;
                 var sample = JsonSerializer.Deserialize<SampleRoom>(stream, Options)
                     ?? throw new InvalidDataException($"Sample {n} is empty.");
+
                 return (Sample: sample, Recorded: n.EndsWith(Constants.Samples.RecordedSuffix, StringComparison.Ordinal));
             })
             .GroupBy(s => s.Sample.Name)

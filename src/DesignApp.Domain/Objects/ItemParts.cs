@@ -22,12 +22,16 @@ public sealed record ItemParts(double RunDepth, double LegWidth, double ChaiseWi
     public static ItemParts Default(ItemForm form, double width, double depth)
     {
         var smaller = Math.Min(width, depth);
+
         if (form != ItemForm.PShaped)
         {
             var run = Math.Round(smaller * Constants.Plans.LegShare);
+
             return new ItemParts(run, run);
         }
+
         var leg = Math.Round(smaller * Constants.Plans.PLegShare);
+
         return new ItemParts(leg, leg, Math.Min(Math.Round(leg * Constants.Plans.ChaiseShare), width), leg);
     }
 
@@ -46,7 +50,10 @@ public sealed record ItemParts(double RunDepth, double LegWidth, double ChaiseWi
             && (form == ItemForm.PShaped
                 ? ChaiseWidth >= LegWidth && ChaiseWidth <= width && ChaiseDepth >= min && ChaiseDepth <= depth - RunDepth
                 : ChaiseWidth == 0 && ChaiseDepth == 0);
+
         if (!fits)
+        {
             throw new DomainException(Constants.Messages.PlanItemParts);
+        }
     }
 }

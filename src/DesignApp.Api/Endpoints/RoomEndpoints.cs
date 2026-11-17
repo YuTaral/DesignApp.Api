@@ -110,9 +110,12 @@ internal static class RoomEndpoints
         CancellationToken cancellationToken)
     {
         if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
+        {
             return problem;
+        }
 
         var analysisScope = AnalysisScope.WholeRoom;
+
         if (!string.IsNullOrWhiteSpace(scope) && (!Enum.TryParse(scope, ignoreCase: true, out analysisScope) || !Enum.IsDefined(analysisScope)))
         {
             return TypedResults.Problem(
@@ -131,10 +134,14 @@ internal static class RoomEndpoints
 
         await using var content = photo.OpenReadStream();
         var result = await uploadRoom.HandleAsync(content, cancellationToken, analysisScope, aiMode);
+
         if (!result.Succeeded)
+        {
             return TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidPhoto);
+        }
 
         var room = result.Value;
+
         return TypedResults.Created(Constants.Routes.RoomUrl(room.Id), RoomResponse.From(room));
     }
 
@@ -147,6 +154,7 @@ internal static class RoomEndpoints
         Guid id, GetRoom getRoom, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
+
         return room is null ? TypedResults.NotFound() : TypedResults.Ok(RoomResponse.From(room));
     }
 
@@ -161,6 +169,7 @@ internal static class RoomEndpoints
         Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
+
         return room is null ? TypedResults.NotFound() : await StreamImmutableAsync(room.PhotoKey, storage, response, cancellationToken);
     }
 
@@ -176,6 +185,7 @@ internal static class RoomEndpoints
         Guid id, int version, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
+
         return room is not null && version >= 0 && version <= room.LatestPhotoVersion
             ? await StreamImmutableAsync(Application.Constants.Rooms.PhotoKey(room.Id, version), storage, response, cancellationToken)
             : TypedResults.NotFound();
@@ -192,6 +202,7 @@ internal static class RoomEndpoints
         Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
+
         return room?.LabelMapKey is { } key ? await StreamImmutableAsync(key, storage, response, cancellationToken) : TypedResults.NotFound();
     }
 
@@ -207,6 +218,7 @@ internal static class RoomEndpoints
         Guid id, int revision, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var room = await getRoom.HandleAsync(id, cancellationToken);
+
         return room is not null && room.HasLabelMapRevision(revision)
             ? await StreamImmutableAsync(Application.Constants.Rooms.LabelMapKey(room.Id, revision), storage, response, cancellationToken)
             : TypedResults.NotFound();
@@ -223,6 +235,7 @@ internal static class RoomEndpoints
     {
         var outcome = await fixOutline.FixAsync(
             id, request.BaseRevision, request.ObjectIndex, request.Mode, request.Radius, request.Points ?? [], request.Shape, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.OutlineFixFailed);
     }
 
@@ -237,6 +250,7 @@ internal static class RoomEndpoints
     {
         var outcome = await addObject.AddAsync(
             id, request.BaseRevision, request.Label, request.Category, request.Strokes ?? [], request.ParentIndex, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.NewObjectFailed);
     }
 
@@ -250,6 +264,7 @@ internal static class RoomEndpoints
         Guid id, FindPartsRequest request, FindRoomParts findParts, CancellationToken cancellationToken)
     {
         var outcome = await findParts.FindAsync(id, request.BaseRevision, request.ObjectIndex, request.Instructions, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.PartsFailed);
     }
 
@@ -263,6 +278,7 @@ internal static class RoomEndpoints
         Guid id, MergePartRequest request, MergeRoomPart mergePart, CancellationToken cancellationToken)
     {
         var outcome = await mergePart.MergeAsync(id, request.BaseRevision, request.ObjectIndex, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.MergeFailed);
     }
 
@@ -275,6 +291,7 @@ internal static class RoomEndpoints
         Guid id, StartRoomAnalysis startAnalysis, CancellationToken cancellationToken)
     {
         var outcome = await startAnalysis.HandleAsync(id, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.AnalysisFailed);
     }
 
@@ -288,6 +305,7 @@ internal static class RoomEndpoints
         Guid id, RemoveObjectsRequest request, RemoveRoomObject removeObject, CancellationToken cancellationToken)
     {
         var outcome = await removeObject.RemoveAsync(id, request.BaseRevision, request.ObjectIndexes ?? [], cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.RemovalFailed);
     }
 
@@ -301,6 +319,7 @@ internal static class RoomEndpoints
         Guid id, LabelMapRevisionRequest request, FixRoomOutline fixOutline, CancellationToken cancellationToken)
     {
         var outcome = await fixOutline.UseRevisionAsync(id, request.Revision, cancellationToken);
+
         return ToResponse(outcome, Constants.Titles.UnknownOutlineVersion);
     }
 
@@ -310,7 +329,9 @@ internal static class RoomEndpoints
     private static Results<Ok<RoomResponse>, ProblemHttpResult, NotFound> ToResponse(Result<Room>? result, string title)
     {
         if (result is null)
+        {
             return TypedResults.NotFound();
+        }
 
         return result.Succeeded
             ? TypedResults.Ok(RoomResponse.From(result.Value))
@@ -327,13 +348,17 @@ internal static class RoomEndpoints
         string key, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
     {
         var file = await storage.OpenReadAsync(key, cancellationToken);
+
         if (file is null)
+        {
             return TypedResults.NotFound();
+        }
 
         // These files never change, so browsers can keep them for good. Vary on Origin so a copy
         // cached by a plain <img> is never reused for a CORS request (the WebGL editor), which would fail.
         response.Headers.CacheControl = Constants.Http.ImmutableCache;
         response.Headers.Vary = Constants.Http.Origin;
+
         return TypedResults.Stream(file.Content, file.ContentType);
     }
 }

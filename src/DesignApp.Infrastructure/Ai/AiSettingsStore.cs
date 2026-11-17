@@ -20,6 +20,7 @@ internal sealed partial class AiSettingsStore(IServiceScopeFactory scopes, ILogg
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var settings = await db.AiSettings.AsNoTracking()
             .SingleOrDefaultAsync(s => s.Id == Constants.Persistence.AiSettingsRowId, cancellationToken);
+
         if (settings is null)
         {
             LogMissing();
@@ -27,6 +28,7 @@ internal sealed partial class AiSettingsStore(IServiceScopeFactory scopes, ILogg
         }
 
         var problems = settings.Problems();
+
         return problems.Count == 0 ? settings : throw new InvalidOperationException(string.Join(" ", problems));
     }
 

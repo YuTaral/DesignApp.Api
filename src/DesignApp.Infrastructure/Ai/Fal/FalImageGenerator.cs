@@ -29,24 +29,40 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
         var request = new ImageRequest(prompt, [DataUri(image)], new ImageSize(IM.Width, IM.Height), IM.OutputFormat, IM.PromptExpansion, seed,
             boxes?.Select(b => new EditBox(b.Label, b.Description, new Box(b.Left, b.Top, b.Right, b.Bottom))).ToList());
         var started = Stopwatch.GetTimestamp();
+
         try
         {
             using var submitted = await http.PostAsJsonAsync(new Uri(settings.ImageEndpoint), request, cancellationToken);
+
             submitted.EnsureSuccessStatusCode();
             var ticket = await submitted.Content.ReadFromJsonAsync<QueueTicket>(cancellationToken);
+
             if (ticket is not { StatusUrl.Length: > 0, ResponseUrl.Length: > 0 })
+            {
                 return Failed("the queue gave no status or result address");
+            }
+
             var status = await WaitAsync(ticket.StatusUrl, started, cancellationToken);
+
             if (status != IM.Completed)
+            {
                 return Failed(status);
+            }
+
             var answer = await http.GetFromJsonAsync<ImageResponse>(new Uri(ticket.ResponseUrl), cancellationToken);
+
             if (answer?.Images is not [{ Url: { Length: > 0 } url }, ..])
+            {
                 return Failed("no image in the result");
+            }
+
             var photo = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
                 ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
                 : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
+
             LogGenerated(settings.ImageEndpoint, seconds);
+
             return photo;
         }
         catch (Exception e) when (e is HttpRequestException or JsonException or FormatException or TimeoutRejectedException
@@ -61,6 +77,7 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
     private static string DataUri(byte[] image)
     {
         var jpeg = image is [0xFF, 0xD8, ..];
+
         return (jpeg ? IM.JpegDataUri : IM.PngDataUri) + Convert.ToBase64String(image);
     }
 
@@ -72,24 +89,34 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
     private async Task<string> WaitAsync(string statusUrl, long started, CancellationToken cancellationToken)
     {
         var errors = 0;
+
         while (Stopwatch.GetElapsedTime(started) < IM.MaxWait)
         {
             await Task.Delay(IM.PollInterval, cancellationToken);
+
             try
             {
                 var status = await http.GetFromJsonAsync<QueueStatus>(new Uri(statusUrl), cancellationToken);
+
                 errors = 0;
+
                 if (status?.Status != IM.Completed)
+                {
                     continue;
+                }
+
                 return status.Error is { Length: > 0 } error ? error : IM.Completed;
             }
             catch (Exception e) when (e is HttpRequestException or JsonException or TimeoutRejectedException)
             {
                 // A status check is free, so a failed one is simply tried again.
                 if (++errors >= IM.MaxStatusErrors)
+                {
                     return e.Message;
+                }
             }
         }
+
         return $"not done after {IM.MaxWait.TotalMinutes:0} minutes";
     }
 
@@ -98,6 +125,7 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
     private Result<byte[]> Failed(string reason)
     {
         LogFailed(reason);
+
         return Result.Failure<byte[]>(IM.Messages.Failed);
     }
 

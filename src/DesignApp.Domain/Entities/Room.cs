@@ -78,11 +78,17 @@ public sealed class Room
         AnalysisScope scope = AnalysisScope.WholeRoom, AiMode aiMode = AiMode.Fake, bool waitForUser = false)
     {
         if (id == Guid.Empty)
+        {
             throw new DomainException(Constants.Messages.RoomNeedsId);
+        }
+
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerId);
         ArgumentException.ThrowIfNullOrWhiteSpace(photoKey);
+
         if (width <= 0 || height <= 0)
+        {
             throw new DomainException(Constants.Messages.PhotoSize);
+        }
 
         return new Room
         {
@@ -118,9 +124,11 @@ public sealed class Room
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(libraryRoom);
         var room = Upload(id, ownerId, photoKey, width, height, now, AnalysisScope.WholeRoom, aiMode);
+
         room.Status = RoomStatus.Segmenting; // the analysis was done ahead of time
         room.MarkReady(objects, labelMapKey);
         room.LibraryRoom = libraryRoom;
+
         return room;
     }
 
@@ -146,7 +154,10 @@ public sealed class Room
     public void StartAnalysis()
     {
         if (AnalysisAttempts >= Constants.Rooms.MaxAnalysisAttempts)
+        {
             throw new DomainException(Constants.Messages.TooManyAttempts);
+        }
+
         MoveTo(RoomStatus.Analyzing, from: RoomStatus.Uploaded);
         AnalysisAttempts++;
     }
@@ -159,7 +170,10 @@ public sealed class Room
     public void RestartAnalysis()
     {
         if (Status is not (RoomStatus.Analyzing or RoomStatus.Segmenting))
+        {
             throw new DomainException(Constants.Messages.CannotRestart(Status));
+        }
+
         Status = RoomStatus.Uploaded;
     }
 
@@ -177,14 +191,26 @@ public sealed class Room
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(labelMapKey);
         var list = objects.ToList();
+
         if (list.Count == 0)
+        {
             throw new DomainException(Constants.Messages.ReadyNeedsObjects);
+        }
+
         if (list.Select(o => o.Index).Distinct().Count() != list.Count)
+        {
             throw new DomainException(Constants.Messages.DuplicateObjectIndexes);
+        }
+
         if (list.Any(o => o.Index is < 1 or > Constants.Rooms.MaxObjectIndex))
+        {
             throw new DomainException(Constants.Messages.ObjectIndexRange);
+        }
+
         if (list.FirstOrDefault(o => o.ParentIndex is int parent && !IsWhole(list, parent)) is { } orphan)
+        {
             throw new DomainException(Constants.Messages.BadParent(orphan.Index));
+        }
 
         MoveTo(RoomStatus.Ready, from: RoomStatus.Segmenting);
         _objects = list.OrderBy(o => o.Index).ToList().AsReadOnly();
@@ -203,16 +229,31 @@ public sealed class Room
     public int AddObject(DetectedObject detected, int baseRevision, Func<int, string> keyFor)
     {
         ArgumentNullException.ThrowIfNull(detected);
+
         if (Status is not RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        }
+
         if (detected.Index is < 1 or > Constants.Rooms.MaxObjectIndex)
+        {
             throw new DomainException(Constants.Messages.ObjectIndexRange);
+        }
+
         if (detected.Index != NextObjectIndex)
+        {
             throw new DomainException(Constants.Messages.NotNextObjectIndex(detected.Index, NextObjectIndex));
+        }
+
         if (detected.ParentIndex is int parent && !IsWhole(_objects, parent))
+        {
             throw new DomainException(Constants.Messages.BadParent(detected.Index));
+        }
+
         var revision = AddLabelMapRevision(baseRevision, keyFor);
+
         _objects = _objects.Append(detected).ToArray();
+
         return revision;
     }
 
@@ -229,14 +270,25 @@ public sealed class Room
     public (int Revision, int PhotoVersion) RemoveObjects(IReadOnlyCollection<int> indexes, int baseRevision, Func<int, string> keyFor)
     {
         ArgumentNullException.ThrowIfNull(indexes);
+
         if (Status is not RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        }
+
         if (indexes.Count == 0)
+        {
             throw new DomainException(Constants.Messages.NothingToRemove);
+        }
+
         if (indexes.FirstOrDefault(i => _objects.All(o => o.Index != i), -1) is var unknown and >= 0)
+        {
             throw new DomainException(Constants.Messages.UnknownObject(unknown));
+        }
+
         var photo = LatestPhotoVersion + 1;
         var revision = AddLabelMapRevision(baseRevision, keyFor, photo);
+
         return (revision, photo);
     }
 
@@ -259,14 +311,20 @@ public sealed class Room
     public int AddLabelMapRevision(int baseRevision, Func<int, string> keyFor, int? photoVersion = null)
     {
         ArgumentNullException.ThrowIfNull(keyFor);
+
         if (Status is not RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        }
+
         var photo = photoVersion ?? PhotoVersionOf(baseRevision);
+
         LatestLabelMapRevision++;
         // One entry per revision; revisions from before photo versions are filled in as photo 0.
         _photoVersions = [.. Enumerable.Range(0, LatestLabelMapRevision).Select(PhotoVersionOf), photo];
         LabelMapRevision = LatestLabelMapRevision;
         LabelMapKey = keyFor(LabelMapRevision);
+
         return LabelMapRevision;
     }
 
@@ -277,10 +335,17 @@ public sealed class Room
     public void UseLabelMapRevision(int revision, Func<int, string> keyFor)
     {
         ArgumentNullException.ThrowIfNull(keyFor);
+
         if (Status is not RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.CannotChangeOutlines(Status));
+        }
+
         if (!HasLabelMapRevision(revision))
+        {
             throw new DomainException(Constants.Messages.NoLabelMapRevision(revision));
+        }
+
         LabelMapRevision = revision;
         LabelMapKey = keyFor(revision);
     }
@@ -298,8 +363,12 @@ public sealed class Room
     public void MarkFailed(string reason)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
         if (Status is RoomStatus.Ready or RoomStatus.Failed)
+        {
             throw new DomainException(Constants.Messages.CannotFail(Status));
+        }
+
         Status = RoomStatus.Failed;
         FailureReason = reason;
     }
@@ -316,19 +385,33 @@ public sealed class Room
     public int AddParts(IReadOnlyList<DetectedObject> parts, int baseRevision, Func<int, string> keyFor)
     {
         ArgumentNullException.ThrowIfNull(parts);
+
         if (Status is not RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.CannotFixOutlines(Status));
+        }
+
         var next = NextObjectIndex;
+
         foreach (var part in parts)
         {
             if (part.Index != next || part.Index > Constants.Rooms.MaxObjectIndex)
+            {
                 throw new DomainException(Constants.Messages.NotNextObjectIndex(part.Index, next));
+            }
+
             if (part.ParentIndex is not int parent || !IsWhole(_objects, parent))
+            {
                 throw new DomainException(Constants.Messages.BadParent(part.Index));
+            }
+
             next++;
         }
+
         var revision = AddLabelMapRevision(baseRevision, keyFor);
+
         _objects = [.. _objects, .. parts];
+
         return revision;
     }
 
@@ -344,7 +427,10 @@ public sealed class Room
     public int MergePart(int partIndex, int baseRevision, Func<int, string> keyFor)
     {
         if (_objects.FirstOrDefault(o => o.Index == partIndex) is not { ParentIndex: not null })
+        {
             throw new DomainException(Constants.Messages.NotAPart(partIndex));
+        }
+
         return AddLabelMapRevision(baseRevision, keyFor);
     }
 
@@ -362,7 +448,10 @@ public sealed class Room
     private void MoveTo(RoomStatus next, RoomStatus from)
     {
         if (Status != from)
+        {
             throw new DomainException(Constants.Messages.CannotMove(Status, next));
+        }
+
         Status = next;
     }
 }

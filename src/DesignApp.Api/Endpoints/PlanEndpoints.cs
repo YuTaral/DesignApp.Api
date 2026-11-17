@@ -34,6 +34,7 @@ internal static class PlanEndpoints
             .WithSummary("Lists the most common objects of a room type (`LivingRoom`, `Bedroom`…), with their usual sizes in centimetres and colors.");
 
         var plans = api.MapGroup(Constants.Routes.Plans).WithTags(Constants.OpenApi.PlansTag);
+
         plans.MapPost(Constants.Routes.Root, CreateAsync)
             .WithName("CreatePlan")
             .WithSummary("Starts a room to build: its type and walls (metres) and their colors, with no objects yet.")
@@ -57,6 +58,7 @@ internal static class PlanEndpoints
                 "The new room waits for the user to start its analysis. With the real AI this is paid, so it is rate-limited.")
             .DisableAntiforgery() // the cookies are SameSite=Lax, so another site's form posts arrive without them
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+
         return api;
     }
 
@@ -68,8 +70,12 @@ internal static class PlanEndpoints
     private static Results<Ok<List<CatalogObjectResponse>>, ProblemHttpResult> Catalog(string roomType, IObjectCatalog catalog, HttpResponse response)
     {
         if (!Enum.TryParse<RoomType>(roomType, ignoreCase: true, out var type) || !Enum.IsDefined(type))
+        {
             return TypedResults.Problem(Domain.Constants.Messages.UnknownRoomType, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidRequest);
+        }
+
         response.Headers.CacheControl = Constants.Http.CatalogCache;
+
         return TypedResults.Ok(catalog.ForRoom(type).Select(CatalogObjectResponse.From).ToList());
     }
 
@@ -85,9 +91,13 @@ internal static class PlanEndpoints
         CreatePlanRequest request, [FromQuery] string? ai, CreatePlan createPlan, IAiProviders aiProviders, CancellationToken cancellationToken)
     {
         if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
+        {
             return problem;
+        }
+
         var plan = await createPlan.HandleAsync(request.Name ?? "", request.RoomType, request.Width, request.Length, request.Height,
             HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, aiMode, request.Furnish, cancellationToken);
+
         return TypedResults.Created(Constants.Routes.PlanUrl(plan.Id), PlanResponse.From(plan));
     }
 
@@ -99,6 +109,7 @@ internal static class PlanEndpoints
     private static async Task<Results<Ok<PlanResponse>, NotFound>> GetAsync(Guid id, GetPlan getPlan, CancellationToken cancellationToken)
     {
         var plan = await getPlan.HandleAsync(id, cancellationToken);
+
         return plan is null ? TypedResults.NotFound() : TypedResults.Ok(PlanResponse.From(plan));
     }
 
@@ -117,6 +128,7 @@ internal static class PlanEndpoints
             : RoomPlan.RectangleOutline(request.Width, request.Length);
         var plan = await savePlan.HandleAsync(id, request.Name ?? "", outline, request.Height,
             HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, request.View, items, request.Corner, cancellationToken);
+
         return plan is null ? TypedResults.NotFound() : TypedResults.Ok(PlanResponse.From(plan));
     }
 
@@ -130,8 +142,12 @@ internal static class PlanEndpoints
         Guid id, DescribeObjectRequest request, DescribePlanObject describe, CancellationToken cancellationToken)
     {
         var outcome = await describe.HandleAsync(id, request.Description, cancellationToken);
+
         if (outcome is null)
+        {
             return TypedResults.NotFound();
+        }
+
         return outcome.Succeeded
             ? TypedResults.Ok(CatalogObjectResponse.From(outcome.Value))
             : TypedResults.Problem(outcome.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.DescribeFailed);
@@ -157,16 +173,25 @@ internal static class PlanEndpoints
         [FromForm] int? view, [FromForm] string? corner, GeneratePlanRoom generate, CancellationToken cancellationToken)
     {
         var photoStyle = PhotoStyle.AsBuilt;
-        if (!string.IsNullOrWhiteSpace(style) && (!Enum.TryParse(style, ignoreCase: true, out photoStyle) || !Enum.IsDefined(photoStyle)))
-            return TypedResults.Problem(Application.Constants.Messages.UnknownPhotoStyle, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
-        if (guide.Length > Application.Constants.Builder.MaxGuideBytes)
-            return TypedResults.Problem(Application.Constants.Messages.GuideImage, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
         List<ItemBox>? layout = null;
+        PlanShot? shot = null;
+
+        if (!string.IsNullOrWhiteSpace(style) && (!Enum.TryParse(style, ignoreCase: true, out photoStyle) || !Enum.IsDefined(photoStyle)))
+        {
+            return TypedResults.Problem(Application.Constants.Messages.UnknownPhotoStyle, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+        }
+
+        if (guide.Length > Application.Constants.Builder.MaxGuideBytes)
+        {
+            return TypedResults.Problem(Application.Constants.Messages.GuideImage, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+        }
+
         if (!string.IsNullOrWhiteSpace(boxes))
         {
             try
             {
                 var read = JsonSerializer.Deserialize<List<ItemBoxRequest>>(boxes, Json);
+
                 layout = read?.Select(b => new ItemBox(b.Item, b.Left, b.Top, b.Right, b.Bottom)).ToList();
             }
             catch (JsonException)
@@ -174,20 +199,31 @@ internal static class PlanEndpoints
                 return TypedResults.Problem(Application.Constants.Messages.PhotoBoxes, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
             }
         }
-        PlanShot? shot = null;
+
         if (view is { } wall)
         {
             var spot = ViewCorner.None;
+
             if (!string.IsNullOrWhiteSpace(corner) && (!Enum.TryParse(corner, ignoreCase: true, out spot) || !Enum.IsDefined(spot)))
+            {
                 return TypedResults.Problem(Application.Constants.Messages.PhotoShot, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+            }
+
             shot = new PlanShot(wall, spot);
         }
+
         using var buffer = new MemoryStream();
+
         await using (var content = guide.OpenReadStream())
             await content.CopyToAsync(buffer, cancellationToken);
+
         var outcome = await generate.HandleAsync(id, buffer.ToArray(), photoStyle, instructions, seed, layout, shot, cancellationToken);
+
         if (outcome is null)
+        {
             return TypedResults.NotFound();
+        }
+
         return outcome.Succeeded
             ? TypedResults.Ok(RoomResponse.From(outcome.Value))
             : TypedResults.Problem(outcome.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);

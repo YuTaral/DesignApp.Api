@@ -16,7 +16,9 @@ internal sealed record SampleObject(string Label, ObjectCategory Category, IRead
     public BoundingBox Box(int width, int height)
     {
         var bounds = Shapes.Select(s => s.Bounds()).Aggregate(SKRect.Union);
+
         bounds.Intersect(new SKRect(0, 0, width, height));
+
         return new BoundingBox(bounds.Left / width, bounds.Top / height, bounds.Width / width, bounds.Height / height);
     }
 }

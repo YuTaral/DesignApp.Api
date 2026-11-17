@@ -17,6 +17,7 @@ internal static class PaletteEndpoints
             .WithName("ListPalettes")
             .WithSummary("Lists the paint palettes with their paints: code, name and on-screen color.")
             .WithDescription("A recolor may name one of these paints (`paint`); its color must then be the paint's color.");
+
         return api;
     }
 
@@ -26,6 +27,7 @@ internal static class PaletteEndpoints
     private static Ok<List<PaletteResponse>> List(IPaletteCatalog palettes, HttpResponse response)
     {
         response.Headers.CacheControl = Constants.Http.LibraryCache;
+
         return TypedResults.Ok(palettes.Palettes.Select(PaletteResponse.From).ToList());
     }
 }

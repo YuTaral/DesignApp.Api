@@ -85,8 +85,12 @@ public sealed class RoomPlan
         HexColor wallColor, HexColor floorColor, FloorType floorType, AiMode aiMode, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerId);
+
         if (!Enum.IsDefined(roomType))
+        {
             throw new DomainException(Constants.Messages.UnknownRoomType);
+        }
+
         var plan = new RoomPlan
         {
             Id = id,
@@ -95,7 +99,9 @@ public sealed class RoomPlan
             AiMode = Enum.IsDefined(aiMode) ? aiMode : throw new DomainException(Constants.Messages.UnknownAiMode(aiMode)),
             CreatedAt = now,
         };
+
         plan.Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)PlanWall.Back, [], now);
+
         return plan;
     }
 
@@ -120,24 +126,47 @@ public sealed class RoomPlan
         ArgumentNullException.ThrowIfNull(outline);
         ArgumentNullException.ThrowIfNull(items);
         var trimmed = (name ?? "").Trim();
+
         if (trimmed.Length > Constants.Plans.MaxNameLength)
+        {
             throw new DomainException(Constants.Messages.PlanName);
+        }
+
         if (height is < Constants.Plans.MinHeightMetres or > Constants.Plans.MaxHeightMetres or double.NaN)
+        {
             throw new DomainException(Constants.Messages.PlanWalls);
+        }
+
         if (items.Count > Constants.Plans.MaxItems)
+        {
             throw new DomainException(Constants.Messages.PlanItems);
+        }
+
         if (!Enum.IsDefined(floorType) || view < 0 || view >= outline.Walls.Count || !Enum.IsDefined(corner))
+        {
             throw new DomainException(Constants.Messages.PlanLook);
+        }
+
         foreach (var item in items)
         {
             if (item.Wall is not { } wall)
+            {
                 continue;
+            }
+
             if (wall >= outline.Walls.Count)
+            {
                 throw new DomainException(Constants.Messages.PlanWallPlacement);
+            }
+
             var (along, ceiling, slack) = (outline.WallLength(wall), height * 100, Constants.Plans.WallTolerance);
+
             if (item.X - item.Width / 2 < -slack || item.X + item.Width / 2 > along + slack || item.Elevation + item.Height > ceiling + slack)
+            {
                 throw new DomainException(Constants.Messages.PlanWallItem(item.Label));
+            }
         }
+
         (Name, Outline, Width, Length, Height, WallColor, FloorColor) = (trimmed, outline, outline.WidthMetres, outline.LengthMetres, height, wallColor, floorColor);
         (FloorType, View, Corner) = (floorType, view, corner);
         _items = [.. items];
@@ -161,9 +190,15 @@ public sealed class RoomPlan
         FloorType floorType, PlanWall view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None)
     {
         if (!double.IsFinite(width) || !double.IsFinite(length))
+        {
             throw new DomainException(Constants.Messages.PlanWalls);
+        }
+
         if (!Enum.IsDefined(view))
+        {
             throw new DomainException(Constants.Messages.PlanLook);
+        }
+
         Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)view, items, now, corner);
     }
 
@@ -181,7 +216,10 @@ public sealed class RoomPlan
     public static RoomOutline RectangleOutline(double width, double length)
     {
         if (width is < Constants.Plans.MinWallMetres or > Constants.Plans.MaxWallMetres || length is < Constants.Plans.MinWallMetres or > Constants.Plans.MaxWallMetres)
+        {
             throw new DomainException(Constants.Messages.PlanWalls);
+        }
+
         return RoomOutline.Rectangle(width, length);
     }
 }

@@ -71,6 +71,7 @@ public class AiSettingsTests(ApiFactoryWithoutAnalysis factory) : IClassFixture<
         {
             await using var scope = factory.Services.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
             db.AiSettings.Add(new AiSettings { Id = 2 });
             await db.SaveChangesAsync();
         });
@@ -87,6 +88,7 @@ public class AiSettingsTests(ApiFactoryWithoutAnalysis factory) : IClassFixture<
     private async Task UpdateAsync(string sql)
     {
         await using var scope = factory.Services.CreateAsyncScope();
+
         await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.ExecuteSqlRawAsync(sql);
     }
 
@@ -96,6 +98,7 @@ public class AiSettingsTests(ApiFactoryWithoutAnalysis factory) : IClassFixture<
         await using var scope = factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var row = await db.AiSettings.SingleAsync();
+
         db.Entry(row).CurrentValues.SetValues(new AiSettings());
         await db.SaveChangesAsync();
     }

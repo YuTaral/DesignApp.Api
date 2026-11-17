@@ -41,27 +41,41 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         var shared = Enumerable.Range(0, items.Count)
             .Where(i => !items[i].Category.IsSurface() || items[i].Points is { Count: > 0 })
             .ToList();
+        var retry = new List<int>();
+
         // One object gains nothing from sharing; its own request costs the same and has its label.
         if (shared.Count < Constants.Ai.Fal.MinShared)
+        {
             shared.Clear();
+        }
 
         var own = Enumerable.Range(0, items.Count).Except(shared).ToList();
         var sharedTask = SegmentSharedAsync(settings, imageUrl, image, [.. shared.Select(i => items[i])], cancellationToken);
+
         await SegmentEachAsync(own);
 
         var sharedMasks = await sharedTask;
-        var retry = new List<int>();
+
         for (var k = 0; k < shared.Count; k++)
         {
             if (sharedMasks[k] is { } mask)
+            {
                 masks[shared[k]] = mask;
+            }
             else
+            {
                 retry.Add(shared[k]);
+            }
         }
+
         if (shared.Count > 0)
+        {
             LogShared(shared.Count, shared.Count - retry.Count);
+        }
+
         await SegmentEachAsync(retry);
         LogRequests(items.Count, requests.Value - before);
+
         return masks;
 
         Task SegmentEachAsync(List<int> indexes)
@@ -71,6 +85,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
                 MaxDegreeOfParallelism = settings.SegmentationParallelism,
                 CancellationToken = cancellationToken,
             };
+
             return Parallel.ForEachAsync(
                 indexes, options, async (i, ct) => masks[i] = await SegmentOneAsync(settings, imageUrl, image, items[i], ct));
         }
@@ -118,10 +133,14 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         AiSettings settings, string imageUrl, AnalysisImage image, IReadOnlyList<InventoryItem> items, CancellationToken cancellationToken)
     {
         var result = new ObjectMask?[items.Count];
+
         if (items.Count == 0)
+        {
             return result;
+        }
 
         List<(ObjectMask Mask, int? Index)> answer;
+
         try
         {
             // Each box is its own object (its id), and one mask is asked for per box. A surface's
@@ -130,6 +149,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
             var points = items
                 .SelectMany((item, k) => item.Category.IsSurface() ? (item.Points ?? []).Select(p => PixelPoint(p, image, k + 1)) : [])
                 .ToList();
+
             answer = await RequestWithIndexesAsync(settings,
                 new SamRequest(imageUrl, "", boxes, MaxMasks: items.Count, PointPrompts: points.Count > 0 ? points : null),
                 cancellationToken);
@@ -137,6 +157,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         catch (Exception e) when (e is HttpRequestException or System.Text.Json.JsonException)
         {
             LogSharedFailed(items.Count, e.Message);
+
             return result;
         }
 
@@ -144,13 +165,17 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         foreach (var (mask, index) in answer)
         {
             if (index is not { } k || k < 0 || k >= items.Count || result[k] is not null)
+            {
                 continue;
+            }
+
             if (Pick([mask], items[k].Box, settings.MinShareInsideBox, settings.MinFill) is { } picked && picked.Fit >= settings.MinFit)
             {
                 LogPicked(items[k].Label, picked.Fit, "shared request");
                 result[k] = picked.Mask;
             }
         }
+
         return result;
     }
 
@@ -165,9 +190,11 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     {
         var box = PixelBox(item, image);
         var best = Pick(await RequestAsync(settings, new SamRequest(imageUrl, item.Label, [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox, settings.MinFill);
+
         if (best is { } fitting && fitting.Fit >= settings.MinFit)
         {
             LogPicked(item.Label, best.Value.Fit, best.Value.How);
+
             return best.Value.Mask;
         }
 
@@ -175,7 +202,9 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         // text answer stands.
         var boxOnly = Pick(await TryRequestAsync(settings, new SamRequest(imageUrl, "", [box], MaxMasks: settings.MaxMasks), cancellationToken), item.Box, settings.MinShareInsideBox, settings.MinFill);
         var chosen = boxOnly is { } b && b.Fit > (best?.Fit ?? -1) ? boxOnly : best;
+
         LogFallback(item.Label, best?.Fit ?? 0, boxOnly?.Fit ?? 0, chosen == boxOnly && boxOnly is not null ? "box only" : "text");
+
         return chosen?.Mask;
     }
 
@@ -212,6 +241,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     private async Task<List<ObjectMask>> RequestAsync(AiSettings settings, SamRequest request, CancellationToken cancellationToken)
     {
         var answers = await RequestWithIndexesAsync(settings, request, cancellationToken);
+
         return [.. answers.Select(a => a.Mask)];
     }
 
@@ -224,21 +254,29 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     {
         CountRequests().Add();
         using var response = await http.PostAsJsonAsync(new Uri(settings.SegmentationEndpoint), request, cancellationToken);
+
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<SamResponse>(cancellationToken);
-
-        var masks = new List<(ObjectMask, int?)>();
         var returned = result?.Masks ?? [];
+        var masks = new List<(ObjectMask, int?)>();
+
         for (var i = 0; i < returned.Count; i++)
         {
             if (returned[i].Url is not { Length: > 0 } url)
+            {
                 continue;
+            }
+
             var png = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
                 ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
                 : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
+
             if (Decode(png) is { } mask)
+            {
                 masks.Add((mask, result?.Metadata is { } metadata && i < metadata.Count ? metadata[i].Index : null));
+            }
         }
+
         return masks;
     }
 
@@ -256,6 +294,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         catch (HttpRequestException e) when (e.StatusCode is { } status && (int)status is >= 400 and < 500)
         {
             LogRefused((int)status);
+
             return [];
         }
     }
@@ -282,18 +321,27 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         double minShareInsideBox = Constants.Ai.Defaults.MinShareInsideBox, double minFill = Constants.Ai.Defaults.MinFill)
     {
         Candidate? best = null;
+
         void Consider(ObjectMask mask, string how)
         {
             if (Bounds(mask) is { } bounds && Fit(bounds, box) * FillFactor(Fill(mask, box), minFill) is var fit && (best is null || fit > best.Value.Fit))
+            {
                 best = new Candidate(mask, fit, how);
+            }
         }
 
         for (var i = 0; i < masks.Count; i++)
+        {
             Consider(masks[i], $"mask {i + 1} of {masks.Count}");
+        }
 
         var inside = masks.Where(m => ShareInside(m, box) >= minShareInsideBox).ToList();
+
         if (inside.Count > 1)
+        {
             Consider(Union(inside), $"{inside.Count} pieces joined");
+        }
+
         return best;
     }
 
@@ -302,15 +350,20 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     internal static (double X0, double Y0, double X1, double Y1)? Bounds(ObjectMask mask)
     {
         int x0 = int.MaxValue, y0 = int.MaxValue, x1 = -1, y1 = -1;
+
         for (var y = 0; y < mask.Height; y++)
         {
             for (var x = 0; x < mask.Width; x++)
             {
                 if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
+                {
                     continue;
+                }
+
                 (x0, y0, x1, y1) = (Math.Min(x0, x), Math.Min(y0, y), Math.Max(x1, x), Math.Max(y1, y));
             }
         }
+
         return x1 < 0 ? null : ((double)x0 / mask.Width, (double)y0 / mask.Height, (x1 + 1.0) / mask.Width, (y1 + 1.0) / mask.Height);
     }
 
@@ -328,11 +381,16 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
         var (bx1, by1) = (b.X + b.Width, b.Y + b.Height);
         var w = Math.Min(a.X1, bx1) - Math.Max(a.X0, b.X);
         var h = Math.Min(a.Y1, by1) - Math.Max(a.Y0, b.Y);
+
         if (w <= 0 || h <= 0)
+        {
             return 0;
+        }
+
         var intersection = w * h;
         var recall = intersection / (b.Width * b.Height);
         var precision = intersection / ((a.X1 - a.X0) * (a.Y1 - a.Y0));
+
         return 5 * precision * recall / (4 * precision + recall);
     }
 
@@ -343,12 +401,21 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     {
         int x0 = (int)(box.X * mask.Width), x1 = (int)Math.Ceiling((box.X + box.Width) * mask.Width);
         int y0 = (int)(box.Y * mask.Height), y1 = (int)Math.Ceiling((box.Y + box.Height) * mask.Height);
+
         (x0, x1, y0, y1) = (Math.Clamp(x0, 0, mask.Width), Math.Clamp(x1, 0, mask.Width), Math.Clamp(y0, 0, mask.Height), Math.Clamp(y1, 0, mask.Height));
         long area = (long)(x1 - x0) * (y1 - y0), filled = 0;
+
         for (var y = y0; y < y1; y++)
+        {
             for (var x = x0; x < x1; x++)
+            {
                 if (mask.Coverage[y * mask.Width + x] >= Constants.Imaging.CoverageThreshold)
+                {
                     filled++;
+                }
+            }
+        }
+
         return area == 0 ? 0 : (double)filled / area;
     }
 
@@ -366,18 +433,26 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     private static double ShareInside(ObjectMask mask, BoundingBox box)
     {
         int all = 0, inside = 0;
+
         for (var y = 0; y < mask.Height; y++)
         {
             for (var x = 0; x < mask.Width; x++)
             {
                 if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
+                {
                     continue;
+                }
+
                 all++;
                 var (nx, ny) = ((x + 0.5) / mask.Width, (y + 0.5) / mask.Height);
+
                 if (nx >= box.X && nx <= box.X + box.Width && ny >= box.Y && ny <= box.Y + box.Height)
+                {
                     inside++;
+                }
             }
         }
+
         return all == 0 ? 0 : (double)inside / all;
     }
 
@@ -387,11 +462,15 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     {
         var first = masks[0];
         var coverage = (byte[])first.Coverage.Clone();
+
         foreach (var mask in masks.Skip(1).Where(m => m.Width == first.Width && m.Height == first.Height))
         {
             for (var i = 0; i < coverage.Length; i++)
+            {
                 coverage[i] = Math.Max(coverage[i], mask.Coverage[i]);
+            }
         }
+
         return new ObjectMask(first.Width, first.Height, coverage);
     }
 
@@ -401,20 +480,30 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     internal static ObjectMask? Decode(byte[] png)
     {
         using var codec = SKCodec.Create(new MemoryStream(png));
+
         if (codec is null)
+        {
             return null;
+        }
+
         var info = new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
         using var bitmap = SKBitmap.Decode(codec, info);
+
         if (bitmap is null)
+        {
             return null;
+        }
 
         var pixels = bitmap.GetPixelSpan();
         var coverage = new byte[info.Width * info.Height];
+
         for (var i = 0; i < coverage.Length; i++)
         {
             var (r, g, b, a) = (pixels[i * 4], pixels[i * 4 + 1], pixels[i * 4 + 2], pixels[i * 4 + 3]);
+
             coverage[i] = (byte)(Math.Max(r, Math.Max(g, b)) * a / Constants.Imaging.FullCoverage);
         }
+
         return new ObjectMask(info.Width, info.Height, coverage);
     }
 

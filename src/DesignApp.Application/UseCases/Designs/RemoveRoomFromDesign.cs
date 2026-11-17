@@ -24,16 +24,25 @@ public sealed class RemoveRoomFromDesign(
     public async Task<Design?> HandleAsync(Guid designId, Guid roomId, CancellationToken cancellationToken)
     {
         var design = await designs.FindAsync(designId, currentUser.Id, cancellationToken);
+
         if (design is null || design.Rooms.All(r => r.RoomId != roomId))
+        {
             return null;
+        }
 
         design.RemoveRoom(roomId, clock.GetUtcNow());
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
+
         // Saving the room's deletion saves the design's change too (one database session).
         if (room is not null)
+        {
             await remover.DeleteAsync([room], cancellationToken);
+        }
         else
+        {
             await designs.SaveChangesAsync(cancellationToken);
+        }
+
         return design;
     }
 }

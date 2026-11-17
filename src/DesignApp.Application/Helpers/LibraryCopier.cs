@@ -41,17 +41,20 @@ public sealed partial class LibraryCopier(
         var id = Guid.CreateVersion7(now);
         var photoKey = Constants.Rooms.PhotoKey(id);
         var labelMapKey = Constants.Rooms.LabelMapKey(id);
+        var room = Room.FromLibrary(id, currentUser.Id, photoKey, layout.Width, layout.Height, now, layout.Objects,
+            labelMapKey, Constants.Library.RoomName(design.Id, source.Id, layout.Id), aiMode);
 
         await using (var photo = library.OpenPhoto(design.Id, source.Id, layout.Id))
             await storage.SaveAsync(photoKey, photo, Constants.ContentTypes.Jpeg, cancellationToken);
+
         _stored.Add(photoKey);
+
         await using (var labelMap = library.OpenLabelMap(design.Id, source.Id, layout.Id))
             await storage.SaveAsync(labelMapKey, labelMap, Constants.ContentTypes.Png, cancellationToken);
-        _stored.Add(labelMapKey);
 
-        var room = Room.FromLibrary(id, currentUser.Id, photoKey, layout.Width, layout.Height, now, layout.Objects,
-            labelMapKey, Constants.Library.RoomName(design.Id, source.Id, layout.Id), aiMode);
+        _stored.Add(labelMapKey);
         rooms.Add(room);
+
         return room;
     }
 
@@ -69,6 +72,7 @@ public sealed partial class LibraryCopier(
                 LogFileNotDeleted(error, key);
             }
         }
+
         _stored.Clear();
     }
 

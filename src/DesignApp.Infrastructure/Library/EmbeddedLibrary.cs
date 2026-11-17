@@ -81,8 +81,12 @@ internal sealed class EmbeddedLibrary : ILibrary
     public byte[] Thumbnail(string designId, string roomId, string layoutId)
     {
         var path = LayoutFile(designId, roomId, layoutId, Constants.Library.PhotoSuffix);
+
         if (!_resources.ContainsKey(path))
+        {
             throw new KeyNotFoundException($"The library has no file {path}.");
+        }
+
         return _thumbnails.GetOrAdd(path, MakeThumbnail);
     }
 
@@ -90,6 +94,7 @@ internal sealed class EmbeddedLibrary : ILibrary
     public byte[] Cover(string designId)
     {
         var design = FindDesign(designId) ?? throw new KeyNotFoundException($"The library has no design {designId}.");
+
         return _covers.GetOrAdd(design.Id, _ => MakeCover(design));
     }
 
@@ -107,12 +112,14 @@ internal sealed class EmbeddedLibrary : ILibrary
         var file = new LibraryRoomFile(room.Width, room.Height, objects);
 
         using var zip = new MemoryStream();
+
         using (var archive = new ZipArchive(zip, ZipArchiveMode.Create, leaveOpen: true))
         {
             Add(archive, room.RoomId + Constants.Library.PhotoSuffix, room.Photo);
             Add(archive, room.RoomId + Constants.Library.LabelMapSuffix, room.LabelMap);
             Add(archive, room.RoomId + Constants.Library.ObjectsSuffix, JsonSerializer.SerializeToUtf8Bytes(file, Options));
         }
+
         return zip.ToArray();
     }
 
@@ -123,19 +130,31 @@ internal sealed class EmbeddedLibrary : ILibrary
     {
         var folder = path[..path.IndexOf('/', StringComparison.Ordinal)];
         var file = Read<LibraryDesignFile>(path);
+
         if (file.Id != folder)
+        {
             throw new InvalidDataException($"Library design {path} has the id '{file.Id}'; it must match its folder '{folder}'.");
+        }
+
         if (file.Rooms.Count == 0)
+        {
             throw new InvalidDataException($"Library design {path} has no rooms.");
+        }
 
         var rooms = file.Rooms.Select(entry =>
         {
             if (entry.Layouts.Count == 0 || entry.Layouts.Distinct(StringComparer.Ordinal).Count() != entry.Layouts.Count)
+            {
                 throw new InvalidDataException($"Library room {file.Id}/{entry.Id} needs one or more layouts, each listed once.");
+            }
+
             return new LibraryRoom(entry.Id, entry.Title, [.. entry.Layouts.Select(layout => ReadLayout(file.Id, entry.Id, layout))]);
         }).ToList();
+
         if (rooms.Select(r => r.Id).Distinct(StringComparer.Ordinal).Count() != rooms.Count)
+        {
             throw new InvalidDataException($"Library design {path} lists a room twice.");
+        }
 
         return (new LibraryDesign(file.Id, file.Name, file.Style, file.Description, rooms), file.Order);
     }
@@ -147,14 +166,22 @@ internal sealed class EmbeddedLibrary : ILibrary
     private LibraryLayout ReadLayout(string designId, string roomId, string layoutId)
     {
         var name = $"{designId}/{roomId}/{layoutId}";
+
         foreach (var suffix in new[] { Constants.Library.PhotoSuffix, Constants.Library.LabelMapSuffix })
         {
             if (!_resources.ContainsKey(LayoutFile(designId, roomId, layoutId, suffix)))
+            {
                 throw new InvalidDataException($"Library layout {name} has no {suffix} file.");
+            }
         }
+
         var layout = Read<LibraryRoomFile>(LayoutFile(designId, roomId, layoutId, Constants.Library.ObjectsSuffix));
+
         if (layout.Width <= 0 || layout.Height <= 0 || layout.Objects.Count == 0)
+        {
             throw new InvalidDataException($"Library layout {name} needs a size and at least one object.");
+        }
+
         return new LibraryLayout(layoutId, layout.Width, layout.Height, [.. layout.Objects.Select(o => o.ToDomain()).OrderBy(o => o.Index)]);
     }
 
@@ -171,6 +198,7 @@ internal sealed class EmbeddedLibrary : ILibrary
             ?? throw new InvalidOperationException($"Library photo {path} can't be scaled.");
         using var image = SKImage.FromBitmap(small);
         using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, Constants.Library.ThumbnailQuality);
+
         return encoded.ToArray();
     }
 
@@ -187,8 +215,10 @@ internal sealed class EmbeddedLibrary : ILibrary
         const int cellWidth = Constants.Library.CoverCellWidth, cellHeight = Constants.Library.CoverCellHeight, gap = Constants.Library.CoverGap;
         using var cover = new SKBitmap(new SKImageInfo(columns * cellWidth + (columns - 1) * gap, rows * cellHeight + (rows - 1) * gap));
         using var canvas = new SKCanvas(cover);
-        canvas.Clear(SKColors.White);
         var sampling = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
+
+        canvas.Clear(SKColors.White);
+
         foreach (var (room, i) in design.Rooms.Take(columns * rows).Select((room, i) => (room, i)))
         {
             using var stream = Open(LayoutFile(design.Id, room.Id, room.Layouts[0].Id, Constants.Library.PhotoSuffix));
@@ -199,9 +229,12 @@ internal sealed class EmbeddedLibrary : ILibrary
             var (sourceWidth, sourceHeight) = (cellWidth / scale, cellHeight / scale);
             var source = SKRect.Create((photo.Width - sourceWidth) / 2, (photo.Height - sourceHeight) / 2, sourceWidth, sourceHeight);
             var target = SKRect.Create(i % columns * (cellWidth + gap), i / columns * (cellHeight + gap), cellWidth, cellHeight);
+
             canvas.DrawImage(image, source, target, sampling);
         }
+
         using var encoded = SKImage.FromBitmap(cover).Encode(SKEncodedImageFormat.Jpeg, Constants.Library.ThumbnailQuality);
+
         return encoded.ToArray();
     }
 
@@ -211,6 +244,7 @@ internal sealed class EmbeddedLibrary : ILibrary
     private T Read<T>(string path)
     {
         using var stream = Open(path);
+
         return JsonSerializer.Deserialize<T>(stream, Options) ?? throw new InvalidDataException($"Library file {path} is empty.");
     }
 
@@ -220,7 +254,10 @@ internal sealed class EmbeddedLibrary : ILibrary
     private Stream Open(string path)
     {
         if (!_resources.TryGetValue(path, out var name))
+        {
             throw new KeyNotFoundException($"The library has no file {path}.");
+        }
+
         return _assembly.GetManifestResourceStream(name) ?? throw new KeyNotFoundException($"The library has no file {path}.");
     }
 
@@ -241,6 +278,7 @@ internal sealed class EmbeddedLibrary : ILibrary
     private static void Add(ZipArchive archive, string name, byte[] content)
     {
         using var entry = archive.CreateEntry(name, CompressionLevel.NoCompression).Open();
+
         entry.Write(content);
     }
 }

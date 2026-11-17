@@ -39,29 +39,57 @@ public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser current
     public async Task<Result<Room>?> HandleAsync(Guid planId, byte[] guidePng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes, PlanShot? shot, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(planId, currentUser.Id, cancellationToken);
+
         if (plan is null)
+        {
             return null;
+        }
+
         if (guidePng.Length is 0 or > Constants.Builder.MaxGuideBytes)
+        {
             return Result.Failure<Room>(Constants.Messages.GuideImage);
+        }
+
         if (plan.Items.Count == 0)
+        {
             return Result.Failure<Room>(Constants.Messages.EmptyPlan);
+        }
+
         if (!Enum.IsDefined(style))
+        {
             return Result.Failure<Room>(Constants.Messages.UnknownPhotoStyle);
+        }
+
         if ((instructions?.Trim().Length ?? 0) > Constants.Builder.MaxInstructionsLength)
+        {
             return Result.Failure<Room>(Constants.Messages.PhotoInstructions);
+        }
+
         if (seed < 0)
+        {
             return Result.Failure<Room>(Constants.Messages.PhotoSeed);
+        }
+
         if (boxes is not null && (boxes.Count > Domain.Constants.Plans.MaxItems || boxes.Any(box => !Fits(box, plan.Items.Count))))
+        {
             return Result.Failure<Room>(Constants.Messages.PhotoBoxes);
+        }
+
         if (shot is not null && (shot.View < 0 || shot.View >= plan.Outline.Walls.Count || !Enum.IsDefined(shot.Corner)))
+        {
             return Result.Failure<Room>(Constants.Messages.PhotoShot);
+        }
 
         var prompt = PlanPrompt.Write(plan, style, instructions, shot);
         var photo = await ai.Images(plan.AiMode).GenerateAsync(guidePng, prompt, seed, boxes?.Select(box => Layout(plan, box)).ToList(), cancellationToken);
+
         if (!photo.Succeeded)
+        {
             return Result.Failure<Room>(photo.Error);
+        }
 
         using var content = new MemoryStream(photo.Value, writable: false);
+
         return await uploadRoom.HandleAsync(content, cancellationToken, AnalysisScope.WholeRoom, plan.AiMode, analyze: false);
     }
 
@@ -71,6 +99,7 @@ public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser current
     private static bool Fits(ItemBox box, int items)
     {
         var edges = new[] { box.Left, box.Top, box.Right, box.Bottom };
+
         return box.Item >= 0 && box.Item < items && edges.All(e => e is >= 0 and <= 1) && box.Left < box.Right && box.Top < box.Bottom;
     }
 
@@ -80,6 +109,7 @@ public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser current
     private static LayoutBox Layout(RoomPlan plan, ItemBox box)
     {
         var item = plan.Items[box.Item];
+
         return new LayoutBox($"{Constants.Builder.BoxLabel}{box.Item + 1}", PlanPrompt.Describe(item), box.Left, box.Top, box.Right, box.Bottom);
     }
 }

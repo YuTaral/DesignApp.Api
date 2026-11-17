@@ -36,6 +36,7 @@ var api = builder.AddProject<Projects.DesignApp_Api>(Constants.Resources.Api)
 // (both inside one DesignApp folder) and the AppHost runs it. The reference gives the Vite
 // dev server the API's address, and it forwards /api there, so the browser stays on one origin.
 var webPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", "..", Constants.Resources.WebFolder));
+
 if (Directory.Exists(webPath))
 {
     // Always http://localhost:5173, so a browser tab left open from an earlier run still works

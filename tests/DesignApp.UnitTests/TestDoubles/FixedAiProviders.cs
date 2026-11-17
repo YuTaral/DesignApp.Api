@@ -24,6 +24,7 @@ internal sealed class FixedAiProviders(
     public IObjectInventoryProvider Inventory(AiMode mode)
     {
         Asked.Add(mode);
+
         return inventory;
     }
 
@@ -42,6 +43,7 @@ internal sealed class FixedAiProviders(
     public IRoomBuilderAi Builder(AiMode mode)
     {
         Asked.Add(mode);
+
         return builder ?? throw new InvalidOperationException("This test has no room builder AI.");
     }
 

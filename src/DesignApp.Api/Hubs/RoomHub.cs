@@ -25,11 +25,15 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
     public async Task<RoomResponse?> Watch(Guid roomId)
     {
         Room? room;
+
         try
         {
             room = Owner() is { } owner ? await rooms.FindAsync(roomId, owner, Context.ConnectionAborted) : null;
+
             if (room is not null)
+            {
                 await Groups.AddToGroupAsync(Context.ConnectionId, Constants.Hub.Group(roomId), Context.ConnectionAborted);
+            }
         }
         catch (OperationCanceledException) when (Context.ConnectionAborted.IsCancellationRequested)
         {
@@ -37,6 +41,7 @@ internal sealed class RoomHub(IRoomRepository rooms) : Hub<IRoomClient>
             // waiting for the answer, and it's not an error.
             return null;
         }
+
         return room is null ? throw new HubException(Constants.Messages.RoomNotFound) : RoomResponse.From(room);
     }
 

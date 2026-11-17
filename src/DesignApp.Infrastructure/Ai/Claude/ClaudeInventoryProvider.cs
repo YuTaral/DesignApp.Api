@@ -36,8 +36,10 @@ internal sealed partial class ClaudeInventoryProvider(
         var response = await AskAsync(image, settings, settings.SystemPrompt(), settings.UserMessage, cancellationToken);
 
         var elapsed = Stopwatch.GetElapsedTime(started);
+
         LogUsage(settings.InventoryModel, settings.InventoryEffort, response.Usage.InputTokens, response.Usage.OutputTokens, elapsed.TotalSeconds);
         await RecordUsageAsync(image, options.Value.RecordSamplesTo, settings, response.Usage, elapsed, cancellationToken);
+
         return Read(response, settings, image);
     }
 
@@ -51,13 +53,17 @@ internal sealed partial class ClaudeInventoryProvider(
             (int)(box.X * image.Width), (int)(box.Y * image.Height), (int)(box.Width * image.Width), (int)(box.Height * image.Height), instructions);
         var response = await AskAsync(image, settings, Constants.Ai.Claude.PartsSystemPrompt, message, cancellationToken);
         var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
+
         LogPartsUsage(settings.InventoryModel, response.Usage.InputTokens, response.Usage.OutputTokens, seconds);
         var parts = Read(response, settings, image);
+
         if (parts.Succeeded)
         {
             var names = string.Join(", ", parts.Value.Select(p => p.Label));
+
             LogParts(whole.Label, names);
         }
+
         return parts;
     }
 
@@ -100,6 +106,7 @@ internal sealed partial class ClaudeInventoryProvider(
                 },
             ],
         }, cancellationToken);
+
         return response;
     }
 
@@ -111,8 +118,12 @@ internal sealed partial class ClaudeInventoryProvider(
     private static Result<IReadOnlyList<InventoryItem>> Read(Message response, AiSettings settings, AnalysisImage image)
     {
         if (response.StopReason != StopReason.EndTurn)
+        {
             throw new InvalidOperationException($"Claude stopped early ({response.StopReason}) while listing objects.");
+        }
+
         var json = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
+
         return InventoryJson.Parse(json, settings.MaxPoints, image.Width, image.Height);
     }
 
@@ -131,7 +142,10 @@ internal sealed partial class ClaudeInventoryProvider(
         AnalysisImage image, string? recordTo, AiSettings settings, Usage usage, TimeSpan elapsed, CancellationToken cancellationToken)
     {
         if (recordTo is not { Length: > 0 } folder || SampleRooms.Match(image) is not { } sample)
+        {
             return;
+        }
+
         var recorded = new
         {
             name = sample.Name,
@@ -141,6 +155,7 @@ internal sealed partial class ClaudeInventoryProvider(
             outputTokens = usage.OutputTokens,
             seconds = Math.Round(elapsed.TotalSeconds, 1),
         };
+
         Directory.CreateDirectory(folder);
         await File.WriteAllTextAsync(Path.Combine(folder, sample.Name + Constants.Samples.ClaudeUsageSuffix), JsonSerializer.Serialize(recorded, Json), cancellationToken);
     }

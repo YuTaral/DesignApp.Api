@@ -27,6 +27,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.Unauthorized, (await guest.GetAsync("/api/designs")).StatusCode);
         using var save = await guest.PostAsJsonAsync("/api/designs", new { roomId = room.Id, name = "Mine" });
+
         Assert.Equal(HttpStatusCode.Unauthorized, save.StatusCode);
     }
 
@@ -44,14 +45,18 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             description = "  Calm greens  ",
             edits = new[] { new { objectIndex = kitchen.Objects[0], color = "#8fa98b", strength = 0.8 } },
         });
+
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
+
         Assert.Equal(("Flat makeover", "Calm greens"), (design.Name, design.Description));
         var first = Assert.Single(design.Rooms);
+
         Assert.Equal((kitchen.Id, DesignApp.Api.Constants.Routes.RoomPhotoUrl(kitchen.Id)), (first.RoomId, first.PhotoUrl));
         Assert.Equal([new EditDto(kitchen.Objects[0], "#8FA98B", 0.8)], first.Edits);
 
         var added = await OkAsync(await browser.PostAsJsonAsync($"/api/designs/{design.Id}/rooms", new { roomId = bedroom.Id }));
+
         Assert.Equal([kitchen.Id, bedroom.Id], added.Rooms.Select(r => r.RoomId));
         Assert.Empty(added.Rooms[1].Edits);
 
@@ -59,13 +64,16 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         {
             edits = new[] { new { objectIndex = bedroom.Objects[1], color = "#A0522D", strength = 1.0 } },
         }));
+
         Assert.Equal([new EditDto(bedroom.Objects[1], "#A0522D", 1.0)], colored.Rooms[1].Edits);
         Assert.Single(colored.Rooms[0].Edits); // the other room keeps its colors
 
         var renamed = await OkAsync(await browser.PutAsJsonAsync($"/api/designs/{design.Id}", new { name = "Whole flat", description = "" }));
+
         Assert.Equal(("Whole flat", ""), (renamed.Name, renamed.Description));
 
         var listed = Assert.Single((await browser.GetFromJsonAsync<List<DesignDto>>("/api/designs"))!);
+
         Assert.Equal((design.Id, 2), (listed.Id, listed.Rooms.Count));
     }
 
@@ -80,9 +88,11 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             .First(o => o.GetProperty("category").GetString() is not ("Wall" or "Floor" or "Ceiling")).GetProperty("index").GetInt32();
 
         using var remove = await browser.PostAsJsonAsync($"/api/rooms/{kitchen.Id}/removals", new { baseRevision = 0, objectIndexes = new[] { removable } });
+
         remove.EnsureSuccessStatusCode();
 
         var withoutIt = DesignApp.Api.Constants.Routes.RoomPhotoUrl(kitchen.Id, 1);
+
         Assert.Equal(withoutIt, (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!.Rooms[0].PhotoUrl);
         Assert.Equal(withoutIt, Assert.Single((await browser.GetFromJsonAsync<List<DesignDto>>("/api/designs"))!).Rooms[0].PhotoUrl);
 
@@ -98,6 +108,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var kitchen = await ReadyRoomAsync(browser);
         var bedroom = await ReadyRoomAsync(browser);
         var design = await CreateAsync(browser, kitchen.Id, "Flat");
+
         await OkAsync(await browser.PostAsJsonAsync($"/api/designs/{design.Id}/rooms", new { roomId = bedroom.Id }));
 
         var left = await OkAsync(await browser.DeleteAsync($"/api/designs/{design.Id}/rooms/{kitchen.Id}"));
@@ -144,6 +155,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         using var other = await SignedUpAsync();
         var theirRoom = await ReadyRoomAsync(other);
+
         Assert.Equal(HttpStatusCode.NotFound, (await other.GetAsync($"/api/designs/{design.Id}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync($"/api/designs/{design.Id}", new { name = "Theirs" })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync($"/api/designs/{design.Id}")).StatusCode);
@@ -159,6 +171,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         using var browser = factory.CreateClient();
         var room = await ReadyRoomAsync(browser);
+
         (await browser.PostAsJsonAsync("/api/account/sign-up", new { email = NewEmail(), password = Password })).EnsureSuccessStatusCode();
 
         using var created = await browser.PostAsJsonAsync("/api/designs", new { roomId = room.Id, name = "From my guest visit" });
@@ -176,6 +189,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         async Task<string?> Refused(object body)
         {
             var response = await browser.PostAsJsonAsync("/api/designs", body);
+
             return await ProblemAsync(response);
         }
 
@@ -197,8 +211,10 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var browser = await SignedUpAsync();
         var saved = await ReadyRoomAsync(browser);
         var unsaved = await ReadyRoomAsync(browser);
+
         await CreateAsync(browser, saved.Id, "Kept");
         var dayAndAHourAgo = DateTimeOffset.UtcNow.AddHours(-25);
+
         await AgeAsync(saved.Id, dayAndAHourAgo);
         await AgeAsync(unsaved.Id, dayAndAHourAgo);
 
@@ -217,10 +233,12 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var guest = factory.CreateClient();
 
         using var response = await guest.GetAsync("/api/palettes");
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(DesignApp.Api.Constants.Http.LibraryCache, response.Headers.CacheControl?.ToString());
         var palettes = (await response.Content.ReadFromJsonAsync<List<PaletteDto>>())!;
         var ral = Assert.Single(palettes, p => p.Id == "ral-classic");
+
         Assert.Contains(new PaintDto("ral-classic/9010", "RAL 9010", "Pure white", "#F7F9EF"), ral.Paints);
     }
 
@@ -242,9 +260,11 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             },
             sizes = new[] { new { objectIndex = wall, width = 4.0, height = 2.5 } },
         });
+
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
         var room = Assert.Single(design.Rooms);
+
         Assert.Equal([new EditDto(wall, "#F7F9EF", 0.9, "ral-classic/9010"), new EditDto(other, "#123456", 1.0)], room.Edits);
         Assert.Equal([new SizeDto(wall, 4.0, 2.5)], room.Sizes);
 
@@ -253,9 +273,11 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             edits = new[] { new { objectIndex = wall, color = "#F7F9EF", strength = 0.9, paint = "ral-classic/9010" } },
             sizes = new[] { new { objectIndex = wall, width = 3.2, height = 2.7 } },
         }));
+
         Assert.Equal([new SizeDto(wall, 3.2, 2.7)], resized.Rooms[0].Sizes);
 
         var read = (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!;
+
         Assert.Equal("ral-classic/9010", Assert.Single(read.Rooms[0].Edits).Paint);
         Assert.Equal([new SizeDto(wall, 3.2, 2.7)], read.Rooms[0].Sizes);
     }
@@ -270,6 +292,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         async Task<string?> Refused(object body)
         {
             var response = await browser.PostAsJsonAsync("/api/designs", body);
+
             return await ProblemAsync(response);
         }
 
@@ -302,10 +325,12 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             roomId = room.Id, name = "Bricks",
             edits = new[] { new { objectIndex = wall, color = "#F7F9EF", strength = 0.9, paint = "ral-classic/9010", tones } },
         });
+
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
 
         var read = (await browser.GetFromJsonAsync<DesignDto>($"/api/designs/{design.Id}"))!;
+
         Assert.Equal(
             [new ToneDto("#9A4B36", 0.7, "#F7F9EF", 0.9, "ral-classic/9010"), new ToneDto("#C8C2B6", 0.3, null, 0.8)],
             Assert.Single(read.Rooms[0].Edits).Tones);
@@ -322,12 +347,14 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
                 } },
             },
         });
+
         Assert.Equal(DesignApp.Application.Constants.Messages.PaintColorMismatch("RAL 9010"), await ProblemAsync(mismatch));
         using var one = await browser.PostAsJsonAsync("/api/designs", new
         {
             roomId = room.Id, name = "x",
             edits = new[] { new { objectIndex = wall, color = "#000000", strength = 1.0, tones = new[] { new { center = "#9A4B36", share = 1.0, strength = 1.0 } } } },
         });
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.ToneCount, await ProblemAsync(one));
     }
 
@@ -339,6 +366,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DesignApp.Infrastructure.Database.AppDbContext>();
         var room = await db.Rooms.FindAsync(roomId);
+
         db.Entry(room!).Property(nameof(Room.CreatedAt)).CurrentValue = uploaded;
         await db.SaveChangesAsync();
     }
@@ -353,7 +381,9 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private async Task<HttpClient> SignedUpAsync()
     {
         var browser = factory.CreateClient();
+
         (await browser.PostAsJsonAsync("/api/account/sign-up", new { email = NewEmail(), password = Password })).EnsureSuccessStatusCode();
+
         return browser;
     }
 
@@ -361,7 +391,9 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<DesignDto> CreateAsync(HttpClient browser, Guid roomId, string name)
     {
         using var created = await browser.PostAsJsonAsync("/api/designs", new { roomId, name });
+
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+
         return (await created.Content.ReadFromJsonAsync<DesignDto>())!;
     }
 
@@ -372,6 +404,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using (response)
         {
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
             return (await response.Content.ReadFromJsonAsync<DesignDto>())!;
         }
     }
@@ -383,6 +416,7 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using (response)
         {
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
             return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("detail").GetString();
         }
     }
@@ -393,19 +427,26 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     private static async Task<ReadyRoom> ReadyRoomAsync(HttpClient browser)
     {
         using var content = new ByteArrayContent(TestImages.Create(1200, 800));
+
         content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
         using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" } };
         using var upload = await browser.PostAsync("/api/rooms", form);
+
         upload.EnsureSuccessStatusCode();
         var id = (await upload.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
 
         var deadline = DateTime.UtcNow.AddSeconds(30);
+
         while (true)
         {
             var room = await browser.GetFromJsonAsync<JsonElement>($"/api/rooms/{id}");
             var status = room.GetProperty("status").GetString();
+
             if (status == "Ready")
+            {
                 return new ReadyRoom(id, [.. room.GetProperty("objects").EnumerateArray().Select(o => o.GetProperty("index").GetInt32())]);
+            }
+
             Assert.NotEqual("Failed", status);
             Assert.True(DateTime.UtcNow < deadline, $"The room was still {status} after 30 seconds.");
             await Task.Delay(100);

@@ -79,6 +79,7 @@ public class SampleRoomsTests
 
         Assert.Equal((sample.Width / 2, sample.Height / 2), (half.Width, half.Height));
         var ratio = full.Coverage.Count(c => c >= 128) / (double)half.Coverage.Count(c => c >= 128);
+
         Assert.InRange(ratio, 3.6, 4.4);
     }
 
@@ -92,10 +93,17 @@ public class SampleRoomsTests
         {
             var mask = sample.Outline(item.Label, sample.Width, sample.Height)!;
             var (minX, minY, maxX, maxY) = (int.MaxValue, int.MaxValue, -1, -1);
+
             for (var y = 0; y < mask.Height; y++)
+            {
                 for (var x = 0; x < mask.Width; x++)
+                {
                     if (mask.Coverage[y * mask.Width + x] >= 128)
+                    {
                         (minX, minY, maxX, maxY) = (Math.Min(minX, x), Math.Min(minY, y), Math.Max(maxX, x), Math.Max(maxY, y));
+                    }
+                }
+            }
 
             // Within 2 px: polygon edges and stroke ends round to whole pixels.
             Assert.InRange(item.Box.X * sample.Width, minX - 2, minX + 2);
@@ -111,8 +119,12 @@ public class SampleRoomsTests
         // A 40x20 mask covering the left half, as the recorder stores it.
         using var bitmap = new SKBitmap(new SKImageInfo(40, 20, SKColorType.Gray8, SKAlphaType.Opaque));
         var coverage = new byte[40 * 20];
+
         for (var y = 0; y < 20; y++)
+        {
             Array.Fill(coverage, (byte)255, y * 40, 20);
+        }
+
         coverage.CopyTo(bitmap.GetPixelSpan());
         using var png = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100);
         var json = $$"""
@@ -157,6 +169,7 @@ public class SampleRoomsTests
     private static AnalysisImage LookAlike(SampleRoom sample)
     {
         using var bitmap = new SKBitmap(sample.Width, sample.Height);
+
         using (var canvas = new SKCanvas(bitmap))
         {
             for (var cy = 0; cy < 16; cy++)
@@ -165,12 +178,15 @@ public class SampleRoomsTests
                 {
                     var v = sample.FingerprintBytes[cy * 16 + cx];
                     using var paint = new SKPaint { Color = new SKColor(v, v, v) };
+
                     canvas.DrawRect(SKRect.Create(cx * sample.Width / 16, cy * sample.Height / 16,
                         (cx + 1) * sample.Width / 16 - cx * sample.Width / 16, (cy + 1) * sample.Height / 16 - cy * sample.Height / 16), paint);
                 }
             }
         }
+
         using var encoded = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Jpeg, 90);
+
         return new AnalysisImage(encoded.ToArray(), sample.Width, sample.Height);
     }
 

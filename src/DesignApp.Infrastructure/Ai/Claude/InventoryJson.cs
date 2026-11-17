@@ -95,17 +95,26 @@ internal static class InventoryJson
     {
         var answer = JsonSerializer.Deserialize<Answer>(json, Options)
             ?? throw new JsonException("Claude returned an empty answer.");
+
         if (!answer.IsRoom)
+        {
             return Result.Failure<IReadOnlyList<InventoryItem>>(Constants.Messages.NotARoom);
+        }
 
         var items = new List<InventoryItem>();
+
         foreach (var o in answer.Objects ?? [])
         {
             if (string.IsNullOrWhiteSpace(o.Label) || o.Box is null || ToBox(o.Box, width, height) is not { } box)
+            {
                 continue;
+            }
+
             var color = HexColor.TryParse(o.Color, out var parsed) ? parsed : HexColor.Parse(Domain.Constants.Colors.Fallback);
+
             items.Add(new InventoryItem(o.Label.Trim(), o.Category, box, color, ToPoints(o.Points, maxPoints, width, height)));
         }
+
         return items;
     }
 
@@ -128,6 +137,7 @@ internal static class InventoryJson
     {
         var (x, w) = Clip(b.X / width, b.Width / width);
         var (y, h) = Clip(b.Y / height, b.Height / height);
+
         return w > Constants.Ai.Claude.MinBoxSide && h > Constants.Ai.Claude.MinBoxSide ? new BoundingBox(x, y, w, h) : null;
     }
 
@@ -137,8 +147,12 @@ internal static class InventoryJson
     private static (double Start, double Length) Clip(double start, double length)
     {
         if (start >= 0 && start + length <= 1)
+        {
             return (start, length);
+        }
+
         var clipped = Math.Clamp(start, 0, 1);
+
         return (clipped, Math.Min(start + length, 1) - clipped);
     }
 

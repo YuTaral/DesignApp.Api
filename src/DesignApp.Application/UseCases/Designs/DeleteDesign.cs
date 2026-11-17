@@ -19,17 +19,25 @@ public sealed class DeleteDesign(IRoomRepository rooms, IDesignRepository design
     public async Task<bool> HandleAsync(Guid id, CancellationToken cancellationToken)
     {
         var design = await designs.FindAsync(id, currentUser.Id, cancellationToken);
+
         if (design is null)
+        {
             return false;
+        }
 
         var owned = new List<Room>();
+
         foreach (var entry in design.Rooms)
         {
             if (await rooms.FindAsync(entry.RoomId, currentUser.Id, cancellationToken) is { } room)
+            {
                 owned.Add(room);
+            }
         }
+
         designs.Remove(design);
         await remover.DeleteAsync(owned, cancellationToken);
+
         return true;
     }
 }

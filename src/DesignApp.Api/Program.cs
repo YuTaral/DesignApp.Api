@@ -39,6 +39,7 @@ builder.Services.AddDesignAppRateLimits(builder.Configuration);
 builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = DesignApp.Application.Constants.Photos.MaxUploadBytes + DesignApp.Api.Constants.Http.UploadFramingBytes);
 
 var webOrigins = builder.Configuration.GetSection(DesignApp.Api.Constants.Http.WebOriginsKey).Get<string[]>() ?? [];
+
 builder.Services.AddCors(options => options.AddPolicy(DesignApp.Api.Constants.Http.WebCorsPolicy, policy => policy
     .WithOrigins(webOrigins)
     .AllowAnyHeader()
@@ -80,8 +81,12 @@ api.MapRoomEndpoints();
 api.MapLibraryEndpoints();
 api.MapPaletteEndpoints();
 api.MapPlanEndpoints();
+
 if (app.Environment.IsDevelopment())
+{
     api.MapDevEndpoints();
+}
+
 app.MapHub<RoomHub>(DesignApp.Api.Constants.Hub.Path);
 
 app.Run();

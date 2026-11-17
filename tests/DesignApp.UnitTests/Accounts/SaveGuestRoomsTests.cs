@@ -68,8 +68,10 @@ public class SaveGuestRoomsTests
     {
         var saved = owners.Select((owner, i) =>
             Room.Upload(Guid.CreateVersion7(Now.AddMinutes(i)), owner, $"rooms/{i}.jpg", 800, 600, Now.AddMinutes(i))).ToList();
+
         saved.ForEach(rooms.Add);
         await rooms.SaveChangesAsync(CancellationToken.None);
+
         return saved;
     }
 }

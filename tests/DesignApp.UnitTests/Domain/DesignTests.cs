@@ -20,8 +20,10 @@ public class DesignTests
 
         Assert.Equal(("Warm living room", "Terracotta and oak", Now, Now), (design.Name, design.Description, design.CreatedAt, design.UpdatedAt));
         var entry = Assert.Single(design.Rooms);
+
         Assert.Equal(room.Id, entry.RoomId);
         var edit = Assert.IsType<RecolorEdit>(Assert.Single(entry.Edits));
+
         Assert.Equal("#C2552F", edit.Color.Value);
     }
 
@@ -29,9 +31,11 @@ public class DesignTests
     public void The_description_is_optional_and_limited()
     {
         var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Draft", null, [], Now);
+
         Assert.Equal("", design.Description);
 
         var error = Assert.Throws<DomainException>(() => design.Rename("Draft", new string('x', DesignApp.Domain.Constants.Designs.MaxDescriptionLength + 1), Now));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.DescriptionLength, error.Message);
     }
 
@@ -58,6 +62,7 @@ public class DesignTests
     {
         var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Flat", null, [], Now);
         var analyzing = Room.Upload(Guid.CreateVersion7(), "user-1", "rooms/b.jpg", 800, 600, Now);
+
         design.AddRoom(analyzing, Now);
 
         Assert.Throws<DomainException>(() => design.SetRoomEdits(analyzing, [new RecolorEdit(1, Terracotta, 1)], Now));
@@ -68,13 +73,18 @@ public class DesignTests
     {
         var design = Design.Create(RoomTests.ReadyRoom(), "user-1", "Flat", null, [], Now);
         var room = RoomTests.ReadyRoom();
+
         design.AddRoom(room, Now);
 
         Assert.Equal(DesignApp.Domain.Constants.Messages.RoomAlreadyInThisDesign, Assert.Throws<DomainException>(() => design.AddRoom(room, Now)).Message);
         Assert.Equal(DesignApp.Domain.Constants.Messages.NotYourRoom,
             Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(ownerId: "user-2"), Now)).Message);
+
         while (design.Rooms.Count < DesignApp.Domain.Constants.Designs.MaxRooms)
+        {
             design.AddRoom(RoomTests.ReadyRoom(), Now);
+        }
+
         Assert.Throws<DomainException>(() => design.AddRoom(RoomTests.ReadyRoom(), Now));
     }
 
@@ -84,12 +94,14 @@ public class DesignTests
         var first = RoomTests.ReadyRoom();
         var design = Design.Create(first, "user-1", "Flat", null, [], Now);
         var second = RoomTests.ReadyRoom();
+
         design.AddRoom(second, Now);
 
         design.RemoveRoom(first.Id, Now);
 
         Assert.Equal([second.Id], design.Rooms.Select(r => r.RoomId));
         var error = Assert.Throws<DomainException>(() => design.RemoveRoom(second.Id, Now));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.LastRoom, error.Message);
     }
 
@@ -116,6 +128,7 @@ public class DesignTests
 
         var error = Assert.Throws<DomainException>(() => Design.Create(room, "user-1", "Draft", null,
             [new RecolorEdit(1, Terracotta, 1), new RecolorEdit(1, HexColor.Parse("#FFFFFF"), 0.5)], Now));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.DuplicateEdit(1), error.Message);
     }
 
@@ -161,7 +174,10 @@ public class DesignTests
     public void Hex_color_parsing(string? input, bool valid)
     {
         Assert.Equal(valid, HexColor.TryParse(input, out var color));
+
         if (valid)
+        {
             Assert.Equal(input!.ToUpperInvariant(), color.Value);
+        }
     }
 }

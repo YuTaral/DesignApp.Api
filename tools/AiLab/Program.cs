@@ -32,19 +32,26 @@ using Microsoft.Extensions.Options;
 using static DesignApp.Domain.Constants;
 
 if (args.Length > 0 && args[0] == "generate")
+{
     return await AiLab.Generator.RunAsync(args);
+}
+
 if (args.Length > 0 && args[0] == "compare-images")
+{
     return await AiLab.ImageComparer.RunAsync(args);
+}
 
 if (args.Length < 2 || args[0] is not ("record" or "replay"))
 {
     Console.Error.WriteLine("Usage: record <photo.jpg> <folder> [--model <id>] [--effort low|medium|high] [--max-objects <n>] | replay <folder>");
+
     return 2;
 }
 
 var recording = args[0] == "record";
 var folder = Path.GetFullPath(recording ? args[2] : args[1]);
 var samFolder = Path.Combine(folder, "sam");
+
 Directory.CreateDirectory(samFolder);
 var json = new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true };
 using var logs = LoggerFactory.Create(b => b.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Information));
@@ -52,6 +59,7 @@ using var logs = LoggerFactory.Create(b => b.AddSimpleConsole(o => o.SingleLine 
 var aiSettings = new AiSettings();
 var via = "api";
 var claudePath = DesignApp.Infrastructure.Constants.Ai.ClaudeCode.DefaultPath;
+
 for (var i = 3; i + 1 < args.Length; i += 2)
 {
     switch (args[i])
@@ -64,6 +72,7 @@ for (var i = 3; i + 1 < args.Length; i += 2)
         default: Console.Error.WriteLine($"Unknown option {args[i]}"); return 2;
     }
 }
+
 var settings = new FixedSettings(aiSettings);
 var started = System.Diagnostics.Stopwatch.GetTimestamp();
 var imaging = new SkiaRoomImaging();
@@ -71,9 +80,11 @@ var imaging = new SkiaRoomImaging();
 // 1. The analysis image, prepared exactly as the app prepares it (recorded once, so replays use the same bytes).
 var imagePath = Path.Combine(folder, "analysis.jpg");
 AnalysisImage image;
+
 if (recording)
 {
     await using var photo = File.OpenRead(args[1]);
+
     image = imaging.PrepareForAnalysis(photo);
     await File.WriteAllBytesAsync(imagePath, image.Jpeg);
     await File.WriteAllTextAsync(Path.Combine(folder, "analysis.json"), JsonSerializer.Serialize(new { image.Width, image.Height }, json));
@@ -81,6 +92,7 @@ if (recording)
 else
 {
     var size = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(folder, "analysis.json"))).RootElement;
+
     image = new AnalysisImage(await File.ReadAllBytesAsync(imagePath), size.GetProperty("width").GetInt32(), size.GetProperty("height").GetInt32());
 }
 
@@ -88,26 +100,48 @@ else
 var secrets = new ConfigurationBuilder().AddUserSecrets(typeof(FixedSettings).Assembly, optional: true).Build();
 var inventoryPath = Path.Combine(folder, "inventory.json");
 IReadOnlyList<InventoryItem> items;
+
 if (recording)
 {
     IObjectInventoryProvider claude;
+
     if (via == "claude-code")
     {
         // Development route: Claude Code on this PC, billed to the Claude subscription it is signed in with.
         var runner = new RecordingClaudeCodeRunner(folder, new ClaudeCodeRunner(Options.Create(new AiOptions { ClaudeCodePath = claudePath })));
+
         claude = new ClaudeCodeInventoryProvider(runner, settings, logs.CreateLogger<ClaudeCodeInventoryProvider>());
     }
     else
     {
         var key = secrets["Ai:AnthropicApiKey"];
-        if (string.IsNullOrWhiteSpace(key)) { Console.Error.WriteLine("Ai:AnthropicApiKey is not in the user secrets."); return 1; }
+
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            Console.Error.WriteLine("Ai:AnthropicApiKey is not in the user secrets.");
+
+            return 1;
+        }
+
         IAnthropicClient client = new AnthropicClient { ApiKey = key, HttpClient = new HttpClient(new ClaudeRecordingHandler(folder, new HttpClientHandler())) };
+
         if (secrets["Ai:AnthropicWorkspaceId"] is { Length: > 0 } workspace)
+        {
             client = client.WithOptions(o => o with { ExtraHeaders = new Dictionary<string, string> { [DesignApp.Infrastructure.Constants.Ai.WorkspaceHeader] = workspace.Trim() } });
+        }
+
         claude = new ClaudeInventoryProvider(client, Options.Create(new AiOptions()), settings, logs.CreateLogger<ClaudeInventoryProvider>());
     }
+
     var listed = await claude.ListObjectsAsync(image, CancellationToken.None);
-    if (!listed.Succeeded) { Console.Error.WriteLine($"Claude: {listed.Error}"); return 1; }
+
+    if (!listed.Succeeded)
+    {
+        Console.Error.WriteLine($"Claude: {listed.Error}");
+
+        return 1;
+    }
+
     items = listed.Value;
     await File.WriteAllTextAsync(inventoryPath, JsonSerializer.Serialize(items.Select(Saved.From), json));
 }
@@ -115,6 +149,7 @@ else
 {
     items = [.. JsonSerializer.Deserialize<List<Saved>>(await File.ReadAllTextAsync(inventoryPath), json)!.Select(s => s.ToItem())];
 }
+
 items = [.. items.Where(i => AnalysisScope.WholeRoom.Includes(i.Category)).Take(DesignApp.Application.Constants.Analysis.MaxObjects)];
 Console.WriteLine($"{items.Count} objects: {string.Join(", ", items.Select(i => i.Label))}");
 
@@ -124,12 +159,21 @@ HttpMessageHandler handler = recording
     ? new RecordingHandler(samFolder, new HttpClientHandler())
     : new ReplayHandler(samFolder, missing);
 using var http = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(3) };
+
 if (recording)
 {
     var fal = secrets["Ai:FalKey"];
-    if (string.IsNullOrWhiteSpace(fal)) { Console.Error.WriteLine("Ai:FalKey is not in the user secrets."); return 1; }
+
+    if (string.IsNullOrWhiteSpace(fal))
+    {
+        Console.Error.WriteLine("Ai:FalKey is not in the user secrets.");
+
+        return 1;
+    }
+
     http.DefaultRequestHeaders.Authorization = new(DesignApp.Infrastructure.Constants.Ai.FalAuthScheme, fal);
 }
+
 var sam = new FalSegmentationProvider(http, settings, logs.CreateLogger<FalSegmentationProvider>());
 var requests = FalSegmentationProvider.CountRequests();
 var masks = await sam.SegmentAsync(image, items, CancellationToken.None);
@@ -137,6 +181,7 @@ var masks = await sam.SegmentAsync(image, items, CancellationToken.None);
 // 4. The label map, built exactly as the app builds it.
 var outlined = items.Zip(masks).Where(p => p.Second is not null).Select(p => new SegmentedObject(p.First, p.Second!)).ToList();
 var map = imaging.BuildLabelMap(image, outlined);
+
 await File.WriteAllBytesAsync(Path.Combine(folder, "labels.png"), map.Png);
 await File.WriteAllTextAsync(Path.Combine(folder, "objects.json"), JsonSerializer.Serialize(map.Objects.Select(o => new
 {
@@ -157,6 +202,7 @@ await File.WriteAllTextAsync(Path.Combine(folder, recording ? "run.json" : "repl
 }, json));
 Console.WriteLine($"label map: {map.Objects.Count} objects, {outlined.Count} of {items.Count} outlined");
 Console.WriteLine(missing.Count == 0 ? "every SAM 3 request was answered" : $"{missing.Count} SAM 3 request(s) not in the recording: {string.Join("; ", missing)}");
+
 return 0;
 
 /// <summary>AI settings that don't come from a database.</summary>
@@ -192,14 +238,19 @@ internal sealed class RecordingHandler(string folder, HttpMessageHandler inner) 
         var body = request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken);
         var response = await base.SendAsync(request, cancellationToken);
         var answer = await response.Content.ReadAsStringAsync(cancellationToken);
+
         if (request.Method == HttpMethod.Post)
+        {
             await File.WriteAllTextAsync(Path.Combine(folder, Hash.Of(body) + ".json"), JsonSerializer.Serialize(new
             {
                 status = (int)response.StatusCode,
                 request = Hash.WithoutImage(body),
                 response = answer,
             }), cancellationToken);
+        }
+
         var copy = new HttpResponseMessage(response.StatusCode) { Content = new StringContent(answer, Encoding.UTF8, "application/json") };
+
         return copy;
     }
 }
@@ -215,13 +266,22 @@ internal sealed class ClaudeRecordingHandler(string folder, HttpMessageHandler i
         var body = request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken);
         var response = await base.SendAsync(request, cancellationToken);
         var answer = await response.Content.ReadAsStringAsync(cancellationToken);
+
         if (request.Method == HttpMethod.Post)
         {
             var sent = System.Text.Json.Nodes.JsonNode.Parse(body)!;
+
             foreach (var message in sent["messages"]!.AsArray())
+            {
                 foreach (var block in message!["content"]!.AsArray())
+                {
                     if (block!["source"] is { } source)
+                    {
                         source["data"] = "(the analysis image)";
+                    }
+                }
+            }
+
             await File.WriteAllTextAsync(Path.Combine(folder, "claude.json"), JsonSerializer.Serialize(new
             {
                 status = (int)response.StatusCode,
@@ -229,9 +289,14 @@ internal sealed class ClaudeRecordingHandler(string folder, HttpMessageHandler i
                 response = answer,
             }), cancellationToken);
         }
+
         var copy = new HttpResponseMessage(response.StatusCode) { Content = new StringContent(answer, Encoding.UTF8, "application/json") };
+
         foreach (var header in response.Headers)
+        {
             copy.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
         return copy;
     }
 }
@@ -245,6 +310,7 @@ internal sealed class RecordingClaudeCodeRunner(string folder, IClaudeCodeRunner
     public async Task<string> RunAsync(IReadOnlyList<string> arguments, string input, CancellationToken cancellationToken)
     {
         string printed;
+
         try
         {
             printed = await inner.RunAsync(arguments, input, cancellationToken);
@@ -254,18 +320,27 @@ internal sealed class RecordingClaudeCodeRunner(string folder, IClaudeCodeRunner
             await Save(arguments, input, null, e.Message, cancellationToken);
             throw;
         }
+
         await Save(arguments, input, printed, null, cancellationToken);
+
         return printed;
     }
 
     private async Task Save(IReadOnlyList<string> arguments, string input, string? printed, string? error, CancellationToken cancellationToken)
     {
         var message = System.Text.Json.Nodes.JsonNode.Parse(input)!;
+
         foreach (var block in message["message"]!["content"]!.AsArray())
+        {
             if (block!["source"] is { } source)
+            {
                 source["data"] = "(the analysis image)";
+            }
+        }
+
         var systemPrompt = arguments.SkipWhile(a => a != "--system-prompt-file").Skip(1).FirstOrDefault() is { } file && File.Exists(file)
             ? await File.ReadAllTextAsync(file, cancellationToken) : "";
+
         await File.WriteAllTextAsync(Path.Combine(folder, "claude-code.json"), JsonSerializer.Serialize(new
         {
             arguments = arguments.Where(a => !a.StartsWith('{') && !a.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)).ToArray(),
@@ -284,12 +359,16 @@ internal sealed class ReplayHandler(string folder, List<string> missing) : HttpM
     {
         var body = request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken);
         var file = Path.Combine(folder, Hash.Of(body) + ".json");
+
         if (!File.Exists(file))
         {
             lock (missing) missing.Add(Hash.Describe(body));
+
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("""{"masks":[]}""", Encoding.UTF8, "application/json") };
         }
+
         var saved = JsonDocument.Parse(await File.ReadAllTextAsync(file, cancellationToken)).RootElement;
+
         return new HttpResponseMessage((HttpStatusCode)saved.GetProperty("status").GetInt32())
         {
             Content = new StringContent(saved.GetProperty("response").GetString()!, Encoding.UTF8, "application/json"),
@@ -309,7 +388,9 @@ internal static class Hash
     public static string WithoutImage(string body)
     {
         var node = System.Text.Json.Nodes.JsonNode.Parse(body)!;
+
         node["image_url"] = "(the analysis image)";
+
         return node.ToJsonString();
     }
 
@@ -318,6 +399,7 @@ internal static class Hash
         var node = System.Text.Json.Nodes.JsonNode.Parse(body)!;
         var prompt = node["prompt"]?.GetValue<string>();
         var boxes = node["box_prompts"]?.AsArray().Count ?? 0;
+
         return string.IsNullOrEmpty(prompt) ? $"box-only ({boxes} box{(boxes == 1 ? "" : "es")})" : $"\"{prompt}\"";
     }
 }

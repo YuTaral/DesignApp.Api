@@ -33,13 +33,25 @@ public sealed record ToneRecolor
     public ToneRecolor(HexColor center, double share, HexColor? color, double strength, string? paint = null)
     {
         if (double.IsNaN(share) || share is < 0 or > 1)
+        {
             throw new DomainException(Constants.Messages.ToneShare);
+        }
+
         if (double.IsNaN(strength) || strength is < Constants.Colors.MinStrength or > Constants.Colors.MaxStrength)
+        {
             throw new DomainException(Constants.Messages.StrengthRange);
+        }
+
         if (paint is not null && color is null)
+        {
             throw new DomainException(Constants.Messages.TonePaintNeedsColor);
+        }
+
         if (paint is not null && !RecolorEdit.IsPaintReference(paint))
+        {
             throw new DomainException(Constants.Messages.PaintReference);
+        }
+
         (Center, Share, Color, Strength, Paint) = (center, share, color, strength, paint);
     }
 }

@@ -396,6 +396,7 @@ public static class Constants
             public static string PartsMessage(string label, int x, int y, int width, int height, string? instructions)
             {
                 var message = $"List the parts of the {label} inside the box at x {x}, y {y}, {width} wide and {height} high.";
+
                 return instructions is null
                     ? message
                     : $"{message} The person editing the photo asks for this; follow it where the photo allows, within the rules above: \"{instructions}\"";

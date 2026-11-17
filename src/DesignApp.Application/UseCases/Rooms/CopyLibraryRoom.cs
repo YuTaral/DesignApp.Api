@@ -27,13 +27,18 @@ public sealed class CopyLibraryRoom(ILibrary library, LibraryCopier copier, IRoo
         var design = library.FindDesign(designId);
         var source = design?.FindRoom(roomId);
         var layout = source?.FindLayout(layoutId);
+
         if (design is null || source is null || layout is null)
+        {
             return null;
+        }
 
         try
         {
             var room = await copier.CopyAsync(design, source, layout, aiMode, cancellationToken);
+
             await rooms.SaveChangesAsync(cancellationToken);
+
             return room;
         }
         catch

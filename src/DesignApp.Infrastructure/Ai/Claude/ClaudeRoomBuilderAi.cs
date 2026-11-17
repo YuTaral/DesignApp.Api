@@ -38,7 +38,9 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
             Messages = [User(RB.DescribeMessage(Words(roomType.ToString()), description))],
         }, cancellationToken);
         var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
+
         LogUsage("described an object", response.Usage.InputTokens, response.Usage.OutputTokens, seconds);
+
         return response.StopReason == StopReason.EndTurn ? ReadObject(Text(response)) : Result.Failure<CatalogObject>(RB.Messages.DescribeFailed);
     }
 
@@ -50,11 +52,16 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
         try
         {
             var answer = JsonSerializer.Deserialize<Described>(json, Json);
+
             if (answer is null || string.IsNullOrWhiteSpace(answer.Label) || !Enum.IsDefined(answer.Shape))
+            {
                 return Result.Failure<CatalogObject>(RB.Messages.DescribeFailed);
+            }
+
             var color = HexColor.TryParse(answer.Color, out var parsed) ? parsed : HexColor.Parse(Domain.Constants.Colors.Fallback);
             // Something hung on a wall sticks out only so far.
             var depth = answer.Shape.IsMounted() ? Math.Min(Side(answer.Depth), Domain.Constants.Plans.MaxMountedDepth) : Side(answer.Depth);
+
             return new CatalogObject(RB.CustomKey, Trim(answer.Label), answer.Shape, Side(answer.Width), depth, Side(answer.Height), color, answer.Shape.UsualElevation());
         }
         catch (JsonException)
@@ -111,6 +118,7 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
     private static string Trim(string label)
     {
         var trimmed = label.Trim();
+
         return trimmed.Length <= Domain.Constants.Plans.MaxLabelLength ? trimmed : trimmed[..Domain.Constants.Plans.MaxLabelLength];
     }
 

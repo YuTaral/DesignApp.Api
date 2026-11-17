@@ -63,8 +63,12 @@ internal static class LibraryEndpoints
     private static Results<FileStreamHttpResult, NotFound> GetPhoto(string designId, string roomId, string layoutId, ILibrary library, HttpResponse response)
     {
         if (library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId) is null)
+        {
             return TypedResults.NotFound();
+        }
+
         response.Headers.CacheControl = Constants.Http.LibraryCache;
+
         return TypedResults.Stream(library.OpenPhoto(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
     }
 
@@ -76,8 +80,12 @@ internal static class LibraryEndpoints
     private static Results<FileContentHttpResult, NotFound> GetCover(string designId, ILibrary library, HttpResponse response)
     {
         if (library.FindDesign(designId) is null)
+        {
             return TypedResults.NotFound();
+        }
+
         response.Headers.CacheControl = Constants.Http.LibraryCache;
+
         return TypedResults.File(library.Cover(designId), Application.Constants.ContentTypes.Jpeg);
     }
 
@@ -91,8 +99,12 @@ internal static class LibraryEndpoints
     private static Results<FileContentHttpResult, NotFound> GetThumbnail(string designId, string roomId, string layoutId, ILibrary library, HttpResponse response)
     {
         if (library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId) is null)
+        {
             return TypedResults.NotFound();
+        }
+
         response.Headers.CacheControl = Constants.Http.LibraryCache;
+
         return TypedResults.File(library.Thumbnail(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
     }
 
@@ -110,10 +122,17 @@ internal static class LibraryEndpoints
         CancellationToken cancellationToken)
     {
         if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
+        {
             return problem;
+        }
+
         var room = await copyRoom.HandleAsync(designId, roomId, layoutId, aiMode, cancellationToken);
+
         if (room is null)
+        {
             return TypedResults.NotFound();
+        }
+
         return TypedResults.Created(Constants.Routes.RoomUrl(room.Id), RoomResponse.From(room));
     }
 
@@ -129,10 +148,17 @@ internal static class LibraryEndpoints
         CancellationToken cancellationToken)
     {
         if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
+        {
             return problem;
+        }
+
         var design = await copyDesign.HandleAsync(designId, aiMode, cancellationToken);
+
         if (design is null)
+        {
             return TypedResults.NotFound();
+        }
+
         return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, new Dictionary<Guid, int>()));
     }
 }

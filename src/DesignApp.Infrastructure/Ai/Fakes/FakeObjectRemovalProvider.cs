@@ -16,6 +16,7 @@ internal sealed class FakeObjectRemovalProvider(IOptions<AiOptions> options) : I
     public async Task<Result<byte[]>> RemoveAsync(byte[] photoJpeg, byte[] maskPng, bool brushed, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
+
         return Fill(photoJpeg, maskPng);
     }
 
@@ -30,26 +31,34 @@ internal sealed class FakeObjectRemovalProvider(IOptions<AiOptions> options) : I
         using var maskCodec = SKCodec.Create(new MemoryStream(maskPng));
         using var mask = SKBitmap.Decode(maskCodec, new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque))
             ?? throw new InvalidOperationException("The mask can't be decoded.");
-        var pixels = photo.GetPixelSpan();
-        var holes = mask.GetPixelSpan();
         var known = new bool[width * height];
-        for (var p = 0; p < known.Length; p++)
-            known[p] = holes[p] < Constants.Imaging.CoverageThreshold;
-
-        // Start at the hole pixels that touch a known pixel, then work inward one ring at a time.
         var queue = new Queue<int>();
         var queued = new bool[known.Length];
+        var pixels = photo.GetPixelSpan();
+        var holes = mask.GetPixelSpan();
+
+        for (var p = 0; p < known.Length; p++)
+        {
+            known[p] = holes[p] < Constants.Imaging.CoverageThreshold;
+        }
+
+        // Start at the hole pixels that touch a known pixel, then work inward one ring at a time.
         for (var p = 0; p < known.Length; p++)
         {
             if (known[p] || !Neighbours(p, width, height).Any(q => known[q]))
+            {
                 continue;
+            }
+
             queued[p] = true;
             queue.Enqueue(p);
         }
+
         while (queue.Count > 0)
         {
             var p = queue.Dequeue();
             int r = 0, g = 0, b = 0, n = 0;
+
             foreach (var q in Neighbours(p, width, height))
             {
                 if (known[q])
@@ -62,13 +71,18 @@ internal sealed class FakeObjectRemovalProvider(IOptions<AiOptions> options) : I
                     queue.Enqueue(q);
                 }
             }
+
             if (n > 0)
+            {
                 (pixels[p * 4], pixels[p * 4 + 1], pixels[p * 4 + 2]) = ((byte)(r / n), (byte)(g / n), (byte)(b / n));
+            }
+
             known[p] = true;
         }
 
         using var image = SKImage.FromPixels(photo.PeekPixels());
         using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, Application.Constants.Photos.JpegQuality);
+
         return encoded.ToArray();
     }
 
@@ -79,12 +93,15 @@ internal sealed class FakeObjectRemovalProvider(IOptions<AiOptions> options) : I
     private static IEnumerable<int> Neighbours(int p, int width, int height)
     {
         var (x, y) = (p % width, p / width);
+
         for (var dy = -1; dy <= 1; dy++)
         {
             for (var dx = -1; dx <= 1; dx++)
             {
                 if ((dx != 0 || dy != 0) && x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
+                {
                     yield return (y + dy) * width + x + dx;
+                }
             }
         }
     }

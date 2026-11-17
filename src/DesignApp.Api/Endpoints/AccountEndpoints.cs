@@ -60,16 +60,22 @@ internal static class AccountEndpoints
         SaveGuestRooms saveGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
+        {
             return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
+        }
 
         var email = request.Email!.Trim();
         var user = new AppUser { UserName = email, Email = email };
         var created = await users.CreateAsync(user, request.Password!);
+
         if (!created.Succeeded)
+        {
             return TypedResults.Problem(Describe(created.Errors), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
+        }
 
         await signIn.SignInAsync(user, isPersistent: true);
         await SaveGuestRoomsAsync(saveGuestRooms, http, user, cancellationToken);
+
         return TypedResults.Ok(new AccountResponse(true, email));
     }
 
@@ -86,20 +92,32 @@ internal static class AccountEndpoints
         SaveGuestRooms saveGuestRooms, HttpContext http, CancellationToken cancellationToken)
     {
         if (Missing(request) is { } missing)
+        {
             return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+        }
 
         var user = await users.FindByEmailAsync(request.Email!.Trim());
+
         if (user is null)
+        {
             return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+        }
 
         var result = await signIn.PasswordSignInAsync(user, request.Password!, isPersistent: true, lockoutOnFailure: true);
+
         if (result.IsLockedOut)
+        {
             return TypedResults.Problem(Constants.Messages.LockedOut,
                 statusCode: StatusCodes.Status429TooManyRequests, title: Constants.Titles.SignInFailed);
+        }
+
         if (!result.Succeeded)
+        {
             return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+        }
 
         await SaveGuestRoomsAsync(saveGuestRooms, http, user, cancellationToken);
+
         return TypedResults.Ok(new AccountResponse(true, user.Email));
     }
 
@@ -109,6 +127,7 @@ internal static class AccountEndpoints
     private static async Task<NoContent> SignOutAsync(SignInManager<AppUser> signIn)
     {
         await signIn.SignOutAsync();
+
         return TypedResults.NoContent();
     }
 
@@ -120,7 +139,10 @@ internal static class AccountEndpoints
     private static async Task SaveGuestRoomsAsync(SaveGuestRooms saveGuestRooms, HttpContext http, AppUser user, CancellationToken cancellationToken)
     {
         if (GuestCookie.Read(http) is not { } guestId)
+        {
             return;
+        }
+
         await saveGuestRooms.HandleAsync(guestId, user.Id, cancellationToken);
         GuestCookie.Clear(http);
     }

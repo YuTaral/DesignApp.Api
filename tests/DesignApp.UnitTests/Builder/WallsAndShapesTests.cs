@@ -56,9 +56,11 @@ public class WallsAndShapesTests
         Assert.Equal(2, plan.Items.Count);
         // Under the ceiling: a painting hung at 220 cm is 20 cm too high in a 260 cm room.
         var tooHigh = new PlanItem("painting", ItemShape.Picture, 200, 0, 80, 3, 60, 0, White, 0, 220);
+
         Assert.Throws<DomainException>(() => plan.Update("", 4, 5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [tooHigh], Now));
 
         var json = (string)PlanItemsJson.Converter.ConvertToProvider(plan.Items)!;
+
         Assert.Equal(plan.Items, (IReadOnlyList<PlanItem>)PlanItemsJson.Converter.ConvertFromProvider(json)!);
         Assert.Contains("\"shape\":\"WallBox\"", json, StringComparison.Ordinal);
     }
@@ -69,6 +71,7 @@ public class WallsAndShapesTests
         var plan = NewPlan();
         var cabinets = new PlanItem("upper cabinets", ItemShape.WallBox, 400, 0, 120, 35, 70, 0, White, (int)PlanWall.Left, 145);
         var mirror = new PlanItem("mirror", ItemShape.Picture, 200, 0, 60, 3, 90, 0, White, (int)PlanWall.Front, 110);
+
         plan.Update("", 4, 5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [Painting((int)PlanWall.Back, 200), cabinets, mirror], Now);
 
         var text = PlanPrompt.Write(plan, PhotoStyle.Modern);
@@ -93,6 +96,7 @@ public class WallsAndShapesTests
         var hiddenWindow = new PlanItem("far side window", ItemShape.Window, 150, 0, 120, 10, 140, 0, White, 1, 90);
         var sofa = new PlanItem("sofa", ItemShape.Sofa, 230, 200, 220, 95, 85, 0, Grey);
         var armchair = new PlanItem("armchair", ItemShape.Chair, 350, 200, 80, 80, 90, 0, Grey);
+
         plan.Update("", LShape(), 2.6, Wall, Floor, FloorType.Wood, 0, [stepWindow, hiddenWindow, sofa, armchair], Now);
 
         var text = PlanPrompt.Write(plan);

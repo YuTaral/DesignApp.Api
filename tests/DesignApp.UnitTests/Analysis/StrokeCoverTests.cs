@@ -17,8 +17,12 @@ public class StrokeCoverTests
     private static byte[] Labels()
     {
         var labels = new byte[W * H];
+
         for (var p = 0; p < W * H; p++)
+        {
             labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
+        }
+
         return labels;
     }
 
@@ -32,7 +36,9 @@ public class StrokeCoverTests
     private static HashSet<(int X, int Y)> Cover(StrokeShape shape, params StrokePoint[] points)
     {
         var covered = new HashSet<(int, int)>();
+
         StrokeCover.Walk(W, H, shape, 1, points, p => Assert.True(covered.Add((p % W, p / W)), $"pixel {p} twice"));
+
         return covered;
     }
 
@@ -152,9 +158,13 @@ public class StrokeCoverTests
         var error = StrokeShapes.Check(shape, points);
 
         if (message is null)
+        {
             Assert.Null(error);
+        }
         else
+        {
             Assert.Contains(message, error, StringComparison.Ordinal);
+        }
     }
 
     [Fact]

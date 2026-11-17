@@ -31,6 +31,7 @@ internal sealed partial class RecordingSegmentationProvider(
         var requests = FalSegmentationProvider.CountRequests();
         var before = requests.Value;
         var masks = await inner.SegmentAsync(image, items, cancellationToken);
+
         if (options.Value.RecordSamplesTo is { Length: > 0 } folder && SampleRooms.Match(image) is { } sample)
         {
             // How many paid SAM 3 requests the photo took, to compare ways of asking.
@@ -55,11 +56,14 @@ internal sealed partial class RecordingSegmentationProvider(
                         shapes = new[] { new { mask = Convert.ToBase64String(EncodePng(pair.Second!)) } },
                     }),
             };
+
             Directory.CreateDirectory(folder);
             var path = Path.Combine(folder, sample.Name + Constants.Samples.RecordedSuffix);
+
             await File.WriteAllTextAsync(path, JsonSerializer.Serialize(recorded, Json), cancellationToken);
             LogRecorded(sample.Name, path);
         }
+
         return masks;
     }
 
@@ -68,9 +72,11 @@ internal sealed partial class RecordingSegmentationProvider(
     private static byte[] EncodePng(ObjectMask mask)
     {
         using var bitmap = new SKBitmap(new SKImageInfo(mask.Width, mask.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         mask.Coverage.CopyTo(bitmap.GetPixelSpan());
         using var image = SKImage.FromBitmap(bitmap);
         using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
+
         return png.ToArray();
     }
 

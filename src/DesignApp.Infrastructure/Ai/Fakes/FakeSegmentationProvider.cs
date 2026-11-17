@@ -19,6 +19,7 @@ internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : IS
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
         var sample = SampleRooms.Match(image);
+
         return [.. items.Select(item => sample?.Outline(item.Label, image.Width, image.Height) ?? Outline(image.Width, image.Height, item))];
     }
 
@@ -39,10 +40,14 @@ internal sealed class FakeSegmentationProvider(IOptions<AiOptions> options) : IS
             {
                 var dx = (x + 0.5 - left) / boxWidth * 2 - 1;
                 var dy = (y + 0.5 - top) / boxHeight * 2 - 1;
+
                 if (filled || dx * dx + dy * dy <= 1)
+                {
                     coverage[y * width + x] = Constants.Imaging.FullCoverage;
+                }
             }
         }
+
         return new ObjectMask(width, height, coverage);
     }
 }

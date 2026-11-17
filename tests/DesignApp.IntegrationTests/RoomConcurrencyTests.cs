@@ -30,6 +30,7 @@ public class RoomConcurrencyTests(ApiFactoryWithoutAnalysis factory) : IClassFix
 
         using var check = factory.Services.CreateScope();
         var stored = await Rooms(check).GetForAnalysisAsync(id, CancellationToken.None);
+
         Assert.Equal(("user-1", RoomStatus.Analyzing), (stored!.OwnerId, stored.Status));
         Assert.Equal("user-1", analyzing.OwnerId); // the worker's copy took the new owner too
     }
@@ -63,8 +64,10 @@ public class RoomConcurrencyTests(ApiFactoryWithoutAnalysis factory) : IClassFix
         var now = DateTimeOffset.UtcNow;
         var room = Room.Upload(Guid.CreateVersion7(now), GuestIds.New(), "rooms/test/photo.jpg", 800, 600, now);
         using var scope = factory.Services.CreateScope();
+
         Rooms(scope).Add(room);
         await Rooms(scope).SaveChangesAsync(CancellationToken.None);
+
         return room.Id;
     }
 }

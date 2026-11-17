@@ -29,6 +29,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
     {
         var answer = await AskAsync(RB.DescribeSystem, RB.DescribeMessage(ClaudeRoomBuilderAi.Words(roomType.ToString()), description),
             ClaudeRoomBuilderAi.Schema(), "described an object", cancellationToken);
+
         return ClaudeRoomBuilderAi.ReadObject(answer);
     }
 
@@ -43,6 +44,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
     private async Task<string> AskAsync(string system, string text, Dictionary<string, JsonElement> schema, string task, CancellationToken cancellationToken)
     {
         var promptFile = Path.GetTempFileName();
+
         try
         {
             await File.WriteAllTextAsync(promptFile, system, cancellationToken);
@@ -62,7 +64,9 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
             var printed = await runner.RunAsync(arguments, Message(text), cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
             var result = ClaudeCodeInventoryProvider.Read(printed);
+
             LogUsage(task, result.Model, result.InputTokens + result.CacheReadTokens + result.CacheWriteTokens, result.OutputTokens, seconds);
+
             return result.Answer;
         }
         finally
@@ -84,6 +88,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
                 [W.Content] = new JsonArray(new JsonObject { [W.Type] = W.Text, [W.Text] = text }),
             },
         };
+
         return message.ToJsonString();
     }
 

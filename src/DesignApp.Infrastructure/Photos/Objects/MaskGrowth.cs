@@ -16,7 +16,10 @@ internal static class MaskGrowth
     public static byte[] Grow(byte[] maskPng, int pixels)
     {
         if (pixels <= 0)
+        {
             return maskPng;
+        }
+
         using var codec = SKCodec.Create(new MemoryStream(maskPng)) ?? throw new InvalidOperationException("The mask can't be decoded.");
         var (width, height) = (codec.Info.Width, codec.Info.Height);
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque))
@@ -25,16 +28,25 @@ internal static class MaskGrowth
 
         // A square reach is two passes of a running maximum: along each row, then down each column.
         var rows = new byte[mask.Length];
+
         for (var y = 0; y < height; y++)
+        {
             Spread(mask, rows, y * width, 1, width, pixels);
+        }
+
         var grown = new byte[mask.Length];
+
         for (var x = 0; x < width; x++)
+        {
             Spread(rows, grown, x, width, height, pixels);
+        }
 
         using var result = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         grown.CopyTo(result.GetPixelSpan());
         using var image = SKImage.FromBitmap(result);
         using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
+
         return png.ToArray();
     }
 
@@ -50,17 +62,26 @@ internal static class MaskGrowth
         // The last white pixel seen so far, and the next one ahead, decide each pixel in one walk.
         var lastWhite = int.MinValue / 2;
         var nextWhite = -1;
+
         for (var i = 0; i < length; i++)
         {
             if (from[start + i * step] >= Constants.Imaging.CoverageThreshold)
+            {
                 lastWhite = i;
+            }
+
             if (nextWhite < i)
             {
                 nextWhite = i;
+
                 while (nextWhite < length && from[start + nextWhite * step] < Constants.Imaging.CoverageThreshold)
+                {
                     nextWhite++;
+                }
             }
+
             var near = i - lastWhite <= reach || (nextWhite < length && nextWhite - i <= reach);
+
             to[start + i * step] = near ? Constants.Imaging.FullCoverage : (byte)0;
         }
     }

@@ -15,6 +15,7 @@ internal sealed class ClaudeCodeRunner(IOptions<AiOptions> options) : IClaudeCod
     {
         var path = options.Value.ClaudeCodePath;
         var folder = Path.Combine(Path.GetTempPath(), Constants.Ai.ClaudeCode.WorkingFolder);
+
         Directory.CreateDirectory(folder);
         var start = new ProcessStartInfo(path)
         {
@@ -24,11 +25,16 @@ internal sealed class ClaudeCodeRunner(IOptions<AiOptions> options) : IClaudeCod
             RedirectStandardError = true,
             UseShellExecute = false,
         };
+
         foreach (var argument in arguments)
+        {
             start.ArgumentList.Add(argument);
+        }
+
         start.Environment.Remove(Constants.Ai.ClaudeCode.ApiKeyVariable);
 
         using var process = new Process { StartInfo = start };
+
         try
         {
             process.Start();
@@ -39,17 +45,24 @@ internal sealed class ClaudeCodeRunner(IOptions<AiOptions> options) : IClaudeCod
         }
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
         timeout.CancelAfter(Constants.Ai.ClaudeCode.Timeout);
+
         try
         {
             var output = process.StandardOutput.ReadToEndAsync(timeout.Token);
             var errors = process.StandardError.ReadToEndAsync(timeout.Token);
+
             await process.StandardInput.WriteLineAsync(input.AsMemory(), timeout.Token);
             process.StandardInput.Close();
             await process.WaitForExitAsync(timeout.Token);
             var printed = await output;
+
             if (string.IsNullOrWhiteSpace(printed))
+            {
                 throw new InvalidOperationException(Constants.Ai.ClaudeCode.Messages.Failed((await errors).Trim()));
+            }
+
             return printed;
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

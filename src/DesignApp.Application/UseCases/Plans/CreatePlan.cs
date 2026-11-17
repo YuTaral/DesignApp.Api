@@ -37,13 +37,17 @@ public sealed class CreatePlan(IPlanRepository plans, ICurrentUser currentUser, 
     {
         var now = clock.GetUtcNow();
         var plan = RoomPlan.Create(Guid.CreateVersion7(now), currentUser.Id, name, roomType, width, length, height, wallColor, floorColor, floorType, aiMode, now);
+
         if (furnish)
         {
             var items = StarterLayout.For(roomType, width, length, height, catalog.ForRoom(roomType));
+
             plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.View, items, now, plan.Corner);
         }
+
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);
+
         return plan;
     }
 }

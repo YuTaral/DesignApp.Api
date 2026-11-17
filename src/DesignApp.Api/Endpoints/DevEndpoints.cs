@@ -34,10 +34,17 @@ internal static class DevEndpoints
         Guid id, [FromQuery] string? name, ExportLibraryRoom export, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(name) || !name.All(c => c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '-'))
+        {
             return TypedResults.Problem(Constants.Messages.ExportName, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidExport);
+        }
+
         var zip = await export.HandleAsync(id, name, cancellationToken);
+
         if (zip is null)
+        {
             return TypedResults.NotFound();
+        }
+
         return TypedResults.File(zip, Constants.Http.Zip, $"{name}.zip");
     }
 }

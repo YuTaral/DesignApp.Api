@@ -56,6 +56,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IPaletteCatalog, EmbeddedPaletteCatalog>();
 
         AddAiPipeline(builder);
+
         return builder;
     }
 
@@ -88,8 +89,11 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
 
         var configured = builder.Configuration.GetSection(Constants.Config.AiSection).Get<AiOptions>() ?? new AiOptions();
+
         if (!configured.HasRealKeys)
+        {
             return;
+        }
 
         if (configured.UseClaudeSubscription)
         {
@@ -101,6 +105,7 @@ public static class DependencyInjection
         {
             AddClaudeApi(builder);
         }
+
         AddSam3(builder);
     }
 
@@ -112,6 +117,7 @@ public static class DependencyInjection
         {
             var ai = sp.GetRequiredService<IOptions<AiOptions>>().Value;
             var client = new AnthropicClient { ApiKey = ai.AnthropicApiKey };
+
             return string.IsNullOrWhiteSpace(ai.AnthropicWorkspaceId)
                 ? client
                 : client.WithOptions(options => options with
@@ -200,8 +206,11 @@ public static class DependencyInjection
     {
         await using var scope = services.CreateAsyncScope();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
         if (configuration.GetValue<bool>(Constants.Config.MigrateOnStartup))
+        {
             await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync(cancellationToken);
+        }
 
         await scope.ServiceProvider.GetRequiredService<S3FileStorage>().EnsureBucketExistsAsync(cancellationToken);
     }

@@ -37,24 +37,39 @@ internal sealed partial class FalObjectRemovalProvider(HttpClient http, IAiSetti
             settings.RemovalMaskExpansion,
             brushed ? Constants.Ai.Removal.ManualMask : Constants.Ai.Removal.AutomaticMask);
         var started = Stopwatch.GetTimestamp();
+
         try
         {
             var ticket = await SubmitAsync(settings, request, cancellationToken);
+
             if (ticket is null)
+            {
                 return Failed("the queue gave no status or result address");
+            }
+
             var status = await WaitAsync(ticket.StatusUrl!, started, cancellationToken);
+
             if (status != Constants.Ai.Removal.Completed)
+            {
                 return Failed(status);
+            }
+
             var answer = await http.GetFromJsonAsync<RemovalResponse>(new Uri(ticket.ResponseUrl!), cancellationToken);
             // fal's own eraser answers with a list of images, Bria's and Ideogram's with one image.
             var url = answer?.Images is [{ Url: { Length: > 0 } first }, ..] ? first : answer?.Image?.Url;
+
             if (string.IsNullOrEmpty(url))
+            {
                 return Failed("no image in the result");
+            }
+
             var image = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
                 ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
                 : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
+
             LogRemoved(settings.RemovalQuality, seconds);
+
             return image;
         }
         catch (Exception e) when (e is HttpRequestException or JsonException or FormatException or TimeoutRejectedException
@@ -72,8 +87,10 @@ internal sealed partial class FalObjectRemovalProvider(HttpClient http, IAiSetti
     private async Task<QueueTicket?> SubmitAsync(AiSettings settings, RemovalRequest request, CancellationToken cancellationToken)
     {
         using var response = await http.PostAsJsonAsync(new Uri(settings.RemovalEndpoint), request, cancellationToken);
+
         response.EnsureSuccessStatusCode();
         var ticket = await response.Content.ReadFromJsonAsync<QueueTicket>(cancellationToken);
+
         return ticket is { StatusUrl.Length: > 0, ResponseUrl.Length: > 0 } ? ticket : null;
     }
 
@@ -85,24 +102,34 @@ internal sealed partial class FalObjectRemovalProvider(HttpClient http, IAiSetti
     private async Task<string> WaitAsync(string statusUrl, long started, CancellationToken cancellationToken)
     {
         var errors = 0;
+
         while (Stopwatch.GetElapsedTime(started) < Constants.Ai.Removal.MaxWait)
         {
             await Task.Delay(Constants.Ai.Removal.PollInterval, cancellationToken);
+
             try
             {
                 var status = await http.GetFromJsonAsync<QueueStatus>(new Uri(statusUrl), cancellationToken);
+
                 errors = 0;
+
                 if (status?.Status != Constants.Ai.Removal.Completed)
+                {
                     continue;
+                }
+
                 return status.Error is { Length: > 0 } error ? error : Constants.Ai.Removal.Completed;
             }
             catch (Exception e) when (e is HttpRequestException or JsonException or TimeoutRejectedException)
             {
                 // A status check is free, so a failed one is simply tried again.
                 if (++errors >= Constants.Ai.Removal.MaxStatusErrors)
+                {
                     return e.Message;
+                }
             }
         }
+
         return $"not done after {Constants.Ai.Removal.MaxWait.TotalMinutes:0} minutes";
     }
 
@@ -111,6 +138,7 @@ internal sealed partial class FalObjectRemovalProvider(HttpClient http, IAiSetti
     private Result<byte[]> Failed(string reason)
     {
         LogFailed(reason);
+
         return Result.Failure<byte[]>(Constants.Ai.Removal.Messages.Failed);
     }
 

@@ -14,6 +14,7 @@ internal sealed class FakeStorage : IFileStorage
     public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken)
     {
         using var buffer = new MemoryStream();
+
         await content.CopyToAsync(buffer, cancellationToken);
         Files[key] = (buffer.ToArray(), contentType);
     }
@@ -30,6 +31,7 @@ internal sealed class FakeStorage : IFileStorage
     public Task DeleteAsync(string key, CancellationToken cancellationToken)
     {
         Files.Remove(key);
+
         return Task.CompletedTask;
     }
 }

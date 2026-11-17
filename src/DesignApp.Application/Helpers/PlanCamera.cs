@@ -38,10 +38,12 @@ public sealed class PlanCamera
         var horizontal = (corner == ViewCorner.None ? Math.Clamp(fit, C.MinFov, C.MaxFov) : C.CornerFov) * Math.PI / 180;
         // Turned to the right (towards the room) from the left corner, to the left from the right one.
         var turn = corner switch { ViewCorner.Left => C.CornerTurn, ViewCorner.Right => -C.CornerTurn, _ => 0 } * Math.PI / 180;
+
         (_sin, _cos) = (Math.Sin(turn), Math.Cos(turn));
         _across = Math.Tan(horizontal / 2);
         // The taller frame's half height (as a slope), of which the picture shows the lower part.
         var tall = _across * (1 + C.LensShift) / C.Aspect;
+
         _below = tall;
         _above = tall * (2 / (1 + C.LensShift) - 1);
     }
@@ -55,28 +57,53 @@ public sealed class PlanCamera
     public IReadOnlyList<string>? Sees(IEnumerable<(double FromLeft, double FromFar, double Height)> points)
     {
         ArgumentNullException.ThrowIfNull(points);
+        string[] names = [P.LeftEdge, P.RightEdge, P.BottomEdge, P.TopEdge];
         var seen = false;
         var edges = new SortedSet<int>();
+
         foreach (var (fromLeft, fromFar, height) in points)
         {
             // To the right of the camera and ahead of it, before turning; then ahead and sideways as it looks.
             var (right, ahead) = (fromLeft - _middle, _stand - fromFar);
             var distance = right * _sin + ahead * _cos;
+
             if (distance <= 0)
             {
                 edges.Add(2);
                 continue;
             }
+
             var sideways = (right * _cos - ahead * _sin) / distance;
             var up = (height - _eye) / distance;
             var outside = false;
-            if (sideways < -_across) { edges.Add(0); outside = true; }
-            if (sideways > _across) { edges.Add(1); outside = true; }
-            if (up < -_below) { edges.Add(2); outside = true; }
-            if (up > _above) { edges.Add(3); outside = true; }
+
+            if (sideways < -_across)
+            {
+                edges.Add(0);
+                outside = true;
+            }
+
+            if (sideways > _across)
+            {
+                edges.Add(1);
+                outside = true;
+            }
+
+            if (up < -_below)
+            {
+                edges.Add(2);
+                outside = true;
+            }
+
+            if (up > _above)
+            {
+                edges.Add(3);
+                outside = true;
+            }
+
             seen |= !outside;
         }
-        string[] names = [P.LeftEdge, P.RightEdge, P.BottomEdge, P.TopEdge];
+
         return seen ? edges.Select(e => names[e]).ToList() : null;
     }
 
@@ -86,6 +113,8 @@ public sealed class PlanCamera
     public static IEnumerable<double> Steps(double from, double to)
     {
         for (var i = 0; i < C.Samples; i++)
+        {
             yield return from + (to - from) * i / (C.Samples - 1);
+        }
     }
 }

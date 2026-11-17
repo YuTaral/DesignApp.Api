@@ -58,23 +58,32 @@ public static partial class PlanPrompt
             .Select(item => (Item: item, Seen: Look(OnWallPoints(item, plan.Outline, item.Depth), frame, camera)))
             .Where(seen => seen.Seen.Edges is not null)
             .ToList();
+        // Decorations are drawn only on objects the photo shows, so only those decide the sentence.
+        var decorated = standing.Concat(openings).Concat(mounted).Any(seen => !seen.Item.Decorations.IsEmpty);
+
         text.Append(B.Prompt.Intro(Words(plan.RoomType.ToString())));
+
         // The style and the user's own words come early: at the end of a long prompt the image model ignored them.
         if (B.Prompt.Style(style) is { Length: > 0 } styled)
         {
             text.Append(culture, $" {styled}");
             text.Append(Kept(standing.Concat(mounted).Select(seen => seen.Item).ToList()));
         }
+
         if (instructions?.Trim().TrimEnd('.') is { Length: > 0 } extra)
+        {
             text.Append(culture, $" {B.Prompt.Extra(extra)}");
+        }
+
         text.Append(culture, $" {B.Prompt.Room(Cm(frame.Across), Cm(frame.Deep), Cm(plan.Height * 100))}");
+
         if (!plan.Outline.IsRectangle && Walls(frame, camera, plan.Height * 100) is { Length: > 0 } walls)
+        {
             text.Append(culture, $" {B.Prompt.Shape(walls)}");
+        }
+
         text.Append(culture, $" {B.Prompt.Surfaces(Color(plan.WallColor), B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor))}");
         text.Append(culture, $" {(corner == ViewCorner.None ? B.Prompt.Camera : B.Prompt.CornerCamera(corner == ViewCorner.Left))}");
-
-        // Decorations are drawn only on objects the photo shows, so only those decide the sentence.
-        var decorated = standing.Concat(openings).Concat(mounted).Any(seen => !seen.Item.Decorations.IsEmpty);
         text.Append(culture, $" {(decorated ? B.Prompt.WithDecorations : B.Prompt.Undecorated)}");
 
         if (standing.Count > 0)
@@ -88,10 +97,17 @@ public static partial class PlanPrompt
         text.Append(openings.Count == 0
             ? B.Prompt.NoOpenings
             : $"{B.Prompt.OpeningsHeading}{string.Join("; ", openings.Select(seen => OnWall(seen.Item, frame) + Cut(seen.Seen) + Decorations(seen.Item)))}.");
+
         if (mounted.Count > 0)
+        {
             text.Append(culture, $" {B.Prompt.MountedHeading}{string.Join("; ", mounted.Select(seen => Hung(seen.Item, frame) + Cut(seen.Seen) + Decorations(seen.Item)))}.");
+        }
+
         if (standing.Count > 0 || mounted.Count > 0)
+        {
             text.Append(culture, $" {B.Prompt.KeepColors}");
+        }
+
         return text.ToString();
     }
 
@@ -111,6 +127,7 @@ public static partial class PlanPrompt
             ? B.Prompt.FlatSize(Cm(across), Cm(deep))
             : B.Prompt.Size(Cm(across), Cm(deep), Cm(item.Height));
         var appliance = IsAppliance(item) ? B.Prompt.Appliance : "";
+
         return B.Prompt.Standing(item.Label, Color(item.Color), Cm(fromLeft), Cm(fromFar), size) + Outline(item, frame) + appliance + facing;
     }
 
@@ -120,11 +137,13 @@ public static partial class PlanPrompt
     {
         var turn = item.Rotation * Math.PI / 180;
         var (cos, sin) = (Math.Cos(turn), Math.Sin(turn));
+
         foreach (var x in PlanCamera.Steps(-item.Width / 2, item.Width / 2))
         {
             foreach (var y in PlanCamera.Steps(-item.Depth / 2, item.Depth / 2))
             {
                 var (px, py) = (item.X + x * cos - y * sin, item.Y + x * sin + y * cos);
+
                 yield return (px, py, 0);
                 yield return (px, py, item.Height);
             }
@@ -138,11 +157,15 @@ public static partial class PlanPrompt
     private static IEnumerable<(double X, double Y, double Height)> OnWallPoints(PlanItem item, RoomOutline outline, double @out)
     {
         var wall = outline.Walls[item.Wall!.Value];
+
         foreach (var along in PlanCamera.Steps(item.X - item.Width / 2, item.X + item.Width / 2))
         {
             var point = wall.Point(along);
+
             foreach (var height in PlanCamera.Steps(item.Elevation, item.Elevation + item.Height))
+            {
                 yield return (point.X + wall.NormalX * @out, point.Y + wall.NormalY * @out, height);
+            }
         }
     }
 
@@ -158,6 +181,7 @@ public static partial class PlanPrompt
         var all = points.ToList();
         var open = frame.Outline.IsRectangle ? all : all.Where(p => frame.Outline.Sees(frame.Camera, new OutlinePoint(p.X, p.Y))).ToList();
         var edges = open.Count == 0 ? null : camera.Sees(open.Select(p => ToPhoto(frame, p)));
+
         return new Seen(edges, edges is not null && open.Count < all.Count);
     }
 
@@ -167,6 +191,7 @@ public static partial class PlanPrompt
     private static (double FromLeft, double FromFar, double Height) ToPhoto(Frame frame, (double X, double Y, double Height) point)
     {
         var (fromLeft, fromFar) = frame.Point(point.X, point.Y);
+
         return (fromLeft, fromFar, point.Height);
     }
 
@@ -181,22 +206,33 @@ public static partial class PlanPrompt
     private static string Walls(Frame frame, PlanCamera camera, double ceiling)
     {
         var described = new List<string>();
+
         for (var index = 0; index < frame.Outline.Walls.Count; index++)
         {
             var wall = frame.Outline.Walls[index];
+
             if (index == frame.View || !frame.Faces(index))
+            {
                 continue;
+            }
+
             var points = PlanCamera.Steps(0, wall.Length)
                 .SelectMany(along => new[] { (wall.Point(along), 0.0), (wall.Point(along), ceiling) })
                 .Select(p => (p.Item1.X, p.Item1.Y, p.Item2));
+
             if (Look(points, frame, camera).Edges is null)
+            {
                 continue;
+            }
+
             var (startLeft, startFar) = frame.Point(wall.Start.X, wall.Start.Y);
             var (endLeft, endFar) = frame.Point(wall.End.X, wall.End.Y);
+
             described.Add(frame.Parallel(index)
                 ? B.Prompt.StepWall(Cm(startFar), Cm(Math.Min(startLeft, endLeft)), Cm(Math.Max(startLeft, endLeft)))
                 : B.Prompt.SideWall(frame.OnLeft(index), Cm(startLeft), Cm(Math.Min(startFar, endFar)), Cm(Math.Max(startFar, endFar))));
         }
+
         return string.Join("; ", described);
     }
 
@@ -205,6 +241,7 @@ public static partial class PlanPrompt
     private static string Decorations(PlanItem item)
     {
         var names = item.Decorations.Names;
+
         return names.Count == 0 ? "" : B.Prompt.Decorated(Listed(names));
     }
 
@@ -223,10 +260,17 @@ public static partial class PlanPrompt
             .Distinct()
             .ToList();
         var text = "";
+
         if (appliances.Count > 0)
+        {
             text += $" {B.Prompt.PlainAppliances(Listed(appliances), appliances.Count)}";
+        }
+
         if (colored.Count > 0)
+        {
             text += $" {B.Prompt.KeptColors(Listed(colored))}";
+        }
+
         return text;
     }
 
@@ -249,6 +293,7 @@ public static partial class PlanPrompt
     private static string Cut(Seen seen)
     {
         var cut = seen.Edges is { Count: > 0 } edges ? B.Prompt.CutBy(edges) : "";
+
         return seen.Hidden ? cut + B.Prompt.PartlyHidden : cut;
     }
 
@@ -267,9 +312,14 @@ public static partial class PlanPrompt
                 // Before turning the back run is at -y and the leg at the right end, between the run and a P's chaise.
                 var parts = item.Parts ?? ItemParts.Default(item.Form, item.Width, item.Depth);
                 var (legLeft, legFar) = PartMiddle(item, frame, item.Width / 2 - parts.LegWidth / 2, (parts.RunDepth - parts.ChaiseDepth) / 2);
+
                 if (item.Form == ItemForm.LShaped)
+                {
                     return B.Prompt.LShaped(Cm(parts.RunDepth), Cm(parts.LegWidth), Cm(legLeft), Cm(legFar));
+                }
+
                 var (chaiseLeft, chaiseFar) = PartMiddle(item, frame, item.Width / 2 - parts.ChaiseWidth / 2, item.Depth / 2 - parts.ChaiseDepth / 2);
+
                 return B.Prompt.PShaped(Cm(parts.RunDepth), Cm(parts.LegWidth), Cm(legLeft), Cm(legFar),
                     Cm(parts.ChaiseWidth), Cm(parts.ChaiseDepth), Cm(chaiseLeft), Cm(chaiseFar));
             }
@@ -293,6 +343,7 @@ public static partial class PlanPrompt
     {
         var turn = item.Rotation * Math.PI / 180;
         var (dx, dy) = (x * Math.Cos(turn) - y * Math.Sin(turn), x * Math.Sin(turn) + y * Math.Cos(turn));
+
         return frame.Point(item.X + dx, item.Y + dy);
     }
 
@@ -302,6 +353,7 @@ public static partial class PlanPrompt
     private static string OnWall(PlanItem item, Frame frame)
     {
         var where = frame.Place(item.Wall!.Value, item.X);
+
         return B.Prompt.Opening(item.Label, Color(item.Color), where, Cm(item.Width), Cm(item.Height), Cm(item.Elevation));
     }
 
@@ -311,6 +363,7 @@ public static partial class PlanPrompt
     private static string Hung(PlanItem item, Frame frame)
     {
         var where = frame.Place(item.Wall!.Value, item.X);
+
         return B.Prompt.Mounted(Named(item), where, Cm(item.Width), Cm(item.Height), Cm(item.Elevation), Cm(item.Depth));
     }
 
@@ -320,6 +373,7 @@ public static partial class PlanPrompt
     public static string Describe(PlanItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
+
         return $"{Named(item)}{Decorations(item)}";
     }
 
@@ -346,9 +400,11 @@ public static partial class PlanPrompt
             .MinBy(n =>
             {
                 var (nr, ng, nb) = Rgb(n.Hex);
+
                 return (r - nr) * (r - nr) + (g - ng) * (g - ng) + (b - nb) * (b - nb);
             })
             .Name;
+
         return name;
     }
 
@@ -357,6 +413,7 @@ public static partial class PlanPrompt
     private static (int R, int G, int B) Rgb(string hex)
     {
         var value = int.Parse(hex.AsSpan(1), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+
         return ((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF);
     }
 
@@ -400,20 +457,26 @@ public static partial class PlanPrompt
         {
             (Outline, View, Far, Corner) = (outline, view, outline.Walls[view], corner);
             var alongs = outline.Points.Select(p => Along(p.X, p.Y)).ToList();
+
             _leftmost = alongs.Min();
             Across = alongs.Max() - _leftmost;
             var facing = outline.Facing(view);
+
             Deep = facing?.Distance ?? outline.Points.Max(p => (p.X - Far.Start.X) * Far.NormalX + (p.Y - Far.Start.Y) * Far.NormalY);
             Near = facing?.Wall ?? -1;
             var fromLeft = Far.Length / 2 - _leftmost;
+
             if (corner != ViewCorner.None)
             {
                 // The near wall's ends (the room's sides when there is none), a little in from the side wall.
                 var near = facing is { } found ? Outline.Walls[found.Wall] : null;
                 var ends = near is null ? new[] { 0, Across } : new[] { Along(near.Start.X, near.Start.Y) - _leftmost, Along(near.End.X, near.End.Y) - _leftmost };
+
                 fromLeft = corner == ViewCorner.Left ? ends.Min() + C.Inset : ends.Max() - C.Inset;
             }
+
             var (along, stand) = (fromLeft + _leftmost, Deep - C.Inset);
+
             Camera = new OutlinePoint(Far.Start.X + Far.Dx * along + Far.NormalX * stand, Far.Start.Y + Far.Dy * along + Far.NormalY * stand);
             CameraFromLeft = fromLeft;
         }
@@ -461,9 +524,13 @@ public static partial class PlanPrompt
         public bool Faces(int wall)
         {
             if (wall == Near)
+            {
                 return false;
+            }
+
             var own = Outline.Walls[wall];
             var middle = own.Point(own.Length / 2);
+
             return (Camera.X - middle.X) * own.NormalX + (Camera.Y - middle.Y) * own.NormalY > 0;
         }
 
@@ -479,6 +546,7 @@ public static partial class PlanPrompt
         public bool OnLeft(int wall)
         {
             var own = Outline.Walls[wall];
+
             return own.NormalX * Far.Dx + own.NormalY * Far.Dy > 0;
         }
 
@@ -489,10 +557,17 @@ public static partial class PlanPrompt
         {
             var point = Outline.Walls[wall].Point(along);
             var (fromLeft, fromFar) = Point(point.X, point.Y);
+
             if (wall == View)
+            {
                 return B.Prompt.OnFarWall(Cm(fromLeft));
+            }
+
             if (Outline.IsRectangle)
+            {
                 return B.Prompt.OnSideWall(OnLeft(wall), Cm(fromFar));
+            }
+
             return Parallel(wall) ? B.Prompt.OnStepWall(Cm(fromFar), Cm(fromLeft)) : B.Prompt.OnSideWallAt(OnLeft(wall), Cm(fromLeft), Cm(fromFar));
         }
 
@@ -510,8 +585,12 @@ public static partial class PlanPrompt
             };
             // The same direction in the photo: to the right (along the far wall), and towards the camera (its normal).
             var (right, toward) = (dx * Far.Dx + dy * Far.Dy, dx * Far.NormalX + dy * Far.NormalY);
+
             if (Corner != ViewCorner.None)
+            {
                 return toward > 0 ? B.Prompt.FacingNearWall : toward < 0 ? B.Prompt.FacingAway : right > 0 ? B.Prompt.FacingRightWall : B.Prompt.FacingLeftWall;
+            }
+
             return toward > 0 ? B.Prompt.FacingCamera : toward < 0 ? B.Prompt.FacingAway : right > 0 ? B.Prompt.FacingRight : B.Prompt.FacingLeft;
         }
 

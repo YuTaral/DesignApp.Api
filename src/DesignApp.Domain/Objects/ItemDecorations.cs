@@ -26,8 +26,12 @@ public sealed record ItemDecorations
         var valid = trimmed.Count <= Constants.Plans.MaxDecorations
             && trimmed.All(n => n.Length is > 0 and <= Constants.Plans.MaxDecorationLength)
             && trimmed.Distinct(StringComparer.OrdinalIgnoreCase).Count() == trimmed.Count;
+
         if (!valid)
+        {
             throw new DomainException(Constants.Messages.PlanItemDecorations);
+        }
+
         Names = trimmed.AsReadOnly();
     }
 

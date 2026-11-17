@@ -29,6 +29,7 @@ public class PaintTests
     public void A_malformed_paint_reference_is_refused(string paint)
     {
         var error = Assert.Throws<DomainException>(() => new RecolorEdit(1, White, 0.8, paint));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.PaintReference, error.Message);
     }
 
@@ -56,6 +57,7 @@ public class PaintTests
     public void A_size_outside_the_limits_is_refused(double width, double height)
     {
         var error = Assert.Throws<DomainException>(() => new SurfaceSize(1, width, height));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.SurfaceSize, error.Message);
     }
 
@@ -66,6 +68,7 @@ public class PaintTests
         var design = Design.Create(room, "user-1", "Flat", null, [new RecolorEdit(1, White, 1, "ral-classic/9010")], [new SurfaceSize(1, 4, 2.5)], Now);
 
         var entry = Assert.Single(design.Rooms);
+
         Assert.Equal([new SurfaceSize(1, 4, 2.5)], entry.Sizes);
         Assert.Equal("ral-classic/9010", Assert.IsType<RecolorEdit>(Assert.Single(entry.Edits)).Paint);
 
@@ -80,8 +83,10 @@ public class PaintTests
         var design = Design.Create(room, "user-1", "Flat", null, [], Now);
 
         var unknown = Assert.Throws<DomainException>(() => design.SetRoomEdits(room, [], [new SurfaceSize(99, 4, 2.5)], Now));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.UnknownSizeObject(99), unknown.Message);
         var twice = Assert.Throws<DomainException>(() => design.SetRoomEdits(room, [], [new SurfaceSize(1, 4, 2.5), new SurfaceSize(1, 3, 2.5)], Now));
+
         Assert.Equal(DesignApp.Domain.Constants.Messages.DuplicateSize(1), twice.Message);
     }
 }

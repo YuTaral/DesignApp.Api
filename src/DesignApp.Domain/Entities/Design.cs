@@ -57,9 +57,11 @@ public sealed class Design
         Room room, string ownerId, string name, string? description, IEnumerable<EditOperation> edits, IEnumerable<SurfaceSize> sizes, DateTimeOffset now)
     {
         var design = new Design { Id = Guid.CreateVersion7(now), OwnerId = ownerId, CreatedAt = now };
+
         design.Rename(name, description, now);
         design.AddRoom(room, now);
         design.SetRoomEdits(room, edits, sizes, now);
+
         return design;
     }
 
@@ -71,11 +73,18 @@ public sealed class Design
     public void Rename(string name, string? description, DateTimeOffset now)
     {
         var trimmedName = name.Trim();
+
         if (trimmedName.Length is 0 or > Constants.Designs.MaxNameLength)
+        {
             throw new DomainException(Constants.Messages.NameLength);
+        }
+
         var trimmedDescription = (description ?? "").Trim();
+
         if (trimmedDescription.Length > Constants.Designs.MaxDescriptionLength)
+        {
             throw new DomainException(Constants.Messages.DescriptionLength);
+        }
 
         Name = trimmedName;
         Description = trimmedDescription;
@@ -89,11 +98,19 @@ public sealed class Design
     public void AddRoom(Room room, DateTimeOffset now)
     {
         if (room.OwnerId != OwnerId)
+        {
             throw new DomainException(Constants.Messages.NotYourRoom);
+        }
+
         if (_rooms.Any(r => r.RoomId == room.Id))
+        {
             throw new DomainException(Constants.Messages.RoomAlreadyInThisDesign);
+        }
+
         if (_rooms.Count >= Constants.Designs.MaxRooms)
+        {
             throw new DomainException(Constants.Messages.DesignFull);
+        }
 
         _rooms.Add(new DesignRoom(room.Id, _rooms.Count == 0 ? 0 : _rooms.Max(r => r.Position) + 1));
         UpdatedAt = now;
@@ -122,21 +139,40 @@ public sealed class Design
 
         var list = edits.ToList();
         var sizeList = sizes.ToList();
+
         if ((list.Count > 0 || sizeList.Count > 0) && room.Status != RoomStatus.Ready)
+        {
             throw new DomainException(Constants.Messages.ColorsNeedAnalysis);
+        }
+
         var knownIndexes = room.Objects.Select(o => o.Index).ToHashSet();
         var unknown = list.FirstOrDefault(e => !knownIndexes.Contains(e.ObjectIndex));
+
         if (unknown is not null)
+        {
             throw new DomainException(Constants.Messages.UnknownObject(unknown.ObjectIndex));
+        }
+
         var repeated = list.GroupBy(e => e.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
+
         if (repeated is not null)
+        {
             throw new DomainException(Constants.Messages.DuplicateEdit(repeated.Key));
+        }
+
         var unknownSize = sizeList.FirstOrDefault(s => !knownIndexes.Contains(s.ObjectIndex));
+
         if (unknownSize is not null)
+        {
             throw new DomainException(Constants.Messages.UnknownSizeObject(unknownSize.ObjectIndex));
+        }
+
         var repeatedSize = sizeList.GroupBy(s => s.ObjectIndex).FirstOrDefault(g => g.Count() > 1);
+
         if (repeatedSize is not null)
+        {
             throw new DomainException(Constants.Messages.DuplicateSize(repeatedSize.Key));
+        }
 
         entry.SetEdits(list.AsReadOnly());
         entry.SetSizes(sizeList.AsReadOnly());
@@ -151,8 +187,11 @@ public sealed class Design
     {
         var entry = _rooms.SingleOrDefault(r => r.RoomId == roomId)
             ?? throw new DomainException(Constants.Messages.RoomNotInDesign);
+
         if (_rooms.Count == 1)
+        {
             throw new DomainException(Constants.Messages.LastRoom);
+        }
 
         _rooms.Remove(entry);
         UpdatedAt = now;

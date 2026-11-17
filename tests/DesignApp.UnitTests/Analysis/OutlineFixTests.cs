@@ -32,8 +32,12 @@ public class OutlineFixTests
     private static byte[] Labels()
     {
         var labels = new byte[W * H];
+
         for (var p = 0; p < W * H; p++)
+        {
             labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
+        }
+
         return labels;
     }
 
@@ -153,6 +157,7 @@ public class OutlineFixTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now, aiMode: AiMode.Real);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
@@ -193,6 +198,7 @@ public class OutlineFixTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now, scope);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
@@ -202,6 +208,7 @@ public class OutlineFixTests
             new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
             .HandleAsync(room.Id, CancellationToken.None);
         Assert.Equal(RoomStatus.Ready, room.Status);
+
         return room;
     }
 
@@ -211,6 +218,7 @@ public class OutlineFixTests
     {
         using var codec = SKCodec.Create(new MemoryStream(png));
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         return bitmap.GetPixelSpan().ToArray();
     }
 }

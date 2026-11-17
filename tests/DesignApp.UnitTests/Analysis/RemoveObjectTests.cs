@@ -31,11 +31,20 @@ public class RemoveObjectTests
         // 10x10: a wall (1) on the left half, a floor (2) on the right half, a lamp (3) in the middle, one old gap.
         const int W = 10, H = 10;
         var labels = new byte[W * H];
+
         for (var p = 0; p < labels.Length; p++)
+        {
             labels[p] = (byte)(p % W < 5 ? 1 : 2);
+        }
+
         for (var y = 3; y < 7; y++)
+        {
             for (var x = 3; x < 7; x++)
+            {
                 labels[y * W + x] = 3;
+            }
+        }
+
         labels[0] = 0;
         var rgba = Enumerable.Repeat((byte)128, W * H * 4).ToArray();
 
@@ -51,23 +60,28 @@ public class RemoveObjectTests
     public void The_fake_eraser_fills_the_mask_from_its_surroundings()
     {
         using var bitmap = new SKBitmap(40, 40);
+
         using (var canvas = new SKCanvas(bitmap))
         {
             canvas.Clear(new SKColor(120, 120, 120));
             canvas.DrawRect(15, 15, 10, 10, new SKPaint { Color = SKColors.Red });
         }
+
         var photo = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Jpeg, 95).ToArray();
         using var maskBitmap = new SKBitmap(new SKImageInfo(40, 40, SKColorType.Gray8, SKAlphaType.Opaque));
+
         using (var canvas = new SKCanvas(maskBitmap))
         {
             canvas.Clear(SKColors.Black);
             canvas.DrawRect(13, 13, 14, 14, new SKPaint { Color = SKColors.White });
         }
+
         var mask = SKImage.FromBitmap(maskBitmap).Encode(SKEncodedImageFormat.Png, 100).ToArray();
 
         var filled = SKBitmap.Decode(FakeObjectRemovalProvider.Fill(photo, mask));
 
         var center = filled.GetPixel(20, 20);
+
         Assert.InRange(center.Red - center.Green, -20, 20); // the red square is gone, gray instead
         Assert.InRange((int)center.Green, 100, 140);
     }
@@ -89,17 +103,21 @@ public class RemoveObjectTests
         Assert.Contains((byte)lamp.Index, before);
         Assert.DoesNotContain((byte)lamp.Index, DecodeLabels(_storage.Files[room.LabelMapKey!].Content));
         var newPhoto = _storage.Files[DesignApp.Application.Constants.Rooms.PhotoKey(room.Id, 1)].Content;
+
         Assert.NotEqual(_storage.Files[room.PhotoKey].Content, newPhoto);
+
         using (var decoded = SKBitmap.Decode(newPhoto))
             Assert.Equal((room.Width, room.Height), (decoded.Width, decoded.Height));
 
         // Undo shows the photo with the lamp; an outline fix there keeps that photo.
         var fixer = new FixRoomOutline(_rooms, new FixedUser("user-1"), _storage, new SkiaRoomImaging());
+
         Assert.True((await fixer.UseRevisionAsync(room.Id, 0, CancellationToken.None))!.Succeeded);
         Assert.Equal(0, room.PhotoVersion);
         var sofa = room.Objects.Single(o => o.Label == "sofa").Index;
         var spot = Array.FindIndex(before, l => l != sofa);
         StrokePoint[] dab = [new((spot % 600 + 0.5) / 600, (spot / 600 + 0.5) / 400)];
+
         Assert.True((await fixer.FixAsync(room.Id, 0, sofa, OutlineBrushMode.Paint, 2, dab, StrokeShape.Brush, CancellationToken.None))!.Succeeded);
         Assert.Equal((2, 0), (room.LabelMapRevision, room.PhotoVersion));
         Assert.Equal([0, 1, 0], room.PhotoVersions);
@@ -119,6 +137,7 @@ public class RemoveObjectTests
         var lamp = room.Objects.Single(o => o.Label == "floor lamp");
 
         var surface = await remover.RemoveAsync(room.Id, 0, [wall.Index], CancellationToken.None);
+
         Assert.Contains("can't be removed", surface!.Error, StringComparison.Ordinal);
         Assert.False((await remover.RemoveAsync(room.Id, 5, [lamp.Index], CancellationToken.None))!.Succeeded);
         Assert.False((await remover.RemoveAsync(room.Id, 0, [99], CancellationToken.None))!.Succeeded);
@@ -126,6 +145,7 @@ public class RemoveObjectTests
 
         Assert.True((await remover.RemoveAsync(room.Id, 0, [lamp.Index], CancellationToken.None))!.Succeeded);
         var again = await remover.RemoveAsync(room.Id, 1, [lamp.Index], CancellationToken.None);
+
         Assert.Equal(DesignApp.Application.Constants.Messages.ObjectNotInPhoto, again!.Error);
         Assert.Equal(1, room.LatestLabelMapRevision);
     }
@@ -143,6 +163,7 @@ public class RemoveObjectTests
         Assert.True(result!.Succeeded, result.Error);
         Assert.Equal((1, 1), (room.LatestLabelMapRevision, room.LatestPhotoVersion)); // one version, one eraser call
         var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+
         Assert.DoesNotContain((byte)sofa, labels);
         Assert.DoesNotContain((byte)lamp, labels);
 
@@ -156,6 +177,7 @@ public class RemoveObjectTests
     private RemoveRoomObject Remover(string user)
     {
         var ai = new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay), new FakeObjectRemovalProvider(NoDelay));
+
         return new RemoveRoomObject(_rooms, new FixedUser(user), _storage, new SkiaRoomImaging(), ai);
     }
 
@@ -164,6 +186,7 @@ public class RemoveObjectTests
     {
         var id = Guid.CreateVersion7(Now);
         var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now);
+
         _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
         _rooms.Add(room);
         await _rooms.SaveChangesAsync(CancellationToken.None);
@@ -173,6 +196,7 @@ public class RemoveObjectTests
             new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
             .HandleAsync(room.Id, CancellationToken.None);
         Assert.Equal(RoomStatus.Ready, room.Status);
+
         return room;
     }
 
@@ -182,6 +206,7 @@ public class RemoveObjectTests
     {
         using var codec = SKCodec.Create(new MemoryStream(png));
         using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
+
         return bitmap.GetPixelSpan().ToArray();
     }
 }

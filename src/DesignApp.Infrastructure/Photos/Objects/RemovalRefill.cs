@@ -16,16 +16,25 @@ internal static class RemovalRefill
     public static int Apply(byte[] labels, int width, int height, ReadOnlySpan<byte> rgba, IReadOnlyCollection<int> indexes)
     {
         var gone = new bool[Constants.Imaging.ByteValues];
-        foreach (var index in indexes)
-            gone[index] = true;
+        var count = 0;
         var removed = new bool[labels.Length];
         var empty = new bool[labels.Length];
-        var count = 0;
+        var queue = new Queue<int>();
+
+        foreach (var index in indexes)
+        {
+            gone[index] = true;
+        }
+
         for (var p = 0; p < labels.Length; p++)
         {
             empty[p] = labels[p] == 0;
+
             if (!gone[labels[p]])
+            {
                 continue;
+            }
+
             (removed[p], labels[p]) = (true, 0);
             count++;
         }
@@ -34,25 +43,46 @@ internal static class RemovalRefill
         LabelMapRefiner.FillRemainingGaps(labels, width, height, rgba);
 
         // Whatever is still empty of the removed area goes to the nearest object, so all of it can be tapped.
-        var queue = new Queue<int>();
         for (var p = 0; p < labels.Length; p++)
         {
             if (labels[p] != 0)
+            {
                 queue.Enqueue(p);
+            }
         }
+
         while (queue.Count > 0)
         {
             var p = queue.Dequeue();
             var (x, y) = (p % width, p / width);
-            if (x > 0) Take(p - 1);
-            if (x < width - 1) Take(p + 1);
-            if (y > 0) Take(p - width);
-            if (y < height - 1) Take(p + width);
+
+            if (x > 0)
+            {
+                Take(p - 1);
+            }
+
+            if (x < width - 1)
+            {
+                Take(p + 1);
+            }
+
+            if (y > 0)
+            {
+                Take(p - width);
+            }
+
+            if (y < height - 1)
+            {
+                Take(p + width);
+            }
 
             void Take(int q)
             {
                 if (labels[q] != 0 || !removed[q])
+                {
                     return;
+                }
+
                 labels[q] = labels[p];
                 queue.Enqueue(q);
             }
@@ -62,8 +92,11 @@ internal static class RemovalRefill
         for (var p = 0; p < labels.Length; p++)
         {
             if (empty[p])
+            {
                 labels[p] = 0;
+            }
         }
+
         return count;
     }
 }

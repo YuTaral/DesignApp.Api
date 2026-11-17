@@ -77,6 +77,7 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
             try
             {
                 await db.SaveChangesAsync(cancellationToken);
+
                 return;
             }
             catch (DbUpdateConcurrencyException conflict) when (attempt < Constants.Persistence.MaxSaveAttempts)
@@ -84,7 +85,9 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
                 foreach (var entry in conflict.Entries)
                 {
                     if (!await TryMergeAsync(entry, cancellationToken))
+                    {
                         throw;
+                    }
                 }
             }
         }
@@ -100,18 +103,28 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     private static async Task<bool> TryMergeAsync(EntityEntry entry, CancellationToken cancellationToken)
     {
         var stored = await entry.GetDatabaseValuesAsync(cancellationToken);
+
         if (stored is null)
+        {
             return false;
+        }
 
         foreach (var property in entry.Properties.Where(p => !p.Metadata.IsConcurrencyToken))
         {
             var theirs = stored[property.Metadata];
+
             if (!property.IsModified)
+            {
                 property.CurrentValue = theirs;
+            }
             else if (!property.Metadata.GetValueComparer().Equals(theirs, property.OriginalValue))
+            {
                 return false;
+            }
         }
+
         entry.OriginalValues.SetValues(stored);
+
         return true;
     }
 }
