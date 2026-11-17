@@ -61,7 +61,7 @@ internal static class AccountEndpoints
     {
         if (Missing(request) is { } missing)
         {
-            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
+            return Problems.BadRequest(missing, Constants.Titles.SignUpFailed);
         }
 
         var email = request.Email!.Trim();
@@ -70,7 +70,7 @@ internal static class AccountEndpoints
 
         if (!created.Succeeded)
         {
-            return TypedResults.Problem(Describe(created.Errors), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignUpFailed);
+            return Problems.BadRequest(Describe(created.Errors), Constants.Titles.SignUpFailed);
         }
 
         await signIn.SignInAsync(user, isPersistent: true);
@@ -93,14 +93,14 @@ internal static class AccountEndpoints
     {
         if (Missing(request) is { } missing)
         {
-            return TypedResults.Problem(missing, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+            return Problems.BadRequest(missing, Constants.Titles.SignInFailed);
         }
 
         var user = await users.FindByEmailAsync(request.Email!.Trim());
 
         if (user is null)
         {
-            return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+            return Problems.BadRequest(Constants.Messages.WrongCredentials, Constants.Titles.SignInFailed);
         }
 
         var result = await signIn.PasswordSignInAsync(user, request.Password!, isPersistent: true, lockoutOnFailure: true);
@@ -113,7 +113,7 @@ internal static class AccountEndpoints
 
         if (!result.Succeeded)
         {
-            return TypedResults.Problem(Constants.Messages.WrongCredentials, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.SignInFailed);
+            return Problems.BadRequest(Constants.Messages.WrongCredentials, Constants.Titles.SignInFailed);
         }
 
         await SaveGuestRoomsAsync(saveGuestRooms, http, user, cancellationToken);

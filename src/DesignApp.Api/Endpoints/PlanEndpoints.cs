@@ -71,7 +71,7 @@ internal static class PlanEndpoints
     {
         if (!Enum.TryParse<RoomType>(roomType, ignoreCase: true, out var type) || !Enum.IsDefined(type))
         {
-            return TypedResults.Problem(Domain.Constants.Messages.UnknownRoomType, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidRequest);
+            return Problems.BadRequest(Domain.Constants.Messages.UnknownRoomType, Constants.Titles.InvalidRequest);
         }
 
         response.Headers.CacheControl = Constants.Http.CatalogCache;
@@ -150,7 +150,7 @@ internal static class PlanEndpoints
 
         return outcome.Succeeded
             ? TypedResults.Ok(CatalogObjectResponse.From(outcome.Value))
-            : TypedResults.Problem(outcome.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.DescribeFailed);
+            : Problems.BadRequest(outcome.Error, Constants.Titles.DescribeFailed);
     }
 
     /// <summary><c>POST /api/plans/{id}/generate</c>: a photo of the built room, as a new room.</summary>
@@ -178,12 +178,12 @@ internal static class PlanEndpoints
 
         if (!string.IsNullOrWhiteSpace(style) && (!Enum.TryParse(style, ignoreCase: true, out photoStyle) || !Enum.IsDefined(photoStyle)))
         {
-            return TypedResults.Problem(Application.Constants.Messages.UnknownPhotoStyle, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+            return Problems.BadRequest(Application.Constants.Messages.UnknownPhotoStyle, Constants.Titles.GenerateFailed);
         }
 
         if (guide.Length > Application.Constants.Builder.MaxGuideBytes)
         {
-            return TypedResults.Problem(Application.Constants.Messages.GuideImage, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+            return Problems.BadRequest(Application.Constants.Messages.GuideImage, Constants.Titles.GenerateFailed);
         }
 
         if (!string.IsNullOrWhiteSpace(boxes))
@@ -196,7 +196,7 @@ internal static class PlanEndpoints
             }
             catch (JsonException)
             {
-                return TypedResults.Problem(Application.Constants.Messages.PhotoBoxes, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+                return Problems.BadRequest(Application.Constants.Messages.PhotoBoxes, Constants.Titles.GenerateFailed);
             }
         }
 
@@ -206,7 +206,7 @@ internal static class PlanEndpoints
 
             if (!string.IsNullOrWhiteSpace(corner) && (!Enum.TryParse(corner, ignoreCase: true, out spot) || !Enum.IsDefined(spot)))
             {
-                return TypedResults.Problem(Application.Constants.Messages.PhotoShot, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+                return Problems.BadRequest(Application.Constants.Messages.PhotoShot, Constants.Titles.GenerateFailed);
             }
 
             shot = new PlanShot(wall, spot);
@@ -226,7 +226,7 @@ internal static class PlanEndpoints
 
         return outcome.Succeeded
             ? TypedResults.Ok(RoomResponse.From(outcome.Value))
-            : TypedResults.Problem(outcome.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.GenerateFailed);
+            : Problems.BadRequest(outcome.Error, Constants.Titles.GenerateFailed);
     }
 
     /// <summary>An object of a request as a domain object.</summary>

@@ -1,3 +1,4 @@
+using DesignApp.Api.Helpers;
 using DesignApp.Application.UseCases;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,7 @@ internal static class DevEndpoints
     {
         if (string.IsNullOrEmpty(name) || !name.All(c => c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '-'))
         {
-            return TypedResults.Problem(Constants.Messages.ExportName, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidExport);
+            return Problems.BadRequest(Constants.Messages.ExportName, Constants.Titles.InvalidExport);
         }
 
         var zip = await export.HandleAsync(id, name, cancellationToken);

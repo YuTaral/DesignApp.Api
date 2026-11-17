@@ -118,10 +118,7 @@ internal static class RoomEndpoints
 
         if (!string.IsNullOrWhiteSpace(scope) && (!Enum.TryParse(scope, ignoreCase: true, out analysisScope) || !Enum.IsDefined(analysisScope)))
         {
-            return TypedResults.Problem(
-                Constants.Messages.UnknownScope(scope, Enum.GetNames<AnalysisScope>()),
-                statusCode: StatusCodes.Status400BadRequest,
-                title: Constants.Titles.InvalidScope);
+            return Problems.BadRequest(Constants.Messages.UnknownScope(scope, Enum.GetNames<AnalysisScope>()), Constants.Titles.InvalidScope);
         }
 
         if (photo.Length > Application.Constants.Photos.MaxUploadBytes)
@@ -137,7 +134,7 @@ internal static class RoomEndpoints
 
         if (!result.Succeeded)
         {
-            return TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidPhoto);
+            return Problems.BadRequest(result.Error, Constants.Titles.InvalidPhoto);
         }
 
         var room = result.Value;
@@ -335,7 +332,7 @@ internal static class RoomEndpoints
 
         return result.Succeeded
             ? TypedResults.Ok(RoomResponse.From(result.Value))
-            : TypedResults.Problem(result.Error, statusCode: StatusCodes.Status400BadRequest, title: title);
+            : Problems.BadRequest(result.Error, title);
     }
 
     /// <summary>Streams a stored file that never changes once written.</summary>

@@ -19,7 +19,7 @@ internal static class AiModeChoice
 
         if (!string.IsNullOrWhiteSpace(ai) && (!Enum.TryParse(ai, ignoreCase: true, out mode) || !Enum.IsDefined(mode)))
         {
-            return TypedResults.Problem(Constants.Messages.UnknownAi(ai), statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.InvalidAi);
+            return Problems.BadRequest(Constants.Messages.UnknownAi(ai), Constants.Titles.InvalidAi);
         }
 
         if (availability.Allows(mode))
@@ -31,6 +31,6 @@ internal static class AiModeChoice
             ? Constants.Messages.RealAiNotSetUp
             : Constants.Messages.OnlyAi(availability.Default.ToString());
 
-        return TypedResults.Problem(why, statusCode: StatusCodes.Status400BadRequest, title: Constants.Titles.AiNotAvailable);
+        return Problems.BadRequest(why, Constants.Titles.AiNotAvailable);
     }
 }
