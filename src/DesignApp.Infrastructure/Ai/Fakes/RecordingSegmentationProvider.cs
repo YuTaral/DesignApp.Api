@@ -2,9 +2,9 @@ using System.Text.Json;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Ai.Fal;
+using DesignApp.Infrastructure.Photos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;
 
@@ -53,7 +53,7 @@ internal sealed partial class RecordingSegmentationProvider(
                     {
                         label = pair.First.Label,
                         category = pair.First.Category.ToString(),
-                        shapes = new[] { new { mask = Convert.ToBase64String(EncodePng(pair.Second!)) } },
+                        shapes = new[] { new { mask = Convert.ToBase64String(MaskPixels.GrayPng(pair.Second!.Coverage, pair.Second.Width, pair.Second.Height)) } },
                     }),
             };
 
@@ -65,19 +65,6 @@ internal sealed partial class RecordingSegmentationProvider(
         }
 
         return masks;
-    }
-
-    /// <summary>Encodes a mask as a grayscale PNG (white = object).</summary>
-    /// <param name="mask">The mask.</param>
-    private static byte[] EncodePng(ObjectMask mask)
-    {
-        using var bitmap = new SKBitmap(new SKImageInfo(mask.Width, mask.Height, SKColorType.Gray8, SKAlphaType.Opaque));
-
-        mask.Coverage.CopyTo(bitmap.GetPixelSpan());
-        using var image = SKImage.FromBitmap(bitmap);
-        using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
-
-        return png.ToArray();
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Recorded the real analysis of sample {Sample} to {Path}")]

@@ -8,7 +8,6 @@ using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Infrastructure.Photos;
 using DesignApp.Tests;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 using static DesignApp.Application.Constants;
@@ -29,20 +28,8 @@ public class PartTests
     private readonly FakeRooms _rooms = new();
     private readonly FakeStorage _storage = new();
 
-    // A 20x10 label map: object 1 covers x < 6, object 2 covers x >= 10, x 6..9 is unassigned.
-    private const int W = 20, H = 10;
-
-    private static byte[] Labels()
-    {
-        var labels = new byte[W * H];
-
-        for (var p = 0; p < W * H; p++)
-        {
-            labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
-        }
-
-        return labels;
-    }
+    // The 20x10 label map of TestRooms.SmallLabels.
+    private const int W = TestRooms.SmallWidth, H = TestRooms.SmallHeight;
 
     /// <summary>A stroke through label-map pixel centers.</summary>
     private static MarkStroke Stroke(params (double X, double Y)[] pixels)
@@ -53,7 +40,7 @@ public class PartTests
     [Fact]
     public void A_part_only_takes_its_objects_pixels()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         // A line from inside object 1 across the gap at row 5: only object 1's pixels become the part.
         var marked = ObjectMarker.Apply(labels, W, H, new NewObjectMark(3, [Stroke((3, 5), (8, 5))], ParentIndex: 1, ParentLabel: "chair"));
@@ -65,19 +52,19 @@ public class PartTests
     [Fact]
     public void A_part_drawn_outside_its_object_is_refused()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         var marked = ObjectMarker.Apply(labels, W, H, new NewObjectMark(3, [Stroke((7, 5), (8, 5))], ParentIndex: 1, ParentLabel: "chair"));
 
         Assert.False(marked.Succeeded);
         Assert.Equal(DesignApp.Infrastructure.Constants.Messages.PartOutsideParent("chair"), marked.Error);
-        Assert.Equal(Labels(), labels);
+        Assert.Equal(TestRooms.SmallLabels(), labels);
     }
 
     [Fact]
     public void Brushing_a_part_takes_only_its_objects_pixels_and_erasing_gives_them_back()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         labels[5 * W + 2] = 3; // the part, inside object 1
 
@@ -141,7 +128,7 @@ public class PartTests
         var seat = room.Objects[^1];
 
         Assert.Equal((chair.Index, chair.Category, "seat"), (seat.ParentIndex, seat.Category, seat.Label));
-        var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+        var labels = TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
 
         Assert.Equal(seat.Index, LabelAt(labels, point));
 
@@ -160,7 +147,7 @@ public class PartTests
 
         Assert.True(merged!.Succeeded, merged.Error);
         Assert.Equal((2, 2), (room.LabelMapRevision, room.LatestLabelMapRevision));
-        Assert.Equal(chair.Index, LabelAt(DecodeLabels(_storage.Files[room.LabelMapKey!].Content), point));
+        Assert.Equal(chair.Index, LabelAt(TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content), point));
         Assert.Contains(room.Objects, o => o.Index == seat.Index); // still listed, so undo brings it back
         Assert.Null(await new MergeRoomPart(_rooms, new FixedUser("someone-else"), _storage, imaging).MergeAsync(room.Id, 2, seat.Index, CancellationToken.None));
     }
@@ -169,7 +156,7 @@ public class PartTests
     public async Task The_ai_finds_an_objects_parts_inside_it_as_a_new_version()
     {
         var (room, sofa, _) = await RoomWithObjectAsync();
-        var before = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+        var before = TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
         var next = room.NextObjectIndex;
 
         var found = await Finder().FindAsync(room.Id, 0, sofa.Index, null, CancellationToken.None);
@@ -182,7 +169,7 @@ public class PartTests
         Assert.All(parts, p => Assert.Equal(sofa.Category, p.Category));
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
         // The parts only took the sofa's pixels; everything else is as it was.
-        var after = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+        var after = TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
         var partIndexes = parts.Select(p => (byte)p.Index).ToHashSet();
 
         Assert.All(Enumerable.Range(0, after.Length).Where(p => after[p] != before[p]), p =>
@@ -269,7 +256,7 @@ public class PartTests
         var removed = await Remover().RemoveAsync(room.Id, 1, [chair.Index], CancellationToken.None);
 
         Assert.True(removed!.Succeeded, removed.Error);
-        var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+        var labels = TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
 
         Assert.DoesNotContain((byte)chair.Index, labels);
         Assert.DoesNotContain((byte)seat.Index, labels);
@@ -290,20 +277,10 @@ public class PartTests
     /// <summary>An analyzed room, one of its objects that can be removed, and a point well inside it.</summary>
     private async Task<(Room Room, DetectedObject Object, StrokePoint Point)> RoomWithObjectAsync()
     {
-        var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now);
-
-        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
-        _rooms.Add(room);
-        await _rooms.SaveChangesAsync(CancellationToken.None);
-        await new AnalyzeRoom(_rooms, _storage, new SkiaRoomImaging(),
-            new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay)),
-            new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
-            .HandleAsync(room.Id, CancellationToken.None);
-        Assert.Equal(RoomStatus.Ready, room.Status);
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now);
 
         // The first removable object with a pixel whose neighbours are all its own, so a small dab stays inside it.
-        var labels = DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content);
+        var labels = TestRooms.DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content);
 
         foreach (var candidate in room.Objects.Where(o => !o.Category.IsSurface()))
         {
@@ -348,15 +325,5 @@ public class PartTests
     private static int LabelAt(byte[] labels, StrokePoint point)
     {
         return labels[(int)(point.Y * 400) * 600 + (int)(point.X * 600)];
-    }
-
-    /// <summary>Decodes a label map PNG to one byte per pixel.</summary>
-    /// <param name="png">The PNG.</param>
-    private static byte[] DecodeLabels(byte[] png)
-    {
-        using var codec = SKCodec.Create(new MemoryStream(png));
-        using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
-
-        return bitmap.GetPixelSpan().ToArray();
     }
 }

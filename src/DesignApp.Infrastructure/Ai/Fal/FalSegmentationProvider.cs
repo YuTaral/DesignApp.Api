@@ -4,6 +4,7 @@ using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Extensions;
 using DesignApp.Domain.Objects;
+using DesignApp.Infrastructure.Photos;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 
@@ -267,9 +268,7 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
                 continue;
             }
 
-            var png = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
-                ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
-                : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
+            var png = await http.ReadFileAsync(url, cancellationToken);
 
             if (Decode(png) is { } mask)
             {
@@ -349,22 +348,9 @@ internal sealed partial class FalSegmentationProvider(HttpClient http, IAiSettin
     /// <param name="mask">The mask.</param>
     internal static (double X0, double Y0, double X1, double Y1)? Bounds(ObjectMask mask)
     {
-        int x0 = int.MaxValue, y0 = int.MaxValue, x1 = -1, y1 = -1;
-
-        for (var y = 0; y < mask.Height; y++)
-        {
-            for (var x = 0; x < mask.Width; x++)
-            {
-                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
-                {
-                    continue;
-                }
-
-                (x0, y0, x1, y1) = (Math.Min(x0, x), Math.Min(y0, y), Math.Max(x1, x), Math.Max(y1, y));
-            }
-        }
-
-        return x1 < 0 ? null : ((double)x0 / mask.Width, (double)y0 / mask.Height, (x1 + 1.0) / mask.Width, (y1 + 1.0) / mask.Height);
+        return MaskPixels.CoveredRect(mask) is { } r
+            ? ((double)r.X0 / mask.Width, (double)r.Y0 / mask.Height, (double)r.X1 / mask.Width, (double)r.Y1 / mask.Height)
+            : null;
     }
 
     /// <summary>

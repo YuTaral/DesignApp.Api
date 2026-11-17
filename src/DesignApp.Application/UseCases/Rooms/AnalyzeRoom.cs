@@ -1,3 +1,4 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
@@ -78,7 +79,7 @@ public sealed partial class AnalyzeRoom(
         AnalysisImage image;
 
         await using (var photo = await storage.OpenReadAsync(room.PhotoKey, cancellationToken)
-            ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
+            ?? throw new InvalidOperationException(Constants.Messages.MissingPhoto(room.Id)))
         {
             image = imaging.PrepareForAnalysis(photo.Content);
         }
@@ -105,11 +106,7 @@ public sealed partial class AnalyzeRoom(
         room.StartSegmentation();
         await SaveAndNotifyAsync(room, cancellationToken);
 
-        var masks = await ai.Segmentation(room.AiMode).SegmentAsync(image, items, cancellationToken);
-        var outlined = items.Zip(masks)
-            .Where(pair => pair.Second is not null)
-            .Select(pair => new SegmentedObject(pair.First, pair.Second!))
-            .ToList();
+        var outlined = await ai.Segmentation(room.AiMode).OutlineAsync(image, items, cancellationToken);
         var labelMap = imaging.BuildLabelMap(image, outlined);
 
         if (labelMap.Objects.Count == 0)

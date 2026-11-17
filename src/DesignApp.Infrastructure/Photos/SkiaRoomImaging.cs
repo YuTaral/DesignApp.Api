@@ -113,7 +113,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             labels[p] = renumber[labels[p]];
         }
 
-        return new LabelMap(EncodeGrayPng(labels, width, height), detected);
+        return new LabelMap(MaskPixels.GrayPng(labels, width, height), detected);
     }
 
     /// <summary>
@@ -168,30 +168,14 @@ internal sealed class SkiaRoomImaging : IRoomImaging
     private static void Paint(byte[] labels, int width, int height, ObjectMask mask, byte paintId)
     {
         // Only visit the part of the label map under the mask's own bounding box.
-        var (minX, minY, maxX, maxY) = (mask.Width, mask.Height, -1, -1);
-
-        for (var y = 0; y < mask.Height; y++)
-        {
-            for (var x = 0; x < mask.Width; x++)
-            {
-                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
-                {
-                    continue;
-                }
-
-                (minX, minY) = (Math.Min(minX, x), Math.Min(minY, y));
-                (maxX, maxY) = (Math.Max(maxX, x), Math.Max(maxY, y));
-            }
-        }
-
-        if (maxX < 0)
+        if (MaskPixels.CoveredRect(mask) is not { } covered)
         {
             return;
         }
 
         var (sx, sy) = (mask.Width / (double)width, mask.Height / (double)height);
-        var (fromX, toX) = ((int)(minX / sx), Math.Min(width - 1, (int)Math.Ceiling((maxX + 1) / sx)));
-        var (fromY, toY) = ((int)(minY / sy), Math.Min(height - 1, (int)Math.Ceiling((maxY + 1) / sy)));
+        var (fromX, toX) = ((int)(covered.X0 / sx), Math.Min(width - 1, (int)Math.Ceiling(covered.X1 / sx)));
+        var (fromY, toY) = ((int)(covered.Y0 / sy), Math.Min(height - 1, (int)Math.Ceiling(covered.Y1 / sy)));
 
         for (var y = fromY; y <= toY; y++)
         {
@@ -257,7 +241,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
         var (labels, width, height) = DecodeGrayPng(labelMapPng);
         var changed = OutlineBrush.Apply(labels, width, height, stroke);
 
-        return changed.Succeeded ? EncodeGrayPng(labels, width, height) : Result.Failure<byte[]>(changed.Error);
+        return changed.Succeeded ? MaskPixels.GrayPng(labels, width, height) : Result.Failure<byte[]>(changed.Error);
     }
 
     /// <inheritdoc/>
@@ -287,7 +271,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             stats.MinX / (double)width, stats.MinY / (double)height,
             (stats.MaxX - stats.MinX + 1) / (double)width, (stats.MaxY - stats.MinY + 1) / (double)height);
 
-        return new MarkedObject(EncodeGrayPng(labels, width, height), box, stats.MedianColor());
+        return new MarkedObject(MaskPixels.GrayPng(labels, width, height), box, stats.MedianColor());
     }
 
     /// <inheritdoc/>
@@ -371,7 +355,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             }
         }
 
-        return new LabelMap(EncodeGrayPng(labels, width, height), found);
+        return new LabelMap(MaskPixels.GrayPng(labels, width, height), found);
     }
 
     /// <inheritdoc/>
@@ -391,7 +375,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             merged++;
         }
 
-        return merged == 0 ? Result.Failure<byte[]>(Constants.Messages.NothingToMerge(partLabel)) : EncodeGrayPng(labels, width, height);
+        return merged == 0 ? Result.Failure<byte[]>(Constants.Messages.NothingToMerge(partLabel)) : MaskPixels.GrayPng(labels, width, height);
     }
 
     /// <inheritdoc/>
@@ -426,7 +410,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             }
         }
 
-        return EncodeGrayPng(mask, photoWidth, photoHeight);
+        return MaskPixels.GrayPng(mask, photoWidth, photoHeight);
     }
 
     /// <inheritdoc/>
@@ -448,7 +432,7 @@ internal sealed class SkiaRoomImaging : IRoomImaging
 
         RemovalRefill.Apply(labels, width, height, atMapSize.GetPixelSpan(), indexes);
 
-        return new RemovedObject(jpeg.ToArray(), EncodeGrayPng(labels, width, height));
+        return new RemovedObject(jpeg.ToArray(), MaskPixels.GrayPng(labels, width, height));
     }
 
     /// <summary>Decodes the stored photo to sRGB RGBA at the label map's size, one 4-byte pixel per label.</summary>
@@ -477,21 +461,6 @@ internal sealed class SkiaRoomImaging : IRoomImaging
             ?? throw new InvalidOperationException("The label map can't be decoded.");
 
         return (bitmap.GetPixelSpan().ToArray(), width, height);
-    }
-
-    /// <summary>Encodes the label map as an 8-bit grayscale PNG, so pixel values survive exactly.</summary>
-    /// <param name="labels">One byte per pixel.</param>
-    /// <param name="width">Width in pixels.</param>
-    /// <param name="height">Height in pixels.</param>
-    private static byte[] EncodeGrayPng(byte[] labels, int width, int height)
-    {
-        using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
-
-        labels.CopyTo(bitmap.GetPixelSpan());
-        using var image = SKImage.FromBitmap(bitmap);
-        using var png = image.Encode(SKEncodedImageFormat.Png, Constants.Imaging.PngQuality);
-
-        return png.ToArray();
     }
 
     /// <summary>Running totals for one object's visible pixels.</summary>

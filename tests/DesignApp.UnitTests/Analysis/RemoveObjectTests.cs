@@ -4,8 +4,6 @@ using DesignApp.Domain.Entities;
 using DesignApp.Infrastructure.Ai;
 using DesignApp.Infrastructure.Ai.Fakes;
 using DesignApp.Infrastructure.Photos;
-using DesignApp.Tests;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 using static DesignApp.Application.Constants;
@@ -89,10 +87,10 @@ public class RemoveObjectTests
     [Fact]
     public async Task A_removal_is_a_new_version_with_its_own_photo_and_undo_goes_back()
     {
-        var room = await AnalyzedRoomAsync();
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now);
         var remover = Remover("user-1");
         var lamp = room.Objects.Single(o => o.Label == "floor lamp");
-        var before = DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content);
+        var before = TestRooms.DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content);
 
         var result = await remover.RemoveAsync(room.Id, 0, [lamp.Index], CancellationToken.None);
 
@@ -101,7 +99,7 @@ public class RemoveObjectTests
         Assert.Equal([0, 1], room.PhotoVersions);
         Assert.Contains(lamp, room.Objects); // still listed, so undo can bring it back
         Assert.Contains((byte)lamp.Index, before);
-        Assert.DoesNotContain((byte)lamp.Index, DecodeLabels(_storage.Files[room.LabelMapKey!].Content));
+        Assert.DoesNotContain((byte)lamp.Index, TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content));
         var newPhoto = _storage.Files[DesignApp.Application.Constants.Rooms.PhotoKey(room.Id, 1)].Content;
 
         Assert.NotEqual(_storage.Files[room.PhotoKey].Content, newPhoto);
@@ -131,7 +129,7 @@ public class RemoveObjectTests
     [Fact]
     public async Task Surfaces_objects_not_in_the_photo_unknown_versions_and_other_users_are_refused()
     {
-        var room = await AnalyzedRoomAsync();
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now);
         var remover = Remover("user-1");
         var wall = room.Objects.First(o => o.Category is ObjectCategory.Wall);
         var lamp = room.Objects.Single(o => o.Label == "floor lamp");
@@ -153,7 +151,7 @@ public class RemoveObjectTests
     [Fact]
     public async Task Several_objects_are_removed_together_in_one_version()
     {
-        var room = await AnalyzedRoomAsync();
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now);
         var remover = Remover("user-1");
         var sofa = room.Objects.Single(o => o.Label == "sofa").Index;
         var lamp = room.Objects.Single(o => o.Label == "floor lamp").Index;
@@ -162,7 +160,7 @@ public class RemoveObjectTests
 
         Assert.True(result!.Succeeded, result.Error);
         Assert.Equal((1, 1), (room.LatestLabelMapRevision, room.LatestPhotoVersion)); // one version, one eraser call
-        var labels = DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
+        var labels = TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content);
 
         Assert.DoesNotContain((byte)sofa, labels);
         Assert.DoesNotContain((byte)lamp, labels);
@@ -179,34 +177,5 @@ public class RemoveObjectTests
         var ai = new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay), new FakeObjectRemovalProvider(NoDelay));
 
         return new RemoveRoomObject(_rooms, new FixedUser(user), _storage, new SkiaRoomImaging(), ai);
-    }
-
-    /// <summary>Uploads and analyzes a room with the fake AI and a real photo.</summary>
-    private async Task<Room> AnalyzedRoomAsync()
-    {
-        var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now);
-
-        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
-        _rooms.Add(room);
-        await _rooms.SaveChangesAsync(CancellationToken.None);
-
-        await new AnalyzeRoom(_rooms, _storage, new SkiaRoomImaging(),
-            new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay)),
-            new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
-            .HandleAsync(room.Id, CancellationToken.None);
-        Assert.Equal(RoomStatus.Ready, room.Status);
-
-        return room;
-    }
-
-    /// <summary>Decodes a label map PNG to one byte per pixel.</summary>
-    /// <param name="png">The PNG.</param>
-    private static byte[] DecodeLabels(byte[] png)
-    {
-        using var codec = SKCodec.Create(new MemoryStream(png));
-        using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
-
-        return bitmap.GetPixelSpan().ToArray();
     }
 }

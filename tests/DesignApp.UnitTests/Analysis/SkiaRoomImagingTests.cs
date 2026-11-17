@@ -45,7 +45,7 @@ public class SkiaRoomImagingTests
         var map = _imaging.BuildLabelMap(image, [new(sofa, Rect(200, 100, 50, 50, 100, 40)), new(wall, Rect(200, 100, 0, 0, 200, 100))]);
 
         Assert.Equal(["sofa", "wall"], map.Objects.Select(o => o.Label));
-        var labels = DecodeLabels(map.Png);
+        var labels = TestRooms.DecodeLabels(map.Png);
 
         Assert.Equal(1, labels[60 * 200 + 100]); // inside the sofa
         Assert.Equal(2, labels[10 * 200 + 10]);  // wall around it
@@ -99,7 +99,7 @@ public class SkiaRoomImagingTests
             new(Item("sofa", ObjectCategory.Furniture), Rect(100, 50, 50, 0, 50, 50)),
         ]);
 
-        var labels = DecodeLabels(map.Png);
+        var labels = TestRooms.DecodeLabels(map.Png);
 
         Assert.Equal(1, labels[50 * 200 + 50]);
         Assert.Equal(2, labels[50 * 200 + 150]);
@@ -123,7 +123,7 @@ public class SkiaRoomImagingTests
 
         var map = _imaging.BuildLabelMap(image, [new(Item("wall", ObjectCategory.Wall), ragged)]);
 
-        var labels = DecodeLabels(map.Png);
+        var labels = TestRooms.DecodeLabels(map.Png);
 
         Assert.All(Enumerable.Range(100, 30), x => Assert.Equal(1, labels[10 * 200 + x])); // the ragged strip, filled
         Assert.Equal(1, labels[80 * 200 + 95]);   // blue just past the mask
@@ -139,7 +139,7 @@ public class SkiaRoomImagingTests
         var map = _imaging.BuildLabelMap(Image(200, 100),
             [new(Item("floor lamp", ObjectCategory.Lighting), Rect(200, 100, 50, 10, 4, 80)), new(Item("sofa", ObjectCategory.Furniture), Rect(200, 100, 120, 60, 60, 30))]);
 
-        var labels = DecodeLabels(map.Png);
+        var labels = TestRooms.DecodeLabels(map.Png);
 
         Assert.Equal(1, labels[50 * 200 + 51]);   // the stand
         Assert.Equal(2, labels[75 * 200 + 150]);  // the sofa
@@ -168,7 +168,7 @@ public class SkiaRoomImagingTests
 
         var map = _imaging.BuildLabelMap(image, [new(Item("mirror", ObjectCategory.Decor), mirror)]);
 
-        Assert.Equal(1, DecodeLabels(map.Png)[50 * 200 + 150]);
+        Assert.Equal(1, TestRooms.DecodeLabels(map.Png)[50 * 200 + 150]);
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public class SkiaRoomImagingTests
 
         var map = _imaging.BuildLabelMap(image, [new(Item("blanket", ObjectCategory.Textile), blanket)]);
 
-        var labels = DecodeLabels(map.Png);
+        var labels = TestRooms.DecodeLabels(map.Png);
 
         Assert.Equal(0, labels[81 * 200 + 181]);
         Assert.Equal(1, labels[25 * 200 + 50]);
@@ -232,16 +232,5 @@ public class SkiaRoomImagingTests
         }
 
         return new ObjectMask(width, height, coverage);
-    }
-
-    /// <summary>Reads the label map's pixel values back.</summary>
-    /// <param name="png">The label map PNG.</param>
-    private static byte[] DecodeLabels(byte[] png)
-    {
-        using var codec = SKCodec.Create(new MemoryStream(png));
-        var info = new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque);
-        using var bitmap = SKBitmap.Decode(codec, info);
-
-        return bitmap.GetPixelSpan().ToArray();
     }
 }

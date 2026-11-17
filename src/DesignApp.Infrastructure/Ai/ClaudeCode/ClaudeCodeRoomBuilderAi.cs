@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Infrastructure.Ai.Claude;
@@ -11,7 +10,6 @@ using static DesignApp.Domain.Constants;
 using CC = DesignApp.Infrastructure.Constants.Ai.ClaudeCode;
 using G = DesignApp.Infrastructure.Constants.Ai.ClaudeCode.Flags;
 using RB = DesignApp.Infrastructure.Constants.Ai.RoomBuilder;
-using W = DesignApp.Infrastructure.Constants.Ai.ClaudeCode.Wire;
 
 namespace DesignApp.Infrastructure.Ai.ClaudeCode;
 
@@ -61,7 +59,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
                 G.Settings, CC.HookFreeSettings,
             ];
             var started = Stopwatch.GetTimestamp();
-            var printed = await runner.RunAsync(arguments, Message(text), cancellationToken);
+            var printed = await runner.RunAsync(arguments, ClaudeCodeMessage.User(ClaudeCodeMessage.Text(text)), cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
             var result = ClaudeCodeInventoryProvider.Read(printed);
 
@@ -73,23 +71,6 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
         {
             File.Delete(promptFile);
         }
-    }
-
-    /// <summary>A user message of one text, as one stream-json line.</summary>
-    /// <param name="text">The text.</param>
-    private static string Message(string text)
-    {
-        var message = new JsonObject
-        {
-            [W.Type] = W.User,
-            [W.Message] = new JsonObject
-            {
-                [W.Role] = W.User,
-                [W.Content] = new JsonArray(new JsonObject { [W.Type] = W.Text, [W.Text] = text }),
-            },
-        };
-
-        return message.ToJsonString();
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Claude Code ({Model}) {Task} with {InputTokens} input and {OutputTokens} output tokens in {Seconds:0.0} s")]

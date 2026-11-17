@@ -1,3 +1,5 @@
+using DesignApp.Application.Objects;
+using DesignApp.Infrastructure.Photos;
 using SkiaSharp;
 
 namespace DesignApp.Infrastructure.Ai.Fakes;
@@ -94,30 +96,15 @@ internal sealed record SampleShape(float[]? Polygon, float[]? Ellipse, float[]? 
     /// <param name="mask">The decoded mask.</param>
     private SKRect MaskBounds(SKImage mask)
     {
-        using var bitmap = SKBitmap.FromImage(mask);
-        var (minX, minY, maxX, maxY) = (mask.Width, mask.Height, -1, -1);
-
-        for (var y = 0; y < mask.Height; y++)
-        {
-            for (var x = 0; x < mask.Width; x++)
-            {
-                if (bitmap.GetPixel(x, y).Red < Constants.Imaging.CoverageThreshold)
-                {
-                    continue;
-                }
-
-                (minX, minY, maxX, maxY) = (Math.Min(minX, x), Math.Min(minY, y), Math.Max(maxX, x), Math.Max(maxY, y));
-            }
-        }
-
-        if (maxX < 0)
-        {
-            return SKRect.Empty;
-        }
-
+        // The recorded masks are black and white, so their gray is the coverage.
+        using var gray = new SKBitmap(new SKImageInfo(mask.Width, mask.Height, SKColorType.Gray8, SKAlphaType.Opaque));
         var (sx, sy) = (PhotoSize.Width / mask.Width, PhotoSize.Height / mask.Height);
 
-        return new SKRect(minX * sx, minY * sy, (maxX + 1) * sx, (maxY + 1) * sy);
+        mask.ReadPixels(gray.Info, gray.GetPixels(), gray.RowBytes, 0, 0);
+
+        return MaskPixels.CoveredRect(new ObjectMask(mask.Width, mask.Height, gray.GetPixelSpan().ToArray())) is { } r
+            ? new SKRect(r.X0 * sx, r.Y0 * sy, r.X1 * sx, r.Y1 * sy)
+            : SKRect.Empty;
     }
 
     /// <summary>Turns x, y pairs into points.</summary>

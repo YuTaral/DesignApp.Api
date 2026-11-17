@@ -117,29 +117,19 @@ internal sealed partial class ClaudeCodeInventoryProvider(
     /// <param name="text">The text sent with the photo.</param>
     internal static string Message(AnalysisImage image, string text)
     {
-        var message = new JsonObject
+        var photo = new JsonObject
         {
-            [W.Type] = W.User,
-            [W.Message] = new JsonObject
+            [W.Type] = W.Image,
+            [W.Source] = new JsonObject
             {
-                [W.Role] = W.User,
-                [W.Content] = new JsonArray(
-                    new JsonObject
-                    {
-                        [W.Type] = W.Image,
-                        [W.Source] = new JsonObject
-                        {
-                            [W.Type] = W.Base64,
-                            [W.MediaType] = Application.Constants.ContentTypes.Jpeg,
-                            [W.Data] = Convert.ToBase64String(image.Jpeg),
-                        },
-                    },
-                    new JsonObject { [W.Type] = W.Text, [W.Text] = text },
-                    new JsonObject { [W.Type] = W.Text, [W.Text] = Constants.Ai.Claude.ImageSize(image.Width, image.Height) }),
+                [W.Type] = W.Base64,
+                [W.MediaType] = Application.Constants.ContentTypes.Jpeg,
+                [W.Data] = Convert.ToBase64String(image.Jpeg),
             },
         };
 
-        return message.ToJsonString();
+        return ClaudeCodeMessage.User(
+            photo, ClaudeCodeMessage.Text(text), ClaudeCodeMessage.Text(Constants.Ai.Claude.ImageSize(image.Width, image.Height)));
     }
 
     /// <summary>Reads Claude Code's result line: the structured answer, and the model and tokens that produced it.</summary>

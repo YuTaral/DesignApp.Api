@@ -62,12 +62,10 @@ internal static class LibraryEndpoints
     /// <returns>200 with the JPEG, or 404.</returns>
     private static Results<FileStreamHttpResult, NotFound> GetPhoto(string designId, string roomId, string layoutId, ILibrary library, HttpResponse response)
     {
-        if (library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId) is null)
+        if (!Cacheable(library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId), response))
         {
             return TypedResults.NotFound();
         }
-
-        response.Headers.CacheControl = Constants.Http.LibraryCache;
 
         return TypedResults.Stream(library.OpenPhoto(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
     }
@@ -79,12 +77,10 @@ internal static class LibraryEndpoints
     /// <returns>200 with the JPEG, or 404.</returns>
     private static Results<FileContentHttpResult, NotFound> GetCover(string designId, ILibrary library, HttpResponse response)
     {
-        if (library.FindDesign(designId) is null)
+        if (!Cacheable(library.FindDesign(designId), response))
         {
             return TypedResults.NotFound();
         }
-
-        response.Headers.CacheControl = Constants.Http.LibraryCache;
 
         return TypedResults.File(library.Cover(designId), Application.Constants.ContentTypes.Jpeg);
     }
@@ -98,14 +94,30 @@ internal static class LibraryEndpoints
     /// <returns>200 with the JPEG, or 404.</returns>
     private static Results<FileContentHttpResult, NotFound> GetThumbnail(string designId, string roomId, string layoutId, ILibrary library, HttpResponse response)
     {
-        if (library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId) is null)
+        if (!Cacheable(library.FindDesign(designId)?.FindRoom(roomId)?.FindLayout(layoutId), response))
         {
             return TypedResults.NotFound();
         }
 
+        return TypedResults.File(library.Thumbnail(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
+    }
+
+    /// <summary>
+    /// Whether a library file's design or layout exists; when it does, the browser may keep the file
+    /// (<see cref="Constants.Http.LibraryCache"/>), since library files change only with a new release.
+    /// </summary>
+    /// <param name="found">The design or layout, or <c>null</c> when the library has none.</param>
+    /// <param name="response">Gets the caching headers.</param>
+    private static bool Cacheable(object? found, HttpResponse response)
+    {
+        if (found is null)
+        {
+            return false;
+        }
+
         response.Headers.CacheControl = Constants.Http.LibraryCache;
 
-        return TypedResults.File(library.Thumbnail(designId, roomId, layoutId), Application.Constants.ContentTypes.Jpeg);
+        return true;
     }
 
     /// <summary><c>POST /api/library/{designId}/{roomId}/{layoutId}/copy</c>.</summary>

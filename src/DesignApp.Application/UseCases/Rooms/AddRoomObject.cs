@@ -56,11 +56,11 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
             return Result.Failure<Room>(invalid);
         }
 
-        var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
+        var labelMap = await storage.ReadAllBytesAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         Result<MarkedObject> marked;
 
         await using (var photo = await storage.OpenReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken)
-            ?? throw new InvalidOperationException($"The photo of room {room.Id} is missing from storage."))
+            ?? throw new InvalidOperationException(Constants.Messages.MissingPhoto(room.Id)))
         {
             marked = imaging.MarkObject(labelMap, photo.Content, new NewObjectMark(room.NextObjectIndex, strokes, parent?.Index, parent?.Label));
         }
@@ -93,14 +93,9 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
     /// <param name="strokes">The strokes.</param>
     private static string? Check(Room room, int baseRevision, string? label, ObjectCategory category, IReadOnlyList<MarkStroke> strokes)
     {
-        if (room.Status is not RoomStatus.Ready)
+        if (RoomEditing.Refusal(room, baseRevision) is { } refusal)
         {
-            return Constants.Messages.OutlinesNotReady;
-        }
-
-        if (!room.HasLabelMapRevision(baseRevision))
-        {
-            return Constants.Messages.UnknownRevision;
+            return refusal;
         }
 
         if (room.NextObjectIndex > Domain.Constants.Rooms.MaxObjectIndex)
@@ -140,20 +135,5 @@ public sealed class AddRoomObject(IRoomRepository rooms, ICurrentUser currentUse
         }
 
         return strokes.Select(s => StrokeShapes.Check(s.Shape, s.Points)).FirstOrDefault(error => error is not null);
-    }
-
-    /// <summary>Reads a stored file into memory.</summary>
-    /// <param name="key">The storage key.</param>
-    /// <param name="cancellationToken">Cancels the read.</param>
-    /// <exception cref="InvalidOperationException">The file is missing.</exception>
-    private async Task<byte[]> ReadAsync(string key, CancellationToken cancellationToken)
-    {
-        await using var stored = await storage.OpenReadAsync(key, cancellationToken)
-            ?? throw new InvalidOperationException($"The file {key} is missing from storage.");
-        using var buffer = new MemoryStream();
-
-        await stored.Content.CopyToAsync(buffer, cancellationToken);
-
-        return buffer.ToArray();
     }
 }

@@ -1,3 +1,4 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
@@ -34,9 +35,9 @@ public sealed class FindRoomParts(IRoomRepository rooms, ICurrentUser currentUse
             return null;
         }
 
-        if (room.Status is not RoomStatus.Ready)
+        if (RoomEditing.Refusal(room, baseRevision) is { } refusal)
         {
-            return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
+            return Result.Failure<Room>(refusal);
         }
 
         instructions = string.IsNullOrWhiteSpace(instructions) ? null : instructions.Trim();
@@ -44,11 +45,6 @@ public sealed class FindRoomParts(IRoomRepository rooms, ICurrentUser currentUse
         if (instructions?.Length > Constants.Parts.MaxInstructionsLength)
         {
             return Result.Failure<Room>(Constants.Messages.PartsInstructions);
-        }
-
-        if (!room.HasLabelMapRevision(baseRevision))
-        {
-            return Result.Failure<Room>(Constants.Messages.UnknownRevision);
         }
 
         var whole = room.Objects.FirstOrDefault(o => o.Index == objectIndex);
@@ -68,7 +64,7 @@ public sealed class FindRoomParts(IRoomRepository rooms, ICurrentUser currentUse
             return Result.Failure<Room>(Constants.Messages.TooManyObjects);
         }
 
-        var photo = await ReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken);
+        var photo = await storage.ReadAllBytesAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken);
         AnalysisImage image;
 
         using (var content = new MemoryStream(photo, writable: false))
@@ -90,15 +86,14 @@ public sealed class FindRoomParts(IRoomRepository rooms, ICurrentUser currentUse
             return Result.Failure<Room>(Constants.Messages.NoParts(whole.Label));
         }
 
-        var masks = await ai.Segmentation(room.AiMode).SegmentAsync(image, items, cancellationToken);
-        var outlined = items.Zip(masks).Where(pair => pair.Second is not null).Select(pair => new SegmentedObject(pair.First, pair.Second!)).ToList();
+        var outlined = await ai.Segmentation(room.AiMode).OutlineAsync(image, items, cancellationToken);
 
         if (outlined.Count == 0)
         {
             return Result.Failure<Room>(Constants.Messages.NoParts(whole.Label));
         }
 
-        var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
+        var labelMap = await storage.ReadAllBytesAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         Result<LabelMap> added;
 
         using (var content = new MemoryStream(photo, writable: false))
@@ -119,20 +114,5 @@ public sealed class FindRoomParts(IRoomRepository rooms, ICurrentUser currentUse
         await rooms.SaveChangesAsync(cancellationToken);
 
         return room;
-    }
-
-    /// <summary>Reads a stored file.</summary>
-    /// <param name="key">Its storage key.</param>
-    /// <param name="cancellationToken">Cancels the read.</param>
-    /// <exception cref="InvalidOperationException">The file is missing.</exception>
-    private async Task<byte[]> ReadAsync(string key, CancellationToken cancellationToken)
-    {
-        await using var stored = await storage.OpenReadAsync(key, cancellationToken)
-            ?? throw new InvalidOperationException($"The file {key} is missing from storage.");
-        using var buffer = new MemoryStream();
-
-        await stored.Content.CopyToAsync(buffer, cancellationToken);
-
-        return buffer.ToArray();
     }
 }

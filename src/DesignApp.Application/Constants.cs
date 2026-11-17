@@ -746,6 +746,20 @@ public static class Constants
             return $"The {label} is a part of the {parent}. Merge it back, or remove the whole {parent}.";
         }
 
+        /// <summary>A file the room needs isn't in storage (it was stored when the room was made or changed).</summary>
+        /// <param name="key">Path of the file in storage.</param>
+        public static string MissingFile(string key)
+        {
+            return $"The file {key} is missing from storage.";
+        }
+
+        /// <summary>A room's photo isn't in storage.</summary>
+        /// <param name="roomId">The room.</param>
+        public static string MissingPhoto(Guid roomId)
+        {
+            return $"The photo of room {roomId} is missing from storage.";
+        }
+
         /// <summary>The AI found no parts on an object.</summary>
         /// <param name="label">The object.</param>
         public static string NoParts(string label)

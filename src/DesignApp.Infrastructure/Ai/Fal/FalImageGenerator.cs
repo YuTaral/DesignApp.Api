@@ -56,17 +56,14 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
                 return Failed("no image in the result");
             }
 
-            var photo = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
-                ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
-                : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
+            var photo = await http.ReadFileAsync(url, cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
 
             LogGenerated(settings.ImageEndpoint, seconds);
 
             return photo;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or FormatException or TimeoutRejectedException
-            || (e is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+        catch (Exception e) when (FalCalls.IsCallFailure(e, cancellationToken))
         {
             return Failed(e.Message);
         }

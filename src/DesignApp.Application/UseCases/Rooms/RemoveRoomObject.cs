@@ -1,3 +1,4 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
@@ -36,14 +37,9 @@ public sealed class RemoveRoomObject(IRoomRepository rooms, ICurrentUser current
             return null;
         }
 
-        if (room.Status is not RoomStatus.Ready)
+        if (RoomEditing.Refusal(room, baseRevision) is { } refusal)
         {
-            return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
-        }
-
-        if (!room.HasLabelMapRevision(baseRevision))
-        {
-            return Result.Failure<Room>(Constants.Messages.UnknownRevision);
+            return Result.Failure<Room>(refusal);
         }
 
         var indexes = objectIndexes.Distinct().ToList();
@@ -73,7 +69,7 @@ public sealed class RemoveRoomObject(IRoomRepository rooms, ICurrentUser current
         // An object goes together with its parts.
         indexes = [.. indexes, .. room.Objects.Where(o => o.ParentIndex is int p && indexes.Contains(p)).Select(o => o.Index)];
 
-        var labelMap = await ReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
+        var labelMap = await storage.ReadAllBytesAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
         var mask = imaging.RemovalMask(labelMap, indexes, room.Width, room.Height);
 
         if (mask is null)
@@ -81,7 +77,7 @@ public sealed class RemoveRoomObject(IRoomRepository rooms, ICurrentUser current
             return Result.Failure<Room>(Constants.Messages.ObjectNotInPhoto);
         }
 
-        var photo = await ReadAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken);
+        var photo = await storage.ReadAllBytesAsync(Constants.Rooms.PhotoKey(room.Id, room.PhotoVersionOf(baseRevision)), cancellationToken);
 
         // The mask counts as brushed only when every object in it was marked by hand.
         var brushed = targets.All(t => t!.MarkedByHand);
@@ -107,20 +103,5 @@ public sealed class RemoveRoomObject(IRoomRepository rooms, ICurrentUser current
         await rooms.SaveChangesAsync(cancellationToken);
 
         return room;
-    }
-
-    /// <summary>Reads a stored file into memory.</summary>
-    /// <param name="key">The storage key.</param>
-    /// <param name="cancellationToken">Cancels the read.</param>
-    /// <exception cref="InvalidOperationException">The file is missing.</exception>
-    private async Task<byte[]> ReadAsync(string key, CancellationToken cancellationToken)
-    {
-        await using var stored = await storage.OpenReadAsync(key, cancellationToken)
-            ?? throw new InvalidOperationException($"The file {key} is missing from storage.");
-        using var buffer = new MemoryStream();
-
-        await stored.Content.CopyToAsync(buffer, cancellationToken);
-
-        return buffer.ToArray();
     }
 }

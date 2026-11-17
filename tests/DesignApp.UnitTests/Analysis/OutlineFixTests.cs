@@ -8,7 +8,6 @@ using DesignApp.Infrastructure.Photos;
 using DesignApp.Tests;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using SkiaSharp;
 using static DesignApp.Application.Constants;
 using static DesignApp.Domain.Constants;
 
@@ -26,20 +25,8 @@ public class OutlineFixTests
     private readonly FakeRooms _rooms = new();
     private readonly FakeStorage _storage = new();
 
-    // A 20x10 label map: object 1 covers x < 6, object 2 covers x >= 10, x 6..9 is unassigned.
-    private const int W = 20, H = 10;
-
-    private static byte[] Labels()
-    {
-        var labels = new byte[W * H];
-
-        for (var p = 0; p < W * H; p++)
-        {
-            labels[p] = (byte)(p % W < 6 ? 1 : p % W >= 10 ? 2 : 0);
-        }
-
-        return labels;
-    }
+    // The 20x10 label map of TestRooms.SmallLabels.
+    private const int W = TestRooms.SmallWidth, H = TestRooms.SmallHeight;
 
     /// <summary>A stroke on object 1 through label-map pixel centers.</summary>
     private static OutlineStroke Stroke(OutlineBrushMode mode, double radius, params (double X, double Y)[] pixels)
@@ -50,7 +37,7 @@ public class OutlineFixTests
     [Fact]
     public void A_click_paints_a_round_dab()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         // Radius 1.5 around pixel (8, 5): pixel centers within 1.5 px are the 3x3 block (its corners
         // are 1.41 away); (8, 3), (8, 7), (6, 5) and (10, 5) are 2 away, so they stay out.
@@ -65,7 +52,7 @@ public class OutlineFixTests
     [Fact]
     public void A_drag_paints_a_continuous_line_between_its_points()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         OutlineBrush.Apply(labels, W, H, Stroke(OutlineBrushMode.Paint, 0.6, (6, 0), (6, 9)));
 
@@ -76,7 +63,7 @@ public class OutlineFixTests
     [Fact]
     public void Painting_takes_pixels_from_other_objects()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         OutlineBrush.Apply(labels, W, H, Stroke(OutlineBrushMode.Paint, 0.6, (12, 5)));
 
@@ -86,7 +73,7 @@ public class OutlineFixTests
     [Fact]
     public void Erasing_only_clears_the_selected_object()
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         // A big brush over the border between object 1 and the gap and object 2.
         var changed = OutlineBrush.Apply(labels, W, H, Stroke(OutlineBrushMode.Erase, 6, (8, 5)));
@@ -103,22 +90,22 @@ public class OutlineFixTests
     [InlineData(OutlineBrushMode.Erase, 8.0, 40.0, "erase the whole wall")]  // a brush bigger than the photo
     public void Strokes_that_change_nothing_useful_are_refused(OutlineBrushMode mode, double x, double radius, string message)
     {
-        var labels = Labels();
+        var labels = TestRooms.SmallLabels();
 
         var result = OutlineBrush.Apply(labels, W, H, Stroke(mode, radius, (x, 5)));
 
         Assert.False(result.Succeeded);
         Assert.Contains(message, result.Error, StringComparison.Ordinal);
-        Assert.Equal(Labels(), labels);
+        Assert.Equal(TestRooms.SmallLabels(), labels);
     }
 
     [Fact]
     public async Task A_fix_is_stored_as_a_new_version_and_undo_can_go_back()
     {
-        var room = await AnalyzedRoomAsync(AnalysisScope.WholeRoom);
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now, AnalysisScope.WholeRoom);
         var imaging = new SkiaRoomImaging();
         var fixer = new FixRoomOutline(_rooms, new FixedUser("user-1"), _storage, imaging);
-        var before = DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id)].Content);
+        var before = TestRooms.DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id)].Content);
 
         // Paint a dab on a pixel the sofa doesn't have yet.
         var image = imaging.PrepareForAnalysis(new MemoryStream(_storage.Files[room.PhotoKey].Content));
@@ -131,8 +118,8 @@ public class OutlineFixTests
         Assert.True(result!.Succeeded, result.Error);
         Assert.Equal((1, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
         Assert.Equal(DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 1), room.LabelMapKey);
-        Assert.Equal(sofa, DecodeLabels(_storage.Files[room.LabelMapKey!].Content)[spot]);
-        Assert.Equal(before, DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content)); // version 0 is kept
+        Assert.Equal(sofa, TestRooms.DecodeLabels(_storage.Files[room.LabelMapKey!].Content)[spot]);
+        Assert.Equal(before, TestRooms.DecodeLabels(_storage.Files[DesignApp.Application.Constants.Rooms.LabelMapKey(room.Id, 0)].Content)); // version 0 is kept
 
         Assert.True((await fixer.UseRevisionAsync(room.Id, 0, CancellationToken.None))!.Succeeded);
         Assert.Equal((0, 1), (room.LabelMapRevision, room.LatestLabelMapRevision));
@@ -147,7 +134,7 @@ public class OutlineFixTests
     [Fact]
     public async Task Objects_only_skips_walls_floors_ceilings_doors_and_windows()
     {
-        var room = await AnalyzedRoomAsync(AnalysisScope.ObjectsOnly);
+        var room = await TestRooms.AnalyzedAsync(_rooms, _storage, Now, AnalysisScope.ObjectsOnly);
 
         Assert.Equal(["sofa", "rug", "floor lamp", "potted plant"], room.Objects.Select(o => o.Label));
     }
@@ -190,35 +177,5 @@ public class OutlineFixTests
     public void Scopes_include_the_right_categories(AnalysisScope scope, ObjectCategory category, bool included)
     {
         Assert.Equal(included, scope.Includes(category));
-    }
-
-    /// <summary>Uploads and analyzes a room with the fake AI and a real photo.</summary>
-    /// <param name="scope">What the analysis looks for.</param>
-    private async Task<Room> AnalyzedRoomAsync(AnalysisScope scope)
-    {
-        var id = Guid.CreateVersion7(Now);
-        var room = Room.Upload(id, "user-1", DesignApp.Application.Constants.Rooms.PhotoKey(id), 600, 400, Now, scope);
-
-        _storage.Files[room.PhotoKey] = (TestImages.Create(600, 400), DesignApp.Application.Constants.ContentTypes.Jpeg);
-        _rooms.Add(room);
-        await _rooms.SaveChangesAsync(CancellationToken.None);
-
-        await new AnalyzeRoom(_rooms, _storage, new SkiaRoomImaging(),
-            new FixedAiProviders(new FakeInventoryProvider(NoDelay), new FakeSegmentationProvider(NoDelay)),
-            new RecordingNotifier(), NullLogger<AnalyzeRoom>.Instance)
-            .HandleAsync(room.Id, CancellationToken.None);
-        Assert.Equal(RoomStatus.Ready, room.Status);
-
-        return room;
-    }
-
-    /// <summary>Decodes a label map PNG to one byte per pixel.</summary>
-    /// <param name="png">The PNG.</param>
-    private static byte[] DecodeLabels(byte[] png)
-    {
-        using var codec = SKCodec.Create(new MemoryStream(png));
-        using var bitmap = SKBitmap.Decode(codec, new SKImageInfo(codec.Info.Width, codec.Info.Height, SKColorType.Gray8, SKAlphaType.Opaque));
-
-        return bitmap.GetPixelSpan().ToArray();
     }
 }

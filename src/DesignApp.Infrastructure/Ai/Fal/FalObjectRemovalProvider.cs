@@ -63,17 +63,14 @@ internal sealed partial class FalObjectRemovalProvider(HttpClient http, IAiSetti
                 return Failed("no image in the result");
             }
 
-            var image = url.StartsWith(Constants.Ai.Fal.DataUriScheme, StringComparison.Ordinal)
-                ? Convert.FromBase64String(url[(url.IndexOf(',', StringComparison.Ordinal) + 1)..])
-                : await http.GetByteArrayAsync(new Uri(url), cancellationToken);
+            var image = await http.ReadFileAsync(url, cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
 
             LogRemoved(settings.RemovalQuality, seconds);
 
             return image;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or FormatException or TimeoutRejectedException
-            || (e is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+        catch (Exception e) when (FalCalls.IsCallFailure(e, cancellationToken))
         {
             return Failed(e.Message);
         }

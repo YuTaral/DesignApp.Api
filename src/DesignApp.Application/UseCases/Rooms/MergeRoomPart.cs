@@ -1,3 +1,4 @@
+using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
@@ -31,14 +32,9 @@ public sealed class MergeRoomPart(IRoomRepository rooms, ICurrentUser currentUse
             return null;
         }
 
-        if (room.Status is not RoomStatus.Ready)
+        if (RoomEditing.Refusal(room, baseRevision) is { } refusal)
         {
-            return Result.Failure<Room>(Constants.Messages.OutlinesNotReady);
-        }
-
-        if (!room.HasLabelMapRevision(baseRevision))
-        {
-            return Result.Failure<Room>(Constants.Messages.UnknownRevision);
+            return Result.Failure<Room>(refusal);
         }
 
         var part = room.Objects.FirstOrDefault(o => o.Index == objectIndex);
@@ -53,16 +49,7 @@ public sealed class MergeRoomPart(IRoomRepository rooms, ICurrentUser currentUse
             return Result.Failure<Room>(Constants.Messages.NotAPart);
         }
 
-        byte[] labelMap;
-
-        await using (var stored = await storage.OpenReadAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken)
-            ?? throw new InvalidOperationException($"Label map {baseRevision} of room {room.Id} is missing from storage."))
-        {
-            using var buffer = new MemoryStream();
-
-            await stored.Content.CopyToAsync(buffer, cancellationToken);
-            labelMap = buffer.ToArray();
-        }
+        var labelMap = await storage.ReadAllBytesAsync(Constants.Rooms.LabelMapKey(room.Id, baseRevision), cancellationToken);
 
         var merged = imaging.MergePart(labelMap, part.Index, parent, part.Label);
 
