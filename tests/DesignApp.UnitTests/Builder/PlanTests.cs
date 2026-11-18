@@ -352,6 +352,35 @@ public class PlanTests
     }
 
     [Fact]
+    public void Every_room_type_can_be_furnished_down_to_the_smallest_walls()
+    {
+        var catalog = new EmbeddedObjectCatalog();
+        var sizes = new[] { 1.0, 1.2, 1.5, 1.8, 2.0, 2.4 };
+
+        foreach (var type in Enum.GetValues<RoomType>())
+        {
+            foreach (var width in sizes)
+            {
+                foreach (var length in sizes.Append(6.0))
+                {
+                    var items = StarterLayout.For(type, width, length, 2.6, catalog.ForRoom(type));
+                    var plan = NewPlan(width, length);
+
+                    // Whatever fits is placed, inside the walls, and the plan takes it.
+                    plan.Update("", width, length, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, items, Now);
+                    Assert.All(items.Where(i => i.Wall is null), i =>
+                    {
+                        var (across, down) = i.Rotation % 180 == 0 ? (i.Width, i.Depth) : (i.Depth, i.Width);
+
+                        Assert.True(i.X - across / 2 >= -1 && i.Y - down / 2 >= -1 && i.X + across / 2 <= width * 100 + 1 && i.Y + down / 2 <= length * 100 + 1,
+                            $"{type} {width}×{length}: {i.Label} is outside");
+                    });
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void A_room_starts_with_the_daylight_rules_glass_and_its_main_furniture()
     {
         var catalog = new EmbeddedObjectCatalog();

@@ -132,7 +132,7 @@ public static class StarterLayout
         var tableLength = Math.Clamp(w - 2 * 100, 80, 140);
         var tableY = (60 + SL.KitchenAisle + l) / 2;
         var cooker = room.Get("cooker")?.Width ?? 60;
-        var cookerX = Math.Clamp(w * 0.4, cooker / 2 + 40, w - 70 - cooker);
+        var cookerX = Within(w * 0.4, cooker / 2 + 40, w - 70 - cooker);
         var fridge = room.Against("fridge", PlanWall.Back, w - 32);
         // The worktop fills the rest of the back wall, on both sides of the cooker.
         var right = fridge is { } f ? f.X - 32 : w;
@@ -264,6 +264,19 @@ public static class StarterLayout
         room.Rug("rug", w / 2 - 20, l * 0.55, Math.Min(140, w - 200), Math.Min(200, l - 160));
         room.Place("beanbag", 100, l - 160, 0);
         room.Corner("floor-lamp", PlanWall.Back, PlanWall.Left);
+    }
+
+    /// <summary>
+    /// A value kept within a range, like <see cref="Math.Clamp(double, double, double)"/>, but the range's middle when the
+    /// room is too small for the range to exist (a lowest value above the highest), rather than an error: whatever is
+    /// placed there is then turned down for not fitting.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="low">The lowest value wanted.</param>
+    /// <param name="high">The highest value wanted.</param>
+    private static double Within(double value, double low, double high)
+    {
+        return low > high ? (low + high) / 2 : Math.Clamp(value, low, high);
     }
 
     /// <summary>
@@ -411,6 +424,12 @@ public static class StarterLayout
             var sideways = wall is PlanWall.Left or PlanWall.Right;
             var length = sideways ? Length : Width;
 
+            // Wider than the wall: it fits nowhere along it.
+            if (w > length)
+            {
+                return null;
+            }
+
             // Try the point first, then further and further either side of it.
             for (var shift = 0.0; shift <= length; shift += SL.Step)
             {
@@ -481,7 +500,7 @@ public static class StarterLayout
                 return;
             }
 
-            Place(key, Math.Clamp(x, across / 2, Width - across / 2), Math.Clamp(y, down / 2, Length - down / 2), 0, Math.Round(across), Math.Round(down));
+            Place(key, Within(x, across / 2, Width - across / 2), Within(y, down / 2, Length - down / 2), 0, Math.Round(across), Math.Round(down));
         }
 
         /// <summary>Chairs round a table, facing it: along both long sides, and one at each end when there is room.</summary>
