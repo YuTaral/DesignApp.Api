@@ -25,6 +25,9 @@ internal sealed class RoomPlanConfiguration : IEntityTypeConfiguration<RoomPlan>
         builder.Property(p => p.Outline)
             .HasColumnType(Constants.Persistence.Json)
             .HasConversion(RoomOutlineJson.Converter, RoomOutlineJson.Comparer);
+        builder.Property(p => p.Finish)
+            .HasColumnType(Constants.Persistence.Json)
+            .HasConversion(RoomFinishJson.Converter, RoomFinishJson.Comparer);
         builder.Property(p => p.Items)
             .HasField("_items")
             .UsePropertyAccessMode(PropertyAccessMode.Field)

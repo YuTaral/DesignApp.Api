@@ -16,8 +16,10 @@ namespace DesignApp.Api.Responses;
 /// <param name="Form">Its outline from above.</param>
 /// <param name="Variants">Its variations (shapes and sizes), the first being the object itself; empty for an object the AI described.</param>
 /// <param name="Decorations">The most popular small things to put on it (up to five), offered when it is added; may be empty.</param>
+/// <param name="Materials">What it is usually made of, to choose from; may be empty.</param>
+/// <param name="Material">The material it starts in; empty when it has none.</param>
 public sealed record CatalogObjectResponse(string Key, string Label, ItemShape Shape, double Width, double Depth, double Height, string Color, double Elevation,
-    ItemForm Form, IReadOnlyList<CatalogVariantResponse> Variants, IReadOnlyList<string> Decorations)
+    ItemForm Form, IReadOnlyList<CatalogVariantResponse> Variants, IReadOnlyList<string> Decorations, IReadOnlyList<string> Materials, string Material)
 {
     /// <summary>Maps a catalog object to its API shape.</summary>
     /// <param name="o">The object.</param>
@@ -25,6 +27,6 @@ public sealed record CatalogObjectResponse(string Key, string Label, ItemShape S
     {
         var variants = (o.Variants ?? []).Select(CatalogVariantResponse.From).ToList();
 
-        return new(o.Key, o.Label, o.Shape, o.Width, o.Depth, o.Height, o.Color.Value, o.Elevation, o.Form, variants, o.Decorations ?? []);
+        return new(o.Key, o.Label, o.Shape, o.Width, o.Depth, o.Height, o.Color.Value, o.Elevation, o.Form, variants, o.Decorations ?? [], o.Materials ?? [], o.Material);
     }
 }

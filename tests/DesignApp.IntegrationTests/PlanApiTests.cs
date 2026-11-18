@@ -17,15 +17,15 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         factory.CreateDefaultClient(factory.ClientOptions.BaseAddress, new CookieContainerHandler(_cookies));
 
     [Fact]
-    public async Task Each_room_type_has_windows_doors_and_ten_common_objects_in_three_variations()
+    public async Task Each_room_type_has_windows_doors_and_common_objects_in_three_variations_and_their_materials()
     {
         using var response = await Client.GetAsync("/api/builder/catalog/bedroom");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var objects = (await response.Content.ReadFromJsonAsync<List<JsonElement>>())!;
 
-        // Five windows and doors, three things to hang on any wall plus a wall TV, and ten objects for the floor.
-        Assert.Equal(19, objects.Count);
+        // Every room's sixteen: five windows and doors, nine things to hang and two for the floor; then the bedroom's seventeen.
+        Assert.Equal(33, objects.Count);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "painting" && o.GetProperty("shape").GetString() == "Picture" && o.GetProperty("elevation").GetDouble() == 130);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "window" && o.GetProperty("elevation").GetDouble() == 90);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "double-bed" && o.GetProperty("shape").GetString() == "Bed");
@@ -39,6 +39,11 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(5, bed.Count);
         Assert.Contains("throw blanket", bed);
         Assert.Equal(0, objects.Single(o => o.GetProperty("key").GetString() == "rug").GetProperty("decorations").GetArrayLength());
+        // Each offers what it is usually made of, and starts in one of them.
+        var bedFrame = objects.Single(o => o.GetProperty("key").GetString() == "double-bed");
+
+        Assert.Contains("oak", bedFrame.GetProperty("materials").EnumerateArray().Select(m => m.GetString()));
+        Assert.Equal("linen upholstered", bedFrame.GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, (await Client.GetAsync("/api/builder/catalog/garage")).StatusCode);
     }
 
@@ -156,6 +161,52 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var stranger = factory.CreateDefaultClient(factory.ClientOptions.BaseAddress, new CookieContainerHandler(new CookieContainer()));
 
         Assert.Equal(HttpStatusCode.NotFound, (await stranger.GetAsync($"/api/plans/{id}")).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_rooms_finish_and_its_objects_materials_are_saved_and_read_back()
+    {
+        var finish = new
+        {
+            walls = "Plaster", accentWall = 0, accentColor = "#B5654A", accentFinish = "Brick", ceilingColor = "#3A3A3A", trimColor = "#1E1E1E",
+            ceilingLight = "Chandelier", timeOfDay = "Evening",
+        };
+        var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
+
+        using var created = await Client.PostAsJsonAsync("/api/plans",
+            new { name = "Sleep", roomType = "Bedroom", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A" });
+        var plan = (await created.Content.ReadFromJsonAsync<JsonElement>())!;
+        var id = plan.GetProperty("id").GetGuid();
+
+        // A furnished bedroom starts with the wall behind its bed in its own color, and its furniture in its materials.
+        Assert.Equal((1, "Paint", "Pendant"), (plan.GetProperty("finish").GetProperty("accentWall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
+            plan.GetProperty("finish").GetProperty("ceilingLight").GetString()));
+        Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("material").GetString() == "linen upholstered");
+
+        using var saved = await Client.PutAsJsonAsync($"/api/plans/{id}", new
+        {
+            name = "Sleep", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", view = 0, items = new[] { sofa }, finish,
+        });
+        using var kept = await Client.PutAsJsonAsync($"/api/plans/{id}", new
+        {
+            name = "Sleep", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", view = 0, items = new[] { sofa },
+        });
+        var read = await Client.GetFromJsonAsync<JsonElement>($"/api/plans/{id}");
+        using var refused = await Client.PutAsJsonAsync($"/api/plans/{id}", new
+        {
+            name = "Sleep", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", view = 0, items = new[] { sofa },
+            finish = new { finish.walls, accentWall = 9, finish.accentColor, finish.accentFinish, finish.ceilingColor, finish.trimColor, finish.ceilingLight, finish.timeOfDay },
+        });
+        var stored = read.GetProperty("finish");
+
+        saved.EnsureSuccessStatusCode();
+        kept.EnsureSuccessStatusCode();
+        // Saving without a finish keeps the one the room has.
+        Assert.Equal(("Plaster", 0, "Brick", "#3A3A3A", "Chandelier", "Evening"), (stored.GetProperty("walls").GetString(), stored.GetProperty("accentWall").GetInt32(),
+            stored.GetProperty("accentFinish").GetString(), stored.GetProperty("ceilingColor").GetString(), stored.GetProperty("ceilingLight").GetString(),
+            stored.GetProperty("timeOfDay").GetString()));
+        Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }
 
     [Fact]

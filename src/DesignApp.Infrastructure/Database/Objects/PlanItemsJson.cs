@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using DesignApp.Domain.Objects;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -12,11 +11,7 @@ namespace DesignApp.Infrastructure.Database;
 /// <summary>Stores the objects of a built room as a jsonb array (always read and written with their plan).</summary>
 internal static class PlanItemsJson
 {
-    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
-    {
-        Converters = { new JsonStringEnumConverter() },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
+    private static readonly JsonSerializerOptions Options = JsonColumnOptions.Value;
 
     /// <summary>Converts the objects to and from the jsonb column.</summary>
     public static readonly ValueConverter<IReadOnlyList<PlanItem>, string> Converter = new(
@@ -58,22 +53,23 @@ internal static class PlanItemsJson
     /// <param name="Form">Its outline from above (missing for a rectangle, and in older plans).</param>
     /// <param name="Parts">An L- or P-shaped object's parts (missing for other outlines; the usual ones in older plans).</param>
     /// <param name="Decorations">The small things on it (missing when none).</param>
+    /// <param name="Material">What it is made of (missing when none, and in older plans).</param>
     private sealed record StoredItem(string Label, ItemShape Shape, double X, double Y, double Width, double Depth, double Height, int Rotation, string Color,
-        int? Wall = null, double Elevation = 0, ItemForm? Form = null, ItemParts? Parts = null, IReadOnlyList<string>? Decorations = null)
+        int? Wall = null, double Elevation = 0, ItemForm? Form = null, ItemParts? Parts = null, IReadOnlyList<string>? Decorations = null, string? Material = null)
     {
         /// <summary>The stored form of an object.</summary>
         /// <param name="i">The object.</param>
         public static StoredItem From(PlanItem i)
         {
             return new(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation,
-                i.Form == ItemForm.Standard ? null : i.Form, i.Parts, i.Decorations.IsEmpty ? null : i.Decorations.Names);
+                i.Form == ItemForm.Standard ? null : i.Form, i.Parts, i.Decorations.IsEmpty ? null : i.Decorations.Names, i.Material.Length == 0 ? null : i.Material);
         }
 
         /// <summary>The object this stored form describes.</summary>
         public PlanItem ToDomain()
         {
             return new(Label, Shape, X, Y, Width, Depth, Height, Rotation, HexColor.Parse(Color), Wall, Elevation, Form ?? ItemForm.Standard, Parts,
-                Decorations is null ? null : new ItemDecorations(Decorations));
+                Decorations is null ? null : new ItemDecorations(Decorations), Material);
         }
     }
 }

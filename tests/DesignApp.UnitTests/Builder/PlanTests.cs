@@ -84,7 +84,7 @@ public class PlanTests
     }
 
     [Fact]
-    public void Every_room_type_offers_windows_doors_and_ten_common_objects_of_real_sizes()
+    public void Every_room_type_offers_windows_doors_and_at_least_twelve_common_objects_of_real_sizes()
     {
         var catalog = new EmbeddedObjectCatalog();
 
@@ -92,7 +92,7 @@ public class PlanTests
         {
             var objects = catalog.ForRoom(type);
 
-            Assert.Equal(10, objects.Count(o => !o.Shape.IsOnWall()));
+            Assert.True(objects.Count(o => !o.Shape.IsOnWall()) >= 12, $"{type}: {objects.Count(o => !o.Shape.IsOnWall())} objects on the floor");
             // Every room offers things to hang: a painting, a mirror and a wall shelf at least.
             Assert.True(objects.Count(o => o.Shape.IsMounted()) >= 3);
             Assert.All(objects.Where(o => o.Shape.IsMounted()), o => Assert.True(o.Elevation > 0 && o.Depth <= Plans.MaxMountedDepth));
@@ -417,8 +417,8 @@ public class PlanTests
     {
         var create = new CreatePlan(_plans, new FixedUser("user-1"), new FixedClock(Now), new EmbeddedObjectCatalog());
 
-        var furnished = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, CancellationToken.None);
-        var empty = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, CancellationToken.None);
+        var furnished = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, CancellationToken.None);
+        var empty = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, null, CancellationToken.None);
 
         Assert.Contains(furnished.Items, i => i.Shape == ItemShape.Bed);
         Assert.Empty(empty.Items);

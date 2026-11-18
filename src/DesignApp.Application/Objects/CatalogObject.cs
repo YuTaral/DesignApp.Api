@@ -22,5 +22,9 @@ namespace DesignApp.Application.Objects;
 /// described, which has none.
 /// </param>
 /// <param name="Decorations">The most popular small things to put on it (up to five), offered when it is added; none for most rugs and lamps.</param>
+/// <param name="Materials">What it is usually made of or covered in, to choose from (such as "linen" or "velvet"); none for an object the AI described.</param>
+/// <param name="Material">The material it starts in, one of <paramref name="Materials"/>; empty when it has none.</param>
+/// <param name="Dressing">The decorations it has in a furnished new room, some of <paramref name="Decorations"/>; none when missing.</param>
 public sealed record CatalogObject(string Key, string Label, ItemShape Shape, double Width, double Depth, double Height, HexColor Color, double Elevation = 0,
-    ItemForm Form = ItemForm.Standard, IReadOnlyList<CatalogVariant>? Variants = null, IReadOnlyList<string>? Decorations = null);
+    ItemForm Form = ItemForm.Standard, IReadOnlyList<CatalogVariant>? Variants = null, IReadOnlyList<string>? Decorations = null,
+    IReadOnlyList<string>? Materials = null, string Material = "", IReadOnlyList<string>? Dressing = null);

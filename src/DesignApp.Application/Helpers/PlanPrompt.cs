@@ -82,7 +82,7 @@ public static partial class PlanPrompt
             text.Append(culture, $" {B.Prompt.Shape(walls)}");
         }
 
-        text.Append(culture, $" {B.Prompt.Surfaces(Color(plan.WallColor), B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor))}");
+        text.Append(culture, $" {Surfaces(plan, frame)} {B.Prompt.Mood(plan.Finish.TimeOfDay)}");
         text.Append(culture, $" {(corner == ViewCorner.None ? B.Prompt.Camera : B.Prompt.CornerCamera(corner == ViewCorner.Left))}");
         text.Append(culture, $" {(decorated ? B.Prompt.WithDecorations : B.Prompt.Undecorated)}");
 
@@ -111,6 +111,31 @@ public static partial class PlanPrompt
         return text.ToString();
     }
 
+    /// <summary>
+    /// The walls' finish and color, the accent wall (when the photo sees it), the ceiling and its light, the trim and the
+    /// floor.
+    /// </summary>
+    /// <param name="plan">The room.</param>
+    /// <param name="frame">The photo's frame.</param>
+    private static string Surfaces(RoomPlan plan, Frame frame)
+    {
+        var finish = plan.Finish;
+        var walls = Look(finish.Walls, plan.WallColor);
+        var seen = finish.AccentWall is { } wall ? frame.Name(wall) : null;
+        var accent = seen is null ? "" : B.Prompt.Accent(seen, Look(finish.AccentFinish, finish.AccentColor));
+
+        return B.Prompt.Surfaces(walls, accent, Color(finish.CeilingColor), B.Prompt.LightWords(finish.CeilingLight), Color(finish.TrimColor),
+            B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
+    }
+
+    /// <summary>A wall finish with its color, such as "exposed brick in terracotta (#B5654A)".</summary>
+    /// <param name="finish">The finish.</param>
+    /// <param name="color">The color.</param>
+    private static string Look(WallFinish finish, HexColor color)
+    {
+        return $"{B.Prompt.FinishWords(finish)} {Color(color)}";
+    }
+
     /// <summary>An object on the floor: its color, where its middle is, its size as the photo sees it, and its facing.</summary>
     /// <param name="item">The object.</param>
     /// <param name="frame">The photo's frame.</param>
@@ -128,7 +153,7 @@ public static partial class PlanPrompt
             : B.Prompt.Size(Cm(across), Cm(deep), Cm(item.Height));
         var appliance = IsAppliance(item) ? B.Prompt.Appliance : "";
 
-        return B.Prompt.Standing(item.Label, Color(item.Color), Cm(fromLeft), Cm(fromFar), size) + Outline(item, frame) + appliance + facing;
+        return B.Prompt.Standing(item.Label, Looks(item), Cm(fromLeft), Cm(fromFar), size) + Outline(item, frame) + appliance + facing;
     }
 
     /// <summary>Points over an object on the plan: a grid over its footprint, on the floor and at its top.</summary>
@@ -354,7 +379,7 @@ public static partial class PlanPrompt
     {
         var where = frame.Place(item.Wall!.Value, item.X);
 
-        return B.Prompt.Opening(item.Label, Color(item.Color), where, Cm(item.Width), Cm(item.Height), Cm(item.Elevation));
+        return B.Prompt.Opening(item.Label, Looks(item), where, Cm(item.Width), Cm(item.Height), Cm(item.Elevation));
     }
 
     /// <summary>A thing hung on a wall in view: which wall, where along it, its size, its height above the floor and how far it sticks out.</summary>
@@ -377,11 +402,21 @@ public static partial class PlanPrompt
         return $"{Named(item)}{Decorations(item)}";
     }
 
-    /// <summary>An object's name with its color: before it ("warm grey (#8A8580) sofa"), or as its frame's for a picture.</summary>
+    /// <summary>
+    /// An object's name with its color and material: before it ("warm grey (#8A8580) velvet sofa"), or as its frame's for
+    /// a picture ("print in a black (#2A2A2A) oak frame").
+    /// </summary>
     /// <param name="item">The object.</param>
     private static string Named(PlanItem item)
     {
-        return item.Shape is ItemShape.Picture ? B.Prompt.Framed(item.Label, Color(item.Color)) : $"{Color(item.Color)} {item.Label}";
+        return item.Shape is ItemShape.Picture ? B.Prompt.Framed(item.Label, Looks(item)) : $"{Looks(item)} {item.Label}";
+    }
+
+    /// <summary>An object's color with its material, if any: "sage green (#A8B89A) velvet".</summary>
+    /// <param name="item">The object.</param>
+    private static string Looks(PlanItem item)
+    {
+        return item.Material.Length == 0 ? Color(item.Color) : $"{Color(item.Color)} {item.Material}";
     }
 
     /// <summary>A color as words and its code, such as "sage green (#A8B89A)".</summary>
@@ -569,6 +604,28 @@ public static partial class PlanPrompt
             }
 
             return Parallel(wall) ? B.Prompt.OnStepWall(Cm(fromFar), Cm(fromLeft)) : B.Prompt.OnSideWallAt(OnLeft(wall), Cm(fromLeft), Cm(fromFar));
+        }
+
+        /// <summary>
+        /// A wall by the name the photo knows it by: the far wall, the left or right wall, or a wall facing the camera;
+        /// <c>null</c> for the wall behind the camera, or one the camera doesn't see.
+        /// </summary>
+        /// <param name="wall">The wall's number.</param>
+        public string? Name(int wall)
+        {
+            var names = B.Prompt.WallNames;
+
+            if (wall == View)
+            {
+                return names.Far;
+            }
+
+            if (wall == Near || wall >= Outline.Walls.Count || !Faces(wall))
+            {
+                return null;
+            }
+
+            return Parallel(wall) ? names.Facing : OnLeft(wall) ? names.Left : names.Right;
         }
 
         /// <summary>Which way an object turned on the plan faces in the photo.</summary>

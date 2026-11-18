@@ -31,9 +31,10 @@ public static class StarterLayout
     {
         ArgumentNullException.ThrowIfNull(catalog);
         var room = new Room(width * 100, length * 100, height * 100, catalog);
+        var wet = type is RoomType.Kitchen or RoomType.Bathroom;
 
         room.Door();
-        room.Windows(type is RoomType.Kitchen or RoomType.Bathroom ? SL.WetSill : SL.Sill, type is RoomType.Bathroom ? SL.BathroomGlassShare : SL.GlassShare);
+        room.Windows(wet ? SL.WetSill : SL.Sill, type is RoomType.Bathroom ? SL.BathroomGlassShare : SL.GlassShare, wet ? SL.Blind : SL.Curtains);
 
         switch (type)
         {
@@ -63,7 +64,39 @@ public static class StarterLayout
         return room.Items;
     }
 
-    /// <summary>A sofa along the left wall facing a TV stand on the right, a coffee table and rug between them, an armchair, lamp, side table, plant and bookshelf.</summary>
+    /// <summary>
+    /// The finish a furnished room of a type starts with: tiled walls and spotlights in a bathroom, spotlights in a
+    /// kitchen, an accent wall behind the bed in a bedroom (the right wall) and a kids' room, the usual pendant elsewhere.
+    /// </summary>
+    /// <param name="type">The room type.</param>
+    public static RoomFinish FinishFor(RoomType type)
+    {
+        var plain = RoomFinish.Default;
+        var spotlights = new RoomFinish(plain.Walls, null, plain.AccentColor, plain.AccentFinish, plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay);
+
+        return type switch
+        {
+            RoomType.Bathroom => new RoomFinish(WallFinish.Tiles, null, plain.AccentColor, plain.AccentFinish, plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights,
+                plain.TimeOfDay),
+            RoomType.Kitchen => spotlights,
+            RoomType.Bedroom => Accent(plain, HexColor.Parse(SL.BedroomAccent)),
+            RoomType.KidsRoom => Accent(plain, HexColor.Parse(SL.KidsAccent)),
+            _ => plain,
+        };
+    }
+
+    /// <summary>A finish with the right wall (behind or beside the bed) painted in its own color.</summary>
+    /// <param name="plain">The finish to start from.</param>
+    /// <param name="color">The accent wall's color.</param>
+    private static RoomFinish Accent(RoomFinish plain, HexColor color)
+    {
+        return new RoomFinish(plain.Walls, (int)PlanWall.Right, color, WallFinish.Paint, plain.CeilingColor, plain.TrimColor, plain.CeilingLight, plain.TimeOfDay);
+    }
+
+    /// <summary>
+    /// A sofa along the left wall with art above it, facing a TV stand on the right with the TV hung above it, a coffee
+    /// table, ottoman and rug between them, an armchair, lamp, side table, plant and bookshelf, and a radiator under the window.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void LivingRoom(Room room)
     {
@@ -84,10 +117,17 @@ public static class StarterLayout
             if (w - (tableX + 30) - tvDepth >= SL.Walkway)
             {
                 room.Place("coffee-table", tableX, s.Y, 90, width: tableLength);
+                room.Place("ottoman", tableX, s.Y + tableLength / 2 + 40, 0);
             }
 
             room.Rug("rug", (depth - 20 + w - tvDepth - 30) / 2, s.Y, Math.Min(w - depth - tvDepth - 10, 200), Math.Min(sofa.Width + 60, l - 60));
-            room.Against("tv-stand", PlanWall.Right, s.Y, Math.Clamp(sofa.Width * 0.7, 100, 180));
+
+            if (room.Against("tv-stand", PlanWall.Right, s.Y, Math.Clamp(sofa.Width * 0.7, 100, 180)) is { } tv)
+            {
+                room.Hang("wall-tv", PlanWall.Right, tv.Y);
+            }
+
+            room.Hang("art-set", PlanWall.Left, s.Y);
             room.Against("side-table", PlanWall.Left, s.Y - sofa.Width / 2 - 30);
             room.Corner("floor-lamp", PlanWall.Back, PlanWall.Left);
         }
@@ -95,14 +135,20 @@ public static class StarterLayout
         room.Against("armchair", PlanWall.Back, w - 100);
         room.Corner("plant", PlanWall.Back, PlanWall.Right);
         room.Against("bookshelf", PlanWall.Right, l - 70);
+        room.UnderWindow("radiator");
     }
 
-    /// <summary>The bed's headboard on the right wall with a nightstand each side, a wardrobe on the left wall, a rug at the bed's foot, a dresser, an armchair and a lamp.</summary>
+    /// <summary>
+    /// The bed's headboard on the right wall with art above it, a nightstand with a lamp each side and a bench at its foot,
+    /// a wardrobe on the left wall, a rug, a dresser with a mirror above it, an armchair with a floor lamp, a plant, and a
+    /// radiator under the window.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void Bedroom(Room room)
     {
         var (w, l) = (room.Width, room.Length);
         var nightstand = room.Get("nightstand")?.Width ?? 45;
+        var wardrobeDepth = room.Get("wardrobe")?.Depth ?? 60;
         // A double bed when it leaves room beside it; otherwise a smaller one.
         var bedWidth = l >= 160 + 2 * (nightstand + 10) + 40 ? 160 : l >= 120 + 2 * SL.BedSide ? 120 : 90;
         var bedLength = w - 210 >= SL.Walkway + 60 ? 210 : 200;
@@ -114,15 +160,33 @@ public static class StarterLayout
             room.Against("nightstand", PlanWall.Right, b.Y - bedWidth / 2 - 5 - nightstand / 2);
             room.Against("nightstand", PlanWall.Right, b.Y + bedWidth / 2 + 5 + nightstand / 2);
             room.Rug("rug", w - bedLength * 0.55, b.Y, Math.Min(230, w - 100), Math.Min(bedWidth + 90, l - 60));
+            room.Hang("art-set", PlanWall.Right, b.Y);
+
+            // A bench across the bed's foot, when a walkway is left between it and the wardrobe.
+            if (w - bedLength - 45 - wardrobeDepth >= SL.Walkway)
+            {
+                room.Place("bed-bench", w - bedLength - 25, b.Y, 90, width: Math.Min(130, bedWidth - 20));
+            }
         }
 
         room.Against("wardrobe", PlanWall.Left, 30 + 75, Math.Clamp(room.FreeAlongLeft - 60, 80, 150));
-        room.Against("dresser", PlanWall.Back, w * 0.4);
+
+        if (room.Against("dresser", PlanWall.Back, w * 0.4) is { } dresser)
+        {
+            room.Hang("mirror", PlanWall.Back, dresser.X);
+        }
+
         room.Against("armchair", PlanWall.Back, 110);
+        room.Corner("floor-lamp", PlanWall.Back, PlanWall.Left);
         room.Corner("plant", PlanWall.Back, PlanWall.Right);
+        room.UnderWindow("radiator");
     }
 
-    /// <summary>Base cabinets, a cooker and the fridge along the back wall, a tall cabinet and bin on the left, and an island with stools or a table with chairs.</summary>
+    /// <summary>
+    /// The back wall's worktop: the sink under the window with the dishwasher beside it, the cooker with its hood, the
+    /// fridge at the end, base cabinets between them and wall cabinets above them; a tall cabinet and bin on the left,
+    /// open shelves on the right, and an island with stools or a table with chairs.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void Kitchen(Room room)
     {
@@ -131,17 +195,31 @@ public static class StarterLayout
         var islandLength = Math.Clamp(w - 2 * SL.KitchenAisle, 120, 180);
         var tableLength = Math.Clamp(w - 2 * 100, 80, 140);
         var tableY = (60 + SL.KitchenAisle + l) / 2;
-        var cooker = room.Get("cooker")?.Width ?? 60;
-        var cookerX = Within(w * 0.4, cooker / 2 + 40, w - 70 - cooker);
+        var cookerWidth = room.Get("cooker")?.Width ?? 60;
+        var cookerX = Within(w * 0.4, cookerWidth / 2 + 40, w - 70 - cookerWidth);
         var fridge = room.Against("fridge", PlanWall.Back, w - 32);
-        // The worktop fills the rest of the back wall, on both sides of the cooker.
-        var right = fridge is { } f ? f.X - 32 : w;
+        var cooker = room.Against("cooker", PlanWall.Back, cookerX);
+        var sink = room.Against("sink-unit", PlanWall.Back, room.BackWindow()?.X ?? w * 0.7);
 
-        room.Against("cooker", PlanWall.Back, cookerX);
-        room.Run("base-cabinets", PlanWall.Back, 0, cookerX - cooker / 2);
-        room.Run("base-cabinets", PlanWall.Back, cookerX + cooker / 2, right);
+        if (sink is { } k)
+        {
+            room.Against("dishwasher", PlanWall.Back, k.X + k.Width / 2 + 30);
+        }
+
+        if (cooker is { } c)
+        {
+            room.Hang("cooker-hood", PlanWall.Back, c.X);
+        }
+
+        // The worktop fills the rest of the back wall, with wall cabinets above it where there is no window.
+        foreach (var run in room.FillBack("base-cabinets"))
+        {
+            room.Hang("upper-cabinets", PlanWall.Back, run.X, width: run.Width);
+        }
+
         room.Against("tall-cabinets", PlanWall.Left, 60 + 30);
         room.Against("bin", PlanWall.Left, 60 + 60 + 25);
+        room.Hang("open-shelves", PlanWall.Right, (fridge?.Depth ?? 65) + 80);
 
         if (w >= islandLength + 2 * SL.KitchenAisle && l >= islandY + 45 + 50 + SL.Walkway && room.Place("island", w / 2, islandY, 0, width: islandLength) is not null)
         {
@@ -161,7 +239,10 @@ public static class StarterLayout
         }
     }
 
-    /// <summary>A bathtub (or a shower in a small room) and a vanity on the back wall, the toilet on the right wall, a tall cabinet, a towel rail and a bath mat.</summary>
+    /// <summary>
+    /// A bathtub (or a shower in a small room) with a shelf above it and a vanity with a mirror cabinet above it on the
+    /// back wall, the toilet on the right wall, a tall cabinet, a towel rail with towels, a bath mat, a laundry basket and a plant.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void Bathroom(Room room)
     {
@@ -172,16 +253,25 @@ public static class StarterLayout
         if (wet is { } t)
         {
             room.Rug("bath-mat", t.X, t.Y + t.Depth / 2 + 30, 80, 50);
+            room.Hang("bath-shelf", PlanWall.Back, t.X);
         }
 
-        room.Against("vanity", PlanWall.Back, w - 45);
+        if (room.Against("vanity", PlanWall.Back, w - 45) is { } vanity)
+        {
+            room.Hang("mirror-cabinet", PlanWall.Back, vanity.X);
+        }
+
         room.Against("toilet", PlanWall.Right, Math.Max(l * 0.5, 100));
         room.Against("tall-cabinet", PlanWall.Right, l - 40);
         room.Against("towel-rail", PlanWall.Left, Math.Min(l * 0.45, room.FreeAlongLeft - 40));
         room.Against("laundry-basket", PlanWall.Left, room.FreeAlongLeft - 30);
+        room.Against("plant", PlanWall.Left, 30);
     }
 
-    /// <summary>A dining table in the middle along the longer side with chairs all round, a rug under it, a sideboard, a display cabinet, a lamp and a plant.</summary>
+    /// <summary>
+    /// A dining table in the middle along the longer side with chairs all round, a rug under it, a sideboard with art
+    /// above it (or on the left wall), a display cabinet, a lamp, a plant, and a radiator under the window.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void DiningRoom(Room room)
     {
@@ -210,25 +300,32 @@ public static class StarterLayout
             room.Chairs("chair", middle.x, middle.y, diameter, diameter, 0);
         }
 
-        room.Against("sideboard", PlanWall.Back, w / 2);
+        var sideboard = room.Against("sideboard", PlanWall.Back, w / 2);
+
+        room.HangAny("art-set", (PlanWall.Back, sideboard?.X ?? w / 2), (PlanWall.Left, room.FreeAlongLeft / 2));
         room.Against("display-cabinet", PlanWall.Right, 70);
         room.Corner("plant", PlanWall.Back, PlanWall.Left);
         room.Corner("floor-lamp", PlanWall.Back, PlanWall.Right);
+        room.UnderWindow("radiator");
     }
 
-    /// <summary>A desk under the back window with its chair, a filing cabinet, a bookshelf on the right wall, a sofa bed (or an armchair) on the left, a rug, a lamp and a plant.</summary>
+    /// <summary>
+    /// A desk under the back window with its chair and a pinboard above it (or on the left wall), a filing cabinet, a
+    /// bookshelf on the right wall, a sofa bed (or an armchair) on the left, a rug, a lamp, a plant, and a radiator under the window.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void HomeOffice(Room room)
     {
         var (w, l) = (room.Width, room.Length);
         var deskWidth = Math.Clamp(w * 0.45, 100, 160);
         var deskDepth = room.Get("desk")?.Depth ?? 70;
+        var desk = room.Against("desk", PlanWall.Back, w / 2, deskWidth);
 
-        if (room.Against("desk", PlanWall.Back, w / 2, deskWidth) is { } desk)
+        if (desk is { } d)
         {
-            room.Place("office-chair", desk.X, deskDepth + 35, 180);
-            room.Against("filing-cabinet", PlanWall.Back, desk.X + deskWidth / 2 + 30);
-            room.Rug("rug", desk.X, deskDepth + 80, Math.Min(deskWidth + 40, w - 60), Math.Min(160, l - deskDepth - 60));
+            room.Place("office-chair", d.X, deskDepth + 35, 180);
+            room.Against("filing-cabinet", PlanWall.Back, d.X + deskWidth / 2 + 30);
+            room.Rug("rug", d.X, deskDepth + 80, Math.Min(deskWidth + 40, w - 60), Math.Min(160, l - deskDepth - 60));
         }
 
         room.Against("bookshelf", PlanWall.Right, 60);
@@ -239,18 +336,23 @@ public static class StarterLayout
             room.Against("armchair", PlanWall.Left, room.FreeAlongLeft / 2);
         }
 
+        room.HangAny("pinboard", (PlanWall.Back, desk?.X ?? w / 2), (PlanWall.Left, room.FreeAlongLeft / 2));
         room.Corner("plant", PlanWall.Back, PlanWall.Left);
         room.Against("floor-lamp", PlanWall.Right, 60 + 40 + 30);
+        room.UnderWindow("radiator");
     }
 
-    /// <summary>A single bed along the right wall with its head at the back, a nightstand, a wardrobe and toy box on the left, a desk with its chair, a bookcase, a rug, a beanbag and a lamp.</summary>
+    /// <summary>
+    /// A single bed along the right wall with its head at the back and wall stickers above it, a nightstand, a wardrobe and
+    /// toy box on the left, a desk with its chair, a bookcase, a rug, a beanbag, a play tent when there is room, and a lamp.
+    /// </summary>
     /// <param name="room">The room.</param>
     private static void KidsRoom(Room room)
     {
         var (w, l) = (room.Width, room.Length);
         var bedLength = room.Get("single-bed")?.Depth ?? 200;
+        var bed = room.Place("single-bed", w - 45, bedLength / 2, 0);
 
-        room.Place("single-bed", w - 45, bedLength / 2, 0);
         room.Against("nightstand", PlanWall.Back, w - 90 - 5 - 20);
         room.Against("wardrobe", PlanWall.Left, 60);
         room.Against("toy-box", PlanWall.Left, 60 + 50 + 60);
@@ -260,9 +362,15 @@ public static class StarterLayout
             room.Place("chair", desk.X, (room.Get("desk")?.Depth ?? 55) + 30, 180);
         }
 
+        if (bed is { } b)
+        {
+            room.Hang("wall-stickers", PlanWall.Right, b.Y, elevation: b.Height + 20);
+        }
+
         room.Against("bookcase", PlanWall.Right, bedLength + 10 + 50);
         room.Rug("rug", w / 2 - 20, l * 0.55, Math.Min(140, w - 200), Math.Min(200, l - 160));
         room.Place("beanbag", 100, l - 160, 0);
+        room.Corner("play-tent", PlanWall.Front, PlanWall.Right);
         room.Corner("floor-lamp", PlanWall.Back, PlanWall.Left);
     }
 
@@ -289,8 +397,9 @@ public static class StarterLayout
     /// <param name="Catalog">The objects that can be placed.</param>
     private sealed record Room(double Width, double Length, double Height, IReadOnlyList<CatalogObject> Catalog)
     {
-        private readonly List<(double X1, double Y1, double X2, double Y2)> _taken = [];
-        private readonly List<(PlanWall Wall, double From, double To, double Bottom)> _openings = [];
+        private readonly List<(double X1, double Y1, double X2, double Y2, double Top)> _taken = [];
+        private readonly List<(PlanWall Wall, double From, double To, double Bottom, double Top)> _openings = [];
+        private readonly List<(PlanWall Wall, double From, double To, double Bottom, double Top)> _hung = [];
 
         /// <summary>The objects placed so far.</summary>
         public List<PlanItem> Items { get; } = [];
@@ -330,9 +439,9 @@ public static class StarterLayout
             var along = SL.DoorMargin + door.Width / 2;
             var (from, to) = (Length - SL.DoorMargin - door.Width, Length - SL.DoorMargin);
 
-            Items.Add(new PlanItem(door.Label, door.Shape, along, 0, door.Width, door.Depth, height, 0, door.Color, (int)PlanWall.Left));
-            _openings.Add((PlanWall.Left, from, to, 0));
-            _taken.Add((0, from, door.Width, to));
+            Items.Add(new PlanItem(door.Label, door.Shape, along, 0, door.Width, door.Depth, height, 0, door.Color, (int)PlanWall.Left, material: door.Material));
+            _openings.Add((PlanWall.Left, from, to, 0, height));
+            _taken.Add((0, from, door.Width, to, height));
             FreeAlongLeft = from - SL.SideGap;
         }
 
@@ -342,7 +451,8 @@ public static class StarterLayout
         /// </summary>
         /// <param name="sill">How high their bottom is above the floor, in centimetres.</param>
         /// <param name="share">The glass wanted, as a share of the floor area.</param>
-        public void Windows(double sill, double share)
+        /// <param name="dressing">What they are dressed with, such as "sheer curtains".</param>
+        public void Windows(double sill, double share, string dressing)
         {
             var window = Catalog.FirstOrDefault(o => o.Key == "window") ?? Catalog.FirstOrDefault(o => o.Shape == ItemShape.Window);
 
@@ -379,14 +489,14 @@ public static class StarterLayout
 
             for (var i = 0; i < count; i++)
             {
-                AddWindow(window, PlanWall.Back, step * (i + 0.5), each, height, sill);
+                AddWindow(window, PlanWall.Back, step * (i + 0.5), each, height, sill, dressing);
             }
 
             var missing = wanted - count * each;
 
             if (missing >= SL.MinWindowWidth && Length >= missing + 2 * SL.WindowGap)
             {
-                AddWindow(window, PlanWall.Right, Length * 0.35, Math.Round(Math.Min(missing, SL.MaxWindowWidth) / 10) * 10, height, sill);
+                AddWindow(window, PlanWall.Right, Length * 0.35, Math.Round(Math.Min(missing, SL.MaxWindowWidth) / 10) * 10, height, sill, dressing);
             }
         }
 
@@ -397,10 +507,116 @@ public static class StarterLayout
         /// <param name="width">Its width.</param>
         /// <param name="height">Its height.</param>
         /// <param name="sill">Its height above the floor.</param>
-        private void AddWindow(CatalogObject window, PlanWall wall, double along, double width, double height, double sill)
+        /// <param name="dressing">What it is dressed with.</param>
+        private void AddWindow(CatalogObject window, PlanWall wall, double along, double width, double height, double sill, string dressing)
         {
-            Items.Add(new PlanItem(window.Label, window.Shape, Math.Round(along), 0, width, window.Depth, Math.Round(height), 0, window.Color, (int)wall, sill));
-            _openings.Add((wall, along - width / 2, along + width / 2, sill));
+            Items.Add(new PlanItem(window.Label, window.Shape, Math.Round(along), 0, width, window.Depth, Math.Round(height), 0, window.Color, (int)wall, sill,
+                decorations: new ItemDecorations([dressing]), material: window.Material));
+            _openings.Add((wall, along - width / 2, along + width / 2, sill, sill + height));
+        }
+
+        /// <summary>The first window on the back wall, if any.</summary>
+        public PlanItem? BackWindow()
+        {
+            return Items.FirstOrDefault(i => i.Shape == ItemShape.Window && i.Wall == (int)PlanWall.Back);
+        }
+
+        /// <summary>Something hung under the first back window, such as a radiator, when it fits there.</summary>
+        /// <param name="key">The object.</param>
+        public PlanItem? UnderWindow(string key)
+        {
+            var window = BackWindow();
+
+            return window is null ? null : Hang(key, PlanWall.Back, window.X);
+        }
+
+        /// <summary>
+        /// Something hung on a wall (a picture, a TV, wall cabinets), above what stands against it: clear of the wall's
+        /// windows and doors, of other hung things and of furniture taller than its bottom, inside the wall and under the ceiling.
+        /// </summary>
+        /// <param name="key">The object.</param>
+        /// <param name="wall">The wall.</param>
+        /// <param name="at">Its middle: across the plan for the back and front walls, down it for the sides.</param>
+        /// <param name="width">Its width, when not the usual.</param>
+        /// <param name="elevation">Its bottom above the floor, when not the usual.</param>
+        /// <returns>The object hung, or <c>null</c> when it doesn't fit there.</returns>
+        public PlanItem? Hang(string key, PlanWall wall, double at, double? width = null, double? elevation = null)
+        {
+            var o = Get(key);
+
+            if (o is null)
+            {
+                return null;
+            }
+
+            var w = Math.Round(width ?? o.Width);
+            var length = wall is PlanWall.Left or PlanWall.Right ? Length : Width;
+            var bottom = Math.Round(Math.Min(elevation ?? o.Elevation, Height - o.Height - SL.CeilingGap));
+            var (from, to, top) = (at - w / 2, at + w / 2, bottom + o.Height);
+            // A wall's own "along" runs from its left end seen from inside: the front wall's from the right, the left wall's from the front.
+            var along = wall switch
+            {
+                PlanWall.Front => Width - at,
+                PlanWall.Left => Length - at,
+                _ => at,
+            };
+            var inside = from >= 0 && to <= length && bottom >= 0;
+            var crossed = _openings.Concat(_hung).Any(x => x.Wall == wall && from < x.To && x.From < to && bottom < x.Top && x.Bottom < top);
+            var standing = _taken.Any(t => Touches(t, wall) && from < Span(t, wall).To && Span(t, wall).From < to && t.Top > bottom);
+
+            if (!inside || crossed || standing)
+            {
+                return null;
+            }
+
+            var item = new PlanItem(o.Label, o.Shape, Math.Round(along), 0, w, o.Depth, o.Height, 0, o.Color, (int)wall, bottom, decorations: Dress(o), material: o.Material);
+
+            Items.Add(item);
+            _hung.Add((wall, from, to, bottom, top));
+
+            return item;
+        }
+
+        /// <summary>Something hung at the first of some spots where it fits (art above a sideboard, else on another wall).</summary>
+        /// <param name="key">The object.</param>
+        /// <param name="spots">The walls and points to try, in order.</param>
+        /// <returns>The object hung, or <c>null</c> when it fits at none.</returns>
+        public PlanItem? HangAny(string key, params (PlanWall Wall, double At)[] spots)
+        {
+            foreach (var (wall, at) in spots)
+            {
+                if (Hang(key, wall, at) is { } hung)
+                {
+                    return hung;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Runs of an object filling the gaps along the back wall between what already stands against it (base cabinets
+        /// between the sink, cooker and fridge), each gap at least <see cref="SL.MinRun"/> wide.
+        /// </summary>
+        /// <param name="key">The object.</param>
+        /// <returns>The runs placed.</returns>
+        public List<PlanItem> FillBack(string key)
+        {
+            var against = _taken.Where(t => Touches(t, PlanWall.Back)).OrderBy(t => t.X1).ToList();
+            var runs = new List<PlanItem>();
+            var cursor = 0.0;
+
+            foreach (var t in against.Append((Width, 0, Width, 0, 0)))
+            {
+                if (Run(key, PlanWall.Back, cursor, t.X1) is { } run)
+                {
+                    runs.Add(run);
+                }
+
+                cursor = Math.Max(cursor, t.X2);
+            }
+
+            return runs;
         }
 
         /// <summary>An object against a wall, facing into the room, as near a point along the wall as it fits.</summary>
@@ -479,12 +695,10 @@ public static class StarterLayout
         /// <param name="wall">The back wall.</param>
         /// <param name="from">Where the run starts, across the plan.</param>
         /// <param name="to">Where it ends.</param>
-        public void Run(string key, PlanWall wall, double from, double to)
+        /// <returns>The run placed, or <c>null</c> when the gap is too small or taken.</returns>
+        public PlanItem? Run(string key, PlanWall wall, double from, double to)
         {
-            if (to - from >= SL.MinRun)
-            {
-                Against(key, wall, (from + to) / 2, Math.Round(to - from));
-            }
+            return to - from >= SL.MinRun ? Against(key, wall, (from + to) / 2, Math.Round(to - from)) : null;
         }
 
         /// <summary>A rug: flat under the furniture, kept inside the room.</summary>
@@ -576,7 +790,7 @@ public static class StarterLayout
             var h = Math.Min(o.Height, Height - 5);
             var turned = rotation % 180 != 0;
             var (across, down) = turned ? (d, w) : (w, d);
-            var box = (X1: x - across / 2, Y1: y - down / 2, X2: x + across / 2, Y2: y + down / 2);
+            var box = (X1: x - across / 2, Y1: y - down / 2, X2: x + across / 2, Y2: y + down / 2, Top: h);
             const double edge = 0.5;
 
             if (box.X1 < -edge || box.Y1 < -edge || box.X2 > Width + edge || box.Y2 > Length + edge)
@@ -591,12 +805,12 @@ public static class StarterLayout
                 return null;
             }
 
-            if (!rug && _openings.Any(opening => Blocks(box, h, opening)))
+            if (!rug && _openings.Concat(_hung).Any(opening => Blocks(box, opening)))
             {
                 return null;
             }
 
-            var item = new PlanItem(label ?? o.Label, o.Shape, Math.Round(x), Math.Round(y), w, d, h, rotation, o.Color);
+            var item = new PlanItem(label ?? o.Label, o.Shape, Math.Round(x), Math.Round(y), w, d, h, rotation, o.Color, decorations: Dress(o), material: o.Material);
 
             Items.Add(item);
 
@@ -608,26 +822,46 @@ public static class StarterLayout
             return item;
         }
 
-        /// <summary>Whether an object against a wall stands in front of one of its windows or doors and is taller than its bottom.</summary>
-        /// <param name="box">The object's footprint.</param>
-        /// <param name="height">Its height.</param>
-        /// <param name="opening">The window or door: its wall, its span along it and its bottom.</param>
-        private bool Blocks((double X1, double Y1, double X2, double Y2) box, double height, (PlanWall Wall, double From, double To, double Bottom) opening)
+        /// <summary>
+        /// Whether an object against a wall stands in front of one of its windows or doors, or of something hung on it, and
+        /// is taller than its bottom.
+        /// </summary>
+        /// <param name="box">The object's footprint and height.</param>
+        /// <param name="opening">The window, door or hung thing: its wall, its span along it, its bottom and top.</param>
+        private bool Blocks((double X1, double Y1, double X2, double Y2, double Top) box, (PlanWall Wall, double From, double To, double Bottom, double Top) opening)
         {
-            var (from, to) = opening.Wall switch
-            {
-                PlanWall.Back or PlanWall.Front => (box.X1, box.X2),
-                _ => (box.Y1, box.Y2),
-            };
-            var touches = opening.Wall switch
+            var (from, to) = Span(box, opening.Wall);
+
+            return Touches(box, opening.Wall) && from < opening.To && opening.From < to && box.Top > opening.Bottom;
+        }
+
+        /// <summary>Whether a footprint stands against a wall.</summary>
+        /// <param name="box">The footprint.</param>
+        /// <param name="wall">The wall.</param>
+        private bool Touches((double X1, double Y1, double X2, double Y2, double Top) box, PlanWall wall)
+        {
+            return wall switch
             {
                 PlanWall.Back => box.Y1 < SL.WallTouch,
                 PlanWall.Front => box.Y2 > Length - SL.WallTouch,
                 PlanWall.Left => box.X1 < SL.WallTouch,
                 _ => box.X2 > Width - SL.WallTouch,
             };
+        }
 
-            return touches && from < opening.To && opening.From < to && height > opening.Bottom;
+        /// <summary>How far along a wall a footprint reaches, in plan coordinates: across for the back and front walls, down for the sides.</summary>
+        /// <param name="box">The footprint.</param>
+        /// <param name="wall">The wall.</param>
+        private static (double From, double To) Span((double X1, double Y1, double X2, double Y2, double Top) box, PlanWall wall)
+        {
+            return wall is PlanWall.Back or PlanWall.Front ? (box.X1, box.X2) : (box.Y1, box.Y2);
+        }
+
+        /// <summary>The decorations an object starts with in a furnished room, if any.</summary>
+        /// <param name="o">The catalog object.</param>
+        private static ItemDecorations? Dress(CatalogObject o)
+        {
+            return o.Dressing is { Count: > 0 } names ? new ItemDecorations(names) : null;
         }
     }
 }

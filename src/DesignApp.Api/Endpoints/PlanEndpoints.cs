@@ -96,7 +96,8 @@ internal static class PlanEndpoints
         }
 
         var plan = await createPlan.HandleAsync(request.Name ?? "", request.RoomType, request.Width, request.Length, request.Height,
-            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, aiMode, request.Furnish, cancellationToken);
+            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, aiMode, request.Furnish, request.Finish?.ToDomain(),
+            cancellationToken);
 
         return TypedResults.Created(Constants.Routes.PlanUrl(plan.Id), PlanResponse.From(plan));
     }
@@ -127,7 +128,8 @@ internal static class PlanEndpoints
             ? new RoomOutline(corners.Select(c => new OutlinePoint(c.X, c.Y)))
             : RoomPlan.RectangleOutline(request.Width, request.Length);
         var plan = await savePlan.HandleAsync(id, request.Name ?? "", outline, request.Height,
-            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, request.View, items, request.Corner, cancellationToken);
+            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, request.View, items, request.Corner,
+            request.Finish?.ToDomain(), cancellationToken);
 
         return plan is null ? TypedResults.NotFound() : TypedResults.Ok(PlanResponse.From(plan));
     }
@@ -241,6 +243,6 @@ internal static class PlanEndpoints
     private static PlanItem ToItem(PlanItemRequest item)
     {
         return new PlanItem(item.Label ?? "", item.Shape, item.X, item.Y, item.Width, item.Depth, item.Height, item.Rotation, HexColor.Parse(item.Color ?? ""),
-            item.Wall, item.Elevation, item.Form, item.Parts?.ToDomain(), item.Decorations is null ? null : new ItemDecorations(item.Decorations));
+            item.Wall, item.Elevation, item.Form, item.Parts?.ToDomain(), item.Decorations is null ? null : new ItemDecorations(item.Decorations), item.Material);
     }
 }

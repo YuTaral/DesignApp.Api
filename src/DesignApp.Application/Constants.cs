@@ -109,6 +109,16 @@ public static class Constants
         /// </summary>
         public static class Layout
         {
+            /// <summary>What a living room's, bedroom's, dining room's, office's or kids' room's windows start dressed with.</summary>
+            public const string Curtains = "sheer curtains";
+            /// <summary>What a kitchen's or bathroom's windows start dressed with.</summary>
+            public const string Blind = "roller blind";
+            /// <summary>The least room left between something hung on a wall and the ceiling, in centimetres.</summary>
+            public const double CeilingGap = 10;
+            /// <summary>The color of the wall behind a furnished bedroom's bed: a muted sage.</summary>
+            public const string BedroomAccent = "#8A9A84";
+            /// <summary>The color of the wall beside a furnished kids' room's bed: a pale sky blue.</summary>
+            public const string KidsAccent = "#BFD5E3";
             /// <summary>A window's height above the floor in a living room, bedroom, dining room, office or kids' room.</summary>
             public const double Sill = 90;
             /// <summary>A window's height above the floor in a kitchen or bathroom (above the worktop and the bath).</summary>
@@ -228,13 +238,76 @@ public static class Constants
                     $"and {height} cm from floor to ceiling.";
             }
 
-            /// <summary>The walls, ceiling and floor.</summary>
-            /// <param name="wall">The walls' color.</param>
+            /// <summary>The walls (with an accent wall, if any), the ceiling and its light, the trim, and the floor.</summary>
+            /// <param name="walls">The walls' finish and color, such as "painted sage green (#8A9A84)" (see <see cref="FinishWords"/>).</param>
+            /// <param name="accent">The accent wall, such as "the far wall, which is exposed brick in terracotta (#B5654A)"; empty for none.</param>
+            /// <param name="ceiling">The ceiling's color.</param>
+            /// <param name="light">The ceiling light in words (see <see cref="LightWords"/>).</param>
+            /// <param name="trim">The skirting boards' color.</param>
             /// <param name="floor">The floor's material.</param>
             /// <param name="floorColor">The floor's color.</param>
-            public static string Surfaces(string wall, string floor, string floorColor)
+            public static string Surfaces(string walls, string accent, string ceiling, string light, string trim, string floor, string floorColor)
             {
-                return $"The walls are painted {wall} with a white ceiling, and the floor is {floor} in {floorColor}.";
+                var except = accent.Length == 0 ? "" : $", except {accent}";
+
+                return $"The walls are {walls}{except}. The ceiling is {ceiling} with {light}, the skirting boards are {trim}, " +
+                    $"and the floor is {floor} in {floorColor}.";
+            }
+
+            /// <summary>A wall finish in words, said before its color: "painted", "exposed brick in"...</summary>
+            /// <param name="finish">The finish.</param>
+            public static string FinishWords(WallFinish finish)
+            {
+                return finish switch
+                {
+                    WallFinish.Wallpaper => "covered in patterned wallpaper in",
+                    WallFinish.Plaster => "finished in softly mottled limewash plaster in",
+                    WallFinish.Brick => "exposed brick in",
+                    WallFinish.WoodPanelling => "clad in wooden wall panelling in",
+                    WallFinish.Tiles => "tiled in",
+                    WallFinish.Concrete => "bare concrete in",
+                    _ => "painted",
+                };
+            }
+
+            /// <summary>The accent wall: which one, and its finish and color.</summary>
+            /// <param name="wall">The wall as the photo sees it, such as "the far wall" (see <see cref="WallNames"/>).</param>
+            /// <param name="look">Its finish and color, as <see cref="FinishWords"/> and a color.</param>
+            public static string Accent(string wall, string look)
+            {
+                return $"{wall}, which is {look}";
+            }
+
+            /// <summary>The walls the photo sees, by name: the far wall, the left or right wall, or (rooms that aren't rectangles) a wall facing the camera.</summary>
+            public static readonly (string Far, string Left, string Right, string Facing) WallNames =
+                ("the far wall", "the left wall", "the right wall", "a wall facing the camera");
+
+            /// <summary>A ceiling light in words.</summary>
+            /// <param name="light">The light.</param>
+            public static string LightWords(CeilingLight light)
+            {
+                return light switch
+                {
+                    CeilingLight.None => "no ceiling light",
+                    CeilingLight.Spotlights => "recessed spotlights",
+                    CeilingLight.Chandelier => "a chandelier hanging from its middle",
+                    CeilingLight.FlushLight => "a flush round ceiling light",
+                    CeilingLight.TrackLights => "black track lights",
+                    _ => "a pendant lamp hanging from its middle",
+                };
+            }
+
+            /// <summary>The photo's light and mood at a time of day.</summary>
+            /// <param name="time">The time of day.</param>
+            public static string Mood(TimeOfDay time)
+            {
+                return time switch
+                {
+                    TimeOfDay.Morning => "Soft, cool morning daylight comes in through the windows.",
+                    TimeOfDay.GoldenHour => "Warm, low golden-hour sunlight streams in through the windows, casting long soft shadows.",
+                    TimeOfDay.Evening => "It is evening: dark outside the windows, with the lamps and the ceiling light on, giving the room a warm, cosy glow.",
+                    _ => "Bright, even daylight fills the room.",
+                };
             }
 
             /// <summary>

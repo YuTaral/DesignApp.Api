@@ -259,6 +259,11 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("design_id");
 
+                    b.Property<string>("Finish")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("finish");
+
                     b.Property<string>("FloorColor")
                         .IsRequired()
                         .HasMaxLength(7)

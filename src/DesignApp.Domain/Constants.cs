@@ -141,6 +141,18 @@ public static class Constants
         /// <summary>The longest name of one decoration.</summary>
         public const int MaxDecorationLength = 60;
 
+        /// <summary>The longest name of an object's material, such as "velvet".</summary>
+        public const int MaxMaterialLength = 40;
+
+        /// <summary>A built room's ceiling color until the user picks one: a soft white.</summary>
+        public const string CeilingColor = "#FAFAF7";
+
+        /// <summary>A built room's skirting boards' color until the user picks one: a warm white.</summary>
+        public const string TrimColor = "#F4F1EA";
+
+        /// <summary>An accent wall's color until the user picks one: a muted sage.</summary>
+        public const string AccentColor = "#8A9A84";
+
         /// <summary>How high a window's bottom usually is above the floor, in centimetres.</summary>
         public const double WindowSill = 90;
 
@@ -235,6 +247,9 @@ public static class Constants
             $"A room's walls must run straight across or down the plan and turn at right angles, each at least {Plans.MinWallSegmentCentimetres:0} cm " +
             $"long and none crossing another, with at most {Plans.MaxCorners} corners and the room {Plans.MinWallMetres} to {Plans.MaxWallMetres} m across.";
 
+        /// <summary>An object's material is named too long.</summary>
+        public static readonly string PlanItemMaterial = $"Name an object's material in up to {Plans.MaxMaterialLength} characters.";
+
         /// <summary>An object's decorations are too many, too long, empty or repeated.</summary>
         public static readonly string PlanItemDecorations =
             $"An object may have up to {Plans.MaxDecorations} different decorations, each named in up to {Plans.MaxDecorationLength} characters.";
@@ -255,6 +270,12 @@ public static class Constants
 
         /// <summary>A floor type or view that isn't one of the choices.</summary>
         public const string PlanLook = "Choose one of the floor types and one of the room's walls to look at.";
+
+        /// <summary>A built room's wall finish, ceiling light or time of day isn't one of the choices.</summary>
+        public const string PlanFinish = "Choose one of the wall finishes, ceiling lights and times of day.";
+
+        /// <summary>A built room's accent wall isn't one of its walls.</summary>
+        public const string PlanAccentWall = "The accent wall must be one of the room's walls.";
 
         /// <summary>A built room type or shape that doesn't exist.</summary>
         public const string UnknownRoomType = "Pick the room's type from the list.";
@@ -615,6 +636,55 @@ public static class Constants
         Traditional,
         /// <summary>Geometric patterns, brass, velvet and lacquer.</summary>
         ArtDeco,
+    }
+
+    /// <summary>What a built room's walls are finished in.</summary>
+    public enum WallFinish
+    {
+        /// <summary>Smooth painted walls.</summary>
+        Paint,
+        /// <summary>Patterned wallpaper.</summary>
+        Wallpaper,
+        /// <summary>Limewash or Venetian plaster, softly mottled.</summary>
+        Plaster,
+        /// <summary>Exposed brick.</summary>
+        Brick,
+        /// <summary>Wooden wall panelling.</summary>
+        WoodPanelling,
+        /// <summary>Wall tiles.</summary>
+        Tiles,
+        /// <summary>Raw or polished concrete.</summary>
+        Concrete,
+    }
+
+    /// <summary>The light on a built room's ceiling.</summary>
+    public enum CeilingLight
+    {
+        /// <summary>No ceiling light.</summary>
+        None,
+        /// <summary>A pendant lamp hanging from the middle.</summary>
+        Pendant,
+        /// <summary>Recessed spotlights.</summary>
+        Spotlights,
+        /// <summary>A chandelier.</summary>
+        Chandelier,
+        /// <summary>A flush ceiling light.</summary>
+        FlushLight,
+        /// <summary>Track lights.</summary>
+        TrackLights,
+    }
+
+    /// <summary>When a built room's photo is taken, which sets its light and mood.</summary>
+    public enum TimeOfDay
+    {
+        /// <summary>Soft, cool morning light.</summary>
+        Morning,
+        /// <summary>Bright, even daylight.</summary>
+        Midday,
+        /// <summary>Warm, low sunlight with long shadows.</summary>
+        GoldenHour,
+        /// <summary>After dark: the lamps on, warm and cosy.</summary>
+        Evening,
     }
 
     /// <summary>What a built room's floor is made of.</summary>

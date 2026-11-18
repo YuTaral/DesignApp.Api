@@ -12,5 +12,9 @@ namespace DesignApp.Api.Requests;
 /// <param name="FloorColor">The floor's color as #RRGGBB.</param>
 /// <param name="FloorType">What the floor is made of (Wood when missing).</param>
 /// <param name="Furnish">Whether it starts with a suggested layout of furniture, windows and a door sized for it (yes when missing).</param>
+/// <param name="Finish">
+/// How the walls and ceiling are finished and lit; when missing, one suited to the room type for a furnished room (tiles
+/// in a bathroom, an accent wall behind a bed), else painted walls with a white ceiling.
+/// </param>
 public sealed record CreatePlanRequest(string? Name, RoomType RoomType, double Width, double Length, double Height, string? WallColor, string? FloorColor,
-    FloorType FloorType = FloorType.Wood, bool Furnish = true);
+    FloorType FloorType = FloorType.Wood, bool Furnish = true, RoomFinishRequest? Finish = null);

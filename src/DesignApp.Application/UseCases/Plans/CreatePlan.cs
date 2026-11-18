@@ -29,21 +29,24 @@ public sealed class CreatePlan(IPlanRepository plans, ICurrentUser currentUser, 
     /// <param name="floorType">What the floor is made of.</param>
     /// <param name="aiMode">The AI its photos are made with.</param>
     /// <param name="furnish">Whether it starts with a suggested layout; otherwise it is empty.</param>
+    /// <param name="finish">
+    /// How the walls and ceiling are finished and lit; when <c>null</c>, one suited to the room type for a furnished room,
+    /// else <see cref="RoomFinish.Default"/>.
+    /// </param>
     /// <param name="cancellationToken">Cancels the save.</param>
     /// <returns>The new plan.</returns>
     /// <exception cref="DomainException">The name, type or walls are invalid.</exception>
     public async Task<RoomPlan> HandleAsync(string name, RoomType roomType, double width, double length, double height,
-        HexColor wallColor, HexColor floorColor, FloorType floorType, AiMode aiMode, bool furnish, CancellationToken cancellationToken)
+        HexColor wallColor, HexColor floorColor, FloorType floorType, AiMode aiMode, bool furnish, RoomFinish? finish,
+        CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow();
         var plan = RoomPlan.Create(Guid.CreateVersion7(now), currentUser.Id, name, roomType, width, length, height, wallColor, floorColor, floorType, aiMode, now);
 
-        if (furnish)
-        {
-            var items = StarterLayout.For(roomType, width, length, height, catalog.ForRoom(roomType));
+        var items = furnish ? StarterLayout.For(roomType, width, length, height, catalog.ForRoom(roomType)) : [];
+        var look = finish ?? (furnish ? StarterLayout.FinishFor(roomType) : RoomFinish.Default);
 
-            plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.View, items, now, plan.Corner);
-        }
+        plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.View, items, now, plan.Corner, look);
 
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);

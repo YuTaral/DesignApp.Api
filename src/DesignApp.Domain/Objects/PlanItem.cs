@@ -56,6 +56,9 @@ public sealed record PlanItem
     /// <summary>The small things the user put on it (cushions, a vase...), shown on it in the photo.</summary>
     public ItemDecorations Decorations { get; }
 
+    /// <summary>What it is made of or covered in, such as "velvet" or "oak"; empty when only its color is given.</summary>
+    public string Material { get; }
+
     /// <summary>Creates an object.</summary>
     /// <param name="label">What it is.</param>
     /// <param name="shape">How it is drawn.</param>
@@ -71,10 +74,14 @@ public sealed record PlanItem
     /// <param name="form">Its outline from above: L-shaped for sofas, tables and boxes, P-shaped for sofas, round for tables and rugs.</param>
     /// <param name="parts">An L- or P-shaped object's parts (the usual ones when missing); <c>null</c> for other outlines.</param>
     /// <param name="decorations">The small things on it, such as cushions; none when missing.</param>
-    /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline or a part is invalid.</exception>
+    /// <param name="material">What it is made of, such as "velvet"; none when missing or empty.</param>
+    /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline, a part or the material is invalid.</exception>
     public PlanItem(string label, ItemShape shape, double x, double y, double width, double depth, double height, int rotation, HexColor color,
-        int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null)
+        int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null,
+        string? material = null)
     {
+        var made = (material ?? "").Trim();
+
         var fits = form switch
         {
             ItemForm.Standard => true,
@@ -87,6 +94,11 @@ public sealed record PlanItem
         if (!fits)
         {
             throw new DomainException(Constants.Messages.PlanItemForm);
+        }
+
+        if (made.Length > Constants.Plans.MaxMaterialLength)
+        {
+            throw new DomainException(Constants.Messages.PlanItemMaterial);
         }
 
         if (string.IsNullOrWhiteSpace(label) || label.Trim().Length > Constants.Plans.MaxLabelLength)
@@ -136,6 +148,6 @@ public sealed record PlanItem
             parts.Check(form, width, depth);
         }
 
-        (Wall, Elevation, Form, Parts, Decorations) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None);
+        (Wall, Elevation, Form, Parts, Decorations, Material) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None, made);
     }
 }
