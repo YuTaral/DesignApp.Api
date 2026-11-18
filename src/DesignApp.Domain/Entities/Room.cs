@@ -56,6 +56,19 @@ public sealed class Room
     /// an uploaded photo.
     /// </summary>
     public string? LibraryRoom { get; private set; }
+    /// <summary>The room plan whose photos this room holds, or <c>null</c> for an uploaded or library photo.</summary>
+    public Guid? PlanId { get; private set; }
+    /// <summary>
+    /// Which of the room's photos to choose from (<see cref="PhotoTake"/>) is its photo, the one the editor analyzes;
+    /// <c>null</c> for a room with only its own photo.
+    /// </summary>
+    public Guid? ChosenTakeId { get; private set; }
+    /// <summary>
+    /// A new id each time a photo is chosen (<see cref="ChooseTake"/>), named in the addresses of the room's photo and
+    /// outline files: choosing again (even a photo chosen before) gives the room new files under the same paths, which
+    /// browsers keep for good. <c>null</c> for a room with only its own photo.
+    /// </summary>
+    public Guid? PhotoSetId { get; private set; }
     /// <summary>The photo version that goes with the current label map version.</summary>
     public int PhotoVersion => PhotoVersionOf(LabelMapRevision);
     /// <summary>The newest photo version stored.</summary>
@@ -130,6 +143,70 @@ public sealed class Room
         room.LibraryRoom = libraryRoom;
 
         return room;
+    }
+
+    /// <summary>
+    /// Creates a room for the photos Generate makes of a room plan, its photo the first of them; it waits for the user to
+    /// start its analysis (with the real AI that costs money).
+    /// </summary>
+    /// <param name="id">The new room's id.</param>
+    /// <param name="ownerId">The plan's owner.</param>
+    /// <param name="photoKey">Storage key of the room's photo, a copy of the first photo's.</param>
+    /// <param name="first">The first photo, already made for this room id.</param>
+    /// <param name="now">When it was made.</param>
+    /// <param name="aiMode">The plan's AI, which later steps use too.</param>
+    /// <param name="planId">The plan.</param>
+    /// <exception cref="DomainException">The id or the photo is invalid.</exception>
+    public static Room FromPlan(Guid id, string ownerId, string photoKey, PhotoTake first, DateTimeOffset now, AiMode aiMode, Guid planId)
+    {
+        ArgumentNullException.ThrowIfNull(first);
+
+        if (first.RoomId != id)
+        {
+            throw new DomainException(Constants.Messages.TakeOfOtherRoom);
+        }
+
+        var room = Upload(id, ownerId, photoKey, first.Width, first.Height, now, AnalysisScope.WholeRoom, aiMode, waitForUser: true);
+
+        room.PlanId = planId;
+        room.ChosenTakeId = first.Id;
+        room.PhotoSetId = Guid.NewGuid();
+
+        return room;
+    }
+
+    /// <summary>
+    /// Makes one of the room's photos its photo (another one, or the same one again to analyze it afresh after its
+    /// analysis failed). The caller copies that photo's file to the room's photo first. A room already analyzed (or whose
+    /// analysis failed) waits for its analysis again: its objects, outline versions and photo versions belonged to the
+    /// photo analyzed, so they are dropped, and its files get new addresses (<see cref="PhotoSetId"/>).
+    /// </summary>
+    /// <param name="take">One of the room's photos.</param>
+    /// <exception cref="DomainException">The photo is another room's, or the room's photo is being analyzed.</exception>
+    public void ChooseTake(PhotoTake take)
+    {
+        ArgumentNullException.ThrowIfNull(take);
+
+        if (take.RoomId != Id)
+        {
+            throw new DomainException(Constants.Messages.TakeOfOtherRoom);
+        }
+
+        if (Status is RoomStatus.Uploaded or RoomStatus.Analyzing or RoomStatus.Segmenting)
+        {
+            throw new DomainException(Constants.Messages.CannotChooseTake(Status));
+        }
+
+        (ChosenTakeId, Width, Height, PhotoSetId) = (take.Id, take.Width, take.Height, Guid.NewGuid());
+
+        if (Status is RoomStatus.Ready or RoomStatus.Failed)
+        {
+            Status = RoomStatus.Waiting;
+            FailureReason = null;
+            _objects = [];
+            _photoVersions = [];
+            (LabelMapKey, LabelMapRevision, LatestLabelMapRevision, AnalysisAttempts) = (null, 0, 0, 0);
+        }
     }
 
     /// <summary>

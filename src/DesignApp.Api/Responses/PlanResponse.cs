@@ -21,9 +21,11 @@ namespace DesignApp.Api.Responses;
 /// <param name="UpdatedAt">When it was last saved.</param>
 /// <param name="Outline">Its walls' corners, clockwise from the top-left one, in centimetres.</param>
 /// <param name="Corner">Where the camera stands to look at the wall in view: across from its middle, or in a near corner.</param>
+/// <param name="DesignId">The plan's own design, which its photos' rooms go into; <c>null</c> until there is one.</param>
 public sealed record PlanResponse(
     Guid Id, string Name, RoomType RoomType, double Width, double Length, double Height, string WallColor, string FloorColor,
-    FloorType FloorType, int View, AiMode AiMode, List<PlanItemRequest> Items, DateTimeOffset UpdatedAt, List<OutlinePointRequest> Outline, ViewCorner Corner)
+    FloorType FloorType, int View, AiMode AiMode, List<PlanItemRequest> Items, DateTimeOffset UpdatedAt, List<OutlinePointRequest> Outline, ViewCorner Corner,
+    Guid? DesignId)
 {
     /// <summary>Maps a plan to its API shape.</summary>
     /// <param name="plan">The plan.</param>
@@ -35,6 +37,6 @@ public sealed record PlanResponse(
         var outline = plan.Outline.Points.Select(p => new OutlinePointRequest(p.X, p.Y)).ToList();
 
         return new(plan.Id, plan.Name, plan.RoomType, plan.Width, plan.Length, plan.Height, plan.WallColor.Value, plan.FloorColor.Value,
-            plan.FloorType, plan.View, plan.AiMode, items, plan.UpdatedAt, outline, plan.Corner);
+            plan.FloorType, plan.View, plan.AiMode, items, plan.UpdatedAt, outline, plan.Corner, plan.DesignId);
     }
 }

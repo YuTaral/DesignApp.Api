@@ -22,6 +22,9 @@ namespace DesignApp.Api.Responses;
 /// (<c>photo</c>), a higher one is <c>photo/{version}</c>, after an object was removed.
 /// </param>
 /// <param name="LibraryRoom">The built-in library layout it was copied from, such as <c>minimalist/kitchen/2</c>; <c>null</c> for an upload.</param>
+/// <param name="PlanId">The room plan whose photos it holds; <c>null</c> for an upload or a library room.</param>
+/// <param name="ChosenTakeId">Which of its photos to choose from is its photo; <c>null</c> when it has none.</param>
+/// <param name="PhotoSetId">Named in its photo and outline addresses, new each time a photo is chosen; <c>null</c> when it has none.</param>
 public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
@@ -36,7 +39,10 @@ public sealed record RoomResponse(
     AnalysisScope Scope,
     AiMode AiMode,
     IReadOnlyList<int> PhotoVersions,
-    string? LibraryRoom)
+    string? LibraryRoom,
+    Guid? PlanId,
+    Guid? ChosenTakeId,
+    Guid? PhotoSetId)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -47,15 +53,18 @@ public sealed record RoomResponse(
             room.Status,
             room.Width,
             room.Height,
-            Constants.Routes.RoomPhotoUrl(room.Id, room.PhotoVersion),
+            Constants.Routes.RoomPhotoUrl(room.Id, room.PhotoVersion, room.PhotoSetId),
             room.CreatedAt,
             room.FailureReason,
             [.. room.Objects.Select(DetectedObjectResponse.From)],
-            room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision),
+            room.LabelMapKey is null ? null : Constants.Routes.RoomLabelMapUrl(room.Id, room.LabelMapRevision, room.PhotoSetId),
             room.LabelMapRevision,
             room.Scope,
             room.AiMode,
             [.. Enumerable.Range(0, room.LatestLabelMapRevision + 1).Select(room.PhotoVersionOf)],
-            room.LibraryRoom);
+            room.LibraryRoom,
+            room.PlanId,
+            room.ChosenTakeId,
+            room.PhotoSetId);
     }
 }

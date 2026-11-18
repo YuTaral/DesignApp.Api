@@ -65,6 +65,9 @@ public sealed class RoomPlan
     /// <summary>When it was last changed.</summary>
     public DateTimeOffset UpdatedAt { get; private set; }
 
+    /// <summary>The plan's own design, which the rooms of its generated photos go into; <c>null</c> until there is one.</summary>
+    public Guid? DesignId { get; private set; }
+
     private RoomPlan() { } // for EF Core
 
     /// <summary>Starts a room with its walls and no objects.</summary>
@@ -207,6 +210,21 @@ public sealed class RoomPlan
     public double WallCentimetres(int wall)
     {
         return Outline.WallLength(wall);
+    }
+
+    /// <summary>Makes a design the plan's own: the rooms of its generated photos go into it.</summary>
+    /// <param name="designId">The design.</param>
+    public void UseDesign(Guid designId)
+    {
+        DesignId = designId;
+    }
+
+    /// <summary>Gives the plan to another user: a guest who signs in keeps the plans made before, under the account.</summary>
+    /// <param name="newOwnerId">The account's user id.</param>
+    public void TransferTo(string newOwnerId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(newOwnerId);
+        OwnerId = newOwnerId;
     }
 
     /// <summary>A rectangular room's outline, with the walls' message when its size is out of bounds.</summary>

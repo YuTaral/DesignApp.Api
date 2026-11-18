@@ -43,6 +43,31 @@ internal static class RoomEndpoints
             .WithSummary("Returns one stored version of the room's photo: 1 and up are made by removing objects (0 is `photo`).")
             .WithDescription("Each version never changes, so it can be cached for good.");
 
+        rooms.MapGet(Constants.Routes.RoomTakes, GetTakesAsync)
+            .WithName("GetRoomTakes")
+            .WithSummary("Lists the room's photos to choose from (a room builder run's photos and their AI changes), oldest first.");
+
+        rooms.MapGet(Constants.Routes.RoomTakePhoto, GetTakePhotoAsync)
+            .WithName("GetRoomTakePhoto")
+            .WithSummary("Returns one of the room's photos to choose from.")
+            .WithDescription("Each photo never changes, so it can be cached for good.");
+
+        rooms.MapPost(Constants.Routes.RoomTakeChange, ChangeTakeAsync)
+            .WithName("ChangeRoomTake")
+            .WithSummary("Has the room's AI make a new version of one of its photos with a change in the user's words (`instructions`).")
+            .WithDescription("The new photo is added to the room's photos; the room's own photo stays as it is. With the real AI this is a paid call, so it is rate-limited.")
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+
+        rooms.MapPost(Constants.Routes.RoomTakeChoice, ChooseTakeAsync)
+            .WithName("ChooseRoomTake")
+            .WithSummary("Makes one of the room's photos the room's photo, the one its analysis uses.")
+            .WithDescription("A room already analyzed with another photo waits for its analysis again: its outlines, removals and the colors its designs gave it are dropped.");
+
+        rooms.MapPost(Constants.Routes.RoomPlanDesign, SaveToPlanDesignAsync)
+            .WithName("SaveRoomToPlanDesign")
+            .WithSummary("Puts a room of a room plan's photos into the plan's own design (made, named after the plan, when it has none).")
+            .RequireAuthorization();
+
         rooms.MapGet(Constants.Routes.RoomLabels, GetLabelMapAsync)
             .WithName("GetRoomLabelMap")
             .WithSummary("Returns the room's label map: a grayscale PNG where each pixel's value is the index of the object it belongs to (0 = none).")
@@ -277,6 +302,91 @@ internal static class RoomEndpoints
         var outcome = await mergePart.MergeAsync(id, request.BaseRevision, request.ObjectIndex, cancellationToken);
 
         return ToResponse(outcome, Constants.Titles.MergeFailed);
+    }
+
+    /// <summary><c>GET /api/rooms/{id}/takes</c>: lists the room's photos to choose from.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getTakes">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the photos, or 404.</returns>
+    private static async Task<Results<Ok<List<PhotoTakeResponse>>, NotFound>> GetTakesAsync(Guid id, GetRoomTakes getTakes, CancellationToken cancellationToken)
+    {
+        var takes = await getTakes.HandleAsync(id, cancellationToken);
+
+        return takes is null ? TypedResults.NotFound() : TypedResults.Ok(takes.Select(PhotoTakeResponse.From).ToList());
+    }
+
+    /// <summary><c>GET /api/rooms/{id}/takes/{takeId}/photo</c>: streams one of the room's photos to choose from.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="takeId">The photo's id.</param>
+    /// <param name="getTakes">The use case that lists the photos.</param>
+    /// <param name="storage">Where the photos are stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the JPEG, or 404 when the room or the photo is missing.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetTakePhotoAsync(
+        Guid id, Guid takeId, GetRoomTakes getTakes, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var takes = await getTakes.HandleAsync(id, cancellationToken);
+        var take = takes?.FirstOrDefault(t => t.Id == takeId);
+
+        return take is null ? TypedResults.NotFound() : await StreamImmutableAsync(take.Key, storage, response, cancellationToken);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/takes/{takeId}/change</c>: has the AI make a changed version of a photo.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="takeId">The photo to change.</param>
+    /// <param name="request">The change, in the user's words.</param>
+    /// <param name="changeTake">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>201 with the new photo, 400 when it couldn't be made, or 404.</returns>
+    private static async Task<Results<Created<PhotoTakeResponse>, ProblemHttpResult, NotFound>> ChangeTakeAsync(
+        Guid id, Guid takeId, ChangeTakeRequest request, ChangeRoomTake changeTake, CancellationToken cancellationToken)
+    {
+        var outcome = await changeTake.HandleAsync(id, takeId, request.Instructions, cancellationToken);
+
+        if (outcome is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return outcome.Succeeded
+            ? TypedResults.Created(Constants.Routes.TakePhotoUrl(id, outcome.Value.Id), PhotoTakeResponse.From(outcome.Value))
+            : Problems.BadRequest(outcome.Error, Constants.Titles.ChangeFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/takes/{takeId}/choose</c>: makes a photo the room's photo.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="takeId">The photo.</param>
+    /// <param name="chooseTake">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room, 400 while its photo is being analyzed, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> ChooseTakeAsync(
+        Guid id, Guid takeId, ChooseRoomTake chooseTake, CancellationToken cancellationToken)
+    {
+        var outcome = await chooseTake.HandleAsync(id, takeId, cancellationToken);
+
+        return ToResponse(outcome, Constants.Titles.ChooseFailed);
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/plan-design</c>: puts a room of a plan's photos into the plan's design.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="saveToPlanDesign">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the design's id, 400 when the room has no plan or the design is full, or 404.</returns>
+    private static async Task<Results<Ok<PlanDesignResponse>, ProblemHttpResult, NotFound>> SaveToPlanDesignAsync(
+        Guid id, SaveRoomToPlanDesign saveToPlanDesign, CancellationToken cancellationToken)
+    {
+        var outcome = await saveToPlanDesign.HandleAsync(id, cancellationToken);
+
+        if (outcome is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return outcome.Succeeded
+            ? TypedResults.Ok(new PlanDesignResponse(outcome.Value))
+            : Problems.BadRequest(outcome.Error, Constants.Titles.PlanDesignFailed);
     }
 
     /// <summary><c>POST /api/rooms/{id}/analysis</c>: starts the analysis of a room that waits for it.</summary>

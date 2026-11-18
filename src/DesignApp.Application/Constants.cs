@@ -184,6 +184,18 @@ public static class Constants
                     "color it has in the render.";
             }
 
+            /// <summary>
+            /// A change the user asked for to one of a room's photos: the image model edits that photo, and keeps the rest of
+            /// it as it is, so the room stays the one built.
+            /// </summary>
+            /// <param name="change">The user's words.</param>
+            public static string Change(string change)
+            {
+                return $"Edit this interior photograph: {change}. Keep everything else exactly as it is: the same room, camera " +
+                    "position, angle and framing, the same furniture in the same places, and the same colors and light. The " +
+                    "result must still look like a real photograph.";
+            }
+
             /// <summary>Without decorations: only what is in the render.</summary>
             public const string Undecorated =
                 "Everything in the photo is already in the render: keep the rest of the room empty, with bare walls and a bare floor.";
@@ -635,6 +647,14 @@ public static class Constants
             return version == 0 ? $"rooms/{roomId}/photo.jpg" : $"rooms/{roomId}/photo-{version}.jpg";
         }
 
+        /// <summary>Storage key of one of a room's photos to choose from, in the room's folder.</summary>
+        /// <param name="roomId">The room's id.</param>
+        /// <param name="takeId">The photo's id.</param>
+        public static string TakeKey(Guid roomId, Guid takeId)
+        {
+            return $"rooms/{roomId}/takes/{takeId}.jpg";
+        }
+
         /// <summary>Storage key of a room's label map, as the analysis made it or after outline fixes.</summary>
         /// <param name="roomId">The room's id.</param>
         /// <param name="revision">The label map version: 0 from the analysis, then one per fix.</param>
@@ -803,6 +823,25 @@ public static class Constants
 
         /// <summary>A 3D view for a photo that is missing or too large.</summary>
         public const string GuideImage = "The 3D view of the room didn't arrive. Try again.";
+
+        /// <summary>A change to a photo without words, or with too many.</summary>
+        public static readonly string ChangeWords = $"Describe the change in 1 to {Builder.MaxInstructionsLength} characters.";
+
+        /// <summary>A note for a photo that is too long.</summary>
+        public static readonly string PhotoNote = $"A photo's note is at most {Domain.Constants.Rooms.MaxTakeNoteLength} characters.";
+
+        /// <summary>A photo added to a room that holds another plan's photos (or none).</summary>
+        public const string NotThisPlansRoom = "That room doesn't hold this room plan's photos.";
+
+        /// <summary>A room saved to its plan's design that wasn't made from a plan, or whose plan is gone.</summary>
+        public const string NotFromPlan = "This room wasn't made from a room plan that still exists.";
+
+        /// <summary>The plan's design has no room left for the photos' room.</summary>
+        /// <param name="design">The design's name.</param>
+        public static string PlanDesignFull(string design)
+        {
+            return $"\"{design}\" is full, so these photos weren't added to it. {Domain.Constants.Messages.DesignFull}";
+        }
 
         /// <summary>A photo asked for a built room without objects.</summary>
         public const string EmptyPlan = "Put at least one object in the room first.";

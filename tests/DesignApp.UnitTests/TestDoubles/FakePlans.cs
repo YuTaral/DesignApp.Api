@@ -24,6 +24,11 @@ internal sealed class FakePlans : IPlanRepository
     }
 
     /// <inheritdoc/>
+    public Task<IReadOnlyList<RoomPlan>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<RoomPlan>>([.. _plans.Where(p => p.OwnerId == ownerId)]);
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         Saves++;

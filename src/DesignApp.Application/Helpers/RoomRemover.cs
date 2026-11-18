@@ -19,25 +19,29 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     /// <param name="cancellationToken">Cancels the work.</param>
     public async Task DeleteAsync(IReadOnlyList<Room> doomed, CancellationToken cancellationToken)
     {
+        var files = new List<string>();
+
+        // Their photos to choose from go with them in the database; their files are listed first.
         foreach (var room in doomed)
         {
+            var takes = await rooms.ListTakesAsync(room.Id, cancellationToken);
+
+            files.AddRange(FilesOf(room));
+            files.AddRange(takes.Select(t => t.Key));
             rooms.Remove(room);
         }
 
         await rooms.SaveChangesAsync(cancellationToken);
 
-        foreach (var room in doomed)
+        foreach (var key in files)
         {
-            foreach (var key in FilesOf(room))
+            try
             {
-                try
-                {
-                    await storage.DeleteAsync(key, cancellationToken);
-                }
-                catch (Exception error) when (error is not OperationCanceledException)
-                {
-                    LogFileNotDeleted(error, key);
-                }
+                await storage.DeleteAsync(key, cancellationToken);
+            }
+            catch (Exception error) when (error is not OperationCanceledException)
+            {
+                LogFileNotDeleted(error, key);
             }
         }
     }

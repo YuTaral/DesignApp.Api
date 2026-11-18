@@ -16,6 +16,11 @@ public interface IPlanRepository
     /// <returns>The plan, or <c>null</c> when that owner has no such plan.</returns>
     Task<RoomPlan?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken);
 
+    /// <summary>A user's plans.</summary>
+    /// <param name="ownerId">The user or guest.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    Task<IReadOnlyList<RoomPlan>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken);
+
     /// <summary>Saves the changes.</summary>
     /// <param name="cancellationToken">Cancels the save.</param>
     Task SaveChangesAsync(CancellationToken cancellationToken);

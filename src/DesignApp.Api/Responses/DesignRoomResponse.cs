@@ -14,12 +14,12 @@ internal sealed record DesignRoomResponse(Guid RoomId, string PhotoUrl, List<Edi
 {
     /// <summary>The response for a room of a design.</summary>
     /// <param name="room">The room.</param>
-    /// <param name="photoVersion">The photo version its room is on (0 when objects were never removed).</param>
-    public static DesignRoomResponse From(DesignRoom room, int photoVersion)
+    /// <param name="stored">Its room, for the photo it shows (its version, and its photo set); <c>null</c> for the uploaded photo.</param>
+    public static DesignRoomResponse From(DesignRoom room, Room? stored)
     {
         return new(
             room.RoomId,
-            Constants.Routes.RoomPhotoUrl(room.RoomId, photoVersion),
+            Constants.Routes.RoomPhotoUrl(room.RoomId, stored?.PhotoVersion ?? 0, stored?.PhotoSetId),
             [.. room.Edits.OfType<RecolorEdit>().Select(e => new EditRequest(e.ObjectIndex, e.Color.Value, e.Strength, e.Paint,
                 e.Tones.Count == 0 ? null : [.. e.Tones.Select(t => new ToneRequest(t.Center.Value, t.Share, t.Color?.Value, t.Strength, t.Paint))]))],
             [.. room.Sizes.Select(s => new SizeRequest(s.ObjectIndex, s.Width, s.Height))]);

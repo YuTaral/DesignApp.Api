@@ -42,6 +42,12 @@ internal sealed class DesignRepository(AppDbContext db) : IDesignRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Design>> ListHoldingRoomAsync(Guid roomId, string ownerId, CancellationToken cancellationToken)
+    {
+        return await db.Designs.Where(d => d.OwnerId == ownerId && d.Rooms.Any(r => r.RoomId == roomId)).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         return db.SaveChangesAsync(cancellationToken);

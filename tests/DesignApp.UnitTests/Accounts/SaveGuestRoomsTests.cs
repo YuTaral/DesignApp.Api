@@ -1,6 +1,8 @@
 using DesignApp.Application.Helpers;
 using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
+using static DesignApp.Domain.Constants;
 
 
 namespace DesignApp.UnitTests.Accounts;
@@ -18,11 +20,18 @@ public class SaveGuestRoomsTests
         var otherGuest = GuestIds.New();
         var mine = await SaveAsync(rooms, guest, guest, otherGuest);
 
-        var moved = await new SaveGuestRooms(rooms).HandleAsync(guest, "user-1", CancellationToken.None);
+        var plans = new FakePlans();
+        var plan = RoomPlan.Create(Guid.NewGuid(), guest, "", RoomType.LivingRoom, 4, 5, 2.6, HexColor.Parse("#E8E2D6"), HexColor.Parse("#B89B7A"),
+            FloorType.Wood, AiMode.Fake, Now);
+
+        plans.Add(plan);
+        var moved = await new SaveGuestRooms(rooms, plans).HandleAsync(guest, "user-1", CancellationToken.None);
 
         Assert.Equal(2, moved);
         Assert.All(mine.Take(2), r => Assert.Equal("user-1", r.OwnerId));
         Assert.Equal(otherGuest, mine[2].OwnerId);
+        // The guest's room plans go too, so their photos' rooms keep their plan.
+        Assert.Equal("user-1", plan.OwnerId);
     }
 
     [Theory]
@@ -34,7 +43,7 @@ public class SaveGuestRoomsTests
         var saved = await SaveAsync(rooms, "user-2");
         var saves = rooms.SaveCount;
 
-        var moved = await new SaveGuestRooms(rooms).HandleAsync(from, "user-1", CancellationToken.None);
+        var moved = await new SaveGuestRooms(rooms, new FakePlans()).HandleAsync(from, "user-1", CancellationToken.None);
 
         Assert.Equal(0, moved);
         Assert.Equal("user-2", saved[0].OwnerId);

@@ -69,6 +69,53 @@ namespace DesignApp.Infrastructure.Database.Migrations
                     b.ToTable("designs", (string)null);
                 });
 
+            modelBuilder.Entity("DesignApp.Domain.Entities.PhotoTake", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ChangedFrom")
+                        .HasColumnType("uuid")
+                        .HasColumnName("changed_from");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("integer")
+                        .HasColumnName("height");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("integer")
+                        .HasColumnName("width");
+
+                    b.HasKey("Id")
+                        .HasName("pk_photo_takes");
+
+                    b.HasIndex("RoomId", "CreatedAt")
+                        .HasDatabaseName("ix_photo_takes_room_id_created_at");
+
+                    b.ToTable("photo_takes", (string)null);
+                });
+
             modelBuilder.Entity("DesignApp.Domain.Entities.Room", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,6 +131,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                     b.Property<int>("AnalysisAttempts")
                         .HasColumnType("integer")
                         .HasColumnName("analysis_attempts");
+
+                    b.Property<Guid?>("ChosenTakeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chosen_take_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -133,12 +184,20 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(300)")
                         .HasColumnName("photo_key");
 
+                    b.Property<Guid?>("PhotoSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("photo_set_id");
+
                     b.Property<string>("PhotoVersions")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
                         .HasColumnName("photo_versions")
                         .HasDefaultValueSql("'[]'::jsonb");
+
+                    b.Property<Guid?>("PlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
 
                     b.Property<string>("Scope")
                         .IsRequired()
@@ -195,6 +254,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<Guid?>("DesignId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("design_id");
 
                     b.Property<string>("FloorColor")
                         .IsRequired()
@@ -696,6 +759,16 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         });
 
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("DesignApp.Domain.Entities.PhotoTake", b =>
+                {
+                    b.HasOne("DesignApp.Domain.Entities.Room", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_photo_takes_rooms_room_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

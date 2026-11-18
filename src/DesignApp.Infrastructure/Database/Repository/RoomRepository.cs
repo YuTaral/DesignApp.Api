@@ -64,6 +64,24 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     }
 
     /// <inheritdoc/>
+    public void AddTake(PhotoTake take)
+    {
+        db.PhotoTakes.Add(take);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<PhotoTake>> ListTakesAsync(Guid roomId, CancellationToken cancellationToken)
+    {
+        return await db.PhotoTakes.Where(t => t.RoomId == roomId).OrderBy(t => t.CreatedAt).ThenBy(t => t.Id).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public Task<PhotoTake?> FindTakeAsync(Guid roomId, Guid takeId, CancellationToken cancellationToken)
+    {
+        return db.PhotoTakes.SingleOrDefaultAsync(t => t.RoomId == roomId && t.Id == takeId, cancellationToken);
+    }
+
+    /// <inheritdoc/>
     /// <remarks>
     /// When someone else saved the same room in the meantime (its version changed), changes to
     /// different fields are merged and the save is tried again: a guest signing in moves a room to

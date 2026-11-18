@@ -21,6 +21,12 @@ internal sealed class PlanRepository(AppDbContext db) : IPlanRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<RoomPlan>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken)
+    {
+        return await db.RoomPlans.Where(p => p.OwnerId == ownerId).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         return db.SaveChangesAsync(cancellationToken);

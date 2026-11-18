@@ -171,6 +171,6 @@ internal static class LibraryEndpoints
             return TypedResults.NotFound();
         }
 
-        return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, new Dictionary<Guid, int>()));
+        return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, new Dictionary<Guid, Domain.Entities.Room>()));
     }
 }

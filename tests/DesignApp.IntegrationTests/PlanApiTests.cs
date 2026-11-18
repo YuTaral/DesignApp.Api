@@ -221,13 +221,66 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         }
     }
 
+    [Fact]
+    public async Task A_runs_photos_are_one_room_to_change_choose_and_save_to_the_plans_design()
+    {
+        using var created = await Client.PostAsJsonAsync("/api/plans",
+            new { roomType = "LivingRoom", width = 4.0, length = 5.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", furnish = true });
+        var planId = (await created.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+
+        // The run's first photo makes the room; the next goes into it.
+        using var first = await GenerateAsync(planId, note: "Back wall, from the middle");
+        var room = await first.Content.ReadFromJsonAsync<JsonElement>();
+        var roomId = room.GetProperty("id").GetGuid();
+        using var second = await GenerateAsync(planId, roomId: roomId, note: "Right wall");
+        using var stranger = await GenerateAsync(planId, roomId: Guid.NewGuid());
+        var takes = (await Client.GetFromJsonAsync<JsonElement[]>($"/api/rooms/{roomId}/takes"))!;
+
+        Assert.Equal((HttpStatusCode.OK, roomId), (second.StatusCode, (await second.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid()));
+        Assert.Equal(HttpStatusCode.BadRequest, stranger.StatusCode);
+        Assert.Equal(["Back wall, from the middle", "Right wall"], takes.Select(t => t.GetProperty("note").GetString()));
+        Assert.Equal(planId, room.GetProperty("planId").GetGuid());
+        Assert.EndsWith($"?set={room.GetProperty("photoSetId").GetGuid()}", room.GetProperty("photoUrl").GetString(), StringComparison.Ordinal);
+
+        // Each photo is served for good; a change adds one; choosing makes it the room's photo.
+        using var photo = await Client.GetAsync(takes[1].GetProperty("photoUrl").GetString());
+
+        Assert.Equal(("image/jpeg", true), (photo.Content.Headers.ContentType?.MediaType, photo.Headers.CacheControl?.ToString().Contains("immutable", StringComparison.Ordinal) == true));
+        using var changed = await Client.PostAsJsonAsync($"/api/rooms/{roomId}/takes/{takes[1].GetProperty("id").GetGuid()}/change", new { instructions = "warm evening light" });
+        using var blank = await Client.PostAsJsonAsync($"/api/rooms/{roomId}/takes/{takes[1].GetProperty("id").GetGuid()}/change", new { instructions = " " });
+
+        Assert.Equal((HttpStatusCode.Created, HttpStatusCode.BadRequest), (changed.StatusCode, blank.StatusCode));
+        Assert.Equal(3, (await Client.GetFromJsonAsync<JsonElement[]>($"/api/rooms/{roomId}/takes"))!.Length);
+        using var chosen = await Client.PostAsync($"/api/rooms/{roomId}/takes/{takes[1].GetProperty("id").GetGuid()}/choose", null);
+        var chosenRoom = await chosen.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(takes[1].GetProperty("id").GetGuid(), chosenRoom.GetProperty("chosenTakeId").GetGuid());
+        // Choosing gives the room's files new addresses, so a browser never shows the photo it had before.
+        Assert.NotEqual(room.GetProperty("photoSetId").GetGuid(), chosenRoom.GetProperty("photoSetId").GetGuid());
+        Assert.Equal(HttpStatusCode.NotFound, (await Client.PostAsync($"/api/rooms/{roomId}/takes/{Guid.NewGuid()}/choose", null)).StatusCode);
+
+        // A guest has no designs; once signed up, the room goes into the plan's own design.
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Client.PostAsync($"/api/rooms/{roomId}/plan-design", null)).StatusCode);
+        (await Client.PostAsJsonAsync("/api/account/sign-up", new { email = $"{Guid.NewGuid():N}@example.test", password = "correct horse battery" })).EnsureSuccessStatusCode();
+        using var saved = await Client.PostAsync($"/api/rooms/{roomId}/plan-design", null);
+        var designId = (await saved.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("designId").GetGuid();
+        var design = await Client.GetFromJsonAsync<JsonElement>($"/api/designs/{designId}");
+
+        Assert.Equal(designId, (await Client.GetFromJsonAsync<JsonElement>($"/api/plans/{planId}")).GetProperty("designId").GetGuid());
+        Assert.Equal(roomId, design.GetProperty("rooms")[0].GetProperty("roomId").GetGuid());
+        Assert.Contains("?set=", design.GetProperty("rooms")[0].GetProperty("photoUrl").GetString(), StringComparison.Ordinal);
+    }
+
     /// <summary>Asks for a photo of a plan with a 3D view.</summary>
     /// <param name="id">The plan.</param>
     /// <param name="style">The photo's style, if any.</param>
     /// <param name="instructions">The user's extra instructions, if any.</param>
     /// <param name="view">The wall the photo looks at, when it isn't the room's own.</param>
     /// <param name="corner">Where the camera stands, with <paramref name="view"/>.</param>
-    private async Task<HttpResponseMessage> GenerateAsync(Guid id, string? style = null, string? instructions = null, string? view = null, string? corner = null)
+    /// <param name="roomId">The room of the run's earlier photos, if any.</param>
+    /// <param name="note">What the photo is, if anything.</param>
+    private async Task<HttpResponseMessage> GenerateAsync(
+        Guid id, string? style = null, string? instructions = null, string? view = null, string? corner = null, Guid? roomId = null, string? note = null)
     {
         using var guide = new ByteArrayContent(TestImages.Create(1280, 960));
 
@@ -252,6 +305,16 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         if (corner is not null)
         {
             form.Add(new StringContent(corner), "corner");
+        }
+
+        if (roomId is not null)
+        {
+            form.Add(new StringContent(roomId.Value.ToString()), "roomId");
+        }
+
+        if (note is not null)
+        {
+            form.Add(new StringContent(note), "note");
         }
 
         return await Client.PostAsync($"/api/plans/{id}/generate", form);

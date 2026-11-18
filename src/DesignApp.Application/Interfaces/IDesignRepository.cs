@@ -31,6 +31,12 @@ public interface IDesignRepository
     /// <param name="cancellationToken">Cancels the query.</param>
     Task<bool> IsRoomInADesignAsync(Guid roomId, CancellationToken cancellationToken);
 
+    /// <summary>A user's designs that hold a room.</summary>
+    /// <param name="roomId">The room.</param>
+    /// <param name="ownerId">The user.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    Task<IReadOnlyList<Design>> ListHoldingRoomAsync(Guid roomId, string ownerId, CancellationToken cancellationToken);
+
     /// <summary>Writes all added, changed and removed designs to the database.</summary>
     /// <param name="cancellationToken">Cancels the save.</param>
     Task SaveChangesAsync(CancellationToken cancellationToken);

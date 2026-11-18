@@ -2,23 +2,30 @@ using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 using static DesignApp.Domain.Constants;
 
 namespace DesignApp.Application.UseCases;
 
 /// <summary>
-/// Turns a built room into a realistic photo and makes it an ordinary room: the prompt is written from the plan with
-/// its exact sizes and positions (<see cref="PlanPrompt"/>), the image model turns the room's simple 3D view into a photo
-/// with that layout, and the photo is
-/// uploaded like any other. Its analysis waits until the user starts it in the editor (with the real AI it costs money),
-/// and then the user can restyle it.
+/// Turns a built room into a realistic photo: the prompt is written from the plan with its exact sizes and positions
+/// (<see cref="PlanPrompt"/>), and the image model turns the room's simple 3D view into a photo with that layout. The
+/// photos of one Generate run are one room: the first makes the room (its photo, the room's), the others are added to
+/// it to choose from. Its analysis waits until the user starts it (with the real AI it costs money). A signed-in user's
+/// room goes into the plan's own design.
 /// </summary>
 /// <param name="plans">Where plans are stored.</param>
+/// <param name="rooms">Where rooms and their photos are stored.</param>
 /// <param name="currentUser">The signed-in user or guest.</param>
 /// <param name="ai">The AI providers.</param>
-/// <param name="uploadRoom">Makes a room from the photo.</param>
-public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser currentUser, IAiProviders ai, UploadRoom uploadRoom)
+/// <param name="takes">Stores the photos.</param>
+/// <param name="planDesigns">Puts the room into the plan's design.</param>
+/// <param name="clock">When the room is made.</param>
+/// <param name="logger">Records a room that couldn't be put into the plan's design.</param>
+public sealed partial class GeneratePlanRoom(
+    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanDesigns planDesigns, TimeProvider clock,
+    ILogger<GeneratePlanRoom> logger)
 {
     /// <summary>Generates the photo and the room.</summary>
     /// <param name="planId">The plan.</param>
@@ -34,15 +41,31 @@ public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser current
     /// The view the photo is made from (the guide must be drawn from it); <c>null</c> for the room's own. The plan keeps
     /// its own view either way.
     /// </param>
+    /// <param name="roomId">The room of this run's earlier photos, to add this one to; <c>null</c> for the run's first.</param>
+    /// <param name="note">What the photo is, such as its view's name.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
-    /// <returns>The new room (waiting for its analysis), a failure the user can read, or <c>null</c> when the user has no such plan.</returns>
-    public async Task<Result<Room>?> HandleAsync(Guid planId, byte[] guidePng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes, PlanShot? shot, CancellationToken cancellationToken)
+    /// <returns>The room (waiting for its analysis), a failure the user can read, or <c>null</c> when the user has no such plan.</returns>
+    public async Task<Result<Room>?> HandleAsync(
+        Guid planId, byte[] guidePng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes, PlanShot? shot,
+        Guid? roomId, string? note, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(planId, currentUser.Id, cancellationToken);
 
         if (plan is null)
         {
             return null;
+        }
+
+        var room = roomId is Guid id ? await rooms.FindAsync(id, currentUser.Id, cancellationToken) : null;
+
+        if (roomId is not null && room?.PlanId != plan.Id)
+        {
+            return Result.Failure<Room>(Constants.Messages.NotThisPlansRoom);
+        }
+
+        if ((note?.Trim().Length ?? 0) > Domain.Constants.Rooms.MaxTakeNoteLength)
+        {
+            return Result.Failure<Room>(Constants.Messages.PhotoNote);
         }
 
         if (guidePng.Length is 0 or > Constants.Builder.MaxGuideBytes)
@@ -88,10 +111,40 @@ public sealed class GeneratePlanRoom(IPlanRepository plans, ICurrentUser current
             return Result.Failure<Room>(photo.Error);
         }
 
-        using var content = new MemoryStream(photo.Value, writable: false);
+        var newId = room?.Id ?? Guid.CreateVersion7(clock.GetUtcNow());
+        var stored = await takes.StoreAsync(newId, photo.Value, note ?? "", null, cancellationToken);
 
-        return await uploadRoom.HandleAsync(content, cancellationToken, AnalysisScope.WholeRoom, plan.AiMode, analyze: false);
+        if (!stored.Succeeded)
+        {
+            return Result.Failure<Room>(stored.Error);
+        }
+
+        if (room is null)
+        {
+            await takes.UseAsRoomPhotoAsync(stored.Value, cancellationToken);
+            room = Room.FromPlan(newId, currentUser.Id, Constants.Rooms.PhotoKey(newId), stored.Value, clock.GetUtcNow(), plan.AiMode, plan.Id);
+            rooms.Add(room);
+        }
+
+        rooms.AddTake(stored.Value);
+        await rooms.SaveChangesAsync(cancellationToken);
+
+        // The photo is made and saved, so the design can't lose it: when the room can't go into the plan's design now
+        // (it is full, or another run of the same plan made the design at the same moment), the photo page puts it there.
+        try
+        {
+            await planDesigns.AddAsync(plan, room, cancellationToken);
+        }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            LogNotInDesign(error, room.Id, plan.Id);
+        }
+
+        return room;
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Room {RoomId} of plan {PlanId} couldn't be put into the plan's design; the photo page puts it there")]
+    private partial void LogNotInDesign(Exception error, Guid roomId, Guid planId);
 
     /// <summary>Whether a box is on the plan's objects and inside the picture.</summary>
     /// <param name="box">The box.</param>

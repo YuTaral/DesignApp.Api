@@ -63,9 +63,9 @@ internal static class DesignEndpoints
     private static async Task<Ok<List<DesignResponse>>> ListAsync(GetDesigns getDesigns, CancellationToken cancellationToken)
     {
         var designs = await getDesigns.AllAsync(cancellationToken);
-        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        var rooms = await getDesigns.RoomsAsync(cancellationToken);
 
-        return TypedResults.Ok(designs.Select(d => DesignResponse.From(d, photoVersions)).ToList());
+        return TypedResults.Ok(designs.Select(d => DesignResponse.From(d, rooms)).ToList());
     }
 
     /// <summary><c>POST /api/designs</c>.</summary>
@@ -85,9 +85,9 @@ internal static class DesignEndpoints
             return TypedResults.NotFound();
         }
 
-        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        var rooms = await getDesigns.RoomsAsync(cancellationToken);
 
-        return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, photoVersions));
+        return TypedResults.Created(Constants.Routes.DesignUrl(design.Id), DesignResponse.From(design, rooms));
     }
 
     /// <summary><c>GET /api/designs/{id}</c>.</summary>
@@ -180,9 +180,9 @@ internal static class DesignEndpoints
             return TypedResults.NotFound();
         }
 
-        var photoVersions = await getDesigns.PhotoVersionsAsync(cancellationToken);
+        var rooms = await getDesigns.RoomsAsync(cancellationToken);
 
-        return TypedResults.Ok(DesignResponse.From(design, photoVersions));
+        return TypedResults.Ok(DesignResponse.From(design, rooms));
     }
 
     /// <summary>The colors of a request as domain edits; an invalid color, strength or paint is a 400.</summary>

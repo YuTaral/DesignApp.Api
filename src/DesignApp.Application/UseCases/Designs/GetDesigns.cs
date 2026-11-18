@@ -32,10 +32,10 @@ public sealed class GetDesigns(IDesignRepository designs, IRoomRepository rooms,
     /// </summary>
     /// <param name="cancellationToken">Cancels the query.</param>
     /// <returns>Photo versions by room id.</returns>
-    public async Task<IReadOnlyDictionary<Guid, int>> PhotoVersionsAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<Guid, Room>> RoomsAsync(CancellationToken cancellationToken)
     {
         var owned = await rooms.ListByOwnerAsync(currentUser.Id, cancellationToken);
 
-        return owned.ToDictionary(r => r.Id, r => r.PhotoVersion);
+        return owned.ToDictionary(r => r.Id);
     }
 }

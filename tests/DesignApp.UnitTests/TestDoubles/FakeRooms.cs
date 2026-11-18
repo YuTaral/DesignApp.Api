@@ -63,6 +63,24 @@ internal sealed class FakeRooms : IRoomRepository
     }
 
     /// <inheritdoc/>
+    /// <summary>The photos to choose from, saved or not.</summary>
+    public List<PhotoTake> Takes { get; } = [];
+
+    public void AddTake(PhotoTake take)
+    {
+        Takes.Add(take);
+    }
+
+    public Task<IReadOnlyList<PhotoTake>> ListTakesAsync(Guid roomId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<PhotoTake>>([.. Takes.Where(t => t.RoomId == roomId).OrderBy(t => t.CreatedAt).ThenBy(t => t.Id)]);
+    }
+
+    public Task<PhotoTake?> FindTakeAsync(Guid roomId, Guid takeId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Takes.SingleOrDefault(t => t.RoomId == roomId && t.Id == takeId));
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         if (FailOnSave)

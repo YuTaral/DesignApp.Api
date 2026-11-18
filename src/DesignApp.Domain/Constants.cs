@@ -30,6 +30,9 @@ public static class Constants
 
         /// <summary>How often analysis may start before the room is failed, so a photo that crashes the worker can't loop forever.</summary>
         public const int MaxAnalysisAttempts = 3;
+
+        /// <summary>The longest note of a photo to choose from: its view's name, or the change the user asked the AI for.</summary>
+        public const int MaxTakeNoteLength = 500;
     }
 
     /// <summary>Boxes in normalized image coordinates.</summary>
@@ -366,6 +369,19 @@ public static class Constants
         public static string CannotRestart(RoomStatus status)
         {
             return $"Cannot restart the analysis of a room that is {status}.";
+        }
+
+        /// <summary>A photo to choose from with no storage key, size or note within its limit.</summary>
+        public static readonly string TakeFields = $"A photo needs a storage key, a size, and a note of at most {Rooms.MaxTakeNoteLength} characters.";
+
+        /// <summary>Choosing a photo of another room.</summary>
+        public const string TakeOfOtherRoom = "That photo belongs to another room.";
+
+        /// <summary>Choosing another photo while the room's photo is being analyzed.</summary>
+        /// <param name="status">The room's status.</param>
+        public static string CannotChooseTake(RoomStatus status)
+        {
+            return $"The room's photo can't change while it is {status}; wait until its analysis is done.";
         }
 
         /// <summary>Fixing the outlines of a room that isn't ready.</summary>

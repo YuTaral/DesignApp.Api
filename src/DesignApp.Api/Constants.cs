@@ -54,6 +54,21 @@ public static class Constants
         /// <summary>One version of a room's photo (1 and up: after objects were removed).</summary>
         public const string RoomPhotoVersion = "/{id:guid}/photo/{version:int}";
 
+        /// <summary>A room's photos to choose from.</summary>
+        public const string RoomTakes = "/{id:guid}/takes";
+
+        /// <summary>One of a room's photos to choose from.</summary>
+        public const string RoomTakePhoto = "/{id:guid}/takes/{takeId:guid}/photo";
+
+        /// <summary>A change the AI makes to one of a room's photos.</summary>
+        public const string RoomTakeChange = "/{id:guid}/takes/{takeId:guid}/change";
+
+        /// <summary>Making one of a room's photos the room's photo.</summary>
+        public const string RoomTakeChoice = "/{id:guid}/takes/{takeId:guid}/choose";
+
+        /// <summary>Saving a room of a plan's photos into the plan's design.</summary>
+        public const string RoomPlanDesign = "/{id:guid}/plan-design";
+
         /// <summary>A room's current label map.</summary>
         public const string RoomLabels = "/{id:guid}/labels";
 
@@ -172,22 +187,47 @@ public static class Constants
             return $"{Api}{Plans}/{id}";
         }
 
-        /// <summary>The URL of a room's photo.</summary>
+        /// <summary>
+        /// The URL of a room's photo. A room with photos to choose from names its photo set in it: choosing a photo
+        /// gives the room a new photo (and new outlines) under the same paths, which browsers keep for good.
+        /// </summary>
         /// <param name="id">The room's id.</param>
+        /// <param name="version">The photo version: 0 is the uploaded (or chosen) photo.</param>
+        /// <param name="set">The room's photo set (<c>Room.PhotoSetId</c>), if it has photos to choose from.</param>
         /// <returns>The path of the photo.</returns>
-        /// <param name="version">The photo version: 0 is the uploaded photo.</param>
-        public static string RoomPhotoUrl(Guid id, int version = 0)
+        public static string RoomPhotoUrl(Guid id, int version = 0, Guid? set = null)
         {
-            return version == 0 ? $"{RoomUrl(id)}/photo" : $"{RoomUrl(id)}/photo/{version}";
+            return WithSet(version == 0 ? $"{RoomUrl(id)}/photo" : $"{RoomUrl(id)}/photo/{version}", set);
         }
+
+        /// <summary>The URL of one of a room's photos to choose from.</summary>
+        /// <param name="roomId">The room's id.</param>
+        /// <param name="takeId">The photo's id.</param>
+        /// <returns>The path of the photo.</returns>
+        public static string TakePhotoUrl(Guid roomId, Guid takeId)
+        {
+            return $"{RoomUrl(roomId)}/takes/{takeId}/photo";
+        }
+
+        /// <summary>A path with the room's photo set named in it, when it has one (see <see cref="RoomPhotoUrl"/>).</summary>
+        /// <param name="path">The path.</param>
+        /// <param name="set">The photo set, if any.</param>
+        private static string WithSet(string path, Guid? set)
+        {
+            return set is Guid id ? $"{path}?{PhotoSetQuery}={id}" : path;
+        }
+
+        /// <summary>The query parameter that names a room's photo set in its file paths.</summary>
+        public const string PhotoSetQuery = "set";
 
         /// <summary>The URL of one version of a room's label map.</summary>
         /// <param name="id">The room's id.</param>
         /// <param name="revision">The version.</param>
+        /// <param name="set">The room's photo set, if it has photos to choose from.</param>
         /// <returns>The path of that label map.</returns>
-        public static string RoomLabelMapUrl(Guid id, int revision)
+        public static string RoomLabelMapUrl(Guid id, int revision, Guid? set = null)
         {
-            return $"{RoomUrl(id)}/labels/{revision}";
+            return WithSet($"{RoomUrl(id)}/labels/{revision}", set);
         }
     }
 
@@ -383,6 +423,18 @@ public static class Constants
         /// <summary>A photo of a built room couldn't be made.</summary>
         public const string GenerateFailed = "Can't make the photo";
 
+        /// <summary>A photo couldn't be changed.</summary>
+        public const string ChangeFailed = "Can't change the photo";
+
+        /// <summary>Two changes to the same thing arrived at the same time.</summary>
+        public const string Conflict = "Changed at the same time";
+
+        /// <summary>A photo couldn't be made the room's.</summary>
+        public const string ChooseFailed = "Can't use this photo";
+
+        /// <summary>A room couldn't be saved into its plan's design.</summary>
+        public const string PlanDesignFailed = "Can't save to the design";
+
         /// <summary>Sign-up failed.</summary>
         public const string SignUpFailed = "Couldn't sign up";
 
@@ -432,6 +484,9 @@ public static class Constants
     /// <summary>Texts the API sends to people.</summary>
     public static class Messages
     {
+        /// <summary>A change that met another change to the same thing made at the same time (another tab, say).</summary>
+        public const string ChangedMeanwhile = "This was changed somewhere else at the same time. Reload the page and try again.";
+
         /// <summary>Sent when the API is started without the AppHost.</summary>
         public const string NeedsAppHost =
             "DesignApp.Api can't run on its own: it needs the database and storage that DesignApp.AppHost starts. " +

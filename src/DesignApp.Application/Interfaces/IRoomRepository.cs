@@ -46,6 +46,21 @@ public interface IRoomRepository
     /// <returns>Their ids, oldest first.</returns>
     Task<IReadOnlyList<Guid>> ListUnfinishedAsync(CancellationToken cancellationToken);
 
+    /// <summary>Adds a photo of a room to choose from; saved with the next <see cref="SaveChangesAsync"/>.</summary>
+    /// <param name="take">The photo.</param>
+    void AddTake(PhotoTake take);
+
+    /// <summary>A room's photos to choose from, in the order they were made.</summary>
+    /// <param name="roomId">The room.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    Task<IReadOnlyList<PhotoTake>> ListTakesAsync(Guid roomId, CancellationToken cancellationToken);
+
+    /// <summary>One photo of a room, or <c>null</c> when the room has no such photo.</summary>
+    /// <param name="roomId">The room.</param>
+    /// <param name="takeId">The photo.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    Task<PhotoTake?> FindTakeAsync(Guid roomId, Guid takeId, CancellationToken cancellationToken);
+
     /// <summary>Writes all added and changed rooms to the database.</summary>
     /// <param name="cancellationToken">Cancels the save.</param>
     Task SaveChangesAsync(CancellationToken cancellationToken);
