@@ -76,14 +76,7 @@ public sealed partial class AnalyzeRoom(
     /// <param name="cancellationToken">Cancels the work.</param>
     private async Task RunPipelineAsync(Room room, CancellationToken cancellationToken)
     {
-        AnalysisImage image;
-
-        await using (var photo = await storage.OpenReadAsync(room.PhotoKey, cancellationToken)
-            ?? throw new InvalidOperationException(Constants.Messages.MissingPhoto(room.Id)))
-        {
-            image = imaging.PrepareForAnalysis(photo.Content);
-        }
-
+        var image = await AnalysisPhoto.ReadAsync(storage, imaging, room, cancellationToken);
         var listed = await ai.Inventory(room.AiMode).ListObjectsAsync(image, cancellationToken);
 
         if (!listed.Succeeded)

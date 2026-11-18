@@ -26,7 +26,9 @@ internal static class RoomEndpoints
             .WithSummary("Uploads a room photo and creates a room for it.")
             .WithDescription($"Send the photo as multipart form data in a field named `photo`. JPEG, PNG or WebP up to {Application.Constants.Photos.MaxUploadMegabytes} MB. " +
                 "An optional `scope` field chooses what the AI looks for: `WholeRoom` (default), `NoDoorsOrWindows` or `ObjectsOnly`. " +
-                "An optional `ai` field chooses `Fake` or `Real` where `GET /api/ai` allows it.")
+                "An optional `ai` field chooses `Fake` or `Real` where `GET /api/ai` allows it. " +
+                "An optional `analyze` field set to `false` leaves the room waiting instead of starting its analysis (which the real AI charges for), " +
+                "such as for a photo only read into a room plan.")
             .DisableAntiforgery() // the cookies are SameSite=Lax, so another site's form posts arrive without them
             .RequireRateLimiting(Constants.RateLimits.UploadsPolicy);
 
@@ -62,6 +64,14 @@ internal static class RoomEndpoints
             .WithName("ChooseRoomTake")
             .WithSummary("Makes one of the room's photos the room's photo, the one its analysis uses.")
             .WithDescription("A room already analyzed with another photo waits for its analysis again: its outlines, removals and the colors its designs gave it are dropped.");
+
+        rooms.MapPost(Constants.Routes.RoomPlan, BuildPlanAsync)
+            .WithName("BuildPlanFromRoom")
+            .WithSummary("Reads the room's photo into a new room plan, to change in the room builder and photograph again.")
+            .WithDescription("The room's AI reads the room's type, size, surfaces and objects (from the builder's catalog) from the photo; overlapping " +
+                "objects are moved apart and wall-side furniture is pushed against its wall. Objects that fit nowhere are left out and listed. " +
+                "The plan is linked to the room. With the real AI it is one Claude call.")
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
         rooms.MapPost(Constants.Routes.RoomPlanDesign, SaveToPlanDesignAsync)
             .WithName("SaveRoomToPlanDesign")
@@ -122,16 +132,36 @@ internal static class RoomEndpoints
         return api;
     }
 
+    /// <summary><c>POST /api/rooms/{id}/plan</c>: the room's photo read into a new plan.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="build">The use case.</param>
+    /// <param name="cancellationToken">Cancels the work.</param>
+    private static async Task<Results<Created<PhotoPlanResponse>, ProblemHttpResult, NotFound>> BuildPlanAsync(Guid id, BuildPlanFromRoom build,
+        CancellationToken cancellationToken)
+    {
+        var outcome = await build.HandleAsync(id, cancellationToken);
+
+        if (outcome is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return outcome.Succeeded
+            ? TypedResults.Created(Constants.Routes.PlanUrl(outcome.Value.Plan.Id), PhotoPlanResponse.From(outcome.Value))
+            : Problems.BadRequest(outcome.Error, Constants.Titles.PhotoPlanFailed);
+    }
+
     /// <summary><c>POST /api/rooms</c>: validates and stores the photo, then creates the room.</summary>
     /// <param name="photo">The uploaded file from the <c>photo</c> form field.</param>
     /// <param name="scope">The optional <c>scope</c> form field: what the AI looks for.</param>
     /// <param name="ai">The optional <c>ai</c> form field: Fake or Real.</param>
+    /// <param name="analyze">The optional <c>analyze</c> form field: false leaves the room waiting instead of starting its analysis.</param>
     /// <param name="aiProviders">Says which AI modes may be used.</param>
     /// <param name="uploadRoom">The use case that processes and stores the photo.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>201 with the new room, 400 for an unusable photo, or 413 when it is too large.</returns>
     private static async Task<Results<Created<RoomResponse>, ProblemHttpResult>> UploadAsync(
-        IFormFile photo, [FromForm] string? scope, [FromForm] string? ai, UploadRoom uploadRoom, IAiProviders aiProviders,
+        IFormFile photo, [FromForm] string? scope, [FromForm] string? ai, [FromForm] bool? analyze, UploadRoom uploadRoom, IAiProviders aiProviders,
         CancellationToken cancellationToken)
     {
         if (AiModeChoice.TryResolve(ai, aiProviders.Availability, out var aiMode) is { } problem)
@@ -155,7 +185,7 @@ internal static class RoomEndpoints
         }
 
         await using var content = photo.OpenReadStream();
-        var result = await uploadRoom.HandleAsync(content, cancellationToken, analysisScope, aiMode);
+        var result = await uploadRoom.HandleAsync(content, cancellationToken, analysisScope, aiMode, analyze ?? true);
 
         if (!result.Succeeded)
         {

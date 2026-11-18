@@ -2,8 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using DesignApp.Application.UseCases;
 using DesignApp.Tests;
 using Microsoft.AspNetCore.Mvc.Testing.Handlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DesignApp.IntegrationTests;
 
@@ -24,8 +26,8 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var objects = (await response.Content.ReadFromJsonAsync<List<JsonElement>>())!;
 
-        // Every room's sixteen: five windows and doors, nine things to hang and two for the floor; then the bedroom's seventeen.
-        Assert.Equal(33, objects.Count);
+        // Every room's seventeen: six windows and doors, nine things to hang and two for the floor; then the bedroom's seventeen.
+        Assert.Equal(34, objects.Count);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "painting" && o.GetProperty("shape").GetString() == "Picture" && o.GetProperty("elevation").GetDouble() == 130);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "window" && o.GetProperty("elevation").GetDouble() == 90);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "double-bed" && o.GetProperty("shape").GetString() == "Bed");
@@ -207,6 +209,50 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             stored.GetProperty("timeOfDay").GetString()));
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+    }
+
+    [Fact]
+    public async Task An_uploaded_rooms_photo_is_read_into_a_tidied_plan_its_owner_can_build_on()
+    {
+        using var content = new ByteArrayContent(TestImages.Create(800, 600));
+        using var notNow = new StringContent("false");
+        using var stranger = factory.CreateDefaultClient(factory.ClientOptions.BaseAddress, new CookieContainerHandler(new CookieContainer()));
+
+        content.Headers.ContentType = new MediaTypeHeaderValue(DesignApp.Application.Constants.ContentTypes.Jpeg);
+        // As Build a room uploads it: only to read into a plan, so its analysis isn't started.
+        using var form = new MultipartFormDataContent { { content, "photo", "room.jpg" }, { notNow, "analyze" } };
+        using var uploaded = await Client.PostAsync("/api/rooms", form);
+        var room = await uploaded.Content.ReadFromJsonAsync<JsonElement>();
+        var roomId = room.GetProperty("id").GetGuid();
+
+        using var built = await Client.PostAsync($"/api/rooms/{roomId}/plan", null);
+        var answer = await built.Content.ReadFromJsonAsync<JsonElement>();
+        var plan = answer.GetProperty("plan");
+        var read = await Client.GetFromJsonAsync<JsonElement>($"/api/plans/{plan.GetProperty("id").GetGuid()}");
+        using var refused = await stranger.PostAsync($"/api/rooms/{roomId}/plan", null);
+
+        await factory.AgeRoomAsync(roomId, DateTimeOffset.UtcNow.AddDays(-2));
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<DeleteUnsavedRooms>().HandleAsync(CancellationToken.None);
+        }
+
+        using var photo = await Client.GetAsync($"/api/rooms/{roomId}/photo");
+
+        Assert.Equal("Waiting", room.GetProperty("status").GetString());
+        Assert.Equal(HttpStatusCode.Created, built.StatusCode);
+        // The fake AI's living room, linked to the photo, with every object kept.
+        Assert.Equal(("LivingRoom", roomId), (read.GetProperty("roomType").GetString(), read.GetProperty("fromRoomId").GetGuid()));
+        Assert.Equal(8, read.GetProperty("items").GetArrayLength());
+        Assert.Equal(0, answer.GetProperty("leftOut").GetArrayLength());
+        // Seen from where the photo was taken, kept with the plan.
+        Assert.Equal(("Spot", 200.0, 470.0), (read.GetProperty("corner").GetString(), read.GetProperty("cameraSpot").GetProperty("x").GetDouble(),
+            read.GetProperty("cameraSpot").GetProperty("y").GetDouble()));
+        Assert.Contains(read.GetProperty("items").EnumerateArray(), i => i.GetProperty("label").GetString() == "three-seat sofa" && i.GetProperty("material").GetString() == "velvet");
+        Assert.Equal(HttpStatusCode.NotFound, refused.StatusCode);
+        // Not in a design, but a plan was read from it: the cleanup of unsaved uploads keeps it, so the builder can show it.
+        Assert.Equal(HttpStatusCode.OK, photo.StatusCode);
     }
 
     [Fact]

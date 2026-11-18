@@ -25,21 +25,32 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
     /// <inheritdoc/>
     public async Task<Result<CatalogObject>> DescribeObjectAsync(RoomType roomType, string description, CancellationToken cancellationToken)
     {
-        var answer = await AskAsync(RB.DescribeSystem, RB.DescribeMessage(ClaudeRoomBuilderAi.Words(roomType.ToString()), description),
-            ClaudeRoomBuilderAi.Schema(), "described an object", cancellationToken);
+        var message = ClaudeCodeMessage.User(ClaudeCodeMessage.Text(RB.DescribeMessage(ClaudeRoomBuilderAi.Words(roomType.ToString()), description)));
+        var answer = await AskAsync(RB.Model, RB.DescribeSystem, message, ClaudeRoomBuilderAi.Schema(), "described an object", cancellationToken);
 
         return ClaudeRoomBuilderAi.ReadObject(answer);
     }
 
-    /// <summary>Runs Claude Code once with instructions, a text and an answer schema.</summary>
+    /// <inheritdoc/>
+    public async Task<Result<PhotoPlan>> PlanFromPhotoAsync(AnalysisImage image, IReadOnlyList<CatalogObject> catalog, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        var message = ClaudeCodeInventoryProvider.Message(image, PhotoPlanJson.Message(catalog, image.Width, image.Height));
+        var answer = await AskAsync(RB.Photo.Model, RB.Photo.System, message, PhotoPlanJson.Schema(catalog), "read a photo into a plan", cancellationToken);
+
+        return PhotoPlanJson.Parse(answer);
+    }
+
+    /// <summary>Runs Claude Code once with instructions, a message and an answer schema.</summary>
+    /// <param name="model">The model.</param>
     /// <param name="system">The instructions.</param>
-    /// <param name="text">The message.</param>
+    /// <param name="message">The stream-json user message (text, and a photo if any).</param>
     /// <param name="schema">The answer's JSON schema.</param>
     /// <param name="task">What it did, for the log.</param>
     /// <param name="cancellationToken">Stops the process.</param>
     /// <returns>The structured answer as JSON.</returns>
     /// <exception cref="InvalidOperationException">Claude Code failed or gave no structured answer.</exception>
-    private async Task<string> AskAsync(string system, string text, Dictionary<string, JsonElement> schema, string task, CancellationToken cancellationToken)
+    private async Task<string> AskAsync(string model, string system, string message, Dictionary<string, JsonElement> schema, string task, CancellationToken cancellationToken)
     {
         var promptFile = Path.GetTempFileName();
 
@@ -49,7 +60,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
             string[] arguments =
             [
                 G.Print, G.InputFormat, G.StreamJson, G.OutputFormat, G.StreamJson, G.Verbose,
-                G.Model, RB.Model,
+                G.Model, model,
                 G.SystemPromptFile, promptFile,
                 G.JsonSchema, JsonSerializer.Serialize(schema),
                 G.Tools, G.NoTools,
@@ -59,7 +70,7 @@ internal sealed partial class ClaudeCodeRoomBuilderAi(IClaudeCodeRunner runner, 
                 G.Settings, CC.HookFreeSettings,
             ];
             var started = Stopwatch.GetTimestamp();
-            var printed = await runner.RunAsync(arguments, ClaudeCodeMessage.User(ClaudeCodeMessage.Text(text)), cancellationToken);
+            var printed = await runner.RunAsync(arguments, message, cancellationToken);
             var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
             var result = ClaudeCodeInventoryProvider.Read(printed);
 

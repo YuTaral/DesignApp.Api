@@ -144,6 +144,12 @@ public static class Constants
         /// <summary>The longest name of an object's material, such as "velvet".</summary>
         public const int MaxMaterialLength = 40;
 
+        /// <summary>A built room's walls' color when none is known: a warm off-white.</summary>
+        public const string DefaultWallColor = "#E8E2D6";
+
+        /// <summary>A built room's floor color when none is known: a light oak.</summary>
+        public const string DefaultFloorColor = "#B89B7A";
+
         /// <summary>A built room's ceiling color until the user picks one: a soft white.</summary>
         public const string CeilingColor = "#FAFAF7";
 
@@ -607,6 +613,8 @@ public static class Constants
         Left,
         /// <summary>In the near right corner, looking towards the far left corner.</summary>
         Right,
+        /// <summary>At the plan's camera spot (where the photo it was read from was taken), looking at the middle of the wall in view.</summary>
+        Spot,
     }
 
     /// <summary>The interior style a built room's photo is made in: its materials and finishes, not its layout.</summary>

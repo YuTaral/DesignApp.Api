@@ -72,6 +72,27 @@ public class CornerViewTests
     }
 
     [Fact]
+    public void A_spot_view_looks_from_where_the_photo_was_taken_and_is_dropped_with_a_spot_outside_the_walls()
+    {
+        var plan = Room(ViewCorner.None);
+
+        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, plan.Items, Now, ViewCorner.Spot, null, new OutlinePoint(120, 300));
+        var prompt = PlanPrompt.Write(plan);
+
+        Assert.Equal((ViewCorner.Spot, new OutlinePoint(120, 300)), (plan.Corner, plan.CameraSpot));
+        Assert.Contains("The camera stands 120 cm from the left wall and 300 cm from the far wall at eye height, looking towards the middle of the far wall.",
+            prompt, StringComparison.Ordinal);
+        // The sofa is ahead and faces the camera; the plant, 170 cm behind the spot, isn't in the photo.
+        Assert.Contains("facing the camera", prompt, StringComparison.Ordinal);
+        Assert.DoesNotContain("plant", prompt, StringComparison.Ordinal);
+
+        plan.Update("", 4, 2.5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [], Now, ViewCorner.Spot);
+
+        // The smaller room leaves the spot outside: the camera looks from the middle again.
+        Assert.Equal((ViewCorner.None, (OutlinePoint?)null), (plan.Corner, plan.CameraSpot));
+    }
+
+    [Fact]
     public void The_corner_camera_looks_diagonally_through_its_fixed_lens()
     {
         // From the near left corner of a 400 × 500 room (5 cm in from both walls), turned 45° to the right.

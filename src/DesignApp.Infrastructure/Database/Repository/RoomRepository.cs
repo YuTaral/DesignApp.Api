@@ -26,7 +26,7 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     public async Task<IReadOnlyList<Room>> ListUnsavedBeforeAsync(DateTimeOffset cutoff, int max, CancellationToken cancellationToken)
     {
         return await db.Rooms
-            .Where(r => r.CreatedAt < cutoff && !db.Designs.Any(d => d.Rooms.Any(x => x.RoomId == r.Id)))
+            .Where(r => r.CreatedAt < cutoff && !db.Designs.Any(d => d.Rooms.Any(x => x.RoomId == r.Id)) && !db.RoomPlans.Any(p => p.FromRoomId == r.Id))
             .OrderBy(r => r.CreatedAt)
             .Take(max)
             .ToListAsync(cancellationToken);

@@ -36,6 +36,11 @@
       {"key": "single", "name": "Single", "label": "single French window", "width": 80, "depth": 10, "height": 220, "elevation": 0},
       {"key": "sliding", "name": "Sliding", "label": "sliding glass door", "width": 240, "depth": 10, "height": 220, "elevation": 0}
     ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "vertical blinds", "roller blinds"] },
+    { "key": "arched-window", "shape": "Window", "color": "#F4F1EA", "materials": "window", "variants": [
+      {"key": "standard", "name": "Standard", "label": "arched window", "width": 100, "depth": 10, "height": 170, "elevation": 80},
+      {"key": "small", "name": "Small", "label": "small arched window", "width": 70, "depth": 10, "height": 110, "elevation": 110},
+      {"key": "tall", "name": "Tall", "label": "tall arched window", "width": 120, "depth": 10, "height": 230, "elevation": 20}
+    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blind", "plants on the sill"] },
     { "key": "door", "shape": "Door", "color": "#F4F1EA", "materials": "door", "variants": [
       {"key": "standard", "name": "Standard", "label": "door", "width": 90, "depth": 5, "height": 210, "elevation": 0},
       {"key": "narrow", "name": "Narrow", "label": "narrow door", "width": 80, "depth": 5, "height": 200, "elevation": 0},
@@ -385,6 +390,11 @@
         {"key": "rectangular", "name": "Rectangular", "label": "rectangular shower tray", "width": 120, "depth": 80, "height": 5},
         {"key": "walk-in", "name": "Walk-in", "label": "walk-in shower", "width": 140, "depth": 90, "height": 5}
       ], "decorations": ["shampoo bottles", "small plant", "towel on the door", "shower caddy", "loofah"] },
+      { "key": "glass-shower", "shape": "Box", "color": "#F4F1EA", "materials": "sanitary", "dressing": ["shampoo bottles"], "variants": [
+        {"key": "screen", "name": "Screen", "label": "glass shower screen", "width": 140, "depth": 90, "height": 200},
+        {"key": "cubicle", "name": "Cubicle", "label": "glass shower cubicle", "width": 90, "depth": 90, "height": 200},
+        {"key": "large", "name": "Large cubicle", "label": "large glass shower cubicle", "width": 120, "depth": 90, "height": 200}
+      ], "decorations": ["shampoo bottles", "rain shower head", "shower caddy", "towel over the glass", "small plant on the tray"] },
       { "key": "toilet", "shape": "Rounded", "color": "#F4F1EA", "materials": "sanitary", "variants": [
         {"key": "standard", "name": "Floor-standing", "label": "toilet", "width": 38, "depth": 65, "height": 75},
         {"key": "wall-hung", "name": "Wall-hung", "label": "wall-hung toilet", "width": 36, "depth": 54, "height": 40},

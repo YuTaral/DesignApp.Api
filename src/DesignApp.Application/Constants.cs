@@ -109,6 +109,12 @@ public static class Constants
         /// </summary>
         public static class Layout
         {
+            /// <summary>How near its wall, in cm, a cabinet, sofa or bed read from a photo is pushed against it.</summary>
+            public const double SnapReach = 40;
+            /// <summary>How far, in cm, an object read from a photo is moved to clear what it overlaps before it is left out.</summary>
+            public const double NudgeReach = 120;
+            /// <summary>The side, in cm, of the floor kept clear where the camera of a photo read into a plan stands.</summary>
+            public const double CameraClearance = 80;
             /// <summary>What a living room's, bedroom's, dining room's, office's or kids' room's windows start dressed with.</summary>
             public const string Curtains = "sheer curtains";
             /// <summary>What a kitchen's or bathroom's windows start dressed with.</summary>
@@ -420,6 +426,14 @@ public static class Constants
 
             /// <summary>Where the camera is.</summary>
             public const string Camera = "The camera stands at the middle of the near wall at eye height, looking straight at the far wall.";
+
+            /// <summary>Where the camera is when it stands at the spot the photo the plan was read from was taken.</summary>
+            /// <param name="fromLeft">How far from the left wall, in cm.</param>
+            /// <param name="fromFar">How far from the far wall, in cm.</param>
+            public static string SpotCamera(string fromLeft, string fromFar)
+            {
+                return $"The camera stands {fromLeft} cm from the left wall and {fromFar} cm from the far wall at eye height, looking towards the middle of the far wall.";
+            }
 
             /// <summary>
             /// Where the camera is when it stands in a near corner, and which wall shows on which side of the photo. The

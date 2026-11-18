@@ -25,12 +25,13 @@ public sealed class SavePlan(IPlanRepository plans, ICurrentUser currentUser, Ti
     /// <param name="items">The objects.</param>
     /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the plan's own.</param>
+    /// <param name="cameraSpot">Where the photo the plan was read from was taken; <c>null</c> keeps the plan's own.</param>
     /// <param name="cancellationToken">Cancels the save.</param>
     /// <returns>The saved plan, or <c>null</c> when the user has no such plan.</returns>
     /// <exception cref="DomainException">The name, walls or objects are invalid.</exception>
     public async Task<RoomPlan?> HandleAsync(Guid id, string name, RoomOutline outline, double height,
         HexColor wallColor, HexColor floorColor, FloorType floorType, int view, IReadOnlyList<PlanItem> items, ViewCorner corner,
-        RoomFinish? finish, CancellationToken cancellationToken)
+        RoomFinish? finish, OutlinePoint? cameraSpot, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(id, currentUser.Id, cancellationToken);
 
@@ -39,7 +40,7 @@ public sealed class SavePlan(IPlanRepository plans, ICurrentUser currentUser, Ti
             return null;
         }
 
-        plan.Update(name, outline, height, wallColor, floorColor, floorType, view, items, clock.GetUtcNow(), corner, finish);
+        plan.Update(name, outline, height, wallColor, floorColor, floorType, view, items, clock.GetUtcNow(), corner, finish, cameraSpot);
         await plans.SaveChangesAsync(cancellationToken);
 
         return plan;

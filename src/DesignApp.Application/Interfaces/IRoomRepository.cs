@@ -15,8 +15,8 @@ public interface IRoomRepository
     void Remove(Room room);
 
     /// <summary>
-    /// Rooms uploaded before <paramref name="cutoff"/> that aren't in any design, oldest first: the
-    /// uploads nobody saved, which are deleted after a while.
+    /// Rooms uploaded before <paramref name="cutoff"/> that aren't in any design and that no room plan was read from,
+    /// oldest first: the uploads nobody saved, which are deleted after a while.
     /// </summary>
     /// <param name="cutoff">Only rooms uploaded before this time.</param>
     /// <param name="max">At most this many.</param>

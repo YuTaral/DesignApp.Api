@@ -215,8 +215,8 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         await CreateAsync(browser, saved.Id, "Kept");
         var dayAndAHourAgo = DateTimeOffset.UtcNow.AddHours(-25);
 
-        await AgeAsync(saved.Id, dayAndAHourAgo);
-        await AgeAsync(unsaved.Id, dayAndAHourAgo);
+        await factory.AgeRoomAsync(saved.Id, dayAndAHourAgo);
+        await factory.AgeRoomAsync(unsaved.Id, dayAndAHourAgo);
 
         using (var scope = factory.Services.CreateScope())
             Assert.True(await scope.ServiceProvider.GetRequiredService<DeleteUnsavedRooms>().HandleAsync(CancellationToken.None) >= 1);
@@ -356,19 +356,6 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         });
 
         Assert.Equal(DesignApp.Domain.Constants.Messages.ToneCount, await ProblemAsync(one));
-    }
-
-    /// <summary>Backdates a room's upload time in the database, as if it had been uploaded then.</summary>
-    /// <param name="roomId">The room.</param>
-    /// <param name="uploaded">When it should look uploaded.</param>
-    private async Task AgeAsync(Guid roomId, DateTimeOffset uploaded)
-    {
-        using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DesignApp.Infrastructure.Database.AppDbContext>();
-        var room = await db.Rooms.FindAsync(roomId);
-
-        db.Entry(room!).Property(nameof(Room.CreatedAt)).CurrentValue = uploaded;
-        await db.SaveChangesAsync();
     }
 
     /// <summary>A fresh email, so tests sharing the database don't collide.</summary>

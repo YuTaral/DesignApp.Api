@@ -245,6 +245,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("ai_mode");
 
+                    b.Property<string>("CameraSpot")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("camera_spot");
+
                     b.Property<string>("Corner")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -275,6 +279,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("floor_type");
+
+                    b.Property<Guid?>("FromRoomId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_room_id");
 
                     b.Property<double>("Height")
                         .HasColumnType("double precision")

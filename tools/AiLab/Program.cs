@@ -5,6 +5,7 @@
 //                                                                       PAID: one Claude call + the SAM 3 requests
 //   dotnet run --project tools/AiLab -- replay <folder>               free: answers SAM 3 from the recording
 //   dotnet run --project tools/AiLab -- generate <prompts.json> <folder> [...]   PAID with --yes: library photos (Generator.cs)
+//   dotnet run --project tools/AiLab -- photo-plan <folder> <photo>... [--yes]   PAID with --yes: Build in 3D on photos (PhotoPlanner.cs)
 //
 // record saves the analysis image, Claude's objects (inventory.json) and every SAM 3 request and response
 // (sam/<hash>.json). replay feeds those back to the same FalSegmentationProvider, so changes to the mask
@@ -39,6 +40,11 @@ if (args.Length > 0 && args[0] == "generate")
 if (args.Length > 0 && args[0] == "compare-images")
 {
     return await AiLab.ImageComparer.RunAsync(args);
+}
+
+if (args.Length > 0 && args[0] == "photo-plan")
+{
+    return await AiLab.PhotoPlanner.RunAsync(args);
 }
 
 if (args.Length < 2 || args[0] is not ("record" or "replay"))

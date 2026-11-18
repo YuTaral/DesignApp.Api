@@ -9,7 +9,9 @@ namespace DesignApp.Application.Helpers;
 /// a little in front of the near wall, at eye height, looking level at the far wall through a wide lens that shows the
 /// room's whole width from halfway there, its picture cut from the lower part of a taller frame. It tells which points the picture shows, so the prompt describes only what is in the render (an object
 /// beside or behind the camera that the prompt still named was drawn anyway, as something else). From a near corner it
-/// stands by the side wall instead, turned to look diagonally across the room through a fixed wide lens.
+/// stands by the side wall instead, turned to look diagonally across the room through a fixed wide lens. From a spot
+/// (where a photo the plan was read from was taken) it stands there, turned towards the far wall's middle, with the lens
+/// fitted as from the near wall but from where it stands.
 /// </summary>
 /// <remarks>The same camera as <c>scene-3d.ts</c> in DesignApp.Web; lengths in centimetres.</remarks>
 public sealed class PlanCamera
@@ -28,16 +30,27 @@ public sealed class PlanCamera
     /// <param name="deep">From the near wall to the far wall.</param>
     /// <param name="height">From the floor to the ceiling.</param>
     /// <param name="middle">Where the camera stands from the left wall; the middle when missing (a rectangle).</param>
-    /// <param name="corner">Whether it stands in a near corner, turned towards the room, or looks straight at the far wall.</param>
-    public PlanCamera(double across, double deep, double height, double? middle = null, ViewCorner corner = ViewCorner.None)
+    /// <param name="corner">Whether it stands in a near corner, turned towards the room, at a spot, or looks straight at the far wall.</param>
+    /// <param name="stand">How far from the far wall it stands; a little in front of the near wall when missing.</param>
+    /// <param name="look">For a spot, the point of the far wall it looks at, from the left wall; the wall's middle when missing.</param>
+    public PlanCamera(double across, double deep, double height, double? middle = null, ViewCorner corner = ViewCorner.None, double? stand = null,
+        double? look = null)
     {
+        var corners = corner is ViewCorner.Left or ViewCorner.Right;
+
         _middle = middle ?? across / 2;
-        _stand = deep - C.Inset;
+        _stand = stand ?? deep - C.Inset;
         _eye = Math.Min(C.EyeHeight, height - C.CeilingGap);
-        var fit = 2 * Math.Atan(across / 2 / Math.Max(C.MinFitDistance, (deep - C.Inset) * C.FitDepthShare)) * 180 / Math.PI;
-        var horizontal = (corner == ViewCorner.None ? Math.Clamp(fit, C.MinFov, C.MaxFov) : C.CornerFov) * Math.PI / 180;
-        // Turned to the right (towards the room) from the left corner, to the left from the right one.
-        var turn = corner switch { ViewCorner.Left => C.CornerTurn, ViewCorner.Right => -C.CornerTurn, _ => 0 } * Math.PI / 180;
+        var fit = 2 * Math.Atan(across / 2 / Math.Max(C.MinFitDistance, _stand * C.FitDepthShare)) * 180 / Math.PI;
+        var horizontal = (corners ? C.CornerFov : Math.Clamp(fit, C.MinFov, C.MaxFov)) * Math.PI / 180;
+        // Turned to the right (towards the room) from the left corner, to the left from the right one; from a spot, towards what it looks at.
+        var turn = corner switch
+        {
+            ViewCorner.Left => C.CornerTurn * Math.PI / 180,
+            ViewCorner.Right => -C.CornerTurn * Math.PI / 180,
+            ViewCorner.Spot => Math.Atan2((look ?? across / 2) - _middle, Math.Max(C.MinFitDistance, _stand)),
+            _ => 0,
+        };
 
         (_sin, _cos) = (Math.Sin(turn), Math.Cos(turn));
         _across = Math.Tan(horizontal / 2);

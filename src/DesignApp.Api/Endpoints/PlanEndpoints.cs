@@ -129,7 +129,7 @@ internal static class PlanEndpoints
             : RoomPlan.RectangleOutline(request.Width, request.Length);
         var plan = await savePlan.HandleAsync(id, request.Name ?? "", outline, request.Height,
             HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, request.View, items, request.Corner,
-            request.Finish?.ToDomain(), cancellationToken);
+            request.Finish?.ToDomain(), request.CameraSpot is { } spot ? new OutlinePoint(spot.X, spot.Y) : null, cancellationToken);
 
         return plan is null ? TypedResults.NotFound() : TypedResults.Ok(PlanResponse.From(plan));
     }

@@ -53,6 +53,12 @@ public sealed class RoomPlan
     /// <summary>Where the camera stands to look at <see cref="View"/>: across from its middle, or in a near corner.</summary>
     public ViewCorner Corner { get; private set; }
 
+    /// <summary>
+    /// Where a photo the plan was read from was taken, on the plan (in centimetres), for <see cref="ViewCorner.Spot"/>;
+    /// <c>null</c> when there is none.
+    /// </summary>
+    public OutlinePoint? CameraSpot { get; private set; }
+
     /// <summary>The objects placed in the room.</summary>
     public IReadOnlyList<PlanItem> Items => _items;
 
@@ -70,6 +76,9 @@ public sealed class RoomPlan
 
     /// <summary>How the walls and ceiling are finished and lit, and when the photo is taken.</summary>
     public RoomFinish Finish { get; private set; } = RoomFinish.Default;
+
+    /// <summary>The uploaded room whose photo the plan was read from; <c>null</c> for a plan built from scratch.</summary>
+    public Guid? FromRoomId { get; private set; }
 
     private RoomPlan() { } // for EF Core
 
@@ -123,18 +132,25 @@ public sealed class RoomPlan
     /// <param name="now">The current time.</param>
     /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the current one (without an accent wall the outline no longer has).</param>
+    /// <param name="cameraSpot">
+    /// Where the photo it was read from was taken; <c>null</c> keeps the current one. A spot outside the new walls is
+    /// dropped, and <see cref="ViewCorner.Spot"/> without a spot looks from the middle (<see cref="ViewCorner.None"/>).
+    /// </param>
     /// <exception cref="DomainException">
     /// The name, ceiling, floor, view or number of objects are invalid, or an object on a wall is on no wall of the room
     /// or doesn't fit on its wall.
     /// </exception>
     public void Update(string name, RoomOutline outline, double height, HexColor wallColor, HexColor floorColor,
-        FloorType floorType, int view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null)
+        FloorType floorType, int view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null,
+        OutlinePoint? cameraSpot = null)
     {
         ArgumentNullException.ThrowIfNull(outline);
         ArgumentNullException.ThrowIfNull(items);
         var trimmed = (name ?? "").Trim();
         // A kept finish loses an accent wall the new outline no longer has; a new one must name one of its walls.
         var kept = finish ?? (Finish.AccentWall >= outline.Walls.Count ? Finish.WithAccentWall(null) : Finish);
+        var spot = cameraSpot ?? CameraSpot;
+        var inside = spot is not null && double.IsFinite(spot.X) && double.IsFinite(spot.Y) && outline.Contains(spot.X, spot.Y) ? spot : null;
 
         if (trimmed.Length > Constants.Plans.MaxNameLength)
         {
@@ -182,12 +198,12 @@ public sealed class RoomPlan
         }
 
         (Name, Outline, Width, Length, Height, WallColor, FloorColor) = (trimmed, outline, outline.WidthMetres, outline.LengthMetres, height, wallColor, floorColor);
-        (FloorType, View, Corner, Finish) = (floorType, view, corner, kept);
+        (FloorType, View, Corner, Finish, CameraSpot) = (floorType, view, corner == ViewCorner.Spot && inside is null ? ViewCorner.None : corner, kept, inside);
         _items = [.. items];
         UpdatedAt = now;
     }
 
-    /// <summary>Saves a rectangular room (as <see cref="Update(string, RoomOutline, double, HexColor, HexColor, FloorType, int, IReadOnlyList{PlanItem}, DateTimeOffset, ViewCorner, RoomFinish)"/>).</summary>
+    /// <summary>Saves a rectangular room (as <see cref="Update(string, RoomOutline, double, HexColor, HexColor, FloorType, int, IReadOnlyList{PlanItem}, DateTimeOffset, ViewCorner, RoomFinish, OutlinePoint)"/>).</summary>
     /// <param name="name">Its name.</param>
     /// <param name="width">The width, in metres.</param>
     /// <param name="length">The length, in metres.</param>
@@ -200,9 +216,11 @@ public sealed class RoomPlan
     /// <param name="now">The current time.</param>
     /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the current one.</param>
+    /// <param name="cameraSpot">Where the photo it was read from was taken; <c>null</c> keeps the current one.</param>
     /// <exception cref="DomainException">The room is too small or too big, or see the other overload.</exception>
     public void Update(string name, double width, double length, double height, HexColor wallColor, HexColor floorColor,
-        FloorType floorType, PlanWall view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null)
+        FloorType floorType, PlanWall view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null,
+        OutlinePoint? cameraSpot = null)
     {
         if (!double.IsFinite(width) || !double.IsFinite(length))
         {
@@ -214,7 +232,7 @@ public sealed class RoomPlan
             throw new DomainException(Constants.Messages.PlanLook);
         }
 
-        Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)view, items, now, corner, finish);
+        Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)view, items, now, corner, finish, cameraSpot);
     }
 
     /// <summary>How long a wall is, in centimetres.</summary>
@@ -229,6 +247,13 @@ public sealed class RoomPlan
     public void UseDesign(Guid designId)
     {
         DesignId = designId;
+    }
+
+    /// <summary>Notes the uploaded room whose photo the plan was read from, so the builder can show the photo beside it.</summary>
+    /// <param name="roomId">The room.</param>
+    public void ReadFrom(Guid roomId)
+    {
+        FromRoomId = roomId;
     }
 
     /// <summary>Gives the plan to another user: a guest who signs in keeps the plans made before, under the account.</summary>

@@ -2,6 +2,7 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 
@@ -56,6 +57,19 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Storage:Bucket", "integration-tests");
         builder.UseSetting("Ai:UseFakes", "true"); // never call paid AI from tests
         builder.UseSetting("RateLimits:AccountAttemptsPer10Minutes", "1000"); // every test client shares one address
+    }
+
+    /// <summary>Backdates a room's upload time in the database, as if it had been uploaded then.</summary>
+    /// <param name="roomId">The room.</param>
+    /// <param name="uploaded">When it should look uploaded.</param>
+    public async Task AgeRoomAsync(Guid roomId, DateTimeOffset uploaded)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DesignApp.Infrastructure.Database.AppDbContext>();
+        var room = await db.Rooms.FindAsync(roomId);
+
+        db.Entry(room!).Property(nameof(DesignApp.Domain.Entities.Room.CreatedAt)).CurrentValue = uploaded;
+        await db.SaveChangesAsync();
     }
 
     /// <summary>Stops the API, then removes the containers.</summary>

@@ -69,6 +69,9 @@ public static class Constants
         /// <summary>Saving a room of a plan's photos into the plan's design.</summary>
         public const string RoomPlanDesign = "/{id:guid}/plan-design";
 
+        /// <summary>Reads a room's photo into a new plan (relative to <see cref="Rooms"/>).</summary>
+        public const string RoomPlan = "/{id:guid}/plan";
+
         /// <summary>A room's current label map.</summary>
         public const string RoomLabels = "/{id:guid}/labels";
 
@@ -419,6 +422,9 @@ public static class Constants
 
         /// <summary>An object couldn't be made from a description.</summary>
         public const string DescribeFailed = "Can't make the object";
+
+        /// <summary>The title when a photo couldn't be read into a plan.</summary>
+        public const string PhotoPlanFailed = "Can't build the room from this photo";
 
         /// <summary>A photo of a built room couldn't be made.</summary>
         public const string GenerateFailed = "Can't make the photo";

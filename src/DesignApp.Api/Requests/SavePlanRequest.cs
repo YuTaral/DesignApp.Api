@@ -21,9 +21,13 @@ namespace DesignApp.Api.Requests;
 /// </param>
 /// <param name="Corner">
 /// Where the camera stands to look at <paramref name="View"/>: <c>None</c> (across from its middle, when missing), or the
-/// near <c>Left</c> or <c>Right</c> corner, looking diagonally across the room.
+/// near <c>Left</c> or <c>Right</c> corner, looking diagonally across the room, or <c>Spot</c>, at the plan's camera spot.
 /// </param>
 /// <param name="Finish">How the walls and ceiling are finished and lit; the plan keeps its own when missing.</param>
+/// <param name="CameraSpot">
+/// Where the photo the plan was read from was taken, in centimetres; the plan keeps its own when missing, and drops it
+/// when it is outside the walls.
+/// </param>
 public sealed record SavePlanRequest(string? Name, double Width, double Length, double Height, string? WallColor, string? FloorColor,
     FloorType FloorType, int View, List<PlanItemRequest>? Items, List<OutlinePointRequest>? Outline = null, ViewCorner Corner = ViewCorner.None,
-    RoomFinishRequest? Finish = null);
+    RoomFinishRequest? Finish = null, OutlinePointRequest? CameraSpot = null);

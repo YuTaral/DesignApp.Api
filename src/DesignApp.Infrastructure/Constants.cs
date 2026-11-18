@@ -585,6 +585,130 @@ public static class Constants
             {
                 /// <summary>A description that gave no usable object.</summary>
                 public const string DescribeFailed = "The AI couldn't make that object. Try describing it differently.";
+
+                /// <summary>A photo that gave no usable plan.</summary>
+                public const string PhotoPlanFailed = "The AI couldn't read this photo into a room. Try another photo of the room.";
+            }
+
+            /// <summary>Reading a room photo into a plan (a vision task, so a stronger model than the short text tasks).</summary>
+            public static class Photo
+            {
+                /// <summary>The model.</summary>
+                public const string Model = "claude-sonnet-5-5";
+
+                /// <summary>The most tokens the answer may have (a plan of 20 objects is about 1,000).</summary>
+                public const int MaxTokens = 16000;
+
+                /// <summary>The instructions.</summary>
+                public const string System =
+                    "You read a photo of a room into a floor plan for a room builder, which draws the plan in 3D and has an image " +
+                    "model turn that view into a photo. Measure carefully from the photo: use the usual sizes of things (doors are " +
+                    "about 210 cm tall, kitchen worktops 90 cm, sofas 85 cm, ceilings 240-280 cm) to judge the room's size and each " +
+                    "object's place. Objects must not overlap on the plan. Answer only with the JSON the schema asks for.";
+
+                /// <summary>The plan's conventions, before the catalog.</summary>
+                public static readonly string[] Rules =
+                [
+                    "- The photo looks at the room's BACK wall, from somewhere near the FRONT wall. cameraX and cameraY are where it was " +
+                    "taken from, in cm from the LEFT and the BACK wall like the objects' x and y (a photo looking diagonally across the " +
+                    "room was taken near a front corner). Nothing stands where the camera is.",
+                    "- widthMetres is from the left wall to the right wall, lengthMetres from the back wall to the front wall, heightMetres the " +
+                    "ceiling, all in METRES (such as 4.2, never 420). Include the part of the room behind the camera that the photo doesn't " +
+                    "show, as a guess. Everything else is in centimetres.",
+                    "- Objects standing on the floor: x is their middle in cm from the LEFT wall, y their middle in cm from the BACK wall. " +
+                    "rotation is clockwise from above: 0 faces the front wall (the camera), 90 faces the left wall, 180 the back wall, " +
+                    "270 the right wall; a bed's headboard and a sofa's back are its back, so a bed with its headboard on the back wall has rotation " +
+                    "0, and a sofa with its back to the left wall has rotation 270. width and depth are before turning. wall is None for them.",
+                    "- Windows, doors and things hung on a wall (pictures, TVs, mirrors, wall cabinets, shelves, radiators): wall is Back, Right, " +
+                    "Front or Left; along is their middle in cm from the wall's left end as seen from inside the room facing it (the back " +
+                    "wall's left end is the left corner; the right wall's is its back corner; the left wall's is its front corner); elevation " +
+                    "is their bottom above the floor.",
+                    "- Use only these catalog objects (key: variant key = label width x depth x height cm, then its materials). Pick the " +
+                    "closest key and variant, then set its real size, its color as #RRGGBB, and one of its materials (or empty). Leave out " +
+                    "what isn't in the catalog, and small things on furniture.",
+                    "- Each thing once: a shower with glass walls or a glass screen is one glass-shower, its tray included (shower is only " +
+                    "an open tray).",
+                ];
+
+                /// <summary>The photo's size, before the rules.</summary>
+                /// <param name="width">Its width, in pixels.</param>
+                /// <param name="height">Its height, in pixels.</param>
+                public static string Size(int width, int height)
+                {
+                    return $"The photo is {width} x {height} px. Read it into a rectangular room plan:";
+                }
+
+                /// <summary>One catalog object, for the list.</summary>
+                /// <param name="key">Its key.</param>
+                /// <param name="variants">Its variations, each as "key = label w x d x h".</param>
+                /// <param name="materials">Its materials, if any.</param>
+                public static string CatalogLine(string key, IEnumerable<string> variants, IReadOnlyList<string> materials)
+                {
+                    var made = materials.Count > 0 ? $" ; materials: {string.Join(", ", materials)}" : "";
+
+                    return $"  {key}: {string.Join(" | ", variants)}{made}";
+                }
+
+                /// <summary>The last line: the room's surfaces.</summary>
+                public const string Surfaces = "- Also the walls' color and finish, the floor's color and type, and the ceiling light.";
+
+                /// <summary>The value for an object on the floor, in an answer's <c>wall</c>.</summary>
+                public const string OnFloor = "None";
+
+                /// <summary>The answer's field names.</summary>
+                public static class Fields
+                {
+                    /// <summary>The room type.</summary>
+                    public const string RoomType = "roomType";
+                    /// <summary>The room's width, in metres (the unit in the name: an unnamed one came back in centimetres).</summary>
+                    public const string RoomWidth = "widthMetres";
+                    /// <summary>The room's length, in metres.</summary>
+                    public const string RoomLength = "lengthMetres";
+                    /// <summary>The room's ceiling height, in metres.</summary>
+                    public const string RoomHeight = "heightMetres";
+                    /// <summary>An object's width, in centimetres.</summary>
+                    public const string Width = "width";
+                    /// <summary>An object's height, in centimetres.</summary>
+                    public const string Height = "height";
+                    /// <summary>The walls' color.</summary>
+                    public const string WallColor = "wallColor";
+                    /// <summary>The walls' finish.</summary>
+                    public const string Walls = "walls";
+                    /// <summary>The floor's color.</summary>
+                    public const string FloorColor = "floorColor";
+                    /// <summary>The floor's type.</summary>
+                    public const string FloorType = "floorType";
+                    /// <summary>The ceiling light.</summary>
+                    public const string CeilingLight = "ceilingLight";
+                    /// <summary>Where the photo was taken from, across the plan.</summary>
+                    public const string CameraX = "cameraX";
+                    /// <summary>Where the photo was taken from, down the plan.</summary>
+                    public const string CameraY = "cameraY";
+                    /// <summary>The objects.</summary>
+                    public const string Objects = "objects";
+                    /// <summary>An object's catalog key.</summary>
+                    public const string Key = "key";
+                    /// <summary>An object's variation key.</summary>
+                    public const string Variant = "variant";
+                    /// <summary>An object's middle across the plan.</summary>
+                    public const string X = "x";
+                    /// <summary>An object's middle down the plan.</summary>
+                    public const string Y = "y";
+                    /// <summary>An object's turn.</summary>
+                    public const string Rotation = "rotation";
+                    /// <summary>An object's depth.</summary>
+                    public const string Depth = "depth";
+                    /// <summary>An object's color.</summary>
+                    public const string Color = "color";
+                    /// <summary>An object's material.</summary>
+                    public const string Material = "material";
+                    /// <summary>The wall an object is on.</summary>
+                    public const string Wall = "wall";
+                    /// <summary>An object's middle along its wall.</summary>
+                    public const string Along = "along";
+                    /// <summary>An object's bottom above the floor.</summary>
+                    public const string Elevation = "elevation";
+                }
             }
         }
 
