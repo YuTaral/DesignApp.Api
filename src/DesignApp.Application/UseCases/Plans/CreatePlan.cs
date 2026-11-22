@@ -46,7 +46,7 @@ public sealed class CreatePlan(IPlanRepository plans, ICurrentUser currentUser, 
         var items = furnish ? StarterLayout.For(roomType, width, length, height, catalog.ForRoom(roomType)) : [];
         var look = finish ?? (furnish ? StarterLayout.FinishFor(roomType) : RoomFinish.Default);
 
-        plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.View, items, now, plan.Corner, look);
+        plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.Viewpoint, items, now, look);
 
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);

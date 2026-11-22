@@ -30,7 +30,7 @@ public class FinishAndDressingTests
         var plan = RoomPlan.Create(Guid.CreateVersion7(Now), "user-1", "", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, Now);
         var sofa = new PlanItem("three-seat sofa", ItemShape.Sofa, 200, 100, 220, 95, 85, 0, Grey, material: "velvet");
 
-        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, [sofa], Now, ViewCorner.None, finish);
+        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, [sofa], Now, finish);
 
         return plan;
     }
@@ -54,7 +54,7 @@ public class FinishAndDressingTests
         Assert.Throws<DomainException>(() => new RoomFinish((WallFinish)99, null, Brick, WallFinish.Paint, Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
         Assert.Throws<DomainException>(() => new RoomFinish(WallFinish.Paint, -1, Brick, WallFinish.Paint, Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
         // A rectangle has four walls: a fifth can't be the accent wall.
-        Assert.Throws<DomainException>(() => plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, ViewCorner.None, Moody(4)));
+        Assert.Throws<DomainException>(() => plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, Moody(4)));
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class FinishAndDressingTests
         plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now);
         var kept = plan.Finish;
 
-        plan.Update("", lShape, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, ViewCorner.None, Moody(5));
+        plan.Update("", lShape, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, Moody(5));
         plan.Update("", RoomPlan.RectangleOutline(4, 5), 2.6, Wall, Floor, FloorType.Wood, 0, [], Now);
         var shrunk = plan.Finish;
 

@@ -53,6 +53,14 @@ internal sealed class AiProviders(IServiceProvider services, IOptions<AiOptions>
             : services.GetKeyedService<IRoomBuilderAi>(Constants.Ai.RealKey) ?? throw NotSetUp();
     }
 
+    /// <inheritdoc/>
+    public IPhotoPlanner PhotoPlanner(AiMode mode)
+    {
+        return mode is AiMode.Fake
+            ? services.GetRequiredService<FakePhotoPlanner>()
+            : services.GetKeyedService<IPhotoPlanner>(Constants.Ai.RealKey) ?? throw NotSetUp();
+    }
+
     public IImageGenerator Images(AiMode mode)
     {
         return mode is AiMode.Fake

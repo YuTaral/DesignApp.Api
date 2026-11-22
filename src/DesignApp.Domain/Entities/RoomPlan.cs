@@ -59,6 +59,9 @@ public sealed class RoomPlan
     /// </summary>
     public OutlinePoint? CameraSpot { get; private set; }
 
+    /// <summary>How the room is seen: <see cref="View"/>, <see cref="Corner"/> and <see cref="CameraSpot"/> together.</summary>
+    public PlanView Viewpoint => new(View, Corner, CameraSpot);
+
     /// <summary>The objects placed in the room.</summary>
     public IReadOnlyList<PlanItem> Items => _items;
 
@@ -115,7 +118,7 @@ public sealed class RoomPlan
             CreatedAt = now,
         };
 
-        plan.Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)PlanWall.Back, [], now);
+        plan.Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, PlanWall.Back, [], now);
 
         return plan;
     }
@@ -127,30 +130,27 @@ public sealed class RoomPlan
     /// <param name="wallColor">The walls' color.</param>
     /// <param name="floorColor">The floor's color.</param>
     /// <param name="floorType">What the floor is made of.</param>
-    /// <param name="view">The number of the wall the 3D view and the photo look at.</param>
+    /// <param name="view">
+    /// How the 3D view and the photo see it: the wall, where the camera stands, and the photo's spot (kept to the walls
+    /// by <see cref="PlanView.Within"/>).
+    /// </param>
     /// <param name="items">The objects.</param>
     /// <param name="now">The current time.</param>
-    /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the current one (without an accent wall the outline no longer has).</param>
-    /// <param name="cameraSpot">
-    /// Where the photo it was read from was taken; <c>null</c> keeps the current one. A spot outside the new walls is
-    /// dropped, and <see cref="ViewCorner.Spot"/> without a spot looks from the middle (<see cref="ViewCorner.None"/>).
-    /// </param>
     /// <exception cref="DomainException">
     /// The name, ceiling, floor, view or number of objects are invalid, or an object on a wall is on no wall of the room
     /// or doesn't fit on its wall.
     /// </exception>
     public void Update(string name, RoomOutline outline, double height, HexColor wallColor, HexColor floorColor,
-        FloorType floorType, int view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null,
-        OutlinePoint? cameraSpot = null)
+        FloorType floorType, PlanView view, IReadOnlyList<PlanItem> items, DateTimeOffset now, RoomFinish? finish = null)
     {
         ArgumentNullException.ThrowIfNull(outline);
+        ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(items);
         var trimmed = (name ?? "").Trim();
         // A kept finish loses an accent wall the new outline no longer has; a new one must name one of its walls.
         var kept = finish ?? (Finish.AccentWall >= outline.Walls.Count ? Finish.WithAccentWall(null) : Finish);
-        var spot = cameraSpot ?? CameraSpot;
-        var inside = spot is not null && double.IsFinite(spot.X) && double.IsFinite(spot.Y) && outline.Contains(spot.X, spot.Y) ? spot : null;
+        var seen = view.Within(outline);
 
         if (trimmed.Length > Constants.Plans.MaxNameLength)
         {
@@ -167,7 +167,7 @@ public sealed class RoomPlan
             throw new DomainException(Constants.Messages.PlanItems);
         }
 
-        if (!Enum.IsDefined(floorType) || view < 0 || view >= outline.Walls.Count || !Enum.IsDefined(corner))
+        if (!Enum.IsDefined(floorType))
         {
             throw new DomainException(Constants.Messages.PlanLook);
         }
@@ -198,12 +198,12 @@ public sealed class RoomPlan
         }
 
         (Name, Outline, Width, Length, Height, WallColor, FloorColor) = (trimmed, outline, outline.WidthMetres, outline.LengthMetres, height, wallColor, floorColor);
-        (FloorType, View, Corner, Finish, CameraSpot) = (floorType, view, corner == ViewCorner.Spot && inside is null ? ViewCorner.None : corner, kept, inside);
+        (FloorType, View, Corner, CameraSpot, Finish) = (floorType, seen.Wall, seen.Corner, seen.Spot, kept);
         _items = [.. items];
         UpdatedAt = now;
     }
 
-    /// <summary>Saves a rectangular room (as <see cref="Update(string, RoomOutline, double, HexColor, HexColor, FloorType, int, IReadOnlyList{PlanItem}, DateTimeOffset, ViewCorner, RoomFinish, OutlinePoint)"/>).</summary>
+    /// <summary>Saves a rectangular room (as <see cref="Update(string, RoomOutline, double, HexColor, HexColor, FloorType, PlanView, IReadOnlyList{PlanItem}, DateTimeOffset, RoomFinish)"/>).</summary>
     /// <param name="name">Its name.</param>
     /// <param name="width">The width, in metres.</param>
     /// <param name="length">The length, in metres.</param>
@@ -211,28 +211,20 @@ public sealed class RoomPlan
     /// <param name="wallColor">The walls' color.</param>
     /// <param name="floorColor">The floor's color.</param>
     /// <param name="floorType">What the floor is made of.</param>
-    /// <param name="view">The wall the 3D view and the photo look at.</param>
+    /// <param name="view">How the 3D view and the photo see it (a rectangle's walls are numbered as <see cref="PlanWall"/>).</param>
     /// <param name="items">The objects.</param>
     /// <param name="now">The current time.</param>
-    /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the current one.</param>
-    /// <param name="cameraSpot">Where the photo it was read from was taken; <c>null</c> keeps the current one.</param>
     /// <exception cref="DomainException">The room is too small or too big, or see the other overload.</exception>
     public void Update(string name, double width, double length, double height, HexColor wallColor, HexColor floorColor,
-        FloorType floorType, PlanWall view, IReadOnlyList<PlanItem> items, DateTimeOffset now, ViewCorner corner = ViewCorner.None, RoomFinish? finish = null,
-        OutlinePoint? cameraSpot = null)
+        FloorType floorType, PlanView view, IReadOnlyList<PlanItem> items, DateTimeOffset now, RoomFinish? finish = null)
     {
         if (!double.IsFinite(width) || !double.IsFinite(length))
         {
             throw new DomainException(Constants.Messages.PlanWalls);
         }
 
-        if (!Enum.IsDefined(view))
-        {
-            throw new DomainException(Constants.Messages.PlanLook);
-        }
-
-        Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, (int)view, items, now, corner, finish, cameraSpot);
+        Update(name, RectangleOutline(width, length), height, wallColor, floorColor, floorType, view, items, now, finish);
     }
 
     /// <summary>How long a wall is, in centimetres.</summary>

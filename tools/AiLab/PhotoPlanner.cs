@@ -1,5 +1,5 @@
 // AiLab photo-plan: the app's "Build in 3D" on photos without uploading them (an upload also runs the paid analysis):
-// the same Claude reader (ClaudeRoomBuilderAi) and the same checks and cleanup (PhotoPlanReader), to measure them.
+// the same Claude reader (ClaudePhotoPlanner) and the same checks and cleanup (PhotoPlanReader), to measure them.
 //
 //   dotnet run --project tools/AiLab -- photo-plan <folder> <photo>... [--yes | --replay]
 //
@@ -66,7 +66,7 @@ internal static class PhotoPlanner
         }
 
         using var logs = LoggerFactory.Create(b => b.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Information));
-        var reader = replay ? null : new ClaudeRoomBuilderAi(new AnthropicClient { ApiKey = key! }, logs.CreateLogger<ClaudeRoomBuilderAi>());
+        var reader = replay ? null : new ClaudePhotoPlanner(new AnthropicClient { ApiKey = key! }, logs.CreateLogger<ClaudePhotoPlanner>());
         var offered = PhotoPlanReader.Offered(new EmbeddedObjectCatalog());
         var failed = 0;
 
@@ -131,7 +131,7 @@ internal static class PhotoPlanner
     /// <param name="image">The photo, prepared.</param>
     /// <param name="offered">The catalog objects it may use.</param>
     /// <param name="path">The photo's path, for the error.</param>
-    private static async Task<PhotoPlan?> ReadAsync(ClaudeRoomBuilderAi reader, AnalysisImage image, IReadOnlyList<CatalogObject> offered, string path)
+    private static async Task<PhotoPlan?> ReadAsync(ClaudePhotoPlanner reader, AnalysisImage image, IReadOnlyList<CatalogObject> offered, string path)
     {
         var read = await reader.PlanFromPhotoAsync(image, offered, CancellationToken.None);
 

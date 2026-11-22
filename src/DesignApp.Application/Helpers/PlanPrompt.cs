@@ -42,7 +42,7 @@ public static partial class PlanPrompt
         var (view, corner) = shot is null ? (plan.View, plan.Corner) : (shot.View, shot.Corner);
         var frame = new Frame(plan.Outline, view, corner, plan.CameraSpot);
         var text = new StringBuilder();
-        var camera = new PlanCamera(frame.Across, frame.Deep, plan.Height * 100, frame.CameraFromLeft, frame.Corner, frame.Stand, frame.Look);
+        var camera = new PlanCamera(frame.Across, plan.Height * 100, frame.Pose);
         var standing = plan.Items
             .Where(i => i.Wall is null)
             .Select(item => (Item: item, Seen: Look(Footprint(item), frame, camera)))
@@ -83,7 +83,7 @@ public static partial class PlanPrompt
         }
 
         text.Append(culture, $" {Surfaces(plan, frame)} {B.Prompt.Mood(plan.Finish.TimeOfDay)}");
-        text.Append(culture, $" {CameraWords(frame)}");
+        text.Append(culture, $" {frame.CameraPlace.Sentence(frame.Pose)}");
         text.Append(culture, $" {(decorated ? B.Prompt.WithDecorations : B.Prompt.Undecorated)}");
 
         if (standing.Count > 0)
@@ -470,28 +470,14 @@ public static partial class PlanPrompt
     [GeneratedRegex("([A-Z])")]
     private static partial Regex CapitalLetter();
 
-    /// <summary>Where the camera stands, in words.</summary>
-    /// <param name="frame">How the plan is seen.</param>
-    private static string CameraWords(Frame frame)
-    {
-        return frame.Corner switch
-        {
-            ViewCorner.Left or ViewCorner.Right => B.Prompt.CornerCamera(frame.Corner == ViewCorner.Left),
-            ViewCorner.Spot => B.Prompt.SpotCamera(Cm(frame.CameraFromLeft), Cm(frame.Stand)),
-            _ => B.Prompt.Camera,
-        };
-    }
-
     /// <summary>How much of a thing the photo shows.</summary>
     /// <param name="Edges">The picture's edges that cut it (none when it is all in view), or null when it is out of view.</param>
     /// <param name="Hidden">Whether a wall of the room hides part of it from the camera.</param>
     private sealed record Seen(IReadOnlyList<string>? Edges, bool Hidden);
 
     /// <summary>
-    /// How the plan is seen from the camera, which stands straight across the room from the middle of the wall in view
-    /// (the far wall), a little in front of the wall facing it (the near wall), and looks at it; or in one of the near
-    /// wall's corners, a little in from both walls; or at the plan's camera spot, looking at the far wall's middle (from
-    /// the middle when the plan has no spot, or it is behind the far wall).
+    /// How the plan is seen looking at the wall in view (the far wall), from the camera's place (<see cref="CameraPlace"/>):
+    /// across from the far wall's middle, in a near corner, or at the plan's camera spot.
     /// </summary>
     private sealed class Frame
     {
@@ -500,39 +486,28 @@ public static partial class PlanPrompt
         /// <summary>The frame for a room seen looking at one of its walls.</summary>
         /// <param name="outline">The room's walls.</param>
         /// <param name="view">The number of the wall in view.</param>
-        /// <param name="corner">Where the camera stands: across from the wall's middle, in a near corner, or at the spot.</param>
+        /// <param name="corner">The camera's place chosen: across from the wall's middle, in a near corner, or at the spot.</param>
         /// <param name="spot">The plan's camera spot, if any.</param>
         public Frame(RoomOutline outline, int view, ViewCorner corner, OutlinePoint? spot)
         {
             (Outline, View, Far) = (outline, view, outline.Walls[view]);
             var alongs = outline.Points.Select(p => Along(p.X, p.Y)).ToList();
-            var ahead = spot is null ? 0 : (spot.X - Far.Start.X) * Far.NormalX + (spot.Y - Far.Start.Y) * Far.NormalY;
-
-            Corner = corner == ViewCorner.Spot && ahead <= C.Inset ? ViewCorner.None : corner;
+            var facing = outline.Facing(view);
 
             _leftmost = alongs.Min();
             Across = alongs.Max() - _leftmost;
-            var facing = outline.Facing(view);
-
             Deep = facing?.Distance ?? outline.Points.Max(p => (p.X - Far.Start.X) * Far.NormalX + (p.Y - Far.Start.Y) * Far.NormalY);
             Near = facing?.Wall ?? -1;
-            var fromLeft = Far.Length / 2 - _leftmost;
+            // The near wall's ends (the room's sides when there is none).
+            var near = facing is { } found ? Outline.Walls[found.Wall] : null;
+            var ends = near is null ? new[] { 0, Across } : new[] { Along(near.Start.X, near.Start.Y) - _leftmost, Along(near.End.X, near.End.Y) - _leftmost };
+            var geometry = new ViewGeometry(Across, Deep, Far.Length / 2 - _leftmost, ends.Min(), ends.Max(), spot is null ? null : Point(spot.X, spot.Y));
 
-            if (Corner is ViewCorner.Left or ViewCorner.Right)
-            {
-                // The near wall's ends (the room's sides when there is none), a little in from the side wall.
-                var near = facing is { } found ? Outline.Walls[found.Wall] : null;
-                var ends = near is null ? new[] { 0, Across } : new[] { Along(near.Start.X, near.Start.Y) - _leftmost, Along(near.End.X, near.End.Y) - _leftmost };
-
-                fromLeft = Corner == ViewCorner.Left ? ends.Min() + C.Inset : ends.Max() - C.Inset;
-            }
-
-            var (along, stand) = Corner == ViewCorner.Spot ? (Along(spot!.X, spot.Y), ahead) : (fromLeft + _leftmost, Deep - C.Inset);
+            CameraPlace = CameraPlace.For(corner, geometry);
+            Pose = CameraPlace.Pose(geometry);
+            var (along, stand) = (Pose.FromLeft + _leftmost, Pose.Stand);
 
             Camera = new OutlinePoint(Far.Start.X + Far.Dx * along + Far.NormalX * stand, Far.Start.Y + Far.Dy * along + Far.NormalY * stand);
-            CameraFromLeft = along - _leftmost;
-            Stand = stand;
-            Look = Far.Length / 2 - _leftmost;
         }
 
         /// <summary>The room's walls.</summary>
@@ -545,7 +520,10 @@ public static partial class PlanPrompt
         public OutlineWall Far { get; }
 
         /// <summary>Where the camera stands: across from the far wall's middle, in a near corner, or at the plan's spot.</summary>
-        public ViewCorner Corner { get; }
+        public CameraPlace CameraPlace { get; }
+
+        /// <summary>Where the camera stands from the photo's left wall and the far wall, how it is turned, and its lens.</summary>
+        public CameraPose Pose { get; }
 
         /// <summary>The room's size from the photo's left wall to its right wall.</summary>
         public double Across { get; }
@@ -559,14 +537,6 @@ public static partial class PlanPrompt
         /// <summary>Where the camera stands on the plan.</summary>
         public OutlinePoint Camera { get; }
 
-        /// <summary>Where the camera stands from the photo's left wall.</summary>
-        public double CameraFromLeft { get; }
-
-        /// <summary>How far the camera stands from the far wall.</summary>
-        public double Stand { get; }
-
-        /// <summary>The far wall's middle, from the photo's left wall (where a camera at a spot looks).</summary>
-        public double Look { get; }
 
         /// <summary>Whether the photo looks across the plan's width (at a wall running down the plan), so its across and deep swap.</summary>
         public bool Sideways => Far.Dx == 0;
@@ -668,7 +638,7 @@ public static partial class PlanPrompt
             // The same direction in the photo: to the right (along the far wall), and towards the camera (its normal).
             var (right, toward) = (dx * Far.Dx + dy * Far.Dy, dx * Far.NormalX + dy * Far.NormalY);
 
-            if (Corner is ViewCorner.Left or ViewCorner.Right)
+            if (CameraPlace.Diagonal)
             {
                 return toward > 0 ? B.Prompt.FacingNearWall : toward < 0 ? B.Prompt.FacingAway : right > 0 ? B.Prompt.FacingRightWall : B.Prompt.FacingLeftWall;
             }

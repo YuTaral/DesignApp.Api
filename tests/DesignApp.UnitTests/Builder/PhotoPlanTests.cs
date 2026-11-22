@@ -30,12 +30,12 @@ public class PhotoPlanTests
 
     /// <summary>The use case with the fake AI, which answers every photo with the same rough living room (or another AI).</summary>
     /// <param name="user">The user asking.</param>
-    /// <param name="builder">The room builder AI; the fake when missing.</param>
-    private BuildPlanFromRoom Build(string user = "user-1", Application.Interfaces.IRoomBuilderAi? builder = null)
+    /// <param name="planner">What reads the photo; the fake when missing.</param>
+    private BuildPlanFromRoom Build(string user = "user-1", Application.Interfaces.IPhotoPlanner? planner = null)
     {
-        var fake = builder ?? new FakeRoomBuilderAi(Options.Create(new AiOptions { UseFakes = true }));
+        var fake = planner ?? new FakePhotoPlanner(Options.Create(new AiOptions { UseFakes = true }));
         var ai = new FixedAiProviders(new FakeInventoryProvider(Options.Create(new AiOptions { UseFakes = true })), new FakeSegmentationProvider(Options.Create(new AiOptions())),
-            builder: fake);
+            photoPlanner: fake);
 
         return new BuildPlanFromRoom(_rooms, _plans, _storage, new SkiaRoomImaging(), ai, _catalog, new FixedUser(user), new FixedClock(Now));
     }
@@ -177,7 +177,7 @@ public class PhotoPlanTests
         var inCentimetres = new Application.Objects.PhotoPlan(RoomType.LivingRoom, 460, 520, 260, "#E8E2D6", WallFinish.Paint, "#B89B7A", FloorType.Wood,
             CeilingLight.Pendant, new OutlinePoint(230, 480), []);
 
-        var outcome = await Build(builder: new FixedPhotoPlanner(inCentimetres)).HandleAsync(room.Id, CancellationToken.None);
+        var outcome = await Build(planner: new FixedPhotoPlanner(inCentimetres)).HandleAsync(room.Id, CancellationToken.None);
         var plan = outcome!.Value.Plan;
 
         Assert.Equal((4.6, 5.2, 2.6), (plan.Width, plan.Length, plan.Height));

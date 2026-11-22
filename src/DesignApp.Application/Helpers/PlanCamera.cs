@@ -1,4 +1,5 @@
-using static DesignApp.Domain.Constants;
+using DesignApp.Application.Objects;
+
 using C = DesignApp.Application.Constants.Builder.Camera;
 using P = DesignApp.Application.Constants.Builder.Prompt;
 
@@ -8,10 +9,8 @@ namespace DesignApp.Application.Helpers;
 /// The 3D view's camera as the photo sees the room: across the room from the middle of the far wall (the wall in view),
 /// a little in front of the near wall, at eye height, looking level at the far wall through a wide lens that shows the
 /// room's whole width from halfway there, its picture cut from the lower part of a taller frame. It tells which points the picture shows, so the prompt describes only what is in the render (an object
-/// beside or behind the camera that the prompt still named was drawn anyway, as something else). From a near corner it
-/// stands by the side wall instead, turned to look diagonally across the room through a fixed wide lens. From a spot
-/// (where a photo the plan was read from was taken) it stands there, turned towards the far wall's middle, with the lens
-/// fitted as from the near wall but from where it stands.
+/// beside or behind the camera that the prompt still named was drawn anyway, as something else). Where it stands, how
+/// it is turned and its lens come from its place (<see cref="CameraPlace"/>), such as a near corner or a photo's spot.
 /// </summary>
 /// <remarks>The same camera as <c>scene-3d.ts</c> in DesignApp.Web; lengths in centimetres.</remarks>
 public sealed class PlanCamera
@@ -27,32 +26,18 @@ public sealed class PlanCamera
 
     /// <summary>The camera for a room seen this way.</summary>
     /// <param name="across">From the photo's left wall to its right wall.</param>
-    /// <param name="deep">From the near wall to the far wall.</param>
     /// <param name="height">From the floor to the ceiling.</param>
-    /// <param name="middle">Where the camera stands from the left wall; the middle when missing (a rectangle).</param>
-    /// <param name="corner">Whether it stands in a near corner, turned towards the room, at a spot, or looks straight at the far wall.</param>
-    /// <param name="stand">How far from the far wall it stands; a little in front of the near wall when missing.</param>
-    /// <param name="look">For a spot, the point of the far wall it looks at, from the left wall; the wall's middle when missing.</param>
-    public PlanCamera(double across, double deep, double height, double? middle = null, ViewCorner corner = ViewCorner.None, double? stand = null,
-        double? look = null)
+    /// <param name="pose">Where it stands, how it is turned and its lens.</param>
+    public PlanCamera(double across, double height, CameraPose pose)
     {
-        var corners = corner is ViewCorner.Left or ViewCorner.Right;
+        ArgumentNullException.ThrowIfNull(pose);
+        // The lens fitted so the room's whole width shows from part of the way to the far wall, kept in a wide lens's range.
+        var fit = 2 * Math.Atan(across / 2 / Math.Max(C.MinFitDistance, pose.Stand * C.FitDepthShare)) * 180 / Math.PI;
+        var horizontal = (pose.Fov ?? Math.Clamp(fit, C.MinFov, C.MaxFov)) * Math.PI / 180;
 
-        _middle = middle ?? across / 2;
-        _stand = stand ?? deep - C.Inset;
+        (_middle, _stand) = (pose.FromLeft, pose.Stand);
         _eye = Math.Min(C.EyeHeight, height - C.CeilingGap);
-        var fit = 2 * Math.Atan(across / 2 / Math.Max(C.MinFitDistance, _stand * C.FitDepthShare)) * 180 / Math.PI;
-        var horizontal = (corners ? C.CornerFov : Math.Clamp(fit, C.MinFov, C.MaxFov)) * Math.PI / 180;
-        // Turned to the right (towards the room) from the left corner, to the left from the right one; from a spot, towards what it looks at.
-        var turn = corner switch
-        {
-            ViewCorner.Left => C.CornerTurn * Math.PI / 180,
-            ViewCorner.Right => -C.CornerTurn * Math.PI / 180,
-            ViewCorner.Spot => Math.Atan2((look ?? across / 2) - _middle, Math.Max(C.MinFitDistance, _stand)),
-            _ => 0,
-        };
-
-        (_sin, _cos) = (Math.Sin(turn), Math.Cos(turn));
+        (_sin, _cos) = (Math.Sin(pose.Turn), Math.Cos(pose.Turn));
         _across = Math.Tan(horizontal / 2);
         // The taller frame's half height (as a slope), of which the picture shows the lower part.
         var tall = _across * (1 + C.LensShift) / C.Aspect;

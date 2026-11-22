@@ -88,6 +88,8 @@ public sealed record PlanItem
             ItemForm.LShaped => shape is ItemShape.Sofa or ItemShape.Table or ItemShape.Box,
             ItemForm.PShaped => shape is ItemShape.Sofa,
             ItemForm.Round => shape is ItemShape.Table or ItemShape.Rug,
+            ItemForm.Arched => shape is ItemShape.Window,
+            ItemForm.GlassScreen or ItemForm.GlassCubicle => shape is ItemShape.Box,
             _ => false,
         };
 

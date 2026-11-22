@@ -41,28 +41,7 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
 
         LogUsage(RB.Model, "described an object", response.Usage.InputTokens, response.Usage.OutputTokens, seconds);
 
-        return response.StopReason == StopReason.EndTurn ? ReadObject(Text(response)) : Result.Failure<CatalogObject>(RB.Messages.DescribeFailed);
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<PhotoPlan>> PlanFromPhotoAsync(AnalysisImage image, IReadOnlyList<CatalogObject> catalog, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(image);
-        var started = Stopwatch.GetTimestamp();
-        var photo = new ImageBlockParam { Source = new Base64ImageSource { Data = Convert.ToBase64String(image.Jpeg), MediaType = MediaType.ImageJpeg } };
-        var response = await client.Messages.Create(new MessageCreateParams
-        {
-            Model = RB.Photo.Model,
-            MaxTokens = RB.Photo.MaxTokens,
-            System = RB.Photo.System,
-            OutputConfig = new OutputConfig { Effort = Effort.Medium, Format = new JsonOutputFormat { Schema = PhotoPlanJson.Schema(catalog) } },
-            Messages = [new UserMessageParam { Content = new List<ContentBlockParam> { photo, new TextBlockParam { Text = PhotoPlanJson.Message(catalog, image.Width, image.Height) } } }],
-        }, cancellationToken);
-        var seconds = Stopwatch.GetElapsedTime(started).TotalSeconds;
-
-        LogUsage(RB.Photo.Model, "read a photo into a plan", response.Usage.InputTokens, response.Usage.OutputTokens, seconds);
-
-        return response.StopReason == StopReason.EndTurn ? PhotoPlanJson.Parse(Text(response)) : Result.Failure<PhotoPlan>(RB.Messages.PhotoPlanFailed);
+        return response.StopReason == StopReason.EndTurn ? ReadObject(ClaudeAnswer.Text(response)) : Result.Failure<CatalogObject>(RB.Messages.DescribeFailed);
     }
 
     /// <summary>Reads a described object from Claude's JSON answer (the API and the Claude Code route share it).</summary>
@@ -116,13 +95,6 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
                 [F.Color] = new { type = "string" },
             }),
         };
-    }
-
-    /// <summary>The text of an answer.</summary>
-    /// <param name="response">The answer.</param>
-    private static string Text(Message response)
-    {
-        return string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
     }
 
     /// <summary>A side kept in the allowed range.</summary>

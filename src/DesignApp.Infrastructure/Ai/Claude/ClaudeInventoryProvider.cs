@@ -122,7 +122,7 @@ internal sealed partial class ClaudeInventoryProvider(
             throw new InvalidOperationException($"Claude stopped early ({response.StopReason}) while listing objects.");
         }
 
-        var json = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
+        var json = ClaudeAnswer.Text(response);
 
         return InventoryJson.Parse(json, settings.MaxPoints, image.Width, image.Height);
     }

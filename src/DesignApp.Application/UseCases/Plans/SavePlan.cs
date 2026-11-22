@@ -21,17 +21,15 @@ public sealed class SavePlan(IPlanRepository plans, ICurrentUser currentUser, Ti
     /// <param name="wallColor">The walls' color.</param>
     /// <param name="floorColor">The floor's color.</param>
     /// <param name="floorType">What the floor is made of.</param>
-    /// <param name="view">The number of the wall the 3D view and the photo look at.</param>
+    /// <param name="view">How the 3D view and the photo see it; without a spot, the plan keeps its own.</param>
     /// <param name="items">The objects.</param>
-    /// <param name="corner">Where the camera stands to look at the wall in view.</param>
     /// <param name="finish">How the walls and ceiling are finished and lit; <c>null</c> keeps the plan's own.</param>
-    /// <param name="cameraSpot">Where the photo the plan was read from was taken; <c>null</c> keeps the plan's own.</param>
     /// <param name="cancellationToken">Cancels the save.</param>
     /// <returns>The saved plan, or <c>null</c> when the user has no such plan.</returns>
     /// <exception cref="DomainException">The name, walls or objects are invalid.</exception>
     public async Task<RoomPlan?> HandleAsync(Guid id, string name, RoomOutline outline, double height,
-        HexColor wallColor, HexColor floorColor, FloorType floorType, int view, IReadOnlyList<PlanItem> items, ViewCorner corner,
-        RoomFinish? finish, OutlinePoint? cameraSpot, CancellationToken cancellationToken)
+        HexColor wallColor, HexColor floorColor, FloorType floorType, PlanView view, IReadOnlyList<PlanItem> items,
+        RoomFinish? finish, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(id, currentUser.Id, cancellationToken);
 
@@ -40,7 +38,9 @@ public sealed class SavePlan(IPlanRepository plans, ICurrentUser currentUser, Ti
             return null;
         }
 
-        plan.Update(name, outline, height, wallColor, floorColor, floorType, view, items, clock.GetUtcNow(), corner, finish, cameraSpot);
+        var seen = view with { Spot = view.Spot ?? plan.CameraSpot };
+
+        plan.Update(name, outline, height, wallColor, floorColor, floorType, seen, items, clock.GetUtcNow(), finish);
         await plans.SaveChangesAsync(cancellationToken);
 
         return plan;

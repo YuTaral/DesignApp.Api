@@ -440,6 +440,11 @@ public class PlanTests
         var bigSofa = new PlanItem("P-shaped corner sofa", ItemShape.Sofa, 200, 250, 300, 200, 85, 0, grey, form: ItemForm.PShaped);
 
         Assert.Throws<DomainException>(() => new PlanItem("window", ItemShape.Window, 100, 0, 120, 10, 140, 0, grey, (int)PlanWall.Back, 90, ItemForm.LShaped));
+        // Only a window is arched, and only a box is a shower's glass.
+        Assert.Equal(ItemForm.Arched, new PlanItem("arched window", ItemShape.Window, 100, 0, 100, 10, 170, 0, grey, (int)PlanWall.Back, 80, ItemForm.Arched).Form);
+        Assert.Equal(ItemForm.GlassCubicle, new PlanItem("glass shower cubicle", ItemShape.Box, 50, 50, 90, 90, 200, 0, grey, form: ItemForm.GlassCubicle).Form);
+        Assert.Throws<DomainException>(() => new PlanItem("door", ItemShape.Door, 100, 0, 90, 5, 210, 0, grey, (int)PlanWall.Back, 0, ItemForm.Arched));
+        Assert.Throws<DomainException>(() => new PlanItem("bed", ItemShape.Bed, 100, 100, 160, 200, 50, 0, grey, form: ItemForm.GlassScreen));
 
         IReadOnlyList<PlanItem> items = [corner, rug, Sofa()];
         var json = (string)PlanItemsJson.Converter.ConvertToProvider(items)!;

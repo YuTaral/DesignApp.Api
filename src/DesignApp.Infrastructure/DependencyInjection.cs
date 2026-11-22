@@ -84,6 +84,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<FakeSegmentationProvider>();
         builder.Services.AddSingleton<FakeObjectRemovalProvider>();
         builder.Services.AddSingleton<FakeRoomBuilderAi>();
+        builder.Services.AddSingleton<FakePhotoPlanner>();
         builder.Services.AddSingleton<FakeImageGenerator>();
         builder.Services.AddSingleton<IAiProviders, AiProviders>();
         builder.Services.AddSingleton<IAiSettingsStore, AiSettingsStore>();
@@ -99,7 +100,9 @@ public static class DependencyInjection
         {
             builder.Services.AddSingleton<IClaudeCodeRunner, ClaudeCodeRunner>();
             builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeCodeInventoryProvider>(Constants.Ai.RealKey);
+            builder.Services.AddSingleton<ClaudeCodeAsker>();
             builder.Services.AddKeyedSingleton<IRoomBuilderAi, ClaudeCodeRoomBuilderAi>(Constants.Ai.RealKey);
+            builder.Services.AddKeyedSingleton<IPhotoPlanner, ClaudeCodePhotoPlanner>(Constants.Ai.RealKey);
         }
         else
         {
@@ -127,6 +130,7 @@ public static class DependencyInjection
         });
         builder.Services.AddKeyedSingleton<IObjectInventoryProvider, ClaudeInventoryProvider>(Constants.Ai.RealKey);
         builder.Services.AddKeyedSingleton<IRoomBuilderAi, ClaudeRoomBuilderAi>(Constants.Ai.RealKey);
+        builder.Services.AddKeyedSingleton<IPhotoPlanner, ClaudePhotoPlanner>(Constants.Ai.RealKey);
     }
 
     /// <summary>SAM 3 and the object eraser on fal.ai, with the fal.ai key.</summary>

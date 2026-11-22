@@ -563,8 +563,9 @@ public static class Constants
     }
 
     /// <summary>
-    /// The outline of a built room's object seen from above, within its width × depth: most are rectangles, but a corner
-    /// sofa or desk is L-shaped and a round table or rug is an ellipse.
+    /// The form of a built room's object within its width × depth: most are plain boxes of their shape, but a corner sofa
+    /// or desk is L-shaped seen from above, a round table or rug is an ellipse, a window may have a round top, and a box
+    /// may be a shower's glass.
     /// </summary>
     public enum ItemForm
     {
@@ -582,6 +583,12 @@ public static class Constants
         PShaped,
         /// <summary>An ellipse in its width × depth: round when they are equal (tables and rugs).</summary>
         Round,
+        /// <summary>A window with a round top: a half circle as wide as the window.</summary>
+        Arched,
+        /// <summary>A shower's glass screen (boxes): a low tray and a clear pane along part of its front.</summary>
+        GlassScreen,
+        /// <summary>A glass shower cubicle (boxes): a low tray and clear panes on its front and right side.</summary>
+        GlassCubicle,
     }
 
     /// <summary>

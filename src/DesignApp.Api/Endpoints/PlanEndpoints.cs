@@ -127,9 +127,10 @@ internal static class PlanEndpoints
         var outline = request.Outline is { } corners
             ? new RoomOutline(corners.Select(c => new OutlinePoint(c.X, c.Y)))
             : RoomPlan.RectangleOutline(request.Width, request.Length);
+        var view = new PlanView(request.View, request.Corner, request.CameraSpot is { } spot ? new OutlinePoint(spot.X, spot.Y) : null);
         var plan = await savePlan.HandleAsync(id, request.Name ?? "", outline, request.Height,
-            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, request.View, items, request.Corner,
-            request.Finish?.ToDomain(), request.CameraSpot is { } spot ? new OutlinePoint(spot.X, spot.Y) : null, cancellationToken);
+            HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, view, items, request.Finish?.ToDomain(),
+            cancellationToken);
 
         return plan is null ? TypedResults.NotFound() : TypedResults.Ok(PlanResponse.From(plan));
     }

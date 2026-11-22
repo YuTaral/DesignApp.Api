@@ -2,6 +2,7 @@ using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
 
 using static DesignApp.Domain.Constants;
 
@@ -39,7 +40,7 @@ public sealed class BuildPlanFromRoom(
 
         var image = await AnalysisPhoto.ReadAsync(storage, imaging, room, cancellationToken);
         var offered = PhotoPlanReader.Offered(catalog);
-        var read = await ai.Builder(room.AiMode).PlanFromPhotoAsync(image, offered, cancellationToken);
+        var read = await ai.PhotoPlanner(room.AiMode).PlanFromPhotoAsync(image, offered, cancellationToken);
 
         if (!read.Succeeded)
         {
@@ -52,8 +53,8 @@ public sealed class BuildPlanFromRoom(
         var plan = RoomPlan.Create(Guid.CreateVersion7(now), currentUser.Id, "", answer.RoomType, ready.Width, ready.Length, ready.Height, ready.WallColor,
             ready.FloorColor, answer.FloorType, room.AiMode, now);
 
-        plan.Update(plan.Name, plan.Outline, ready.Height, ready.WallColor, ready.FloorColor, answer.FloorType, (int)PlanWall.Back, ready.Items, now, ViewCorner.Spot,
-            ready.Finish, ready.Camera);
+        plan.Update(plan.Name, plan.Outline, ready.Height, ready.WallColor, ready.FloorColor, answer.FloorType, new PlanView((int)PlanWall.Back, ViewCorner.Spot, ready.Camera),
+            ready.Items, now, ready.Finish);
         plan.ReadFrom(room.Id);
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);

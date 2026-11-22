@@ -1,4 +1,5 @@
 using DesignApp.Application.Helpers;
+using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
 using DesignApp.Domain.Exceptions;
 using DesignApp.Domain.Objects;
@@ -26,7 +27,7 @@ public class CornerViewTests
         var plant = new PlanItem("plant", ItemShape.Plant, 370, 470, 40, 40, 120, 0, Grey);
         var sofa = new PlanItem("sofa", ItemShape.Box, 200, 100, 200, 90, 80, 0, Grey);
 
-        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, [plant, sofa], Now, corner);
+        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, new PlanView((int)PlanWall.Back, corner), [plant, sofa], Now);
 
         return plan;
     }
@@ -37,7 +38,7 @@ public class CornerViewTests
         var plan = Room(ViewCorner.Left);
 
         Assert.Equal(ViewCorner.Left, plan.Corner);
-        Assert.Throws<DomainException>(() => plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, (ViewCorner)7));
+        Assert.Throws<DomainException>(() => plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, new PlanView(0, (ViewCorner)7), [], Now));
     }
 
     [Fact]
@@ -76,7 +77,7 @@ public class CornerViewTests
     {
         var plan = Room(ViewCorner.None);
 
-        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, (int)PlanWall.Back, plan.Items, Now, ViewCorner.Spot, null, new OutlinePoint(120, 300));
+        plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, new PlanView((int)PlanWall.Back, ViewCorner.Spot, new OutlinePoint(120, 300)), plan.Items, Now);
         var prompt = PlanPrompt.Write(plan);
 
         Assert.Equal((ViewCorner.Spot, new OutlinePoint(120, 300)), (plan.Corner, plan.CameraSpot));
@@ -86,7 +87,7 @@ public class CornerViewTests
         Assert.Contains("facing the camera", prompt, StringComparison.Ordinal);
         Assert.DoesNotContain("plant", prompt, StringComparison.Ordinal);
 
-        plan.Update("", 4, 2.5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [], Now, ViewCorner.Spot);
+        plan.Update("", 4, 2.5, 2.6, Wall, Floor, FloorType.Wood, new PlanView((int)PlanWall.Back, ViewCorner.Spot), [], Now);
 
         // The smaller room leaves the spot outside: the camera looks from the middle again.
         Assert.Equal((ViewCorner.None, (OutlinePoint?)null), (plan.Corner, plan.CameraSpot));
@@ -96,7 +97,7 @@ public class CornerViewTests
     public void The_corner_camera_looks_diagonally_through_its_fixed_lens()
     {
         // From the near left corner of a 400 × 500 room (5 cm in from both walls), turned 45° to the right.
-        var camera = new PlanCamera(400, 500, 260, 5, ViewCorner.Left);
+        var camera = new PlanCamera(400, 260, new CornerCamera(left: true).Pose(new ViewGeometry(400, 500, 200, 0, 400, null)));
 
         // The far right corner is ahead; the far left corner is near the picture's left edge, and the near right one its right edge.
         Assert.Empty(camera.Sees([(395, 5, 100)])!);

@@ -29,6 +29,11 @@ public interface IAiProviders
     /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
     IRoomBuilderAi Builder(AiMode mode);
 
+    /// <summary>What reads a room photo into a plan, of a mode: the fake or Claude.</summary>
+    /// <param name="mode">The uploaded room's AI mode.</param>
+    /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
+    IPhotoPlanner PhotoPlanner(AiMode mode);
+
     /// <summary>The image model that turns a built room's 3D view into a photo: the fake or one on fal.ai.</summary>
     /// <param name="mode">The plan's AI mode.</param>
     /// <exception cref="InvalidOperationException">The mode isn't set up.</exception>
