@@ -445,6 +445,9 @@ public class PlanTests
         Assert.Equal(ItemForm.GlassCubicle, new PlanItem("glass shower cubicle", ItemShape.Box, 50, 50, 90, 90, 200, 0, grey, form: ItemForm.GlassCubicle).Form);
         Assert.Throws<DomainException>(() => new PlanItem("door", ItemShape.Door, 100, 0, 90, 5, 210, 0, grey, (int)PlanWall.Back, 0, ItemForm.Arched));
         Assert.Throws<DomainException>(() => new PlanItem("bed", ItemShape.Bed, 100, 100, 160, 200, 50, 0, grey, form: ItemForm.GlassScreen));
+        // A swivel office chair is a chair.
+        Assert.Equal(ItemForm.Swivel, new PlanItem("office chair", ItemShape.Chair, 100, 100, 52, 61, 115, 0, grey, form: ItemForm.Swivel).Form);
+        Assert.Throws<DomainException>(() => new PlanItem("sofa", ItemShape.Sofa, 100, 100, 200, 90, 85, 0, grey, form: ItemForm.Swivel));
 
         IReadOnlyList<PlanItem> items = [corner, rug, Sofa()];
         var json = (string)PlanItemsJson.Converter.ConvertToProvider(items)!;
@@ -473,9 +476,14 @@ public class PlanTests
         Assert.Throws<DomainException>(() => new PlanItem("sofa", ItemShape.Sofa, 0, 0, 300, 200, 85, 0, grey, form: ItemForm.PShaped, parts: new ItemParts(150, 70, 160, 90)));
         Assert.Throws<DomainException>(() => new PlanItem("sofa", ItemShape.Sofa, 0, 0, 300, 200, 85, 0, grey, form: ItemForm.PShaped, parts: new ItemParts(95, 170, 160, 90)));
         Assert.Throws<DomainException>(() => new PlanItem("sofa", ItemShape.Sofa, 0, 0, 220, 95, 85, 0, grey, parts: new ItemParts(50, 50)));
-        var stored = (string)PlanItemsJson.Converter.ConvertToProvider(new List<PlanItem> { resized })!;
+        var mirrored = new PlanItem("L-shaped corner sofa", ItemShape.Sofa, 200, 100, 260, 160, 85, 0, grey, form: ItemForm.LShaped, parts: new ItemParts(80, 80, LegLeft: true));
 
-        Assert.Equal(resized, ((IReadOnlyList<PlanItem>)PlanItemsJson.Converter.ConvertFromProvider(stored)!)[0]);
+        // Mirrored, the leg is at the back run's left end: its middle 90 cm left of the sofa's.
+        Assert.Contains("its corner leg is 80 cm wide, its middle 110 cm from the left wall and 140 cm from the far wall", PlanPrompt.Write(UpdatedWith(mirrored)),
+            StringComparison.Ordinal);
+        var stored = (string)PlanItemsJson.Converter.ConvertToProvider(new List<PlanItem> { resized, mirrored })!;
+
+        Assert.Equal([resized, mirrored], (IReadOnlyList<PlanItem>)PlanItemsJson.Converter.ConvertFromProvider(stored)!);
     }
 
     /// <summary>A new living room holding one object.</summary>

@@ -90,6 +90,7 @@ public sealed record PlanItem
             ItemForm.Round => shape is ItemShape.Table or ItemShape.Rug,
             ItemForm.Arched => shape is ItemShape.Window,
             ItemForm.GlassScreen or ItemForm.GlassCubicle => shape is ItemShape.Box,
+            ItemForm.Swivel => shape is ItemShape.Chair,
             _ => false,
         };
 

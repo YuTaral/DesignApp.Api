@@ -105,6 +105,11 @@
       {"key": "standard", "name": "Three frames", "label": "set of three framed prints", "width": 150, "depth": 3, "height": 50, "elevation": 140},
       {"key": "gallery", "name": "Gallery wall", "label": "gallery wall of framed prints", "width": 180, "depth": 3, "height": 110, "elevation": 120},
       {"key": "pair", "name": "Pair", "label": "pair of framed prints", "width": 110, "depth": 3, "height": 60, "elevation": 140}
+    ] },
+    { "key": "carpet", "shape": "Rug", "color": "#B8A88E", "materials": "rug", "variants": [
+      {"key": "standard", "name": "Carpet", "label": "carpet", "width": 250, "depth": 350, "height": 1},
+      {"key": "runner", "name": "Runner", "label": "runner carpet", "width": 80, "depth": 300, "height": 1},
+      {"key": "round", "name": "Round", "label": "round carpet", "width": 200, "depth": 200, "height": 1, "form": "Round"}
     ] }
   ],
   "rooms": {
@@ -225,11 +230,11 @@
         {"key": "standard", "name": "Standard", "label": "desk", "width": 120, "depth": 60, "height": 75},
         {"key": "small", "name": "Small", "label": "small desk", "width": 90, "depth": 50, "height": 75},
         {"key": "corner", "name": "L-shaped", "label": "L-shaped corner desk", "width": 140, "depth": 120, "height": 75, "form": "LShaped"}
-      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
+      ], "decorations": ["laptop", "desktop computer with a monitor", "keyboard and mouse", "desk lamp", "small plant"] },
       { "key": "chair", "shape": "Chair", "color": "#8A8580", "materials": "seat", "variants": [
         {"key": "standard", "name": "Standard", "label": "chair", "width": 45, "depth": 50, "height": 85},
         {"key": "upholstered", "name": "Upholstered", "label": "upholstered chair", "width": 50, "depth": 55, "height": 90},
-        {"key": "swivel", "name": "Swivel", "label": "swivel chair", "width": 60, "depth": 60, "height": 100}
+        {"key": "swivel", "name": "Swivel", "label": "swivel chair", "width": 60, "depth": 60, "height": 100, "form": "Swivel"}
       ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
       { "key": "armchair", "shape": "Sofa", "color": "#9DB4C0", "materials": "upholstery", "dressing": ["cushion", "throw blanket"], "variants": [
         {"key": "standard", "name": "Reading", "label": "reading armchair", "width": 80, "depth": 80, "height": 90},
@@ -534,15 +539,15 @@
       ] }
     ],
     "HomeOffice": [
-      { "key": "desk", "shape": "Table", "color": "#E8DCC8", "materials": "wood", "dressing": ["monitor", "desk lamp", "pen holder"], "variants": [
+      { "key": "desk", "shape": "Table", "color": "#E8DCC8", "materials": "wood", "dressing": ["desktop computer with a monitor", "desk lamp", "keyboard and mouse"], "variants": [
         {"key": "standard", "name": "Standard", "label": "desk", "width": 140, "depth": 70, "height": 75},
         {"key": "corner", "name": "L-shaped", "label": "L-shaped corner desk", "width": 160, "depth": 140, "height": 75, "form": "LShaped"},
         {"key": "standing", "name": "Standing", "label": "standing desk", "width": 140, "depth": 70, "height": 110}
-      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
-      { "key": "office-chair", "shape": "Chair", "color": "#2F2C2A", "materials": "office", "variants": [
-        {"key": "standard", "name": "Standard", "label": "office chair", "width": 60, "depth": 60, "height": 110},
-        {"key": "executive", "name": "Executive", "label": "executive chair", "width": 70, "depth": 70, "height": 125},
-        {"key": "task", "name": "Task", "label": "small task chair", "width": 55, "depth": 55, "height": 95}
+      ], "decorations": ["laptop", "desktop computer with a monitor", "keyboard and mouse", "desk lamp", "small plant"] },
+      { "key": "office-chair", "shape": "Chair", "color": "#1E1E1E", "materials": "office", "material": "mesh", "variants": [
+        {"key": "standard", "name": "Mesh", "label": "black mesh office chair with armrests", "width": 52, "depth": 61, "height": 115, "form": "Swivel"},
+        {"key": "executive", "name": "Executive", "label": "executive chair", "width": 70, "depth": 70, "height": 125, "form": "Swivel"},
+        {"key": "task", "name": "Task", "label": "small task chair", "width": 55, "depth": 55, "height": 95, "form": "Swivel"}
       ], "decorations": ["seat cushion", "jacket on the back", "lumbar pillow", "throw blanket", "headphones"] },
       { "key": "bookshelf", "shape": "Box", "color": "#F4F1EA", "materials": "wood", "dressing": ["books", "small plants", "picture frames"], "variants": [
         {"key": "standard", "name": "Tall", "label": "bookshelf", "width": 80, "depth": 35, "height": 190},
@@ -593,7 +598,7 @@
         {"key": "standard", "name": "Large", "label": "large work desk", "width": 140, "depth": 70, "height": 110},
         {"key": "corner", "name": "Corner", "label": "corner desk", "width": 160, "depth": 140, "height": 75, "form": "LShaped"},
         {"key": "writing", "name": "Writing desk", "label": "writing desk", "width": 110, "depth": 55, "height": 76}
-      ], "decorations": ["monitor", "laptop", "desk lamp", "small plant", "notebooks"] },
+      ], "decorations": ["desktop computer with a monitor", "laptop", "keyboard and mouse", "desk lamp", "notebooks"] },
       { "key": "printer-cabinet", "shape": "Box", "color": "#F2F0EB", "materials": "cabinet", "variants": [
         {"key": "standard", "name": "Cabinet", "label": "printer cabinet", "width": 60, "depth": 45, "height": 70},
         {"key": "tall", "name": "Tall", "label": "tall office cabinet", "width": 80, "depth": 45, "height": 120},
@@ -635,11 +640,11 @@
         {"key": "standard", "name": "Standard", "label": "desk", "width": 100, "depth": 55, "height": 70},
         {"key": "small", "name": "Small", "label": "small children's desk", "width": 80, "depth": 50, "height": 60},
         {"key": "corner", "name": "L-shaped", "label": "L-shaped desk", "width": 120, "depth": 110, "height": 70, "form": "LShaped"}
-      ], "decorations": ["laptop", "desk lamp", "monitor", "pen holder", "small plant"] },
+      ], "decorations": ["laptop", "desktop computer with a monitor", "keyboard and mouse", "desk lamp", "small plant"] },
       { "key": "chair", "shape": "Chair", "color": "#D9C27A", "materials": "seat", "variants": [
         {"key": "standard", "name": "Standard", "label": "chair", "width": 40, "depth": 45, "height": 75},
         {"key": "small", "name": "Small", "label": "small child's chair", "width": 32, "depth": 32, "height": 55},
-        {"key": "swivel", "name": "Swivel", "label": "swivel desk chair", "width": 50, "depth": 50, "height": 90}
+        {"key": "swivel", "name": "Swivel", "label": "swivel desk chair", "width": 50, "depth": 50, "height": 90, "form": "Swivel"}
       ], "decorations": ["seat cushion", "sheepskin", "throw blanket", "jacket on the back", "tote bag"] },
       { "key": "toy-box", "shape": "Box", "color": "#B5543C", "materials": "wood", "dressing": ["stuffed animals"], "variants": [
         {"key": "standard", "name": "Chest", "label": "toy chest", "width": 80, "depth": 40, "height": 45},

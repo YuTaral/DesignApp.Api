@@ -334,16 +334,16 @@ public static partial class PlanPrompt
         {
             case ItemForm.LShaped or ItemForm.PShaped:
             {
-                // Before turning the back run is at -y and the leg at the right end, between the run and a P's chaise.
+                // Before turning the back run is at -y and the leg at its right end (left when mirrored), between the run and a P's chaise.
                 var parts = item.Parts ?? ItemParts.Default(item.Form, item.Width, item.Depth);
-                var (legLeft, legFar) = PartMiddle(item, frame, item.Width / 2 - parts.LegWidth / 2, (parts.RunDepth - parts.ChaiseDepth) / 2);
+                var (legLeft, legFar) = PartMiddle(item, frame, parts.Side * (item.Width / 2 - parts.LegWidth / 2), (parts.RunDepth - parts.ChaiseDepth) / 2);
 
                 if (item.Form == ItemForm.LShaped)
                 {
                     return B.Prompt.LShaped(Cm(parts.RunDepth), Cm(parts.LegWidth), Cm(legLeft), Cm(legFar));
                 }
 
-                var (chaiseLeft, chaiseFar) = PartMiddle(item, frame, item.Width / 2 - parts.ChaiseWidth / 2, item.Depth / 2 - parts.ChaiseDepth / 2);
+                var (chaiseLeft, chaiseFar) = PartMiddle(item, frame, parts.Side * (item.Width / 2 - parts.ChaiseWidth / 2), item.Depth / 2 - parts.ChaiseDepth / 2);
 
                 return B.Prompt.PShaped(Cm(parts.RunDepth), Cm(parts.LegWidth), Cm(legLeft), Cm(legFar),
                     Cm(parts.ChaiseWidth), Cm(parts.ChaiseDepth), Cm(chaiseLeft), Cm(chaiseFar));

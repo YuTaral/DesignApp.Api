@@ -589,6 +589,8 @@ public static class Constants
         GlassScreen,
         /// <summary>A glass shower cubicle (boxes): a low tray and clear panes on its front and right side.</summary>
         GlassCubicle,
+        /// <summary>A swivel office chair (chairs): a five-star base on wheels, a gas column, a tall back and armrests.</summary>
+        Swivel,
     }
 
     /// <summary>

@@ -26,8 +26,8 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var objects = (await response.Content.ReadFromJsonAsync<List<JsonElement>>())!;
 
-        // Every room's seventeen: six windows and doors, nine things to hang and two for the floor; then the bedroom's seventeen.
-        Assert.Equal(34, objects.Count);
+        // Every room's eighteen: six windows and doors, nine things to hang and three for the floor; then the bedroom's seventeen.
+        Assert.Equal(35, objects.Count);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "painting" && o.GetProperty("shape").GetString() == "Picture" && o.GetProperty("elevation").GetDouble() == 130);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "window" && o.GetProperty("elevation").GetDouble() == 90);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "double-bed" && o.GetProperty("shape").GetString() == "Bed");
