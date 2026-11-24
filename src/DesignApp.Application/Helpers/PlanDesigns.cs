@@ -86,6 +86,38 @@ public sealed class PlanDesigns(IDesignRepository designs, IPlanRepository plans
         return null;
     }
 
+    /// <summary>
+    /// Puts a new room of the plan's photos in an old room's place, in every design holding the old one; with none, the
+    /// new room goes into the plan's design as usual (<see cref="AddAsync"/>).
+    /// </summary>
+    /// <param name="plan">The plan.</param>
+    /// <param name="oldRoom">The room replaced.</param>
+    /// <param name="room">The new room, already saved, with the plan's owner.</param>
+    /// <param name="cancellationToken">Cancels the work.</param>
+    /// <returns><c>null</c> when the room is in place, else why it couldn't be added.</returns>
+    public async Task<string?> ReplaceAsync(RoomPlan plan, Room oldRoom, Room room, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(oldRoom);
+        ArgumentNullException.ThrowIfNull(room);
+
+        var holding = await designs.ListHoldingRoomAsync(oldRoom.Id, room.OwnerId, cancellationToken);
+        var now = clock.GetUtcNow();
+
+        if (holding.Count == 0)
+        {
+            return await AddAsync(plan, room, cancellationToken);
+        }
+
+        foreach (var design in holding)
+        {
+            design.ReplaceRoom(oldRoom.Id, room, now);
+        }
+
+        await designs.SaveChangesAsync(cancellationToken);
+
+        return null;
+    }
+
     /// <summary>A new design's name: the plan's, or its room type in words ("Living room").</summary>
     /// <param name="plan">The plan.</param>
     private static string NameOf(RoomPlan plan)

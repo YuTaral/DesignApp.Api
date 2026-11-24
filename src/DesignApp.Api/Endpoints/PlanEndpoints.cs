@@ -177,12 +177,16 @@ internal static class PlanEndpoints
     /// run's first photo, which makes the room).
     /// </param>
     /// <param name="note">The optional <c>note</c> form field: what the photo is, such as its view's name.</param>
+    /// <param name="replaces">
+    /// The optional <c>replaces</c> form field, with the run's first photo: an older room of the plan which the new room
+    /// replaces in its designs (the old room is deleted).
+    /// </param>
     /// <param name="generate">The use case.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the room (waiting for its analysis), 400 when no photo could be made, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> GenerateAsync(
         Guid id, IFormFile guide, [FromForm] string? style, [FromForm] string? instructions, [FromForm] int? seed, [FromForm] string? boxes,
-        [FromForm] int? view, [FromForm] string? corner, [FromForm] Guid? roomId, [FromForm] string? note, GeneratePlanRoom generate,
+        [FromForm] int? view, [FromForm] string? corner, [FromForm] Guid? roomId, [FromForm] string? note, [FromForm] Guid? replaces, GeneratePlanRoom generate,
         CancellationToken cancellationToken)
     {
         var photoStyle = PhotoStyle.AsBuilt;
@@ -230,7 +234,8 @@ internal static class PlanEndpoints
         await using (var content = guide.OpenReadStream())
             await content.CopyToAsync(buffer, cancellationToken);
 
-        var outcome = await generate.HandleAsync(id, buffer.ToArray(), photoStyle, instructions, seed, layout, shot, roomId, note, cancellationToken);
+        var run = new PhotoRun(roomId, note, replaces);
+        var outcome = await generate.HandleAsync(id, buffer.ToArray(), photoStyle, instructions, seed, layout, shot, run, cancellationToken);
 
         if (outcome is null)
         {

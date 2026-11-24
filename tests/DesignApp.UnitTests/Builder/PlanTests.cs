@@ -261,7 +261,7 @@ public class PlanTests
         var made = await create.HandleAsync("", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, design.Id, null, CancellationToken.None);
 
         Assert.True(made.Succeeded, made.Error);
-        var photo = await Generator().HandleAsync(made.Value.Id, TestImages.Create(1280, 960), PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None);
+        var photo = await Generator().HandleAsync(made.Value.Id, TestImages.Create(1280, 960), PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, null), CancellationToken.None);
         var refusedTheirs = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, theirs.Id, null, CancellationToken.None);
         var refusedFull = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, full.Id, null, CancellationToken.None);
 
@@ -283,14 +283,14 @@ public class PlanTests
         var generate = Generator();
         var guide = TestImages.Create(1280, 960);
 
-        Assert.Equal(DesignApp.Application.Constants.Messages.EmptyPlan, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None))!.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.EmptyPlan, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, null), CancellationToken.None))!.Error);
         plan.Update("", 4, 5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [Sofa()], Now);
-        Assert.Equal(DesignApp.Application.Constants.Messages.GuideImage, (await generate.HandleAsync(plan.Id, [], PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None))!.Error);
-        Assert.Equal(DesignApp.Application.Constants.Messages.UnknownPhotoStyle, (await generate.HandleAsync(plan.Id, guide, (PhotoStyle)99, null, null, null, null, null, null, CancellationToken.None))!.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.GuideImage, (await generate.HandleAsync(plan.Id, [], PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, null), CancellationToken.None))!.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.UnknownPhotoStyle, (await generate.HandleAsync(plan.Id, guide, (PhotoStyle)99, null, null, null, null, new PhotoRun(null, null), CancellationToken.None))!.Error);
         Assert.Equal(DesignApp.Application.Constants.Messages.PhotoInstructions,
-            (await generate.HandleAsync(plan.Id, guide, PhotoStyle.Boho, new string('x', 501), null, null, null, null, null, CancellationToken.None))!.Error);
+            (await generate.HandleAsync(plan.Id, guide, PhotoStyle.Boho, new string('x', 501), null, null, null, new PhotoRun(null, null), CancellationToken.None))!.Error);
 
-        var made = await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None);
+        var made = await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, null), CancellationToken.None);
 
         Assert.True(made!.Succeeded, made.Error);
         var room = made.Value;
@@ -299,43 +299,43 @@ public class PlanTests
         Assert.Equal((RoomStatus.Waiting, AiMode.Fake, 1280), (room.Status, room.AiMode, room.Width));
         Assert.True(_storage.Files.ContainsKey(room.PhotoKey));
         Assert.Empty(_scheduler.Scheduled);
-        Assert.Null(await Generator("someone-else").HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None));
+        Assert.Null(await Generator("someone-else").HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, null), CancellationToken.None));
 
         // One call, decorations or not: the 3D view and the prompt, which names each object's decorations with it.
         var images = new RecordingImageGenerator();
         var cushioned = new PlanItem("sofa", ItemShape.Sofa, 200, 80, 220, 95, 85, 0, HexColor.Parse("#8A8580"), decorations: new ItemDecorations(["cushions", "throw blanket"]));
 
         plan.Update("", 4, 5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [cushioned], Now);
-        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, null, null, null, null, CancellationToken.None))!.Succeeded);
+        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, null, null, new PhotoRun(null, null), CancellationToken.None))!.Succeeded);
         var (image, prompt, seed, boxes) = Assert.Single(images.Calls);
 
         Assert.Null(boxes);
         Assert.Same(guide, image);
         Assert.Null(seed);
         // A seed makes the photo repeatable, for comparing changes fairly; it can't be negative.
-        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, 42, null, null, null, null, CancellationToken.None))!.Succeeded);
+        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, 42, null, null, new PhotoRun(null, null), CancellationToken.None))!.Succeeded);
         Assert.Equal(42, images.Calls[^1].Seed);
         // Object boxes go to the image model with each object described; boxes off the plan or the picture are refused.
-        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, [new ItemBox(0, 0.1, 0.4, 0.6, 0.9)], null, null, null, CancellationToken.None))!.Succeeded);
+        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, [new ItemBox(0, 0.1, 0.4, 0.6, 0.9)], null, new PhotoRun(null, null), CancellationToken.None))!.Succeeded);
         var box = Assert.Single(images.Calls[^1].Boxes!);
 
         Assert.Equal(("object1", "warm grey (#8A8580) sofa, decorated with cushions and throw blanket", 0.1, 0.9), (box.Label, box.Description, box.Left, box.Bottom));
 
         foreach (var bad in new[] { new ItemBox(1, 0.1, 0.4, 0.6, 0.9), new ItemBox(0, 0.6, 0.4, 0.1, 0.9), new ItemBox(0, -0.1, 0.4, 0.6, 1.2) })
         {
-            Assert.Equal(DesignApp.Application.Constants.Messages.PhotoBoxes, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, [bad], null, null, null, CancellationToken.None))!.Error);
+            Assert.Equal(DesignApp.Application.Constants.Messages.PhotoBoxes, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, [bad], null, new PhotoRun(null, null), CancellationToken.None))!.Error);
         }
 
-        Assert.Equal(DesignApp.Application.Constants.Messages.PhotoSeed, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, -1, null, null, null, null, CancellationToken.None))!.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.PhotoSeed, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, -1, null, null, new PhotoRun(null, null), CancellationToken.None))!.Error);
         Assert.Contains("facing the camera, decorated with cushions and throw blanket", prompt, StringComparison.Ordinal);
         // A photo of another view (several can be made at once) is written from that view, and the plan keeps its own.
-        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, null, new PlanShot((int)PlanWall.Front, ViewCorner.Left), null, null, CancellationToken.None))!.Succeeded);
+        Assert.True((await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.Boho, null, null, null, new PlanShot((int)PlanWall.Front, ViewCorner.Left), new PhotoRun(null, null), CancellationToken.None))!.Succeeded);
         Assert.Contains("near left corner", images.Calls[^1].Prompt, StringComparison.Ordinal);
         Assert.Equal((0, ViewCorner.None), (plan.View, plan.Corner));
 
         foreach (var bad in new[] { new PlanShot(4, ViewCorner.None), new PlanShot(-1, ViewCorner.None), new PlanShot(0, (ViewCorner)9) })
         {
-            Assert.Equal(DesignApp.Application.Constants.Messages.PhotoShot, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, bad, null, null, CancellationToken.None))!.Error);
+            Assert.Equal(DesignApp.Application.Constants.Messages.PhotoShot, (await generate.HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, null, null, bad, new PhotoRun(null, null), CancellationToken.None))!.Error);
         }
     }
 
@@ -602,6 +602,7 @@ public class PlanTests
         var clock = new FixedClock(Now);
         var takes = new TakeStore(new SkiaPhotoProcessor(), _storage, clock);
 
-        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(images), takes, new PlanDesigns(_designs, _plans, clock), clock, NullLogger<GeneratePlanRoom>.Instance);
+        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(images), takes, new PlanDesigns(_designs, _plans, clock), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), clock,
+            NullLogger<GeneratePlanRoom>.Instance);
     }
 }

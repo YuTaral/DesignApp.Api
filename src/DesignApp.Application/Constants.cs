@@ -920,6 +920,9 @@ public static class Constants
         /// <summary>A photo added to a room that holds another plan's photos (or none).</summary>
         public const string NotThisPlansRoom = "That room doesn't hold this room plan's photos.";
 
+        /// <summary>New photos meant to replace a room that is gone (replaced already, or deleted).</summary>
+        public const string ReplacedRoomMissing = "The room these photos were to replace is gone. Open the room builder again from the design to choose.";
+
         /// <summary>A room saved to its plan's design that wasn't made from a plan, or whose plan is gone.</summary>
         public const string NotFromPlan = "This room wasn't made from a room plan that still exists.";
 

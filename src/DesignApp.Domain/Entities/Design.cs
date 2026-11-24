@@ -102,6 +102,37 @@ public sealed class Design
         UpdatedAt = now;
     }
 
+    /// <summary>
+    /// Puts a new room in an old one's place (its photos were made again): in the same position, with no edits yet, as
+    /// the new room has its own photo.
+    /// </summary>
+    /// <param name="oldRoomId">The room replaced.</param>
+    /// <param name="room">The new room; it must be the owner's and not in this design already.</param>
+    /// <param name="now">The change time.</param>
+    /// <exception cref="DomainException">The old room isn't here, or the new one isn't the owner's or is already here.</exception>
+    public void ReplaceRoom(Guid oldRoomId, Room room, DateTimeOffset now)
+    {
+        var index = _rooms.FindIndex(r => r.RoomId == oldRoomId);
+
+        if (index < 0)
+        {
+            throw new DomainException(Constants.Messages.RoomNotInDesign);
+        }
+
+        if (room.OwnerId != OwnerId)
+        {
+            throw new DomainException(Constants.Messages.NotYourRoom);
+        }
+
+        if (_rooms.Any(r => r.RoomId == room.Id))
+        {
+            throw new DomainException(Constants.Messages.RoomAlreadyInThisDesign);
+        }
+
+        _rooms[index] = new DesignRoom(room.Id, _rooms[index].Position);
+        UpdatedAt = now;
+    }
+
     /// <summary>Replaces one room's edits, and clears its sizes.</summary>
     /// <param name="room">The room; it must be in this design, and analyzed when there are edits.</param>
     /// <param name="edits">The new edits, at most one per object.</param>

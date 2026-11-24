@@ -13,7 +13,8 @@ namespace DesignApp.Application.UseCases;
 /// (<see cref="PlanPrompt"/>), and the image model turns the room's simple 3D view into a photo with that layout. The
 /// photos of one Generate run are one room: the first makes the room (its photo, the room's), the others are added to
 /// it to choose from. Its analysis waits until the user starts it (with the real AI it costs money). A signed-in user's
-/// room goes into the plan's own design.
+/// room goes into the plan's own design, or, when the run replaces an older room of the plan (Edit in 3D on a design's
+/// page), into that room's place, and the old room is deleted.
 /// </summary>
 /// <param name="plans">Where plans are stored.</param>
 /// <param name="rooms">Where rooms and their photos are stored.</param>
@@ -21,10 +22,11 @@ namespace DesignApp.Application.UseCases;
 /// <param name="ai">The AI providers.</param>
 /// <param name="takes">Stores the photos.</param>
 /// <param name="planDesigns">Puts the room into the plan's design.</param>
+/// <param name="remover">Deletes a room replaced.</param>
 /// <param name="clock">When the room is made.</param>
 /// <param name="logger">Records a room that couldn't be put into the plan's design.</param>
 public sealed partial class GeneratePlanRoom(
-    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanDesigns planDesigns, TimeProvider clock,
+    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanDesigns planDesigns, RoomRemover remover, TimeProvider clock,
     ILogger<GeneratePlanRoom> logger)
 {
     /// <summary>Generates the photo and the room.</summary>
@@ -41,13 +43,12 @@ public sealed partial class GeneratePlanRoom(
     /// The view the photo is made from (the guide must be drawn from it); <c>null</c> for the room's own. The plan keeps
     /// its own view either way.
     /// </param>
-    /// <param name="roomId">The room of this run's earlier photos, to add this one to; <c>null</c> for the run's first.</param>
-    /// <param name="note">What the photo is, such as its view's name.</param>
+    /// <param name="run">The Generate run it belongs to, what it is, and the room it replaces, if any.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The room (waiting for its analysis), a failure the user can read, or <c>null</c> when the user has no such plan.</returns>
     public async Task<Result<Room>?> HandleAsync(
         Guid planId, byte[] guidePng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes, PlanShot? shot,
-        Guid? roomId, string? note, CancellationToken cancellationToken)
+        PhotoRun run, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(planId, currentUser.Id, cancellationToken);
 
@@ -56,14 +57,26 @@ public sealed partial class GeneratePlanRoom(
             return null;
         }
 
-        var room = roomId is Guid id ? await rooms.FindAsync(id, currentUser.Id, cancellationToken) : null;
+        var room = run.RoomId is Guid id ? await rooms.FindAsync(id, currentUser.Id, cancellationToken) : null;
+        // Only the run's first photo makes a room, which can replace an older one.
+        var replaced = run.RoomId is null && run.Replaces is Guid old ? await rooms.FindAsync(old, currentUser.Id, cancellationToken) : null;
 
-        if (roomId is not null && room?.PlanId != plan.Id)
+        if (run.RoomId is not null && room?.PlanId != plan.Id)
         {
             return Result.Failure<Room>(Constants.Messages.NotThisPlansRoom);
         }
 
-        if ((note?.Trim().Length ?? 0) > Domain.Constants.Rooms.MaxTakeNoteLength)
+        if (run.RoomId is null && run.Replaces is not null && replaced is null)
+        {
+            return Result.Failure<Room>(Constants.Messages.ReplacedRoomMissing);
+        }
+
+        if (replaced is not null && replaced.PlanId != plan.Id)
+        {
+            return Result.Failure<Room>(Constants.Messages.NotThisPlansRoom);
+        }
+
+        if ((run.Note?.Trim().Length ?? 0) > Domain.Constants.Rooms.MaxTakeNoteLength)
         {
             return Result.Failure<Room>(Constants.Messages.PhotoNote);
         }
@@ -112,7 +125,7 @@ public sealed partial class GeneratePlanRoom(
         }
 
         var newId = room?.Id ?? Guid.CreateVersion7(clock.GetUtcNow());
-        var stored = await takes.StoreAsync(newId, photo.Value, note ?? "", null, cancellationToken);
+        var stored = await takes.StoreAsync(newId, photo.Value, run.Note ?? "", null, cancellationToken);
 
         if (!stored.Succeeded)
         {
@@ -131,9 +144,18 @@ public sealed partial class GeneratePlanRoom(
 
         // The photo is made and saved, so the design can't lose it: when the room can't go into the plan's design now
         // (it is full, or another run of the same plan made the design at the same moment), the photo page puts it there.
+        // A replaced room is deleted only once the new one has its place.
         try
         {
-            await planDesigns.AddAsync(plan, room, cancellationToken);
+            if (replaced is null)
+            {
+                await planDesigns.AddAsync(plan, room, cancellationToken);
+            }
+            else
+            {
+                await planDesigns.ReplaceAsync(plan, replaced, room, cancellationToken);
+                await remover.DeleteAsync([replaced], cancellationToken);
+            }
         }
         catch (Exception error) when (error is not OperationCanceledException)
         {

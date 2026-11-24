@@ -1,4 +1,5 @@
 using DesignApp.Application.Helpers;
+using DesignApp.Application.Objects;
 using DesignApp.Application.UseCases;
 using DesignApp.Domain.Entities;
 using DesignApp.Domain.Exceptions;
@@ -35,7 +36,7 @@ public class PhotoTakeTests
         var plan = Plan("user-1");
         var generate = Generator("user-1");
 
-        var first = await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "Back wall, from the middle", CancellationToken.None);
+        var first = await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "Back wall, from the middle"), CancellationToken.None);
         var room = first!.Value;
         var firstTake = Assert.Single(_rooms.Takes);
 
@@ -45,7 +46,7 @@ public class PhotoTakeTests
         Assert.Equal(_storage.Files[firstTake.Key].Content, _storage.Files[room.PhotoKey].Content);
 
         // The run's other photos go into the same room; the room keeps its photo.
-        var second = await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, room.Id, "Right wall", CancellationToken.None);
+        var second = await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(room.Id, "Right wall"), CancellationToken.None);
 
         Assert.Same(room, second!.Value);
         Assert.Equal(2, _rooms.Takes.Count);
@@ -56,9 +57,9 @@ public class PhotoTakeTests
         var other = Plan("user-1");
 
         Assert.Equal(DesignApp.Application.Constants.Messages.NotThisPlansRoom,
-            (await generate.HandleAsync(other.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, room.Id, null, CancellationToken.None))!.Error);
+            (await generate.HandleAsync(other.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(room.Id, null), CancellationToken.None))!.Error);
         Assert.Equal(DesignApp.Application.Constants.Messages.PhotoNote,
-            (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, new string('x', 501), CancellationToken.None))!.Error);
+            (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, new string('x', 501)), CancellationToken.None))!.Error);
     }
 
     [Fact]
@@ -67,8 +68,8 @@ public class PhotoTakeTests
         var plan = Plan("user-1");
         var generate = Generator("user-1");
 
-        var one = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "one", CancellationToken.None))!.Value;
-        var two = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "two", CancellationToken.None))!.Value;
+        var one = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
+        var two = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "two"), CancellationToken.None))!.Value;
         var design = Assert.Single(_designs.All);
 
         Assert.Equal(design.Id, plan.DesignId);
@@ -86,15 +87,45 @@ public class PhotoTakeTests
         var guest = GuestIds.New();
         var guestPlan = Plan(guest);
 
-        Assert.True((await Generator(guest).HandleAsync(guestPlan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "", CancellationToken.None))!.Succeeded);
+        Assert.True((await Generator(guest).HandleAsync(guestPlan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, ""), CancellationToken.None))!.Succeeded);
         Assert.Null(guestPlan.DesignId);
         Assert.Single(_designs.All);
     }
 
     [Fact]
+    public async Task A_run_replacing_a_room_takes_its_place_in_the_design_and_deletes_it()
+    {
+        var plan = Plan("user-1");
+        var generate = Generator("user-1");
+
+        var one = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
+        var two = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "two"), CancellationToken.None))!.Value;
+        var oldFiles = _rooms.Takes.Where(t => t.RoomId == one.Id).Select(t => t.Key).Append(one.PhotoKey).ToList();
+        var design = Assert.Single(_designs.All);
+        var three = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "three", one.Id), CancellationToken.None))!.Value;
+
+        // The new room is where the old one was; the old room and its files are gone.
+        Assert.Equal([three.Id, two.Id], design.Rooms.Select(r => r.RoomId));
+        Assert.Null(await _rooms.FindAsync(one.Id, "user-1", CancellationToken.None));
+        Assert.DoesNotContain(oldFiles, _storage.Files.ContainsKey);
+        Assert.NotNull(await _rooms.FindAsync(two.Id, "user-1", CancellationToken.None));
+
+        // A room gone already, or another plan's, is refused before any photo is made.
+        var other = Plan("user-1");
+        var otherRoom = (await generate.HandleAsync(other.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "other"), CancellationToken.None))!.Value;
+        var made = _rooms.Takes.Count;
+
+        Assert.Equal(DesignApp.Application.Constants.Messages.ReplacedRoomMissing,
+            (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "again", one.Id), CancellationToken.None))!.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.NotThisPlansRoom,
+            (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "theirs", otherRoom.Id), CancellationToken.None))!.Error);
+        Assert.Equal(made, _rooms.Takes.Count);
+    }
+
+    [Fact]
     public async Task A_change_makes_a_new_photo_of_the_room_from_the_one_changed()
     {
-        var room = (await Generator("user-1").HandleAsync(Plan("user-1").Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "view", CancellationToken.None))!.Value;
+        var room = (await Generator("user-1").HandleAsync(Plan("user-1").Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "view"), CancellationToken.None))!.Value;
         var images = new RecordingImageGenerator();
         var change = new ChangeRoomTake(_rooms, new FixedUser("user-1"), Ai(images), Takes());
         var original = Assert.Single(_rooms.Takes);
@@ -118,10 +149,10 @@ public class PhotoTakeTests
     {
         var plan = Plan("user-1");
         var generate = Generator("user-1");
-        var room = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "one", CancellationToken.None))!.Value;
+        var room = (await generate.HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
         var wide = TestImages.Create(1600, 900);
 
-        await generate.HandleAsync(plan.Id, wide, PhotoStyle.AsBuilt, null, null, null, null, room.Id, "two", CancellationToken.None);
+        await generate.HandleAsync(plan.Id, wide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(room.Id, "two"), CancellationToken.None);
         var second = _rooms.Takes[1];
         var choose = new ChooseRoomTake(_rooms, _designs, new FixedUser("user-1"), Takes(), _storage, _clock, NullLogger<ChooseRoomTake>.Instance);
 
@@ -141,7 +172,7 @@ public class PhotoTakeTests
     public async Task A_photo_whose_analysis_failed_can_be_chosen_again_and_analyzed_afresh()
     {
         var plan = Plan("user-1");
-        var room = (await Generator("user-1").HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, null, "one", CancellationToken.None))!.Value;
+        var room = (await Generator("user-1").HandleAsync(plan.Id, _guide, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
         var take = Assert.Single(_rooms.Takes);
         var choose = new ChooseRoomTake(_rooms, _designs, new FixedUser("user-1"), Takes(), _storage, _clock, NullLogger<ChooseRoomTake>.Instance);
 
@@ -225,6 +256,6 @@ public class PhotoTakeTests
     /// <param name="user">The current user.</param>
     private GeneratePlanRoom Generator(string user)
     {
-        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(), Takes(), Designs(), _clock, NullLogger<GeneratePlanRoom>.Instance);
+        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(), Takes(), Designs(), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), _clock, NullLogger<GeneratePlanRoom>.Instance);
     }
 }
