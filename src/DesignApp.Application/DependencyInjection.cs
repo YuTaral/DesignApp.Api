@@ -27,6 +27,9 @@ public static class DependencyInjection
         services.AddScoped<SavePlan>();
         services.AddScoped<DescribePlanObject>();
         services.AddScoped<GeneratePlanRoom>();
+        services.AddScoped<GeneratePlanPanorama>();
+        services.AddScoped<SaveRoomPanoramaView>();
+        services.AddScoped<PlanPhotos>();
         services.AddScoped<GetRoomTakes>();
         services.AddScoped<ChangeRoomTake>();
         services.AddScoped<ChooseRoomTake>();

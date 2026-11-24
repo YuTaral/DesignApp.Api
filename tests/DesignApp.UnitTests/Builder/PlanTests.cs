@@ -339,6 +339,37 @@ public class PlanTests
         }
     }
 
+    [Fact]
+    public async Task A_runs_later_photos_copy_the_objects_from_its_first_photo()
+    {
+        var plan = NewPlan();
+        var images = new RecordingImageGenerator();
+        var guide = TestImages.Create(1280, 960);
+        var otherView = TestImages.Create(1024, 768);
+        var here = new ItemBox(0, 0.1, 0.4, 0.6, 0.9);
+        var there = new ItemBox(0, 0.5, 0.3, 0.9, 0.8);
+
+        _plans.Add(plan);
+        plan.Update("", 4, 5, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, [Sofa()], Now);
+        var first = (await Generator(images: images).HandleAsync(plan.Id, guide, PhotoStyle.AsBuilt, null, 7, [there], null, new PhotoRun(null, "back"), CancellationToken.None))!.Value;
+        var second = await Generator(images: images).HandleAsync(plan.Id, otherView, PhotoStyle.AsBuilt, null, 7,
+            [here], new PlanShot((int)PlanWall.Front, ViewCorner.None), new PhotoRun(first.Id, "front", null, [there]), CancellationToken.None);
+        var copied = Assert.Single(images.Calls[1].Boxes!);
+
+        // The first photo has no reference; the second takes the first as it was made, and copies the sofa from its box there.
+        Assert.True(second!.Succeeded, second.Error);
+        Assert.Null(images.References[0]);
+        Assert.Equal(_storage.Files[Assert.Single(_rooms.Takes, t => t.Note == "back").Key].Content, images.References[1]);
+        Assert.Equal(new SourceBox(0.5, 0.3, 0.9, 0.8), copied.FromReference);
+        Assert.Equal((0.1, 0.9), (copied.Left, copied.Bottom));
+        Assert.Contains("The second image is a photograph of this same room", images.Calls[1].Prompt, StringComparison.Ordinal);
+        Assert.DoesNotContain("second image", images.Calls[0].Prompt, StringComparison.Ordinal);
+        Assert.Equal(7, images.Calls[1].Seed);
+        // Reference boxes off the plan are refused like the others.
+        Assert.Equal(DesignApp.Application.Constants.Messages.PhotoBoxes, (await Generator(images: images).HandleAsync(plan.Id, otherView, PhotoStyle.AsBuilt, null, null,
+            [here], null, new PhotoRun(first.Id, "bad", null, [new ItemBox(3, 0.1, 0.1, 0.2, 0.2)]), CancellationToken.None))!.Error);
+    }
+
     [Theory]
     [InlineData(2.4, 3.0)]
     [InlineData(3.0, 3.5)]
@@ -602,7 +633,7 @@ public class PlanTests
         var clock = new FixedClock(Now);
         var takes = new TakeStore(new SkiaPhotoProcessor(), _storage, clock);
 
-        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(images), takes, new PlanDesigns(_designs, _plans, clock), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), clock,
-            NullLogger<GeneratePlanRoom>.Instance);
+        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(images), takes,
+            new PlanPhotos(_rooms, new FixedUser(user), new PlanDesigns(_designs, _plans, clock), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), NullLogger<PlanPhotos>.Instance), clock);
     }
 }

@@ -724,6 +724,9 @@ public static class Constants
             /// <summary>The photo's format.</summary>
             public const string OutputFormat = "jpeg";
 
+            /// <summary>The reference photo's position in the image list (the 3D view is first, at 0).</summary>
+            public const int ReferenceIndex = 1;
+
             /// <summary>
             /// Whether the model may rewrite the prompt first: off, since the prompt is written to the centimetre from the
             /// plan, and a rewrite could add things to the room.
@@ -781,6 +784,12 @@ public static class Constants
                 public const string Description = "description";
                 /// <summary>A box's place.</summary>
                 public const string Box = "box";
+                /// <summary>A copied object's reference image: its position in the image list, from 0.</summary>
+                public const string SourceImageIndex = "source_image_index";
+                /// <summary>Where a copied object is in its reference image.</summary>
+                public const string SourceBox = "source_box";
+                /// <summary>Where a copied object goes in the photo.</summary>
+                public const string TargetBox = "target_box";
                 /// <summary>A box's left edge.</summary>
                 public const string XMin = "x_min";
                 /// <summary>A box's top edge.</summary>

@@ -69,6 +69,8 @@ public sealed class Room
     /// browsers keep for good. <c>null</c> for a room with only its own photo.
     /// </summary>
     public Guid? PhotoSetId { get; private set; }
+    /// <summary>The room's 360-degree photo, whose views can be saved as its photos; <c>null</c> for none.</summary>
+    public Panorama? Panorama { get; private set; }
     /// <summary>The photo version that goes with the current label map version.</summary>
     public int PhotoVersion => PhotoVersionOf(LabelMapRevision);
     /// <summary>The newest photo version stored.</summary>
@@ -173,6 +175,21 @@ public sealed class Room
         room.PhotoSetId = Guid.NewGuid();
 
         return room;
+    }
+
+    /// <summary>Gives a room of a plan's photos its 360-degree photo.</summary>
+    /// <param name="panorama">The panorama, stored in the room's folder.</param>
+    /// <exception cref="DomainException">The room holds no plan's photos.</exception>
+    public void UsePanorama(Panorama panorama)
+    {
+        ArgumentNullException.ThrowIfNull(panorama);
+
+        if (PlanId is null)
+        {
+            throw new DomainException(Constants.Messages.PanoramaNeedsPlan);
+        }
+
+        Panorama = panorama;
     }
 
     /// <summary>

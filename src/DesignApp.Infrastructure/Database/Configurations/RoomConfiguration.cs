@@ -1,4 +1,5 @@
 using DesignApp.Domain.Entities;
+using DesignApp.Domain.Objects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -41,6 +42,11 @@ internal sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
             .HasColumnType(Constants.Persistence.Json)
             .HasDefaultValueSql(Constants.Persistence.EmptyJsonArray)
             .HasConversion(PhotoVersionsJson.Converter, PhotoVersionsJson.Comparer);
+
+        // The 360-degree photo, if any: read and written with the room.
+        builder.Property(r => r.Panorama)
+            .HasColumnType(Constants.Persistence.Json)
+            .HasConversion(OptionalJson<Panorama>.Converter);
 
         builder.HasIndex(r => new { r.OwnerId, r.CreatedAt });
         builder.HasIndex(r => r.Status); // finding unfinished rooms on startup

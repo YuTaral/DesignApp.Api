@@ -15,7 +15,9 @@ namespace DesignApp.Infrastructure.Ai.Fal;
 /// <summary>
 /// Turns a built room's 3D view into a realistic photo, with the objects' decorations, with FLUX 3 Image Klein on
 /// fal.ai (the model is <see cref="AiSettings.ImageEndpoint"/>): the image and the instruction are queued as one paid
-/// job, then the job is followed until the photo is ready. A slow answer never sends it again.
+/// job, then the job is followed until the photo is ready. A slow answer never sends it again. A reference photo (the
+/// first of the same room, from another view) goes second in the image list, and each object it shows is copied from its
+/// box there into its box in the new photo, so every view shows the same furniture, materials and decorations.
 /// </summary>
 /// <param name="http">The fal.ai client (key, timeout per call, no retries).</param>
 /// <param name="settingsStore">The AI settings, read per photo.</param>
@@ -23,11 +25,14 @@ namespace DesignApp.Infrastructure.Ai.Fal;
 internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStore settingsStore, ILogger<FalImageGenerator> logger) : IImageGenerator
 {
     /// <inheritdoc/>
-    public async Task<Result<byte[]>> GenerateAsync(byte[] image, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, CancellationToken cancellationToken)
+    public async Task<Result<byte[]>> GenerateAsync(
+        byte[] image, byte[]? reference, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, PhotoSize? size, CancellationToken cancellationToken)
     {
         var settings = await settingsStore.GetAsync(cancellationToken);
-        var request = new ImageRequest(prompt, [DataUri(image)], new ImageSize(IM.Width, IM.Height), IM.OutputFormat, IM.PromptExpansion, seed,
-            boxes?.Select(b => new EditBox(b.Label, b.Description, new Box(b.Left, b.Top, b.Right, b.Bottom))).ToList());
+        var images = reference is null ? [DataUri(image)] : new[] { DataUri(image), DataUri(reference) };
+        var pixels = new ImageSize(size?.Width ?? IM.Width, size?.Height ?? IM.Height);
+        var request = new ImageRequest(prompt, images, pixels, IM.OutputFormat, IM.PromptExpansion, seed,
+            boxes?.Select(b => ToEditBox(b, reference is not null)).ToList());
         var started = Stopwatch.GetTimestamp();
 
         try
@@ -67,6 +72,24 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
         {
             return Failed(e.Message);
         }
+    }
+
+    /// <summary>
+    /// A box as the model takes it: a new object drawn in its box, or, with a reference photo that shows it, the object
+    /// copied from its box there into its box here.
+    /// </summary>
+    /// <param name="box">The object's box.</param>
+    /// <param name="referenced">Whether a reference photo is sent.</param>
+    private static EditBox ToEditBox(LayoutBox box, bool referenced)
+    {
+        var here = new Box(box.Left, box.Top, box.Right, box.Bottom);
+
+        if (!referenced || box.FromReference is not { } from)
+        {
+            return new EditBox(box.Label, box.Description, here, null, null, null);
+        }
+
+        return new EditBox(box.Label, box.Description, null, IM.ReferenceIndex, new Box(from.Left, from.Top, from.Right, from.Bottom), here);
     }
 
     /// <summary>An image inline, as a data URI of its own type: the 3D view is a PNG, a photo to decorate a JPEG.</summary>
@@ -128,7 +151,7 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
 
     /// <summary>The job sent to the queue.</summary>
     /// <param name="Prompt">The instruction.</param>
-    /// <param name="ImageUrls">The image to start from (the 3D view, or the photo to decorate), inline.</param>
+    /// <param name="ImageUrls">The image to start from (the 3D view, or the photo to decorate), then any reference photo, inline.</param>
     /// <param name="ImageSize">The photo's size.</param>
     /// <param name="OutputFormat">The photo's format.</param>
     /// <param name="PromptExpansion">Whether the model may rewrite the prompt first.</param>
@@ -143,14 +166,20 @@ internal sealed partial class FalImageGenerator(HttpClient http, IAiSettingsStor
         [property: JsonPropertyName(J.Seed), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Seed,
         [property: JsonPropertyName(J.BoundingBoxes), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<EditBox>? BoundingBoxes);
 
-    /// <summary>An object the model draws inside a box of the photo.</summary>
+    /// <summary>An object the model draws inside a box of the photo, or copies there from a reference image.</summary>
     /// <param name="Label">Its id.</param>
     /// <param name="Description">What it is and how it looks.</param>
-    /// <param name="Box">Where it goes.</param>
+    /// <param name="Box">Where a new object goes; left out for a copied one.</param>
+    /// <param name="SourceImageIndex">The reference image a copied object is in; left out for a new one.</param>
+    /// <param name="SourceBox">Where a copied object is in its reference image; left out for a new one.</param>
+    /// <param name="TargetBox">Where a copied object goes; left out for a new one.</param>
     private sealed record EditBox(
         [property: JsonPropertyName(J.Label)] string Label,
         [property: JsonPropertyName(J.Description)] string Description,
-        [property: JsonPropertyName(J.Box)] Box Box);
+        [property: JsonPropertyName(J.Box), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Box? Box,
+        [property: JsonPropertyName(J.SourceImageIndex), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SourceImageIndex,
+        [property: JsonPropertyName(J.SourceBox), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Box? SourceBox,
+        [property: JsonPropertyName(J.TargetBox), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Box? TargetBox);
 
     /// <summary>A box as shares of the photo, 0 at the left and top.</summary>
     /// <param name="XMin">Its left edge.</param>

@@ -10,4 +10,8 @@ namespace DesignApp.Application.Objects;
 /// <param name="Top">The box's top edge.</param>
 /// <param name="Right">The box's right edge.</param>
 /// <param name="Bottom">The box's bottom edge.</param>
-public sealed record LayoutBox(string Label, string Description, double Left, double Top, double Right, double Bottom);
+/// <param name="FromReference">
+/// Where the same object is in the reference photo, to copy it from there (its look, materials and decorations);
+/// <c>null</c> to draw it from its description alone.
+/// </param>
+public sealed record LayoutBox(string Label, string Description, double Left, double Top, double Right, double Bottom, SourceBox? FromReference = null);

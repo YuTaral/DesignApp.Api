@@ -34,8 +34,9 @@ public static partial class PlanPrompt
     /// <param name="style">The interior style of the photo.</param>
     /// <param name="instructions">The user's own extra instructions, if any.</param>
     /// <param name="shot">The view the photo is made from; the room's own (<see cref="RoomPlan.View"/> and <see cref="RoomPlan.Corner"/>) when missing.</param>
+    /// <param name="referenced">Whether a photo of the same room from another view is sent with the render, for every object to keep its look.</param>
     /// <returns>The prompt.</returns>
-    public static string Write(RoomPlan plan, PhotoStyle style = PhotoStyle.AsBuilt, string? instructions = null, PlanShot? shot = null)
+    public static string Write(RoomPlan plan, PhotoStyle style = PhotoStyle.AsBuilt, string? instructions = null, PlanShot? shot = null, bool referenced = false)
     {
         ArgumentNullException.ThrowIfNull(plan);
         var culture = CultureInfo.InvariantCulture;
@@ -61,7 +62,7 @@ public static partial class PlanPrompt
         // Decorations are drawn only on objects the photo shows, so only those decide the sentence.
         var decorated = standing.Concat(openings).Concat(mounted).Any(seen => !seen.Item.Decorations.IsEmpty);
 
-        text.Append(B.Prompt.Intro(Words(plan.RoomType.ToString())));
+        text.Append(referenced ? B.Prompt.IntroWithReference(Words(plan.RoomType.ToString())) : B.Prompt.Intro(Words(plan.RoomType.ToString())));
 
         // The style and the user's own words come early: at the end of a long prompt the image model ignored them.
         if (B.Prompt.Style(style) is { Length: > 0 } styled)
@@ -119,9 +120,20 @@ public static partial class PlanPrompt
     /// <param name="frame">The photo's frame.</param>
     private static string Surfaces(RoomPlan plan, Frame frame)
     {
+        return Surfaces(plan, frame.Name);
+    }
+
+    /// <summary>The walls (with an accent wall, named as the view sees it), the ceiling and its light, the trim, and the floor.</summary>
+    /// <param name="plan">The room.</param>
+    /// <param name="wallName">Names a wall by its number; <c>null</c> for a wall the view doesn't show.</param>
+    internal static string Surfaces(RoomPlan plan, Func<int, string?> wallName)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        ArgumentNullException.ThrowIfNull(wallName);
+
         var finish = plan.Finish;
         var walls = Look(finish.Walls, plan.WallColor);
-        var seen = finish.AccentWall is { } wall ? frame.Name(wall) : null;
+        var seen = finish.AccentWall is { } wall ? wallName(wall) : null;
         var accent = seen is null ? "" : B.Prompt.Accent(seen, Look(finish.AccentFinish, finish.AccentColor));
 
         return B.Prompt.Surfaces(walls, accent, Color(finish.CeilingColor), B.Prompt.LightWords(finish.CeilingLight), Color(finish.TrimColor),
@@ -397,9 +409,17 @@ public static partial class PlanPrompt
     /// <returns>Such as "warm grey (#8A8580) three-seat sofa, decorated with cushions".</returns>
     public static string Describe(PlanItem item)
     {
+        return Describe(item, "");
+    }
+
+    /// <summary>An object in a few words with something about it between its name and its decorations, such as its width.</summary>
+    /// <param name="item">The object.</param>
+    /// <param name="after">The words after its name, such as ", 220 cm wide".</param>
+    internal static string Describe(PlanItem item, string after)
+    {
         ArgumentNullException.ThrowIfNull(item);
 
-        return $"{Named(item)}{Decorations(item)}";
+        return $"{Named(item)}{after}{Decorations(item)}";
     }
 
     /// <summary>
@@ -454,7 +474,7 @@ public static partial class PlanPrompt
 
     /// <summary>Centimetres as a whole number.</summary>
     /// <param name="centimetres">The length.</param>
-    private static string Cm(double centimetres)
+    internal static string Cm(double centimetres)
     {
         return Math.Round(centimetres).ToString("0", CultureInfo.InvariantCulture);
     }

@@ -256,6 +256,35 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task A_360_photo_makes_a_room_and_its_views_are_saved_as_its_photos()
+    {
+        using var created = await Client.PostAsJsonAsync("/api/plans",
+            new { roomType = "LivingRoom", width = 4.0, length = 5.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A" });
+        var plan = await created.Content.ReadFromJsonAsync<JsonElement>();
+        using var guide = new ByteArrayContent(TestImages.Create(512, 256, SkiaSharp.SKEncodedImageFormat.Png));
+
+        guide.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        using var form = new MultipartFormDataContent { { guide, "guide", "guide.png" }, { new StringContent("200"), "spotX" }, { new StringContent("300"), "spotY" } };
+        using var generated = await Client.PostAsync($"/api/plans/{plan.GetProperty("id").GetGuid()}/panorama", form);
+        var room = await generated.Content.ReadFromJsonAsync<JsonElement>();
+        var id = room.GetProperty("id").GetGuid();
+        var panoramaUrl = room.GetProperty("panorama").GetProperty("url").GetString()!;
+        using var panorama = await Client.GetAsync(panoramaUrl);
+        using var saved = await Client.PostAsJsonAsync($"/api/rooms/{id}/panorama/views", new { yaw = -30.0, pitch = 0.0, fov = 60.0 });
+        using var tooWide = await Client.PostAsJsonAsync($"/api/rooms/{id}/panorama/views", new { yaw = 0.0, pitch = 0.0, fov = 150.0 });
+        var takes = await Client.GetFromJsonAsync<JsonElement>($"/api/rooms/{id}/takes");
+
+        // The fake AI's photo is the 3D view itself, made 4K; the room's photo and the saved view are cut from it.
+        Assert.Equal(HttpStatusCode.OK, generated.StatusCode);
+        Assert.Equal((4096, 2048), (room.GetProperty("panorama").GetProperty("width").GetInt32(), room.GetProperty("panorama").GetProperty("height").GetInt32()));
+        Assert.Equal(HttpStatusCode.OK, panorama.StatusCode);
+        Assert.Equal("image/jpeg", panorama.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(HttpStatusCode.Created, saved.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, tooWide.StatusCode);
+        Assert.Equal(["360° view, straight ahead", "360° view, 30° left"], takes.EnumerateArray().Select(t => t.GetProperty("note").GetString()));
+    }
+
+    [Fact]
     public async Task A_room_built_for_a_new_design_makes_it_with_its_first_photo()
     {
         using var signedUp = await Client.PostAsJsonAsync("/api/account/sign-up", new { email = $"new-design-{Guid.NewGuid():N}@example.com", password = "correct horse battery" });

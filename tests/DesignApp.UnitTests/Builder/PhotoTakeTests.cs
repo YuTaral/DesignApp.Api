@@ -252,10 +252,17 @@ public class PhotoTakeTests
         return new PlanDesigns(_designs, _plans, _clock);
     }
 
+    /// <summary>The shared plan photo helpers for a user, over the fakes.</summary>
+    /// <param name="user">The current user.</param>
+    private PlanPhotos Photos(string user)
+    {
+        return new PlanPhotos(_rooms, new FixedUser(user), Designs(), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), NullLogger<PlanPhotos>.Instance);
+    }
+
     /// <summary>The generate use case for a user.</summary>
     /// <param name="user">The current user.</param>
     private GeneratePlanRoom Generator(string user)
     {
-        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(), Takes(), Designs(), new RoomRemover(_rooms, _storage, NullLogger<RoomRemover>.Instance), _clock, NullLogger<GeneratePlanRoom>.Instance);
+        return new GeneratePlanRoom(_plans, _rooms, new FixedUser(user), Ai(), Takes(), Photos(user), _clock);
     }
 }

@@ -42,6 +42,11 @@ if (args.Length > 0 && args[0] == "compare-images")
     return await AiLab.ImageComparer.RunAsync(args);
 }
 
+if (args.Length > 0 && args[0] is "edit" or "fill")
+{
+    return await AiLab.ImageEditor.RunAsync(args);
+}
+
 if (args.Length > 0 && args[0] == "photo-plan")
 {
     return await AiLab.PhotoPlanner.RunAsync(args);

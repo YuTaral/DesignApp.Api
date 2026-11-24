@@ -113,6 +113,12 @@ public static class Constants
 
         /// <summary>Making a photo of a built room.</summary>
         public const string PlanGenerate = "/{id:guid}/generate";
+        /// <summary>A plan's 360-degree photo, made as a new room.</summary>
+        public const string PlanPanorama = "/{id:guid}/panorama";
+        /// <summary>A room's 360-degree photo.</summary>
+        public const string RoomPanorama = "/{id:guid}/panorama";
+        /// <summary>A view of a room's 360-degree photo, saved as one of its photos.</summary>
+        public const string RoomPanoramaViews = "/{id:guid}/panorama/views";
 
         /// <summary>The built-in library of ready-made designs.</summary>
         public const string Library = "/library";
@@ -201,6 +207,13 @@ public static class Constants
         public static string RoomPhotoUrl(Guid id, int version = 0, Guid? set = null)
         {
             return WithSet(version == 0 ? $"{RoomUrl(id)}/photo" : $"{RoomUrl(id)}/photo/{version}", set);
+        }
+
+        /// <summary>The URL of a room's 360-degree photo.</summary>
+        /// <param name="id">The room's id.</param>
+        public static string RoomPanoramaUrl(Guid id)
+        {
+            return $"{RoomUrl(id)}/panorama";
         }
 
         /// <summary>The URL of one of a room's photos to choose from.</summary>
@@ -430,6 +443,8 @@ public static class Constants
 
         /// <summary>A photo of a built room couldn't be made.</summary>
         public const string GenerateFailed = "Can't make the photo";
+        /// <summary>Title of a 360-degree view that can't be saved.</summary>
+        public const string PanoramaViewFailed = "Can't save this view";
 
         /// <summary>A photo couldn't be changed.</summary>
         public const string ChangeFailed = "Can't change the photo";

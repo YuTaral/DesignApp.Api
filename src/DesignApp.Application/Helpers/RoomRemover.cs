@@ -52,6 +52,11 @@ public sealed partial class RoomRemover(IRoomRepository rooms, IFileStorage stor
     {
         yield return room.PhotoKey;
 
+        if (room.Panorama is { } panorama)
+        {
+            yield return panorama.Key;
+        }
+
         for (var version = 1; version <= room.LatestPhotoVersion; version++)
         {
             yield return Constants.Rooms.PhotoKey(room.Id, version);

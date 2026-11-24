@@ -2,7 +2,6 @@ using DesignApp.Application.Helpers;
 using DesignApp.Application.Interfaces;
 using DesignApp.Application.Objects;
 using DesignApp.Domain.Entities;
-using Microsoft.Extensions.Logging;
 
 using static DesignApp.Domain.Constants;
 
@@ -12,7 +11,9 @@ namespace DesignApp.Application.UseCases;
 /// Turns a built room into a realistic photo: the prompt is written from the plan with its exact sizes and positions
 /// (<see cref="PlanPrompt"/>), and the image model turns the room's simple 3D view into a photo with that layout. The
 /// photos of one Generate run are one room: the first makes the room (its photo, the room's), the others are added to
-/// it to choose from. Its analysis waits until the user starts it (with the real AI it costs money). A signed-in user's
+/// it to choose from, each made with the run's first photo as a reference: the objects it shows are copied from it, so
+/// every view has the same furniture, materials and decorations. Its analysis waits until the user starts it (with the
+/// real AI it costs money). A signed-in user's
 /// room goes into the plan's own design, or, when the run replaces an older room of the plan (Edit in 3D on a design's
 /// page), into that room's place, and the old room is deleted.
 /// </summary>
@@ -21,13 +22,10 @@ namespace DesignApp.Application.UseCases;
 /// <param name="currentUser">The signed-in user or guest.</param>
 /// <param name="ai">The AI providers.</param>
 /// <param name="takes">Stores the photos.</param>
-/// <param name="planDesigns">Puts the room into the plan's design.</param>
-/// <param name="remover">Deletes a room replaced.</param>
+/// <param name="planPhotos">Checks the request, and puts the room into the plan's design or a replaced room's place.</param>
 /// <param name="clock">When the room is made.</param>
-/// <param name="logger">Records a room that couldn't be put into the plan's design.</param>
-public sealed partial class GeneratePlanRoom(
-    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanDesigns planDesigns, RoomRemover remover, TimeProvider clock,
-    ILogger<GeneratePlanRoom> logger)
+public sealed class GeneratePlanRoom(
+    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanPhotos planPhotos, TimeProvider clock)
 {
     /// <summary>Generates the photo and the room.</summary>
     /// <param name="planId">The plan.</param>
@@ -59,21 +57,16 @@ public sealed partial class GeneratePlanRoom(
 
         var room = run.RoomId is Guid id ? await rooms.FindAsync(id, currentUser.Id, cancellationToken) : null;
         // Only the run's first photo makes a room, which can replace an older one.
-        var replaced = run.RoomId is null && run.Replaces is Guid old ? await rooms.FindAsync(old, currentUser.Id, cancellationToken) : null;
+        var replaced = await planPhotos.ReplacedAsync(plan, run.RoomId is null ? run.Replaces : null, cancellationToken);
 
         if (run.RoomId is not null && room?.PlanId != plan.Id)
         {
             return Result.Failure<Room>(Constants.Messages.NotThisPlansRoom);
         }
 
-        if (run.RoomId is null && run.Replaces is not null && replaced is null)
+        if (!replaced.Succeeded)
         {
-            return Result.Failure<Room>(Constants.Messages.ReplacedRoomMissing);
-        }
-
-        if (replaced is not null && replaced.PlanId != plan.Id)
-        {
-            return Result.Failure<Room>(Constants.Messages.NotThisPlansRoom);
+            return Result.Failure<Room>(replaced.Error);
         }
 
         if ((run.Note?.Trim().Length ?? 0) > Domain.Constants.Rooms.MaxTakeNoteLength)
@@ -81,24 +74,9 @@ public sealed partial class GeneratePlanRoom(
             return Result.Failure<Room>(Constants.Messages.PhotoNote);
         }
 
-        if (guidePng.Length is 0 or > Constants.Builder.MaxGuideBytes)
+        if (PlanPhotos.Problem(plan, guidePng, Constants.Builder.MaxGuideBytes, style, instructions) is { } problem)
         {
-            return Result.Failure<Room>(Constants.Messages.GuideImage);
-        }
-
-        if (plan.Items.Count == 0)
-        {
-            return Result.Failure<Room>(Constants.Messages.EmptyPlan);
-        }
-
-        if (!Enum.IsDefined(style))
-        {
-            return Result.Failure<Room>(Constants.Messages.UnknownPhotoStyle);
-        }
-
-        if ((instructions?.Trim().Length ?? 0) > Constants.Builder.MaxInstructionsLength)
-        {
-            return Result.Failure<Room>(Constants.Messages.PhotoInstructions);
+            return Result.Failure<Room>(problem);
         }
 
         if (seed < 0)
@@ -106,7 +84,7 @@ public sealed partial class GeneratePlanRoom(
             return Result.Failure<Room>(Constants.Messages.PhotoSeed);
         }
 
-        if (boxes is not null && (boxes.Count > Domain.Constants.Plans.MaxItems || boxes.Any(box => !Fits(box, plan.Items.Count))))
+        if (!PlanPhotos.FitAll(boxes, plan.Items.Count) || !PlanPhotos.FitAll(run.ReferenceBoxes, plan.Items.Count))
         {
             return Result.Failure<Room>(Constants.Messages.PhotoBoxes);
         }
@@ -116,8 +94,12 @@ public sealed partial class GeneratePlanRoom(
             return Result.Failure<Room>(Constants.Messages.PhotoShot);
         }
 
-        var prompt = PlanPrompt.Write(plan, style, instructions, shot);
-        var photo = await ai.Images(plan.AiMode).GenerateAsync(guidePng, prompt, seed, boxes?.Select(box => Layout(plan, box)).ToList(), cancellationToken);
+        // A later photo of the run takes the run's first photo (the room's first) as its reference.
+        var first = room is null ? null : (await rooms.ListTakesAsync(room.Id, cancellationToken)).FirstOrDefault(t => t.ChangedFrom is null);
+        var reference = first is null ? null : await takes.ReadAsync(first, cancellationToken);
+        var prompt = PlanPrompt.Write(plan, style, instructions, shot, reference is not null);
+        var layout = boxes?.Select(box => PlanPhotos.Layout(plan, box, run.ReferenceBoxes)).ToList();
+        var photo = await ai.Images(plan.AiMode).GenerateAsync(guidePng, reference, prompt, seed, layout, null, cancellationToken);
 
         if (!photo.Succeeded)
         {
@@ -142,49 +124,9 @@ public sealed partial class GeneratePlanRoom(
         rooms.AddTake(stored.Value);
         await rooms.SaveChangesAsync(cancellationToken);
 
-        // The photo is made and saved, so the design can't lose it: when the room can't go into the plan's design now
-        // (it is full, or another run of the same plan made the design at the same moment), the photo page puts it there.
-        // A replaced room is deleted only once the new one has its place.
-        try
-        {
-            if (replaced is null)
-            {
-                await planDesigns.AddAsync(plan, room, cancellationToken);
-            }
-            else
-            {
-                await planDesigns.ReplaceAsync(plan, replaced, room, cancellationToken);
-                await remover.DeleteAsync([replaced], cancellationToken);
-            }
-        }
-        catch (Exception error) when (error is not OperationCanceledException)
-        {
-            LogNotInDesign(error, room.Id, plan.Id);
-        }
+        await planPhotos.PlaceAsync(plan, room, replaced.Value, cancellationToken);
 
         return room;
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Room {RoomId} of plan {PlanId} couldn't be put into the plan's design; the photo page puts it there")]
-    private partial void LogNotInDesign(Exception error, Guid roomId, Guid planId);
-
-    /// <summary>Whether a box is on the plan's objects and inside the picture.</summary>
-    /// <param name="box">The box.</param>
-    /// <param name="items">How many objects the plan has.</param>
-    private static bool Fits(ItemBox box, int items)
-    {
-        var edges = new[] { box.Left, box.Top, box.Right, box.Bottom };
-
-        return box.Item >= 0 && box.Item < items && edges.All(e => e is >= 0 and <= 1) && box.Left < box.Right && box.Top < box.Bottom;
-    }
-
-    /// <summary>A box as the image model takes it: an id, the object in words, and the box.</summary>
-    /// <param name="plan">The room.</param>
-    /// <param name="box">One object's box.</param>
-    private static LayoutBox Layout(RoomPlan plan, ItemBox box)
-    {
-        var item = plan.Items[box.Item];
-
-        return new LayoutBox($"{Constants.Builder.BoxLabel}{box.Item + 1}", PlanPrompt.Describe(item), box.Left, box.Top, box.Right, box.Bottom);
-    }
 }

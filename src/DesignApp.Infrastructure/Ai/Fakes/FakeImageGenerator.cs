@@ -13,7 +13,8 @@ namespace DesignApp.Infrastructure.Ai.Fakes;
 internal sealed class FakeImageGenerator(IOptions<AiOptions> options) : IImageGenerator
 {
     /// <inheritdoc/>
-    public async Task<Result<byte[]>> GenerateAsync(byte[] image, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, CancellationToken cancellationToken)
+    public async Task<Result<byte[]>> GenerateAsync(
+        byte[] image, byte[]? reference, string prompt, int? seed, IReadOnlyList<LayoutBox>? boxes, PhotoSize? size, CancellationToken cancellationToken)
     {
         await Task.Delay(options.Value.FakeStepDelay, cancellationToken);
 

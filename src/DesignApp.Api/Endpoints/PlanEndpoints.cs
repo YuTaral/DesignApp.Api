@@ -52,6 +52,15 @@ internal static class PlanEndpoints
             .WithSummary("Turns a description of an object into one that can be placed, with its size and color (the AI; Claude Haiku when real).")
             .WithDescription("The object isn't added to the room: place it, then save the room. With the real AI this is a paid call, so it is rate-limited.")
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+        plans.MapPost(Constants.Routes.PlanPanorama, GeneratePanoramaAsync)
+            .WithName("GeneratePlanPanorama")
+            .WithSummary("Makes one 360-degree photo of the built room from its 360-degree 3D view (multipart field `guide`, a PNG twice as wide as it is tall) and returns the new room made from it.")
+            .WithDescription("Form fields: `spotX` and `spotY` (where the camera stands, in cm on the plan), and optionally `startYaw` (which way its views start), `boxes` (each object's box in the 3D view), " +
+                "`style`, `instructions` and `replaces` (an older room of the plan the new room replaces). The room's photo is the view straight ahead, cut from " +
+                "the 360-degree photo; more views are saved from it without AI. With the real AI this is paid (a 4K photo), so it is rate-limited.")
+            .DisableAntiforgery() // the cookies are SameSite=Lax, so another site's form posts arrive without them
+            .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
+
         plans.MapPost(Constants.Routes.PlanGenerate, GenerateAsync)
             .WithName("GeneratePlanRoom")
             .WithSummary("Makes a realistic photo of the built room from its 3D view (multipart field `guide`, a PNG) and returns the new room made from it.")
@@ -181,19 +190,22 @@ internal static class PlanEndpoints
     /// The optional <c>replaces</c> form field, with the run's first photo: an older room of the plan which the new room
     /// replaces in its designs (the old room is deleted).
     /// </param>
+    /// <param name="referenceBoxes">
+    /// The optional <c>referenceBoxes</c> form field, with the run's later photos: a JSON list of each object's box in the
+    /// run's first photo (<see cref="ItemBoxRequest"/>), from which those objects are copied.
+    /// </param>
     /// <param name="generate">The use case.</param>
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the room (waiting for its analysis), 400 when no photo could be made, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> GenerateAsync(
         Guid id, IFormFile guide, [FromForm] string? style, [FromForm] string? instructions, [FromForm] int? seed, [FromForm] string? boxes,
-        [FromForm] int? view, [FromForm] string? corner, [FromForm] Guid? roomId, [FromForm] string? note, [FromForm] Guid? replaces, GeneratePlanRoom generate,
+        [FromForm] int? view, [FromForm] string? corner, [FromForm] Guid? roomId, [FromForm] string? note, [FromForm] Guid? replaces, [FromForm] string? referenceBoxes,
+        GeneratePlanRoom generate,
         CancellationToken cancellationToken)
     {
-        var photoStyle = PhotoStyle.AsBuilt;
-        List<ItemBox>? layout = null;
         PlanShot? shot = null;
 
-        if (!string.IsNullOrWhiteSpace(style) && (!Enum.TryParse(style, ignoreCase: true, out photoStyle) || !Enum.IsDefined(photoStyle)))
+        if (!TryReadStyle(style, out var photoStyle))
         {
             return Problems.BadRequest(Application.Constants.Messages.UnknownPhotoStyle, Constants.Titles.GenerateFailed);
         }
@@ -203,18 +215,9 @@ internal static class PlanEndpoints
             return Problems.BadRequest(Application.Constants.Messages.GuideImage, Constants.Titles.GenerateFailed);
         }
 
-        if (!string.IsNullOrWhiteSpace(boxes))
+        if (!TryReadBoxes(boxes, out var layout) || !TryReadBoxes(referenceBoxes, out var inReference))
         {
-            try
-            {
-                var read = JsonSerializer.Deserialize<List<ItemBoxRequest>>(boxes, Json);
-
-                layout = read?.Select(b => new ItemBox(b.Item, b.Left, b.Top, b.Right, b.Bottom)).ToList();
-            }
-            catch (JsonException)
-            {
-                return Problems.BadRequest(Application.Constants.Messages.PhotoBoxes, Constants.Titles.GenerateFailed);
-            }
+            return Problems.BadRequest(Application.Constants.Messages.PhotoBoxes, Constants.Titles.GenerateFailed);
         }
 
         if (view is { } wall)
@@ -229,14 +232,82 @@ internal static class PlanEndpoints
             shot = new PlanShot(wall, spot);
         }
 
+        var bytes = await ReadAllAsync(guide, cancellationToken);
+        var run = new PhotoRun(roomId, note, replaces, inReference);
+        var outcome = await generate.HandleAsync(id, bytes, photoStyle, instructions, seed, layout, shot, run, cancellationToken);
+
+        return ToRoomResult(outcome);
+    }
+
+    /// <summary><c>POST /api/plans/{id}/panorama</c>: a 360-degree photo of the built room, as a new room.</summary>
+    /// <param name="id">The plan's id.</param>
+    /// <param name="guide">The room's 360-degree 3D view (PNG).</param>
+    /// <param name="spotX">The <c>spotX</c> form field: where the camera stands, across the plan in cm.</param>
+    /// <param name="spotY">The <c>spotY</c> form field: where the camera stands, down the plan in cm.</param>
+    /// <param name="startYaw">The optional <c>startYaw</c> form field: which way its views start, in degrees from its middle (0 when missing).</param>
+    /// <param name="style">The optional <c>style</c> form field: the photo's interior style.</param>
+    /// <param name="instructions">The optional <c>instructions</c> form field: the user's own words for the AI.</param>
+    /// <param name="boxes">The optional <c>boxes</c> form field: a JSON list of each object's box in the 3D view (<see cref="ItemBoxRequest"/>).</param>
+    /// <param name="replaces">The optional <c>replaces</c> form field: an older room of the plan which the new room replaces.</param>
+    /// <param name="generate">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the room, 400 when no photo could be made, or 404.</returns>
+    private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> GeneratePanoramaAsync(
+        Guid id, IFormFile guide, [FromForm] double spotX, [FromForm] double spotY, [FromForm] double? startYaw, [FromForm] string? style, [FromForm] string? instructions,
+        [FromForm] string? boxes, [FromForm] Guid? replaces, GeneratePlanPanorama generate, CancellationToken cancellationToken)
+    {
+        var spot = new OutlinePoint(spotX, spotY);
+
+        if (!TryReadStyle(style, out var photoStyle))
+        {
+            return Problems.BadRequest(Application.Constants.Messages.UnknownPhotoStyle, Constants.Titles.GenerateFailed);
+        }
+
+        if (guide.Length > Application.Constants.Panoramas.MaxGuideBytes)
+        {
+            return Problems.BadRequest(Application.Constants.Messages.PanoramaGuide, Constants.Titles.GenerateFailed);
+        }
+
+        if (!TryReadBoxes(boxes, out var layout))
+        {
+            return Problems.BadRequest(Application.Constants.Messages.PhotoBoxes, Constants.Titles.GenerateFailed);
+        }
+
+        var bytes = await ReadAllAsync(guide, cancellationToken);
+        var outcome = await generate.HandleAsync(id, bytes, photoStyle, instructions, layout, spot, startYaw ?? 0, replaces, cancellationToken);
+
+        return ToRoomResult(outcome);
+    }
+
+    /// <summary>Reads the optional <c>style</c> form field.</summary>
+    /// <param name="style">The field; empty or missing for the room as planned.</param>
+    /// <param name="photoStyle">The style.</param>
+    /// <returns>Whether the field was empty or a known style.</returns>
+    private static bool TryReadStyle(string? style, out PhotoStyle photoStyle)
+    {
+        photoStyle = PhotoStyle.AsBuilt;
+
+        return string.IsNullOrWhiteSpace(style) || (Enum.TryParse(style, ignoreCase: true, out photoStyle) && Enum.IsDefined(photoStyle));
+    }
+
+    /// <summary>An uploaded file's bytes.</summary>
+    /// <param name="file">The file.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    private static async Task<byte[]> ReadAllAsync(IFormFile file, CancellationToken cancellationToken)
+    {
         using var buffer = new MemoryStream();
 
-        await using (var content = guide.OpenReadStream())
+        await using (var content = file.OpenReadStream())
             await content.CopyToAsync(buffer, cancellationToken);
 
-        var run = new PhotoRun(roomId, note, replaces);
-        var outcome = await generate.HandleAsync(id, buffer.ToArray(), photoStyle, instructions, seed, layout, shot, run, cancellationToken);
+        return buffer.ToArray();
+    }
 
+    /// <summary>A photo use case's outcome as the endpoint's result.</summary>
+    /// <param name="outcome">The new room, a failure the user can read, or <c>null</c> when the user has no such plan.</param>
+    /// <returns>200 with the room, 400 with why no photo could be made, or 404.</returns>
+    private static Results<Ok<RoomResponse>, ProblemHttpResult, NotFound> ToRoomResult(Result<Room>? outcome)
+    {
         if (outcome is null)
         {
             return TypedResults.NotFound();
@@ -245,6 +316,33 @@ internal static class PlanEndpoints
         return outcome.Succeeded
             ? TypedResults.Ok(RoomResponse.From(outcome.Value))
             : Problems.BadRequest(outcome.Error, Constants.Titles.GenerateFailed);
+    }
+
+    /// <summary>Reads a form field's JSON list of object boxes.</summary>
+    /// <param name="json">The field; empty or missing for none.</param>
+    /// <param name="boxes">The boxes, or <c>null</c> for none.</param>
+    /// <returns>Whether the field was empty or a list of boxes.</returns>
+    private static bool TryReadBoxes(string? json, out List<ItemBox>? boxes)
+    {
+        boxes = null;
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return true;
+        }
+
+        try
+        {
+            var read = JsonSerializer.Deserialize<List<ItemBoxRequest>>(json, Json);
+
+            boxes = read?.Select(b => new ItemBox(b.Item, b.Left, b.Top, b.Right, b.Bottom)).ToList();
+
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     /// <summary>An object of a request as a domain object.</summary>

@@ -25,6 +25,7 @@ namespace DesignApp.Api.Responses;
 /// <param name="PlanId">The room plan whose photos it holds; <c>null</c> for an upload or a library room.</param>
 /// <param name="ChosenTakeId">Which of its photos to choose from is its photo; <c>null</c> when it has none.</param>
 /// <param name="PhotoSetId">Named in its photo and outline addresses, new each time a photo is chosen; <c>null</c> when it has none.</param>
+/// <param name="Panorama">Its 360-degree photo, whose views can be saved as its photos; <c>null</c> when it has none.</param>
 public sealed record RoomResponse(
     Guid Id,
     RoomStatus Status,
@@ -42,7 +43,8 @@ public sealed record RoomResponse(
     string? LibraryRoom,
     Guid? PlanId,
     Guid? ChosenTakeId,
-    Guid? PhotoSetId)
+    Guid? PhotoSetId,
+    PanoramaResponse? Panorama)
 {
     /// <summary>Maps a domain room to its API shape.</summary>
     /// <param name="room">The room to map.</param>
@@ -65,6 +67,7 @@ public sealed record RoomResponse(
             room.LibraryRoom,
             room.PlanId,
             room.ChosenTakeId,
-            room.PhotoSetId);
+            room.PhotoSetId,
+            room.Panorama is { } panorama ? new PanoramaResponse(Constants.Routes.RoomPanoramaUrl(room.Id), panorama.Width, panorama.Height, panorama.StartYaw) : null);
     }
 }

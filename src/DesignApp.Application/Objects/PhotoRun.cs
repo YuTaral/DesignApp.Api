@@ -7,4 +7,8 @@ namespace DesignApp.Application.Objects;
 /// For the run's first photo: a room of the same plan which the new room replaces, in its designs and in its place there;
 /// the old room and its photos are deleted. <c>null</c> to add the new room instead.
 /// </param>
-public sealed record PhotoRun(Guid? RoomId, string? Note, Guid? Replaces = null);
+/// <param name="ReferenceBoxes">
+/// For the run's later photos: where each object is in the run's first photo, so the image model copies the objects it
+/// shows from there (the same furniture, materials and decorations in every view); <c>null</c> for none.
+/// </param>
+public sealed record PhotoRun(Guid? RoomId, string? Note, Guid? Replaces = null, IReadOnlyList<ItemBox>? ReferenceBoxes = null);

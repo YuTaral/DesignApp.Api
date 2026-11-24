@@ -38,7 +38,7 @@ public sealed class ChangeRoomTake(IRoomRepository rooms, ICurrentUser currentUs
         }
 
         var picture = await takes.ReadAsync(take, cancellationToken);
-        var changed = await ai.Images(room!.AiMode).GenerateAsync(picture, Constants.Builder.Prompt.Change(words), null, null, cancellationToken);
+        var changed = await ai.Images(room!.AiMode).GenerateAsync(picture, null, Constants.Builder.Prompt.Change(words), null, null, null, cancellationToken);
 
         if (!changed.Succeeded)
         {

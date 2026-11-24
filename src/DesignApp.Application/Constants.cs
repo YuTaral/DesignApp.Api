@@ -212,6 +212,22 @@ public static class Constants
                     "result must still look like a real photograph.";
             }
 
+            /// <summary>
+            /// The intro with a reference photo: the render is the first image, and the second is the run's first photo of the
+            /// same room from another view, whose look every object keeps (the image model refers to images by their order).
+            /// </summary>
+            /// <param name="room">The room type in words.</param>
+            public static string IntroWithReference(string room)
+            {
+                return $"Turn the first image, a simple 3D render, into a realistic photograph of the same {room} interior, from " +
+                    "exactly the same camera position, angle and framing as the first image, with level vertical lines; do not zoom " +
+                    "out or show more of the room. The second image is a photograph of this same room taken from another camera " +
+                    "position: every object, its materials, colors, patterns and decorations, and the walls, floor and light look " +
+                    "exactly as they do in the second image, now seen from the first image's camera. Take only their look from the " +
+                    "second image, never its camera or framing. Turn each plain shape into the real object it stands for, keeping " +
+                    "its place, outline, size and exactly the color it has in the render.";
+            }
+
             /// <summary>Without decorations: only what is in the render.</summary>
             public const string Undecorated =
                 "Everything in the photo is already in the render: keep the rest of the room empty, with bare walls and a bare floor.";
@@ -659,6 +675,109 @@ public static class Constants
         }
     }
 
+    /// <summary>
+    /// A room's 360-degree photo: one equirectangular picture from one spot, whose views are cut out of it, so every
+    /// view of the room shows exactly the same objects and decorations.
+    /// </summary>
+    public static class Panoramas
+    {
+        /// <summary>The photo's width, twice its height: 4K, sharp enough for 1024-pixel views.</summary>
+        public const int Width = 4096;
+
+        /// <summary>The photo's height.</summary>
+        public const int Height = 2048;
+
+        /// <summary>The largest 360-degree view the browser may send (a 4096 x 2048 PNG).</summary>
+        public const int MaxGuideBytes = 32 * 1024 * 1024;
+
+        /// <summary>The width of a view cut from the photo.</summary>
+        public const int ViewWidth = 1024;
+
+        /// <summary>The height of a view cut from the photo.</summary>
+        public const int ViewHeight = 768;
+
+        /// <summary>The tilt of the first view, the room's photo: a little down, as a photographer holds the camera.</summary>
+        public const double FrontPitch = -8;
+
+        /// <summary>The lens of the first view, across its height, in degrees.</summary>
+        public const double FrontFov = 60;
+
+        /// <summary>The narrowest lens a saved view may have, across its height.</summary>
+        public const double MinFov = 35;
+
+        /// <summary>The widest lens a saved view may have.</summary>
+        public const double MaxFov = 90;
+
+        /// <summary>The furthest a saved view may turn either way from the photo's middle, before its own width.</summary>
+        public const double MaxYaw = 180;
+
+        /// <summary>How many degrees a view's edge keeps from the seam behind, where the photo's ends meet.</summary>
+        public const double SeamMargin = 4;
+
+        /// <summary>The furthest a saved view may tilt up or down.</summary>
+        public const double MaxPitch = 80;
+
+        /// <summary>The note of the first view.</summary>
+        public const string FrontNote = "360° view, straight ahead";
+
+        /// <summary>The note of a saved view: which way it looks from the photo's middle.</summary>
+        /// <param name="yaw">The turn, in degrees; right is positive.</param>
+        public static string ViewNote(double yaw)
+        {
+            var turn = (int)Math.Round(yaw);
+
+            return turn == 0 ? FrontNote : $"360° view, {Math.Abs(turn)}° {(turn > 0 ? "right" : "left")}";
+        }
+
+        /// <summary>The wording of the 360-degree photo's prompt (see <c>Helpers/PanoramaPrompt</c>).</summary>
+        public static class Prompt
+        {
+            /// <summary>What to make: the same projection, every wall and object where the render has it.</summary>
+            /// <param name="room">The room type in words.</param>
+            public static string Intro(string room)
+            {
+                return $"Turn this 360-degree equirectangular panorama, a simple 3D render of a {room} seen from where a person " +
+                    "stands in the room at eye height, into a realistic 360-degree equirectangular panoramic photograph of the same " +
+                    "interior. Keep the equirectangular projection exactly as in the render: the full 360-degree horizontal sweep " +
+                    "and 180-degree vertical sweep, the ceiling stretched across the top and the floor across the bottom, every wall " +
+                    "and corner exactly where it is in the render. Turn each plain shape into the real object it stands for, keeping " +
+                    "its place, outline, size and exactly the color it has in the render.";
+            }
+
+            /// <summary>The room's size.</summary>
+            /// <param name="width">Its width, in cm.</param>
+            /// <param name="length">Its length, in cm.</param>
+            /// <param name="height">Its height, in cm.</param>
+            public static string Room(string width, string length, string height)
+            {
+                return $"The room is {width} cm by {length} cm, and {height} cm from floor to ceiling.";
+            }
+
+            /// <summary>An accent wall, named by its color in the render (a panorama has no near or far wall).</summary>
+            public const string AccentWall = "the wall shown in that color in the render";
+
+            /// <summary>That nothing is added, and every color is kept.</summary>
+            public const string Contents =
+                "Every object keeps exactly the color it has in the render and the color named for it below. Everything in the " +
+                "photo is already in the render, apart from the decorations named with their objects below, each resting on or " +
+                "hanging at its own object: keep the rest of the room bare.";
+
+            /// <summary>The objects, each with its color, size and decorations.</summary>
+            /// <param name="objects">The objects, numbered.</param>
+            public static string Objects(string objects)
+            {
+                return $"The objects: {objects}.";
+            }
+
+            /// <summary>One object's width, after its description.</summary>
+            /// <param name="width">Its width, in cm.</param>
+            public static string Wide(string width)
+            {
+                return $", {width} cm wide";
+            }
+        }
+    }
+
     /// <summary>Limits for the parts the AI finds on an object.</summary>
     public static class Parts
     {
@@ -732,6 +851,13 @@ public static class Constants
         public static string PhotoKey(Guid roomId, int version = 0)
         {
             return version == 0 ? $"rooms/{roomId}/photo.jpg" : $"rooms/{roomId}/photo-{version}.jpg";
+        }
+
+        /// <summary>Storage key of a room's 360-degree photo, in the room's folder.</summary>
+        /// <param name="roomId">The room's id.</param>
+        public static string PanoramaKey(Guid roomId)
+        {
+            return $"rooms/{roomId}/panorama.jpg";
         }
 
         /// <summary>Storage key of one of a room's photos to choose from, in the room's folder.</summary>
@@ -922,6 +1048,25 @@ public static class Constants
 
         /// <summary>New photos meant to replace a room that is gone (replaced already, or deleted).</summary>
         public const string ReplacedRoomMissing = "The room these photos were to replace is gone. Open the room builder again from the design to choose.";
+
+        /// <summary>A 360-degree view that isn't a PNG twice as wide as it is tall, or is too big.</summary>
+        public static readonly string PanoramaGuide = $"The 360° view must be a PNG twice as wide as it is tall, at most {Panoramas.MaxGuideBytes / (1024 * 1024)} MB.";
+
+        /// <summary>A 360-degree camera standing outside the room's walls.</summary>
+        public const string PanoramaSpot = "The 360° camera must stand inside the room's walls.";
+
+        /// <summary>A 360-degree photo whose first view would face the seam behind.</summary>
+        public static readonly string PanoramaStart = $"The 360° view must start at most {Domain.Constants.Rooms.MaxPanoramaStartYaw:0}° from its middle.";
+
+        /// <summary>A 360-degree photo the image model sent that can't be read.</summary>
+        public const string PanoramaPicture = "The 360° photo the AI made couldn't be read. Try again.";
+
+        /// <summary>A view of a room that has no 360-degree photo.</summary>
+        public const string NoPanorama = "This room has no 360° photo.";
+
+        /// <summary>A view turned, tilted or zoomed beyond what can be saved.</summary>
+        public static readonly string PanoramaView =
+            $"A saved view must keep clear of the seam behind, tilt at most {Panoramas.MaxPitch:0}°, and have a lens of {Panoramas.MinFov:0}° to {Panoramas.MaxFov:0}°.";
 
         /// <summary>A room saved to its plan's design that wasn't made from a plan, or whose plan is gone.</summary>
         public const string NotFromPlan = "This room wasn't made from a room plan that still exists.";

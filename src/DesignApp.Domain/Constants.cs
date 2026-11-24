@@ -33,6 +33,12 @@ public static class Constants
 
         /// <summary>The longest note of a photo to choose from: its view's name, or the change the user asked the AI for.</summary>
         public const int MaxTakeNoteLength = 500;
+
+        /// <summary>
+        /// The furthest a 360-degree photo's start may turn from its middle, in degrees: its first view (80 degrees wide)
+        /// stays clear of the seam behind.
+        /// </summary>
+        public const double MaxPanoramaStartYaw = 120;
     }
 
     /// <summary>Boxes in normalized image coordinates.</summary>
@@ -403,6 +409,12 @@ public static class Constants
 
         /// <summary>Choosing a photo of another room.</summary>
         public const string TakeOfOtherRoom = "That photo belongs to another room.";
+
+        /// <summary>A 360-degree photo with no storage key, or not twice as wide as it is tall.</summary>
+        public const string PanoramaFields = "A 360° photo needs a storage key, must be twice as wide as it is tall, and must start facing away from its seam.";
+
+        /// <summary>A 360-degree photo for a room that holds no plan's photos.</summary>
+        public const string PanoramaNeedsPlan = "Only a room made in the room builder can have a 360° photo.";
 
         /// <summary>Choosing another photo while the room's photo is being analyzed.</summary>
         /// <param name="status">The room's status.</param>

@@ -178,6 +178,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("owner_id");
 
+                    b.Property<string>("Panorama")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("panorama");
+
                     b.Property<string>("PhotoKey")
                         .IsRequired()
                         .HasMaxLength(300)

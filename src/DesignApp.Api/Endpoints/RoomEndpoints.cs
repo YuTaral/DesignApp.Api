@@ -45,6 +45,16 @@ internal static class RoomEndpoints
             .WithSummary("Returns one stored version of the room's photo: 1 and up are made by removing objects (0 is `photo`).")
             .WithDescription("Each version never changes, so it can be cached for good.");
 
+        rooms.MapGet(Constants.Routes.RoomPanorama, GetPanoramaAsync)
+            .WithName("GetRoomPanorama")
+            .WithSummary("Returns the room's 360-degree photo: an equirectangular JPEG twice as wide as it is tall, its middle facing the room.")
+            .WithDescription("It never changes, so it can be cached for good.");
+
+        rooms.MapPost(Constants.Routes.RoomPanoramaViews, SavePanoramaViewAsync)
+            .WithName("SaveRoomPanoramaView")
+            .WithSummary("Cuts a view (`yaw`, `pitch`, `fov` in degrees) out of the room's 360-degree photo and adds it to the room's photos.")
+            .WithDescription("No AI is involved: every view comes from the same photo, so the room looks the same in all of them.");
+
         rooms.MapGet(Constants.Routes.RoomTakes, GetTakesAsync)
             .WithName("GetRoomTakes")
             .WithSummary("Lists the room's photos to choose from (a room builder run's photos and their AI changes), oldest first.");
@@ -377,14 +387,53 @@ internal static class RoomEndpoints
     {
         var outcome = await changeTake.HandleAsync(id, takeId, request.Instructions, cancellationToken);
 
+        return ToCreatedTake(id, outcome, Constants.Titles.ChangeFailed);
+    }
+
+    /// <summary><c>GET /api/rooms/{id}/panorama</c>: streams the room's 360-degree photo.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="getRoom">The use case that loads the room.</param>
+    /// <param name="storage">Where the photos are stored.</param>
+    /// <param name="response">Used to set the caching headers.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the JPEG, or 404 when the room or its 360-degree photo is missing.</returns>
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetPanoramaAsync(
+        Guid id, GetRoom getRoom, IFileStorage storage, HttpResponse response, CancellationToken cancellationToken)
+    {
+        var room = await getRoom.HandleAsync(id, cancellationToken);
+
+        return room?.Panorama is { } panorama ? await StreamImmutableAsync(panorama.Key, storage, response, cancellationToken) : TypedResults.NotFound();
+    }
+
+    /// <summary><c>POST /api/rooms/{id}/panorama/views</c>: saves a view of the room's 360-degree photo as one of its photos.</summary>
+    /// <param name="id">The room's id.</param>
+    /// <param name="request">Which way the view looks, and its lens.</param>
+    /// <param name="saveView">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>201 with the new photo, 400 when the room has no 360-degree photo or the view is out of range, or 404.</returns>
+    private static async Task<Results<Created<PhotoTakeResponse>, ProblemHttpResult, NotFound>> SavePanoramaViewAsync(
+        Guid id, PanoramaViewRequest request, SaveRoomPanoramaView saveView, CancellationToken cancellationToken)
+    {
+        var outcome = await saveView.HandleAsync(id, request.ToView(), cancellationToken);
+
+        return ToCreatedTake(id, outcome, Constants.Titles.PanoramaViewFailed);
+    }
+
+    /// <summary>A use case's new photo of a room as the endpoint's result.</summary>
+    /// <param name="roomId">The room.</param>
+    /// <param name="outcome">The photo, a failure the user can read, or <c>null</c> when the user has no such room.</param>
+    /// <param name="title">The problem's title when it failed.</param>
+    /// <returns>201 with the photo, 400 with why it failed, or 404.</returns>
+    private static Results<Created<PhotoTakeResponse>, ProblemHttpResult, NotFound> ToCreatedTake(Guid roomId, Result<PhotoTake>? outcome, string title)
+    {
         if (outcome is null)
         {
             return TypedResults.NotFound();
         }
 
         return outcome.Succeeded
-            ? TypedResults.Created(Constants.Routes.TakePhotoUrl(id, outcome.Value.Id), PhotoTakeResponse.From(outcome.Value))
-            : Problems.BadRequest(outcome.Error, Constants.Titles.ChangeFailed);
+            ? TypedResults.Created(Constants.Routes.TakePhotoUrl(roomId, outcome.Value.Id), PhotoTakeResponse.From(outcome.Value))
+            : Problems.BadRequest(outcome.Error, title);
     }
 
     /// <summary><c>POST /api/rooms/{id}/takes/{takeId}/choose</c>: makes a photo the room's photo.</summary>

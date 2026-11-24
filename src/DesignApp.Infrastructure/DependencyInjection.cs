@@ -52,6 +52,7 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<IPhotoProcessor, SkiaPhotoProcessor>();
         builder.Services.AddSingleton<IRoomImaging, SkiaRoomImaging>();
+        builder.Services.AddSingleton<IPanoramaImaging, SkiaPanoramaImaging>();
         builder.Services.AddSingleton<ILibrary, EmbeddedLibrary>();
         builder.Services.AddSingleton<IPaletteCatalog, EmbeddedPaletteCatalog>();
 
