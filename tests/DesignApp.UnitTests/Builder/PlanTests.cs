@@ -242,6 +242,39 @@ public class PlanTests
     }
 
     [Fact]
+    public async Task A_room_started_from_a_design_puts_its_photos_there_and_only_in_the_users_own_design_with_room()
+    {
+        var clock = new FixedClock(Now);
+        var create = new CreatePlan(_plans, new FixedUser("user-1"), clock, new EmbeddedObjectCatalog(), new PlanDesigns(_designs, _plans, clock));
+        var design = Design.Create(UnitTests.Domain.RoomTests.ReadyRoom(), "user-1", "Flat", null, [], Now);
+        var theirs = Design.Create(UnitTests.Domain.RoomTests.ReadyRoom("someone-else"), "someone-else", "Theirs", null, [], Now);
+        var full = Design.Create(UnitTests.Domain.RoomTests.ReadyRoom(), "user-1", "Full", null, [], Now);
+
+        for (var i = 1; i < Designs.MaxRooms; i++)
+        {
+            full.AddRoom(UnitTests.Domain.RoomTests.ReadyRoom(), Now);
+        }
+
+        _designs.Add(design);
+        _designs.Add(theirs);
+        _designs.Add(full);
+        var made = await create.HandleAsync("", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, design.Id, CancellationToken.None);
+
+        Assert.True(made.Succeeded, made.Error);
+        var photo = await Generator().HandleAsync(made.Value.Id, TestImages.Create(1280, 960), PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None);
+        var refusedTheirs = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, theirs.Id, CancellationToken.None);
+        var refusedFull = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, full.Id, CancellationToken.None);
+
+        // The plan is the design's from the start, and its first photo's room goes there (not into a design of its own).
+        Assert.Equal(design.Id, made.Value.DesignId);
+        Assert.True(photo!.Succeeded, photo.Error);
+        Assert.Equal(2, design.Rooms.Count);
+        Assert.Contains(design.Rooms, r => r.RoomId == photo.Value.Id);
+        Assert.Equal(DesignApp.Application.Constants.Messages.PlanDesignMissing, refusedTheirs.Error);
+        Assert.Equal(DesignApp.Application.Constants.Messages.PlanDesignAlreadyFull("Full"), refusedFull.Error);
+    }
+
+    [Fact]
     public async Task Generating_makes_a_photo_and_a_new_room_with_the_plans_ai()
     {
         var plan = NewPlan();
@@ -415,10 +448,10 @@ public class PlanTests
     [Fact]
     public async Task A_new_room_is_furnished_unless_the_user_wants_it_empty()
     {
-        var create = new CreatePlan(_plans, new FixedUser("user-1"), new FixedClock(Now), new EmbeddedObjectCatalog());
+        var create = new CreatePlan(_plans, new FixedUser("user-1"), new FixedClock(Now), new EmbeddedObjectCatalog(), new PlanDesigns(_designs, _plans, new FixedClock(Now)));
 
-        var furnished = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, CancellationToken.None);
-        var empty = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, null, CancellationToken.None);
+        var furnished = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, null, CancellationToken.None)).Value;
+        var empty = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, null, null, CancellationToken.None)).Value;
 
         Assert.Contains(furnished.Items, i => i.Shape == ItemShape.Bed);
         Assert.Empty(empty.Items);

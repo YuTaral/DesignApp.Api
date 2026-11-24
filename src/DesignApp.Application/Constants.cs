@@ -923,6 +923,16 @@ public static class Constants
         /// <summary>A room saved to its plan's design that wasn't made from a plan, or whose plan is gone.</summary>
         public const string NotFromPlan = "This room wasn't made from a room plan that still exists.";
 
+        /// <summary>A room built for a design that isn't one of the user's (or is gone).</summary>
+        public const string PlanDesignMissing = "That design wasn't found: it may have been deleted. Open it from My designs and try again.";
+
+        /// <summary>A room built for a design that already holds as many rooms as a design can.</summary>
+        /// <param name="design">The design's name.</param>
+        public static string PlanDesignAlreadyFull(string design)
+        {
+            return $"\"{design}\" is full. {Domain.Constants.Messages.DesignFull}";
+        }
+
         /// <summary>The plan's design has no room left for the photos' room.</summary>
         /// <param name="design">The design's name.</param>
         public static string PlanDesignFull(string design)

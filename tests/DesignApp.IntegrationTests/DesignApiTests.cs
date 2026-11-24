@@ -243,6 +243,27 @@ public class DesignApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task A_room_built_from_a_design_is_the_designs_and_another_users_design_is_refused()
+    {
+        using var browser = await SignedUpAsync();
+        using var stranger = await SignedUpAsync();
+        var kitchen = await ReadyRoomAsync(browser);
+        using var created = await browser.PostAsJsonAsync("/api/designs", new { roomId = kitchen.Id, name = "Flat" });
+        var design = (await created.Content.ReadFromJsonAsync<DesignDto>())!;
+        var room = new { roomType = "Bedroom", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", designId = design.Id };
+
+        using var built = await browser.PostAsJsonAsync("/api/plans", room);
+        var plan = await built.Content.ReadFromJsonAsync<JsonElement>();
+        using var refused = await stranger.PostAsJsonAsync("/api/plans", room);
+        var problem = await refused.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(HttpStatusCode.Created, built.StatusCode);
+        Assert.Equal(design.Id, plan.GetProperty("designId").GetGuid());
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Equal(DesignApp.Application.Constants.Messages.PlanDesignMissing, problem.GetProperty("detail").GetString());
+    }
+
+    [Fact]
     public async Task Paints_and_wall_sizes_are_saved_with_a_rooms_colors()
     {
         using var browser = await SignedUpAsync();

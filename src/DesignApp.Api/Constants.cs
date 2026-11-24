@@ -425,6 +425,8 @@ public static class Constants
 
         /// <summary>The title when a photo couldn't be read into a plan.</summary>
         public const string PhotoPlanFailed = "Can't build the room from this photo";
+        /// <summary>A room built for a design that isn't the user's, or is full.</summary>
+        public const string PlanDesignRefused = "Can't add a room to this design";
 
         /// <summary>A photo of a built room couldn't be made.</summary>
         public const string GenerateFailed = "Can't make the photo";

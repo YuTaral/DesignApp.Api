@@ -181,12 +181,12 @@ public class FinishAndDressingTests
     [Fact]
     public async Task A_furnished_room_starts_with_a_finish_for_its_type()
     {
-        var create = new CreatePlan(new FakePlans(), new FixedUser("user-1"), new FixedClock(Now), _catalog);
+        var create = new CreatePlan(new FakePlans(), new FixedUser("user-1"), new FixedClock(Now), _catalog, new PlanDesigns(new FakeDesigns(), new FakePlans(), new FixedClock(Now)));
 
-        var bathroom = await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, true, null, CancellationToken.None);
-        var bedroom = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, CancellationToken.None);
-        var empty = await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, false, null, CancellationToken.None);
-        var chosen = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, Moody(null), CancellationToken.None);
+        var bathroom = (await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, true, null, null, CancellationToken.None)).Value;
+        var bedroom = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, null, CancellationToken.None)).Value;
+        var empty = (await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, false, null, null, CancellationToken.None)).Value;
+        var chosen = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, Moody(null), null, CancellationToken.None)).Value;
 
         Assert.Equal(WallFinish.Tiles, bathroom.Finish.Walls);
         Assert.Equal(CeilingLight.Spotlights, bathroom.Finish.CeilingLight);

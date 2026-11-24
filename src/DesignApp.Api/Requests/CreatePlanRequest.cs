@@ -16,5 +16,6 @@ namespace DesignApp.Api.Requests;
 /// How the walls and ceiling are finished and lit; when missing, one suited to the room type for a furnished room (tiles
 /// in a bathroom, an accent wall behind a bed), else painted walls with a white ceiling.
 /// </param>
+/// <param name="DesignId">The design the room is started from (Add room on its page): its photos go into it. None when missing.</param>
 public sealed record CreatePlanRequest(string? Name, RoomType RoomType, double Width, double Length, double Height, string? WallColor, string? FloorColor,
-    FloorType FloorType = FloorType.Wood, bool Furnish = true, RoomFinishRequest? Finish = null);
+    FloorType FloorType = FloorType.Wood, bool Furnish = true, RoomFinishRequest? Finish = null, Guid? DesignId = null);

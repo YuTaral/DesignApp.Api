@@ -38,7 +38,8 @@ internal static class PlanEndpoints
         plans.MapPost(Constants.Routes.Root, CreateAsync)
             .WithName("CreatePlan")
             .WithSummary("Starts a room to build: its type and walls (metres) and their colors, with no objects yet.")
-            .WithDescription("An optional `ai` query (`Fake` or `Real`, where `GET /api/ai` allows it) sets the AI its descriptions and photos use.");
+            .WithDescription("An optional `ai` query (`Fake` or `Real`, where `GET /api/ai` allows it) sets the AI its descriptions and photos use. " +
+                "An optional `designId` (one of the user's designs with room for another room) puts the room's photos into that design.");
         plans.MapGet(Constants.Routes.ById, GetAsync)
             .WithName("GetPlan")
             .WithSummary("Returns a built room with its walls and objects.");
@@ -95,11 +96,13 @@ internal static class PlanEndpoints
             return problem;
         }
 
-        var plan = await createPlan.HandleAsync(request.Name ?? "", request.RoomType, request.Width, request.Length, request.Height,
+        var created = await createPlan.HandleAsync(request.Name ?? "", request.RoomType, request.Width, request.Length, request.Height,
             HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, aiMode, request.Furnish, request.Finish?.ToDomain(),
-            cancellationToken);
+            request.DesignId, cancellationToken);
 
-        return TypedResults.Created(Constants.Routes.PlanUrl(plan.Id), PlanResponse.From(plan));
+        return created.Succeeded
+            ? TypedResults.Created(Constants.Routes.PlanUrl(created.Value.Id), PlanResponse.From(created.Value))
+            : Problems.BadRequest(created.Error, Constants.Titles.PlanDesignRefused);
     }
 
     /// <summary><c>GET /api/plans/{id}</c>: a built room.</summary>

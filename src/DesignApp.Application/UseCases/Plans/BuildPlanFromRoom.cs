@@ -21,21 +21,31 @@ namespace DesignApp.Application.UseCases;
 /// <param name="catalog">The objects a plan may use.</param>
 /// <param name="currentUser">The signed-in user or guest.</param>
 /// <param name="clock">The current time.</param>
+/// <param name="planDesigns">Checks the design the room is started from.</param>
 public sealed class BuildPlanFromRoom(
     IRoomRepository rooms, IPlanRepository plans, IFileStorage storage, IRoomImaging imaging, IAiProviders ai, IObjectCatalog catalog,
-    ICurrentUser currentUser, TimeProvider clock)
+    ICurrentUser currentUser, TimeProvider clock, PlanDesigns planDesigns)
 {
     /// <summary>Builds the plan.</summary>
     /// <param name="roomId">The uploaded room.</param>
+    /// <param name="designId">The design the room is started from, whose photos go into it; none when missing.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The plan and what was left out; a failure the user can read when the AI couldn't read the photo; <c>null</c> when the user has no such room.</returns>
-    public async Task<Result<PhotoPlanOutcome>?> HandleAsync(Guid roomId, CancellationToken cancellationToken)
+    public async Task<Result<PhotoPlanOutcome>?> HandleAsync(Guid roomId, Guid? designId, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
 
         if (room is null)
         {
             return null;
+        }
+
+        // The design first, so a refused one costs no AI call.
+        var design = await planDesigns.ForNewPlanAsync(designId, currentUser.Id, cancellationToken);
+
+        if (!design.Succeeded)
+        {
+            return Result.Failure<PhotoPlanOutcome>(design.Error);
         }
 
         var image = await AnalysisPhoto.ReadAsync(storage, imaging, room, cancellationToken);
@@ -56,6 +66,12 @@ public sealed class BuildPlanFromRoom(
         plan.Update(plan.Name, plan.Outline, ready.Height, ready.WallColor, ready.FloorColor, answer.FloorType, new PlanView((int)PlanWall.Back, ViewCorner.Spot, ready.Camera),
             ready.Items, now, ready.Finish);
         plan.ReadFrom(room.Id);
+
+        if (design.Value is Guid chosen)
+        {
+            plan.UseDesign(chosen);
+        }
+
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);
 
