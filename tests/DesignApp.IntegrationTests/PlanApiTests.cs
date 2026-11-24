@@ -256,6 +256,32 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task A_room_built_for_a_new_design_makes_it_with_its_first_photo()
+    {
+        using var signedUp = await Client.PostAsJsonAsync("/api/account/sign-up", new { email = $"new-design-{Guid.NewGuid():N}@example.com", password = "correct horse battery" });
+        var room = new { roomType = "Bedroom", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A" };
+
+        using var unnamed = await Client.PostAsJsonAsync("/api/plans", new { room.roomType, room.width, room.length, room.height, room.wallColor, room.floorColor, newDesign = new { name = "  " } });
+        using var created = await Client.PostAsJsonAsync("/api/plans",
+            new { room.roomType, room.width, room.length, room.height, room.wallColor, room.floorColor, newDesign = new { name = " Sea view flat ", description = "Blues and sand" } });
+        var plan = await created.Content.ReadFromJsonAsync<JsonElement>();
+        var before = await Client.GetFromJsonAsync<JsonElement>("/api/designs");
+        using var generated = await GenerateAsync(plan.GetProperty("id").GetGuid());
+        var photoRoom = await generated.Content.ReadFromJsonAsync<JsonElement>();
+        var after = await Client.GetFromJsonAsync<JsonElement>("/api/designs");
+        var design = Assert.Single(after.EnumerateArray());
+
+        // No design until the first photo; then one with the name and description given, holding the photo's room.
+        Assert.Equal(HttpStatusCode.OK, signedUp.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, unnamed.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal(0, before.GetArrayLength());
+        Assert.Equal(HttpStatusCode.OK, generated.StatusCode);
+        Assert.Equal(("Sea view flat", "Blues and sand"), (design.GetProperty("name").GetString(), design.GetProperty("description").GetString()));
+        Assert.Contains(design.GetProperty("rooms").EnumerateArray(), r => r.GetProperty("roomId").GetGuid() == photoRoom.GetProperty("id").GetGuid());
+    }
+
+    [Fact]
     public async Task A_described_object_and_a_generated_photo_come_from_the_ai()
     {
         using var created = await Client.PostAsJsonAsync("/api/plans",

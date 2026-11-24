@@ -83,6 +83,13 @@ public sealed class RoomPlan
     /// <summary>The uploaded room whose photo the plan was read from; <c>null</c> for a plan built from scratch.</summary>
     public Guid? FromRoomId { get; private set; }
 
+    /// <summary>
+    /// The new design the user started the plan for (in Build a room), made with this name and description when the
+    /// first room of the plan's photos is added; <c>null</c> when the plan's photos go into an existing design or one
+    /// named after the plan.
+    /// </summary>
+    public DesignDetails? NewDesign { get; private set; }
+
     private RoomPlan() { } // for EF Core
 
     /// <summary>Starts a room with its walls and no objects.</summary>
@@ -246,6 +253,24 @@ public sealed class RoomPlan
     public void ReadFrom(Guid roomId)
     {
         FromRoomId = roomId;
+    }
+
+    /// <summary>
+    /// Chooses the design a new plan's photos go into: an existing one, or else a new one, made with these details when
+    /// its first photo's room is added; neither when both are missing.
+    /// </summary>
+    /// <param name="designId">The existing design; none when missing.</param>
+    /// <param name="newDesign">The new design's name and description, used without an existing design; none when missing.</param>
+    public void ChooseDesign(Guid? designId, DesignDetails? newDesign)
+    {
+        if (designId is Guid id)
+        {
+            UseDesign(id);
+        }
+        else
+        {
+            NewDesign = newDesign;
+        }
     }
 
     /// <summary>Gives the plan to another user: a guest who signs in keeps the plans made before, under the account.</summary>

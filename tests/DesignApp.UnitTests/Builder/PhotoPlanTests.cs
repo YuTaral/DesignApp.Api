@@ -151,7 +151,7 @@ public class PhotoPlanTests
     {
         var room = await UploadedAsync();
 
-        var outcome = await Build().HandleAsync(room.Id, null, CancellationToken.None);
+        var outcome = await Build().HandleAsync(room.Id, null, null, CancellationToken.None);
         var plan = outcome!.Value.Plan;
         var standing = plan.Items.Where(i => !i.Shape.IsOnWall() && i.Shape != ItemShape.Rug).ToList();
         var window = plan.Items.Single(i => i.Shape == ItemShape.Window);
@@ -178,7 +178,7 @@ public class PhotoPlanTests
         var inCentimetres = new Application.Objects.PhotoPlan(RoomType.LivingRoom, 460, 520, 260, "#E8E2D6", WallFinish.Paint, "#B89B7A", FloorType.Wood,
             CeilingLight.Pendant, new OutlinePoint(230, 480), []);
 
-        var outcome = await Build(planner: new FixedPhotoPlanner(inCentimetres)).HandleAsync(room.Id, null, CancellationToken.None);
+        var outcome = await Build(planner: new FixedPhotoPlanner(inCentimetres)).HandleAsync(room.Id, null, null, CancellationToken.None);
         var plan = outcome!.Value.Plan;
 
         Assert.Equal((4.6, 5.2, 2.6), (plan.Width, plan.Length, plan.Height));
@@ -189,7 +189,7 @@ public class PhotoPlanTests
     {
         var room = await UploadedAsync();
 
-        var outcome = await Build("someone-else").HandleAsync(room.Id, null, CancellationToken.None);
+        var outcome = await Build("someone-else").HandleAsync(room.Id, null, null, CancellationToken.None);
         var saved = await _plans.ListByOwnerAsync("someone-else", CancellationToken.None);
 
         Assert.Null(outcome);

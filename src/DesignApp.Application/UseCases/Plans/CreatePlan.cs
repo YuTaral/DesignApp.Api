@@ -37,12 +37,13 @@ public sealed class CreatePlan(IPlanRepository plans, ICurrentUser currentUser, 
     /// else <see cref="RoomFinish.Default"/>.
     /// </param>
     /// <param name="designId">The design the room is started from, whose photos go into it; none when missing.</param>
+    /// <param name="newDesign">Without a design: the new design its photos go into, made with the first one.</param>
     /// <param name="cancellationToken">Cancels the save.</param>
     /// <returns>The new plan, or why the design can't take it (not the user's, or full).</returns>
     /// <exception cref="DomainException">The name, type or walls are invalid.</exception>
     public async Task<Result<RoomPlan>> HandleAsync(string name, RoomType roomType, double width, double length, double height,
         HexColor wallColor, HexColor floorColor, FloorType floorType, AiMode aiMode, bool furnish, RoomFinish? finish, Guid? designId,
-        CancellationToken cancellationToken)
+        DesignDetails? newDesign, CancellationToken cancellationToken)
     {
         var design = await planDesigns.ForNewPlanAsync(designId, currentUser.Id, cancellationToken);
 
@@ -57,12 +58,7 @@ public sealed class CreatePlan(IPlanRepository plans, ICurrentUser currentUser, 
         var look = finish ?? (furnish ? StarterLayout.FinishFor(roomType) : RoomFinish.Default);
 
         plan.Update(plan.Name, plan.Outline, height, wallColor, floorColor, floorType, plan.Viewpoint, items, now, look);
-
-        if (design.Value is Guid chosen)
-        {
-            plan.UseDesign(chosen);
-        }
-
+        plan.ChooseDesign(design.Value, newDesign);
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);
 

@@ -39,7 +39,8 @@ internal static class PlanEndpoints
             .WithName("CreatePlan")
             .WithSummary("Starts a room to build: its type and walls (metres) and their colors, with no objects yet.")
             .WithDescription("An optional `ai` query (`Fake` or `Real`, where `GET /api/ai` allows it) sets the AI its descriptions and photos use. " +
-                "An optional `designId` (one of the user's designs with room for another room) puts the room's photos into that design.");
+                "An optional `designId` (one of the user's designs with room for another room) puts the room's photos into that design; " +
+                "without one, an optional `newDesign` (`name`, `description`) is the new design they go into, made with the first photo.");
         plans.MapGet(Constants.Routes.ById, GetAsync)
             .WithName("GetPlan")
             .WithSummary("Returns a built room with its walls and objects.");
@@ -98,7 +99,7 @@ internal static class PlanEndpoints
 
         var created = await createPlan.HandleAsync(request.Name ?? "", request.RoomType, request.Width, request.Length, request.Height,
             HexColor.Parse(request.WallColor ?? ""), HexColor.Parse(request.FloorColor ?? ""), request.FloorType, aiMode, request.Furnish, request.Finish?.ToDomain(),
-            request.DesignId, cancellationToken);
+            request.DesignId, request.NewDesign?.ToDomain(), cancellationToken);
 
         return created.Succeeded
             ? TypedResults.Created(Constants.Routes.PlanUrl(created.Value.Id), PlanResponse.From(created.Value))

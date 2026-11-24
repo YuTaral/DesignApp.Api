@@ -72,23 +72,9 @@ public sealed class Design
     /// <exception cref="DomainException">The name or description is too long, or the name is empty.</exception>
     public void Rename(string name, string? description, DateTimeOffset now)
     {
-        var trimmedName = name.Trim();
+        var details = new DesignDetails(name, description);
 
-        if (trimmedName.Length is 0 or > Constants.Designs.MaxNameLength)
-        {
-            throw new DomainException(Constants.Messages.NameLength);
-        }
-
-        var trimmedDescription = (description ?? "").Trim();
-
-        if (trimmedDescription.Length > Constants.Designs.MaxDescriptionLength)
-        {
-            throw new DomainException(Constants.Messages.DescriptionLength);
-        }
-
-        Name = trimmedName;
-        Description = trimmedDescription;
-        UpdatedAt = now;
+        (Name, Description, UpdatedAt) = (details.Name, details.Description, now);
     }
 
     /// <summary>Adds a room, with no edits yet. It may still be analyzed.</summary>

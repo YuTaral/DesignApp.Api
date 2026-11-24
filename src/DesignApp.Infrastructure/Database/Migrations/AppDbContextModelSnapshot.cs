@@ -303,6 +303,10 @@ namespace DesignApp.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(80)")
                         .HasColumnName("name");
 
+                    b.Property<string>("NewDesign")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("new_design");
+
                     b.Property<string>("Outline")
                         .IsRequired()
                         .HasColumnType("jsonb")

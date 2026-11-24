@@ -6,8 +6,8 @@ namespace DesignApp.Application.Helpers;
 
 /// <summary>
 /// The design a room plan's photos go into: the one the user started the plan from (Add room on a design's page), or
-/// the plan's own, made (named after the plan) the first time a room of its photos is added, and made again if the user
-/// deleted it. Guests have no designs.
+/// the plan's own, made the first time a room of its photos is added (with the new design's name and description the
+/// user gave in Build a room, else named after the plan), and made again if the user deleted it. Guests have no designs.
 /// </summary>
 /// <param name="designs">Where designs are stored.</param>
 /// <param name="plans">Where plans are stored.</param>
@@ -71,7 +71,7 @@ public sealed class PlanDesigns(IDesignRepository designs, IPlanRepository plans
 
         if (design is null)
         {
-            design = Design.Create(room, plan.OwnerId, NameOf(plan), null, [], now);
+            design = Design.Create(room, plan.OwnerId, plan.NewDesign?.Name ?? NameOf(plan), plan.NewDesign?.Description, [], now);
             designs.Add(design);
             plan.UseDesign(design.Id);
         }

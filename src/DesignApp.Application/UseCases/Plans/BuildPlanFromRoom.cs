@@ -29,9 +29,10 @@ public sealed class BuildPlanFromRoom(
     /// <summary>Builds the plan.</summary>
     /// <param name="roomId">The uploaded room.</param>
     /// <param name="designId">The design the room is started from, whose photos go into it; none when missing.</param>
+    /// <param name="newDesign">Without a design: the new design its photos go into, made with the first one.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The plan and what was left out; a failure the user can read when the AI couldn't read the photo; <c>null</c> when the user has no such room.</returns>
-    public async Task<Result<PhotoPlanOutcome>?> HandleAsync(Guid roomId, Guid? designId, CancellationToken cancellationToken)
+    public async Task<Result<PhotoPlanOutcome>?> HandleAsync(Guid roomId, Guid? designId, DesignDetails? newDesign, CancellationToken cancellationToken)
     {
         var room = await rooms.FindAsync(roomId, currentUser.Id, cancellationToken);
 
@@ -66,12 +67,7 @@ public sealed class BuildPlanFromRoom(
         plan.Update(plan.Name, plan.Outline, ready.Height, ready.WallColor, ready.FloorColor, answer.FloorType, new PlanView((int)PlanWall.Back, ViewCorner.Spot, ready.Camera),
             ready.Items, now, ready.Finish);
         plan.ReadFrom(room.Id);
-
-        if (design.Value is Guid chosen)
-        {
-            plan.UseDesign(chosen);
-        }
-
+        plan.ChooseDesign(design.Value, newDesign);
         plans.Add(plan);
         await plans.SaveChangesAsync(cancellationToken);
 

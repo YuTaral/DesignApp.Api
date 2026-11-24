@@ -258,12 +258,12 @@ public class PlanTests
         _designs.Add(design);
         _designs.Add(theirs);
         _designs.Add(full);
-        var made = await create.HandleAsync("", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, design.Id, CancellationToken.None);
+        var made = await create.HandleAsync("", RoomType.LivingRoom, 4, 5, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, design.Id, null, CancellationToken.None);
 
         Assert.True(made.Succeeded, made.Error);
         var photo = await Generator().HandleAsync(made.Value.Id, TestImages.Create(1280, 960), PhotoStyle.AsBuilt, null, null, null, null, null, null, CancellationToken.None);
-        var refusedTheirs = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, theirs.Id, CancellationToken.None);
-        var refusedFull = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, full.Id, CancellationToken.None);
+        var refusedTheirs = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, theirs.Id, null, CancellationToken.None);
+        var refusedFull = await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, full.Id, null, CancellationToken.None);
 
         // The plan is the design's from the start, and its first photo's room goes there (not into a design of its own).
         Assert.Equal(design.Id, made.Value.DesignId);
@@ -450,8 +450,8 @@ public class PlanTests
     {
         var create = new CreatePlan(_plans, new FixedUser("user-1"), new FixedClock(Now), new EmbeddedObjectCatalog(), new PlanDesigns(_designs, _plans, new FixedClock(Now)));
 
-        var furnished = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, null, CancellationToken.None)).Value;
-        var empty = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, null, null, CancellationToken.None)).Value;
+        var furnished = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, null, null, CancellationToken.None)).Value;
+        var empty = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, false, null, null, null, CancellationToken.None)).Value;
 
         Assert.Contains(furnished.Items, i => i.Shape == ItemShape.Bed);
         Assert.Empty(empty.Items);

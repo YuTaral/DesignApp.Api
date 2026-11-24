@@ -70,8 +70,8 @@ internal static class RoomEndpoints
             .WithSummary("Reads the room's photo into a new room plan, to change in the room builder and photograph again.")
             .WithDescription("The room's AI reads the room's type, size, surfaces and objects (from the builder's catalog) from the photo; overlapping " +
                 "objects are moved apart and wall-side furniture is pushed against its wall. Objects that fit nowhere are left out and listed. " +
-                "The plan is linked to the room. With the real AI it is one Claude call. An optional `designId` query (one of the user's designs " +
-                "with room for another room) puts the plan's photos into that design.")
+                "The plan is linked to the room. With the real AI it is one Claude call. An optional body names the design its photos go into: " +
+                "`designId` (one of the user's designs with room for another room), or a `newDesign` (`name`, `description`) made with the first photo.")
             .RequireRateLimiting(Constants.RateLimits.RemovalsPolicy);
 
         rooms.MapPost(Constants.Routes.RoomPlanDesign, SaveToPlanDesignAsync)
@@ -135,13 +135,13 @@ internal static class RoomEndpoints
 
     /// <summary><c>POST /api/rooms/{id}/plan</c>: the room's photo read into a new plan.</summary>
     /// <param name="id">The room's id.</param>
-    /// <param name="designId">The optional <c>designId</c> query: the design the plan's photos go into.</param>
+    /// <param name="request">The optional body: the design the plan's photos go into, or a new one.</param>
     /// <param name="build">The use case.</param>
     /// <param name="cancellationToken">Cancels the work.</param>
-    private static async Task<Results<Created<PhotoPlanResponse>, ProblemHttpResult, NotFound>> BuildPlanAsync(Guid id, [FromQuery] Guid? designId,
+    private static async Task<Results<Created<PhotoPlanResponse>, ProblemHttpResult, NotFound>> BuildPlanAsync(Guid id, BuildPlanRequest? request,
         BuildPlanFromRoom build, CancellationToken cancellationToken)
     {
-        var outcome = await build.HandleAsync(id, designId, cancellationToken);
+        var outcome = await build.HandleAsync(id, request?.DesignId, request?.NewDesign?.ToDomain(), cancellationToken);
 
         if (outcome is null)
         {

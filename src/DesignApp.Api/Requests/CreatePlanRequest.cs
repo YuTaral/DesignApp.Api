@@ -17,5 +17,7 @@ namespace DesignApp.Api.Requests;
 /// in a bathroom, an accent wall behind a bed), else painted walls with a white ceiling.
 /// </param>
 /// <param name="DesignId">The design the room is started from (Add room on its page): its photos go into it. None when missing.</param>
+/// <param name="NewDesign">Without a design: the new design the room's photos go into, made with the first one.</param>
 public sealed record CreatePlanRequest(string? Name, RoomType RoomType, double Width, double Length, double Height, string? WallColor, string? FloorColor,
-    FloorType FloorType = FloorType.Wood, bool Furnish = true, RoomFinishRequest? Finish = null, Guid? DesignId = null);
+    FloorType FloorType = FloorType.Wood, bool Furnish = true, RoomFinishRequest? Finish = null, Guid? DesignId = null,
+    NewDesignRequest? NewDesign = null);
