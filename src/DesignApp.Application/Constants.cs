@@ -760,8 +760,17 @@ public static class Constants
         /// <summary>How many degrees a view's edge keeps from the seam behind, where the photo's ends meet.</summary>
         public const double SeamMargin = 4;
 
-        /// <summary>The furthest a saved view may tilt up or down.</summary>
+        /// <summary>The furthest a saved view may tilt up or down (a wide lens tilts less; see PanoramaView.MaxTilt).</summary>
         public const double MaxPitch = 80;
+
+        /// <summary>Straight up (and down), in degrees of tilt: where every point of the 360-degree photo's seam meets.</summary>
+        public const double StraightUp = 90;
+
+        /// <summary>
+        /// How far past its limits a saved view may still be, in degrees: the browser works out the same limits, with
+        /// its own rounding, and a view right at them must be accepted.
+        /// </summary>
+        public const double Rounding = 0.01;
 
         /// <summary>The note of the first view.</summary>
         public const string FrontNote = "360° view, straight ahead";
@@ -1141,7 +1150,7 @@ public static class Constants
 
         /// <summary>A view turned, tilted or zoomed beyond what can be saved.</summary>
         public static readonly string PanoramaView =
-            $"A saved view must keep clear of the seam behind, tilt at most {Panoramas.MaxPitch:0}°, and have a lens of {Panoramas.MinFov:0}° to {Panoramas.MaxFov:0}°.";
+            $"A saved view must keep clear of the seam behind and of straight up and down, and have a lens of {Panoramas.MinFov:0}° to {Panoramas.MaxFov:0}°.";
 
         /// <summary>A room saved to its plan's design that wasn't made from a plan, or whose plan is gone.</summary>
         public const string NotFromPlan = "This room wasn't made from a room plan that still exists.";

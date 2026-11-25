@@ -9,20 +9,38 @@ namespace DesignApp.Application.Objects;
 public sealed record PanoramaView(double Yaw, double Pitch, double Fov)
 {
     /// <summary>
-    /// Whether a saved view may look this way (<see cref="Constants.Panoramas"/>): its lens in range, and turned no
-    /// further than keeps its edge (a 4:3 view) clear of the seam behind, as the viewer stops.
+    /// Whether a saved view may look this way (<see cref="Constants.Panoramas"/>): its lens in range, tilted no further
+    /// than <see cref="MaxTilt"/>, and turned no further than keeps its edge (a 4:3 view, at its tilt) clear of the seam
+    /// behind, as the viewer stops.
     /// </summary>
     public bool IsAllowed =>
         double.IsFinite(Yaw) && double.IsFinite(Pitch) && double.IsFinite(Fov)
-        && Math.Abs(Pitch) <= Constants.Panoramas.MaxPitch && Fov >= Constants.Panoramas.MinFov && Fov <= Constants.Panoramas.MaxFov
-        && Math.Abs(Yaw) <= Constants.Panoramas.MaxYaw - HalfWidth(Fov) - Constants.Panoramas.SeamMargin;
+        && Fov >= Constants.Panoramas.MinFov && Fov <= Constants.Panoramas.MaxFov && Math.Abs(Pitch) <= MaxTilt(Fov) + Constants.Panoramas.Rounding
+        && Math.Abs(Yaw) <= Constants.Panoramas.MaxYaw - Reach(Fov, Pitch) - Constants.Panoramas.SeamMargin + Constants.Panoramas.Rounding;
 
-    /// <summary>Half a saved view's width, in degrees, for its lens across its height.</summary>
+    /// <summary>
+    /// The furthest a view with this lens may tilt up or down: straight up and down, where every point of the seam meets,
+    /// stay out of it by the seam's margin.
+    /// </summary>
+    /// <param name="fov">The lens across the view's height, in degrees.</param>
+    /// <returns>The tilt, in degrees.</returns>
+    public static double MaxTilt(double fov)
+    {
+        return Math.Min(Constants.Panoramas.MaxPitch, Constants.Panoramas.StraightUp - fov / 2 - Constants.Panoramas.SeamMargin);
+    }
+
+    /// <summary>
+    /// How far a saved view's edge reaches to either side of where it faces, in degrees. Level, that is half its width;
+    /// tilted, its top or bottom corner reaches further, nearer straight up or down, where the turns crowd together.
+    /// </summary>
     /// <param name="fov">The lens across its height, in degrees.</param>
-    private static double HalfWidth(double fov)
+    /// <param name="pitch">Its tilt, in degrees.</param>
+    private static double Reach(double fov, double pitch)
     {
         var aspect = (double)Constants.Panoramas.ViewWidth / Constants.Panoramas.ViewHeight;
+        var half = fov * Math.PI / 360;
+        var tilt = Math.Abs(pitch) * Math.PI / 180;
 
-        return Math.Atan(Math.Tan(fov * Math.PI / 360) * aspect) * 180 / Math.PI;
+        return Math.Atan2(Math.Sin(half) * aspect, Math.Cos(tilt + half)) * 180 / Math.PI;
     }
 }
