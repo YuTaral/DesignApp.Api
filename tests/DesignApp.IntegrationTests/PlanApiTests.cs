@@ -170,8 +170,9 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     {
         var finish = new
         {
-            walls = "Plaster", accentWall = 0, accentColor = "#B5654A", accentFinish = "Brick", ceilingColor = "#3A3A3A", trimColor = "#1E1E1E",
-            ceilingLight = "Chandelier", timeOfDay = "Evening",
+            walls = "Plaster",
+            ownWalls = new[] { new { wall = 0, finish = "Brick", color = "#B5654A" }, new { wall = 2, finish = "Paint", color = "#8A9A84" } },
+            ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", ceilingLight = "Chandelier", timeOfDay = "Evening",
         };
         var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
 
@@ -181,7 +182,7 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var id = plan.GetProperty("id").GetGuid();
 
         // A furnished bedroom starts with the wall behind its bed in its own color, and its furniture in its materials.
-        Assert.Equal((1, "Paint", "Pendant"), (plan.GetProperty("finish").GetProperty("accentWall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
+        Assert.Equal((1, "Paint", "Pendant"), (plan.GetProperty("finish").GetProperty("ownWalls")[0].GetProperty("wall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
             plan.GetProperty("finish").GetProperty("ceilingLight").GetString()));
         Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("material").GetString() == "linen upholstered");
 
@@ -197,16 +198,16 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var refused = await Client.PutAsJsonAsync($"/api/plans/{id}", new
         {
             name = "Sleep", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", view = 0, items = new[] { sofa },
-            finish = new { finish.walls, accentWall = 9, finish.accentColor, finish.accentFinish, finish.ceilingColor, finish.trimColor, finish.ceilingLight, finish.timeOfDay },
+            finish = new { finish.walls, ownWalls = new[] { new { wall = 9, finish = "Brick", color = "#B5654A" } }, finish.ceilingColor, finish.trimColor, finish.ceilingLight, finish.timeOfDay },
         });
         var stored = read.GetProperty("finish");
 
         saved.EnsureSuccessStatusCode();
         kept.EnsureSuccessStatusCode();
-        // Saving without a finish keeps the one the room has.
-        Assert.Equal(("Plaster", 0, "Brick", "#3A3A3A", "Chandelier", "Evening"), (stored.GetProperty("walls").GetString(), stored.GetProperty("accentWall").GetInt32(),
-            stored.GetProperty("accentFinish").GetString(), stored.GetProperty("ceilingColor").GetString(), stored.GetProperty("ceilingLight").GetString(),
-            stored.GetProperty("timeOfDay").GetString()));
+        // Saving without a finish keeps the one the room has, each wall in its own look; a wall the room lacks is refused.
+        Assert.Equal(("Plaster", "0 Brick #B5654A | 2 Paint #8A9A84", "#3A3A3A", "Chandelier", "Evening"), (stored.GetProperty("walls").GetString(),
+            string.Join(" | ", stored.GetProperty("ownWalls").EnumerateArray().Select(w => $"{w.GetProperty("wall").GetInt32()} {w.GetProperty("finish").GetString()} {w.GetProperty("color").GetString()}")),
+            stored.GetProperty("ceilingColor").GetString(), stored.GetProperty("ceilingLight").GetString(), stored.GetProperty("timeOfDay").GetString()));
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }

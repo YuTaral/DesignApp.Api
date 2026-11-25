@@ -42,7 +42,7 @@ public static class PhotoPlanReader
         var (tidied, unplaced) = PhotoLayout.Tidy(width, length, height, items, camera);
         var wallColor = HexColor.TryParse(answer.WallColor, out var walls) ? walls : HexColor.Parse(Plans.DefaultWallColor);
         var floorColor = HexColor.TryParse(answer.FloorColor, out var floor) ? floor : HexColor.Parse(Plans.DefaultFloorColor);
-        var finish = new RoomFinish(answer.Walls, null, plain.AccentColor, plain.AccentFinish, plain.CeilingColor, plain.TrimColor, answer.CeilingLight, plain.TimeOfDay);
+        var finish = new RoomFinish(answer.Walls, [], plain.CeilingColor, plain.TrimColor, answer.CeilingLight, plain.TimeOfDay);
 
         return new TidiedPhotoPlan(width, length, height, wallColor, floorColor, finish, camera, [.. tidied.Take(Plans.MaxItems)], [.. leftOut, .. unplaced]);
     }

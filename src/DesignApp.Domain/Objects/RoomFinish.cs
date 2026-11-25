@@ -5,27 +5,21 @@ using static DesignApp.Domain.Constants;
 namespace DesignApp.Domain.Objects;
 
 /// <summary>
-/// How a built room's walls and ceiling are finished and lit: the walls' finish, one accent wall in its own color and
-/// finish, the ceiling's and the skirting boards' colors, the ceiling light, and the time of day its photo
-/// is taken at.
+/// How a built room's walls and ceiling are finished and lit: the walls' finish (each wall may have its own finish and
+/// color instead), the ceiling's and the skirting boards' colors, the ceiling light, and the time of day its photo is
+/// taken at.
 /// </summary>
 public sealed record RoomFinish
 {
-    /// <summary>Painted walls, no accent wall, a soft white ceiling, warm white trim, a pendant light, at midday.</summary>
-    public static readonly RoomFinish Default = new(WallFinish.Paint, null, HexColor.Parse(Constants.Plans.AccentColor), WallFinish.Paint,
-        HexColor.Parse(Constants.Plans.CeilingColor), HexColor.Parse(Constants.Plans.TrimColor), CeilingLight.Pendant, TimeOfDay.Midday);
+    /// <summary>Painted walls, none in its own look, a soft white ceiling, warm white trim, a pendant light, at midday.</summary>
+    public static readonly RoomFinish Default = new(WallFinish.Paint, [], HexColor.Parse(Constants.Plans.CeilingColor), HexColor.Parse(Constants.Plans.TrimColor),
+        CeilingLight.Pendant, TimeOfDay.Midday);
 
-    /// <summary>What the walls are finished in.</summary>
+    /// <summary>What the walls are finished in (in the room's wall color), but those in <see cref="OwnWalls"/>.</summary>
     public WallFinish Walls { get; }
 
-    /// <summary>The number of the wall in its own color and finish (see <see cref="RoomOutline"/>); <c>null</c> for none.</summary>
-    public int? AccentWall { get; }
-
-    /// <summary>The accent wall's color.</summary>
-    public HexColor AccentColor { get; }
-
-    /// <summary>What the accent wall is finished in.</summary>
-    public WallFinish AccentFinish { get; }
+    /// <summary>The walls in their own finish and color, by wall number; each wall at most once.</summary>
+    public IReadOnlyList<WallLook> OwnWalls { get; }
 
     /// <summary>The ceiling's color.</summary>
     public HexColor CeilingColor { get; }
@@ -41,35 +35,64 @@ public sealed record RoomFinish
 
     /// <summary>Creates a finish.</summary>
     /// <param name="walls">What the walls are finished in.</param>
-    /// <param name="accentWall">The accent wall's number; <c>null</c> for none.</param>
-    /// <param name="accentColor">The accent wall's color.</param>
-    /// <param name="accentFinish">What the accent wall is finished in.</param>
+    /// <param name="ownWalls">The walls in their own finish and color; each wall at most once.</param>
     /// <param name="ceilingColor">The ceiling's color.</param>
     /// <param name="trimColor">The skirting boards' color.</param>
     /// <param name="ceilingLight">The ceiling light.</param>
     /// <param name="timeOfDay">When the photo is taken.</param>
-    /// <exception cref="DomainException">A choice isn't one of the lists, or the accent wall's number is negative.</exception>
-    public RoomFinish(WallFinish walls, int? accentWall, HexColor accentColor, WallFinish accentFinish, HexColor ceilingColor, HexColor trimColor,
-        CeilingLight ceilingLight, TimeOfDay timeOfDay)
+    /// <exception cref="DomainException">A choice isn't one of the lists, or a wall has its own look twice.</exception>
+    public RoomFinish(WallFinish walls, IReadOnlyList<WallLook> ownWalls, HexColor ceilingColor, HexColor trimColor, CeilingLight ceilingLight, TimeOfDay timeOfDay)
     {
-        if (!Enum.IsDefined(walls) || !Enum.IsDefined(accentFinish) || !Enum.IsDefined(ceilingLight) || !Enum.IsDefined(timeOfDay))
+        ArgumentNullException.ThrowIfNull(ownWalls);
+
+        if (!Enum.IsDefined(walls) || !Enum.IsDefined(ceilingLight) || !Enum.IsDefined(timeOfDay))
         {
             throw new DomainException(Constants.Messages.PlanFinish);
         }
 
-        if (accentWall < 0)
+        if (ownWalls.DistinctBy(w => w.Wall).Count() != ownWalls.Count)
         {
-            throw new DomainException(Constants.Messages.PlanAccentWall);
+            throw new DomainException(Constants.Messages.PlanOwnWalls);
         }
 
-        (Walls, AccentWall, AccentColor, AccentFinish) = (walls, accentWall, accentColor, accentFinish);
+        (Walls, OwnWalls) = (walls, [.. ownWalls.OrderBy(w => w.Wall)]);
         (CeilingColor, TrimColor, CeilingLight, TimeOfDay) = (ceilingColor, trimColor, ceilingLight, timeOfDay);
     }
 
-    /// <summary>This finish with another accent wall (or none), the rest the same.</summary>
-    /// <param name="wall">The accent wall's number; <c>null</c> for none.</param>
-    public RoomFinish WithAccentWall(int? wall)
+    /// <summary>This finish without the walls' own looks of walls a room no longer has, the rest the same.</summary>
+    /// <param name="wallCount">How many walls the room has.</param>
+    public RoomFinish Within(int wallCount)
     {
-        return new RoomFinish(Walls, wall, AccentColor, AccentFinish, CeilingColor, TrimColor, CeilingLight, TimeOfDay);
+        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, CeilingLight, TimeOfDay);
+    }
+
+    /// <summary>A wall's finish and color: its own, or the room's.</summary>
+    /// <param name="wall">The wall's number.</param>
+    /// <param name="wallColor">The room's wall color.</param>
+    public (WallFinish Finish, HexColor Color) LookOf(int wall, HexColor wallColor)
+    {
+        return OwnWalls.FirstOrDefault(w => w.Wall == wall) is { } own ? (own.Finish, own.Color) : (Walls, wallColor);
+    }
+
+    /// <inheritdoc/>
+    public bool Equals(RoomFinish? other)
+    {
+        return other is not null && (Walls, CeilingColor, TrimColor, CeilingLight, TimeOfDay) == (other.Walls, other.CeilingColor, other.TrimColor, other.CeilingLight, other.TimeOfDay)
+            && OwnWalls.SequenceEqual(other.OwnWalls);
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+
+        hash.Add((Walls, CeilingColor, TrimColor, CeilingLight, TimeOfDay));
+
+        foreach (var wall in OwnWalls)
+        {
+            hash.Add(wall);
+        }
+
+        return hash.ToHashCode();
     }
 }

@@ -35,11 +35,11 @@ public class FinishAndDressingTests
         return plan;
     }
 
-    /// <summary>A finish with brick on one wall, a dark ceiling, black trim, a chandelier, in the evening.</summary>
-    /// <param name="accentWall">The brick wall's number.</param>
-    private static RoomFinish Moody(int? accentWall)
+    /// <summary>A finish with brick on some walls, a dark ceiling, black trim, a chandelier, in the evening.</summary>
+    /// <param name="brickWalls">The brick walls' numbers.</param>
+    private static RoomFinish Moody(params int[] brickWalls)
     {
-        return new RoomFinish(WallFinish.Plaster, accentWall, Brick, WallFinish.Brick, HexColor.Parse("#3A3A3A"), HexColor.Parse("#1E1E1E"),
+        return new RoomFinish(WallFinish.Plaster, [.. brickWalls.Select(w => new WallLook(w, WallFinish.Brick, Brick))], HexColor.Parse("#3A3A3A"), HexColor.Parse("#1E1E1E"),
             CeilingLight.Chandelier, TimeOfDay.Evening);
     }
 
@@ -51,14 +51,16 @@ public class FinishAndDressingTests
         Assert.Equal(Moody((int)PlanWall.Left), plan.Finish);
         Assert.Equal(RoomFinish.Default, RoomPlan.Create(Guid.CreateVersion7(Now), "user-1", "", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood,
             AiMode.Fake, Now).Finish);
-        Assert.Throws<DomainException>(() => new RoomFinish((WallFinish)99, null, Brick, WallFinish.Paint, Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
-        Assert.Throws<DomainException>(() => new RoomFinish(WallFinish.Paint, -1, Brick, WallFinish.Paint, Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
-        // A rectangle has four walls: a fifth can't be the accent wall.
+        Assert.Throws<DomainException>(() => new RoomFinish((WallFinish)99, [], Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
+        Assert.Throws<DomainException>(() => new WallLook(-1, WallFinish.Paint, Brick));
+        // Each wall has its own look at most once.
+        Assert.Throws<DomainException>(() => Moody(1, 1));
+        // A rectangle has four walls: a fifth can't have its own look.
         Assert.Throws<DomainException>(() => plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, Moody(4)));
     }
 
     [Fact]
-    public void Saving_without_a_finish_keeps_it_and_drops_an_accent_wall_the_new_outline_lacks()
+    public void Saving_without_a_finish_keeps_it_and_drops_the_own_looks_of_walls_the_new_outline_lacks()
     {
         var plan = Room(Moody((int)PlanWall.Left));
         var lShape = new RoomOutline([new(0, 0), new(400, 0), new(400, 300), new(250, 300), new(250, 500), new(0, 500)]);
@@ -66,25 +68,31 @@ public class FinishAndDressingTests
         plan.Update("", plan.Outline, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now);
         var kept = plan.Finish;
 
-        plan.Update("", lShape, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, Moody(5));
+        plan.Update("", lShape, 2.6, Wall, Floor, FloorType.Wood, 0, [], Now, Moody(1, 5));
         plan.Update("", RoomPlan.RectangleOutline(4, 5), 2.6, Wall, Floor, FloorType.Wood, 0, [], Now);
         var shrunk = plan.Finish;
 
         Assert.Equal(Moody((int)PlanWall.Left), kept);
-        Assert.Null(shrunk.AccentWall);
+        Assert.Equal([1], shrunk.OwnWalls.Select(w => w.Wall));
         Assert.Equal(TimeOfDay.Evening, shrunk.TimeOfDay);
     }
 
     [Fact]
-    public void The_photo_prompt_says_the_material_finish_accent_wall_ceiling_light_and_mood()
+    public void The_photo_prompt_says_the_material_finish_walls_in_their_own_finish_ceiling_light_and_mood()
     {
         var moody = PlanPrompt.Write(Room(Moody((int)PlanWall.Back)));
+        var twoWalls = PlanPrompt.Write(Room(Moody((int)PlanWall.Back, (int)PlanWall.Left)));
+        var panorama = PanoramaPrompt.Write(Room(Moody((int)PlanWall.Back, (int)PlanWall.Left)));
         var behind = PlanPrompt.Write(Room(Moody((int)PlanWall.Front)));
         var plain = PlanPrompt.Write(Room(RoomFinish.Default));
 
         Assert.Contains("velvet three-seat sofa", moody, StringComparison.Ordinal);
         Assert.Contains("The walls are finished in softly mottled limewash plaster in", moody, StringComparison.Ordinal);
         Assert.Contains("except the far wall, which is exposed brick in", moody, StringComparison.Ordinal);
+        Assert.Contains(", and the left wall, which is exposed brick in", twoWalls, StringComparison.Ordinal);
+        // The 360-degree prompt names each by where it is in the panorama.
+        Assert.Contains("except the wall in the middle of the panorama, which is exposed brick in", panorama, StringComparison.Ordinal);
+        Assert.Contains(", and the wall to the left of the middle, which is exposed brick in", panorama, StringComparison.Ordinal);
         Assert.Contains("(#3A3A3A) with a chandelier", moody, StringComparison.Ordinal);
         Assert.Contains("the skirting boards are black (#1E1E1E)", moody, StringComparison.Ordinal);
         Assert.Contains("It is evening", moody, StringComparison.Ordinal);
@@ -186,12 +194,12 @@ public class FinishAndDressingTests
         var bathroom = (await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, true, null, null, null, CancellationToken.None)).Value;
         var bedroom = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, null, null, null, CancellationToken.None)).Value;
         var empty = (await create.HandleAsync("", RoomType.Bathroom, 3, 3, 2.5, Wall, Floor, FloorType.Tiles, AiMode.Fake, false, null, null, null, CancellationToken.None)).Value;
-        var chosen = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, Moody(null), null, null, CancellationToken.None)).Value;
+        var chosen = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, Moody(), null, null, CancellationToken.None)).Value;
 
         Assert.Equal(WallFinish.Tiles, bathroom.Finish.Walls);
         Assert.Equal(CeilingLight.Spotlights, bathroom.Finish.CeilingLight);
-        Assert.Equal((int)PlanWall.Right, bedroom.Finish.AccentWall);
+        Assert.Equal([(int)PlanWall.Right], bedroom.Finish.OwnWalls.Select(w => w.Wall));
         Assert.Equal(RoomFinish.Default, empty.Finish);
-        Assert.Equal(Moody(null), chosen.Finish);
+        Assert.Equal(Moody(), chosen.Finish);
     }
 }

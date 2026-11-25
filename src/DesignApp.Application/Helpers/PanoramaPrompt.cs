@@ -43,7 +43,7 @@ public static class PanoramaPrompt
         }
 
         text.Append(culture, $" {P.Room(PlanPrompt.Cm(plan.Width * 100), PlanPrompt.Cm(plan.Length * 100), PlanPrompt.Cm(plan.Height * 100))}");
-        text.Append(culture, $" {PlanPrompt.Surfaces(plan, _ => P.AccentWall)} {Constants.Builder.Prompt.Mood(plan.Finish.TimeOfDay)}");
+        text.Append(culture, $" {PlanPrompt.Surfaces(plan, wall => P.OwnWall(plan.Outline.Walls[wall].Side))} {Constants.Builder.Prompt.Mood(plan.Finish.TimeOfDay)}");
         text.Append(culture, $" {P.Contents} {P.Objects(string.Join("; ", objects))}");
 
         if (areas.Count > 0)

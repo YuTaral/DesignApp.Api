@@ -32,10 +32,7 @@ public static class PhotoRegionsOf
         floors.AddRange(plan.Items.Where(i => i.Shape is ItemShape.FloorZone).Select(i => i.Color));
         walls.AddRange(plan.Items.Where(i => i.Shape is ItemShape.WallZone).Select(i => i.Color));
 
-        if (plan.Finish.AccentWall is not null)
-        {
-            walls.Add(plan.Finish.AccentColor);
-        }
+        walls.AddRange(plan.Finish.OwnWalls.Select(w => w.Color));
 
         var surfaces = new Dictionary<int, IReadOnlyList<HexColor>>
         {

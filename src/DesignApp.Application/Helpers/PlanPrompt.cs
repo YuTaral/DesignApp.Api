@@ -124,7 +124,7 @@ public static partial class PlanPrompt
         return Surfaces(plan, frame.Name);
     }
 
-    /// <summary>The walls (with an accent wall, named as the view sees it), the ceiling and its light, the trim, and the floor.</summary>
+    /// <summary>The walls (with those in their own finish, named as the view sees them), the ceiling and its light, the trim, and the floor.</summary>
     /// <param name="plan">The room.</param>
     /// <param name="wallName">Names a wall by its number; <c>null</c> for a wall the view doesn't show.</param>
     internal static string Surfaces(RoomPlan plan, Func<int, string?> wallName)
@@ -134,10 +134,12 @@ public static partial class PlanPrompt
 
         var finish = plan.Finish;
         var walls = Look(finish.Walls, plan.WallColor);
-        var seen = finish.AccentWall is { } wall ? wallName(wall) : null;
-        var accent = seen is null ? "" : B.Prompt.Accent(seen, Look(finish.AccentFinish, finish.AccentColor));
+        var own = finish.OwnWalls
+            .Select(w => (Name: wallName(w.Wall), Look: Look(w.Finish, w.Color)))
+            .Where(w => w.Name is not null)
+            .Select(w => B.Prompt.OwnWall(w.Name!, w.Look));
 
-        return B.Prompt.Surfaces(walls, accent, Color(finish.CeilingColor), B.Prompt.LightWords(finish.CeilingLight), Color(finish.TrimColor),
+        return B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), B.Prompt.LightWords(finish.CeilingLight), Color(finish.TrimColor),
             B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
     }
 

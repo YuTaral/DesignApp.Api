@@ -162,9 +162,6 @@ public static class Constants
         /// <summary>A built room's skirting boards' color until the user picks one: a warm white.</summary>
         public const string TrimColor = "#F4F1EA";
 
-        /// <summary>An accent wall's color until the user picks one: a muted sage.</summary>
-        public const string AccentColor = "#8A9A84";
-
         /// <summary>How high a window's bottom usually is above the floor, in centimetres.</summary>
         public const double WindowSill = 90;
 
@@ -289,8 +286,8 @@ public static class Constants
         /// <summary>A built room's wall finish, ceiling light or time of day isn't one of the choices.</summary>
         public const string PlanFinish = "Choose one of the wall finishes, ceiling lights and times of day.";
 
-        /// <summary>A built room's accent wall isn't one of its walls.</summary>
-        public const string PlanAccentWall = "The accent wall must be one of the room's walls.";
+        /// <summary>A wall in its own finish that isn't one of the room's walls, or is given twice.</summary>
+        public const string PlanOwnWalls = "Each wall in its own finish must be one of the room's walls, once.";
 
         /// <summary>A built room type or shape that doesn't exist.</summary>
         public const string UnknownRoomType = "Pick the room's type from the list.";

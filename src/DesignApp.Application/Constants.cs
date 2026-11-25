@@ -282,17 +282,20 @@ public static class Constants
                     $"and {height} cm from floor to ceiling.";
             }
 
-            /// <summary>The walls (with an accent wall, if any), the ceiling and its light, the trim, and the floor.</summary>
+            /// <summary>The walls (with those in their own finish, if any), the ceiling and its light, the trim, and the floor.</summary>
             /// <param name="walls">The walls' finish and color, such as "painted sage green (#8A9A84)" (see <see cref="FinishWords"/>).</param>
-            /// <param name="accent">The accent wall, such as "the far wall, which is exposed brick in terracotta (#B5654A)"; empty for none.</param>
+            /// <param name="ownWalls">
+            /// The walls in their own finish, such as "the far wall, which is exposed brick in terracotta (#B5654A)", joined
+            /// by <see cref="OwnWallsJoin"/>; empty for none.
+            /// </param>
             /// <param name="ceiling">The ceiling's color.</param>
             /// <param name="light">The ceiling light in words (see <see cref="LightWords"/>).</param>
             /// <param name="trim">The skirting boards' color.</param>
             /// <param name="floor">The floor's material.</param>
             /// <param name="floorColor">The floor's color.</param>
-            public static string Surfaces(string walls, string accent, string ceiling, string light, string trim, string floor, string floorColor)
+            public static string Surfaces(string walls, string ownWalls, string ceiling, string light, string trim, string floor, string floorColor)
             {
-                var except = accent.Length == 0 ? "" : $", except {accent}";
+                var except = ownWalls.Length == 0 ? "" : $", except {ownWalls}";
 
                 return $"The walls are {walls}{except}. The ceiling is {ceiling} with {light}, the skirting boards are {trim}, " +
                     $"and the floor is {floor} in {floorColor}.";
@@ -314,13 +317,16 @@ public static class Constants
                 };
             }
 
-            /// <summary>The accent wall: which one, and its finish and color.</summary>
+            /// <summary>A wall in its own finish: which one, and its finish and color.</summary>
             /// <param name="wall">The wall as the photo sees it, such as "the far wall" (see <see cref="WallNames"/>).</param>
             /// <param name="look">Its finish and color, as <see cref="FinishWords"/> and a color.</param>
-            public static string Accent(string wall, string look)
+            public static string OwnWall(string wall, string look)
             {
                 return $"{wall}, which is {look}";
             }
+
+            /// <summary>What joins the walls in their own finishes: "except the far wall, which is..., and the left wall, which is...".</summary>
+            public const string OwnWallsJoin = ", and ";
 
             /// <summary>The walls the photo sees, by name: the far wall, the left or right wall, or (rooms that aren't rectangles) a wall facing the camera.</summary>
             public static readonly (string Far, string Left, string Right, string Facing) WallNames =
@@ -808,8 +814,21 @@ public static class Constants
                 return $"The room is {width} cm by {length} cm, and {height} cm from floor to ceiling.";
             }
 
-            /// <summary>An accent wall, named by its color in the render (a panorama has no near or far wall).</summary>
-            public const string AccentWall = "the wall shown in that color in the render";
+            /// <summary>
+            /// A wall in its own finish, named by where it is in the panorama (it has no near or far wall): its middle faces
+            /// the back wall, its ends meet at the front wall.
+            /// </summary>
+            /// <param name="side">The side of the room the wall is on.</param>
+            public static string OwnWall(PlanWall side)
+            {
+                return side switch
+                {
+                    PlanWall.Back => "the wall in the middle of the panorama",
+                    PlanWall.Right => "the wall to the right of the middle",
+                    PlanWall.Front => "the wall at both ends of the panorama",
+                    _ => "the wall to the left of the middle",
+                };
+            }
 
             /// <summary>That nothing is added, and every color is kept.</summary>
             public const string Contents =

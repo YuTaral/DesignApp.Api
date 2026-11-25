@@ -222,7 +222,7 @@ public class SkiaPhotoColorsTests
         var f = plan.Finish;
 
         plan.Update(plan.Name, plan.Outline, plan.Height, plan.WallColor, plan.FloorColor, plan.FloorType, plan.View, plan.Items, DateTimeOffset.UnixEpoch,
-            new RoomFinish(f.Walls, f.AccentWall, f.AccentColor, f.AccentFinish, f.CeilingColor, f.TrimColor, f.CeilingLight, TimeOfDay.Evening));
+            new RoomFinish(f.Walls, f.OwnWalls, f.CeilingColor, f.TrimColor, f.CeilingLight, TimeOfDay.Evening));
 
         return plan;
     }
@@ -273,6 +273,7 @@ public class SkiaPhotoColorsTests
         var plan = RoomPlan.Create(Guid.CreateVersion7(now), "user-1", "", RoomType.Bedroom, 4, 4, 2.6, wall, HexColor.Parse("#C8C8C8"), FloorType.Vinyl, AiMode.Fake, now);
         var red = HexColor.Parse("#B23A3A");
         var tiles = HexColor.Parse("#FFFFFF");
+        var brick = HexColor.Parse("#B5543C");
 
         plan.Update("", plan.Outline, 2.6, wall, plan.FloorColor, FloorType.Vinyl, new PlanView((int)PlanWall.Back, ViewCorner.None),
             [
@@ -280,7 +281,8 @@ public class SkiaPhotoColorsTests
                 new PlanItem("window", ItemShape.Window, 200, 0, 100, 10, 120, 0, red, 0, 90),
                 new PlanItem("painting", ItemShape.Picture, 100, 0, 60, 3, 40, 0, red, 0, 140),
                 new PlanItem("floor area", ItemShape.FloorZone, 300, 300, 100, 100, 1, 0, tiles, material: nameof(FloorType.Tiles)),
-            ], now, RoomFinish.Default.WithAccentWall(3));
+            ], now, new RoomFinish(WallFinish.Paint, [new WallLook(3, WallFinish.Brick, brick)], RoomFinish.Default.CeilingColor, RoomFinish.Default.TrimColor,
+                CeilingLight.Pendant, TimeOfDay.Midday));
         var regions = PhotoRegionsOf.Plan(plan);
 
         // The bed and the painting (whose masks show only its frame); not the window, nor the floor area (a surface).
@@ -288,7 +290,7 @@ public class SkiaPhotoColorsTests
         Assert.False(regions.KeepsLight);
         Assert.True(PhotoRegionsOf.Plan(Evening(plan)).KeepsLight);
         Assert.Equal([plan.FloorColor, tiles], regions.Surfaces[Ids.Floor]);
-        Assert.Equal([wall, plan.Finish.AccentColor], regions.Surfaces[Ids.Wall]);
+        Assert.Equal([wall, brick], regions.Surfaces[Ids.Wall]);
         Assert.Equal([plan.Finish.CeilingColor], regions.Surfaces[Ids.Ceiling]);
     }
 }

@@ -155,8 +155,8 @@ public sealed class RoomPlan
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(items);
         var trimmed = (name ?? "").Trim();
-        // A kept finish loses an accent wall the new outline no longer has; a new one must name one of its walls.
-        var kept = finish ?? (Finish.AccentWall >= outline.Walls.Count ? Finish.WithAccentWall(null) : Finish);
+        // A kept finish loses the own looks of walls the new outline no longer has; a new one must name its walls.
+        var kept = finish ?? Finish.Within(outline.Walls.Count);
         var seen = view.Within(outline);
 
         if (trimmed.Length > Constants.Plans.MaxNameLength)
@@ -179,9 +179,9 @@ public sealed class RoomPlan
             throw new DomainException(Constants.Messages.PlanLook);
         }
 
-        if (kept.AccentWall >= outline.Walls.Count)
+        if (kept.OwnWalls.Any(w => w.Wall >= outline.Walls.Count))
         {
-            throw new DomainException(Constants.Messages.PlanAccentWall);
+            throw new DomainException(Constants.Messages.PlanOwnWalls);
         }
 
         foreach (var item in items)

@@ -72,12 +72,11 @@ public static class StarterLayout
     public static RoomFinish FinishFor(RoomType type)
     {
         var plain = RoomFinish.Default;
-        var spotlights = new RoomFinish(plain.Walls, null, plain.AccentColor, plain.AccentFinish, plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay);
+        var spotlights = new RoomFinish(plain.Walls, [], plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay);
 
         return type switch
         {
-            RoomType.Bathroom => new RoomFinish(WallFinish.Tiles, null, plain.AccentColor, plain.AccentFinish, plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights,
-                plain.TimeOfDay),
+            RoomType.Bathroom => new RoomFinish(WallFinish.Tiles, [], plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay),
             RoomType.Kitchen => spotlights,
             RoomType.Bedroom => Accent(plain, HexColor.Parse(SL.BedroomAccent)),
             RoomType.KidsRoom => Accent(plain, HexColor.Parse(SL.KidsAccent)),
@@ -87,10 +86,11 @@ public static class StarterLayout
 
     /// <summary>A finish with the right wall (behind or beside the bed) painted in its own color.</summary>
     /// <param name="plain">The finish to start from.</param>
-    /// <param name="color">The accent wall's color.</param>
+    /// <param name="color">The wall's color.</param>
     private static RoomFinish Accent(RoomFinish plain, HexColor color)
     {
-        return new RoomFinish(plain.Walls, (int)PlanWall.Right, color, WallFinish.Paint, plain.CeilingColor, plain.TrimColor, plain.CeilingLight, plain.TimeOfDay);
+        return new RoomFinish(plain.Walls, [new WallLook((int)PlanWall.Right, WallFinish.Paint, color)], plain.CeilingColor, plain.TrimColor, plain.CeilingLight,
+            plain.TimeOfDay);
     }
 
     /// <summary>
