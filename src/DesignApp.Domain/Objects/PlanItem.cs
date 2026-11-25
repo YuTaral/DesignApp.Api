@@ -124,7 +124,7 @@ public sealed record PlanItem
             throw new DomainException(Constants.Messages.PlanWallPlacement);
         }
 
-        var raised = shape is ItemShape.Window || shape.IsMounted();
+        var raised = shape is ItemShape.Window or ItemShape.WallZone || shape.IsMounted();
 
         if (!double.IsFinite(elevation) || elevation < 0 || elevation > Constants.Plans.MaxItemCentimetres || (!raised && elevation != 0))
         {
@@ -134,6 +134,11 @@ public sealed record PlanItem
         if (shape.IsMounted() && depth > Constants.Plans.MaxMountedDepth)
         {
             throw new DomainException(Constants.Messages.PlanMountedDepth);
+        }
+
+        if (shape.IsZone() && (!IsZoneMaterial(shape, made) || decorations is { IsEmpty: false }))
+        {
+            throw new DomainException(Constants.Messages.PlanZoneMaterial);
         }
 
         var hasParts = form is ItemForm.LShaped or ItemForm.PShaped;
@@ -152,5 +157,15 @@ public sealed record PlanItem
         }
 
         (Wall, Elevation, Form, Parts, Decorations, Material) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None, made);
+    }
+
+    /// <summary>Whether a zone's material is one of its kind's: a floor type for a floor area, a wall finish for a wall area.</summary>
+    /// <param name="shape">The zone's shape.</param>
+    /// <param name="material">Its material's name.</param>
+    private static bool IsZoneMaterial(ItemShape shape, string material)
+    {
+        return shape is ItemShape.FloorZone
+            ? Enum.TryParse<FloorType>(material, ignoreCase: false, out var floor) && Enum.IsDefined(floor)
+            : Enum.TryParse<WallFinish>(material, ignoreCase: false, out var finish) && Enum.IsDefined(finish);
     }
 }

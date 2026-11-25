@@ -88,7 +88,7 @@ internal sealed partial class ClaudeRoomBuilderAi(IAnthropicClient client, ILogg
             ["properties"] = JsonSerializer.SerializeToElement(new Dictionary<string, object>
             {
                 [F.Label] = new { type = "string" },
-                [F.Shape] = new { type = "string", @enum = Enum.GetNames<ItemShape>() },
+                [F.Shape] = new { type = "string", @enum = Enum.GetValues<ItemShape>().Where(s => !s.IsZone()).Select(s => s.ToString()).ToArray() },
                 [F.Width] = new { type = "number" },
                 [F.Depth] = new { type = "number" },
                 [F.Height] = new { type = "number" },

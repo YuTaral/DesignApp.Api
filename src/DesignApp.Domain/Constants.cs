@@ -262,6 +262,9 @@ public static class Constants
         /// <summary>An object's material is named too long.</summary>
         public static readonly string PlanItemMaterial = $"Name an object's material in up to {Plans.MaxMaterialLength} characters.";
 
+        /// <summary>A floor or wall area whose material isn't a floor type or wall finish, or that has decorations.</summary>
+        public const string PlanZoneMaterial = "A floor area needs a floor material (such as Tiles), and a wall area a wall finish (such as Brick); neither has decorations.";
+
         /// <summary>An object's decorations are too many, too long, empty or repeated.</summary>
         public static readonly string PlanItemDecorations =
             $"An object may have up to {Plans.MaxDecorations} different decorations, each named in up to {Plans.MaxDecorationLength} characters.";
@@ -572,6 +575,16 @@ public static class Constants
         Picture,
         /// <summary>A block hung on a wall: upper kitchen cabinets, wall shelves, a cooker hood, a mirror cabinet.</summary>
         WallBox,
+        /// <summary>
+        /// An area of the floor in its own material (a <see cref="FloorType"/> name) and color, such as tiles by the
+        /// kitchen units: a surface, not furniture.
+        /// </summary>
+        FloorZone,
+        /// <summary>
+        /// An area of a wall in its own finish (a <see cref="WallFinish"/> name) and color, such as brick behind the sofa:
+        /// a surface, not furniture.
+        /// </summary>
+        WallZone,
     }
 
     /// <summary>

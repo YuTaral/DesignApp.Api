@@ -31,7 +31,7 @@ public static class PhotoLayout
         var room = new LayoutRoom(width * 100, length * 100, height * 100, []);
         var all = items.ToList();
         var leftOut = new List<string>();
-        var standing = all.Where(i => !i.Shape.IsOnWall() && i.Shape != ItemShape.Rug).OrderByDescending(i => i.Width * i.Depth);
+        var standing = all.Where(i => !i.Shape.IsOnWall() && !i.Shape.IsZone() && i.Shape != ItemShape.Rug).OrderByDescending(i => i.Width * i.Depth);
         var steps = (int)(SL.NudgeReach / SL.Step);
 
         foreach (var item in all.Where(i => i.Shape.IsOpening()))

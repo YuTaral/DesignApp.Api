@@ -45,7 +45,7 @@ public static partial class PlanPrompt
         var text = new StringBuilder();
         var camera = new PlanCamera(frame.Across, plan.Height * 100, frame.Pose);
         var standing = plan.Items
-            .Where(i => i.Wall is null)
+            .Where(i => i.Wall is null && !i.Shape.IsZone())
             .Select(item => (Item: item, Seen: Look(Footprint(item), frame, camera)))
             .Where(seen => seen.Seen.Edges is not null)
             .ToList();
@@ -84,6 +84,7 @@ public static partial class PlanPrompt
         }
 
         text.Append(culture, $" {Surfaces(plan, frame)} {B.Prompt.Mood(plan.Finish.TimeOfDay)}");
+        text.Append(Zones(plan, frame, camera));
         text.Append(culture, $" {frame.CameraPlace.Sentence(frame.Pose)}");
         text.Append(culture, $" {(decorated ? B.Prompt.WithDecorations : B.Prompt.Undecorated)}");
 
@@ -140,10 +141,42 @@ public static partial class PlanPrompt
             B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
     }
 
+    /// <summary>
+    /// The areas of the floor and walls in their own materials that the photo sees, each as a sentence: where it is, how
+    /// big, and its material and color. A wall's area counts only on a wall that faces the camera.
+    /// </summary>
+    /// <param name="plan">The room.</param>
+    /// <param name="frame">The photo's frame.</param>
+    /// <param name="camera">The photo's camera.</param>
+    /// <returns>The sentences, each after a space; empty for none.</returns>
+    private static string Zones(RoomPlan plan, Frame frame, PlanCamera camera)
+    {
+        var text = new StringBuilder();
+
+        foreach (var item in plan.Items.Where(i => i.Shape is ItemShape.FloorZone && Look(Footprint(i), frame, camera).Edges is not null))
+        {
+            var (fromLeft, fromFar, across, deep) = AsSeen(item, frame);
+            var floor = B.Prompt.FloorWords(Enum.Parse<FloorType>(item.Material));
+
+            text.Append(' ').Append(B.Prompt.FloorZone(floor, Color(item.Color), Cm(across), Cm(deep), Cm(fromLeft), Cm(fromFar)));
+        }
+
+        foreach (var item in plan.Items.Where(i => i.Shape is ItemShape.WallZone && frame.Faces(i.Wall!.Value)
+            && Look(OnWallPoints(i, plan.Outline, 0), frame, camera).Edges is not null))
+        {
+            var look = Look(Enum.Parse<WallFinish>(item.Material), item.Color);
+
+            text.Append(' ').Append(B.Prompt.WallZone(frame.Place(item.Wall!.Value, item.X), look, Cm(item.Width), Cm(item.Elevation),
+                Cm(item.Elevation + item.Height)));
+        }
+
+        return text.ToString();
+    }
+
     /// <summary>A wall finish with its color, such as "exposed brick in terracotta (#B5654A)".</summary>
     /// <param name="finish">The finish.</param>
     /// <param name="color">The color.</param>
-    private static string Look(WallFinish finish, HexColor color)
+    internal static string Look(WallFinish finish, HexColor color)
     {
         return $"{B.Prompt.FinishWords(finish)} {Color(color)}";
     }
@@ -153,10 +186,7 @@ public static partial class PlanPrompt
     /// <param name="frame">The photo's frame.</param>
     private static string Standing(PlanItem item, Frame frame)
     {
-        var (fromLeft, fromFar) = frame.Point(item.X, item.Y);
-        var turned = item.Rotation % 180 != 0;
-        var (planAcross, planAlong) = turned ? (item.Depth, item.Width) : (item.Width, item.Depth);
-        var (across, deep) = frame.Sideways ? (planAlong, planAcross) : (planAcross, planAlong);
+        var (fromLeft, fromFar, across, deep) = AsSeen(item, frame);
         var facing = item.Shape is ItemShape.Rug or ItemShape.Cylinder or ItemShape.Plant or ItemShape.Lamp or ItemShape.Table
             ? ""
             : $", {frame.Facing(item.Rotation)}";
@@ -166,6 +196,22 @@ public static partial class PlanPrompt
         var appliance = IsAppliance(item) ? B.Prompt.Appliance : "";
 
         return B.Prompt.Standing(item.Label, Looks(item), Cm(fromLeft), Cm(fromFar), size) + Outline(item, frame) + appliance + facing;
+    }
+
+    /// <summary>
+    /// Where a thing on the floor is and how big, as the photo sees it: its middle's distances from the left and far walls,
+    /// and its size across the photo and into it.
+    /// </summary>
+    /// <param name="item">The thing on the floor.</param>
+    /// <param name="frame">The photo's frame.</param>
+    private static (double FromLeft, double FromFar, double Across, double Deep) AsSeen(PlanItem item, Frame frame)
+    {
+        var (fromLeft, fromFar) = frame.Point(item.X, item.Y);
+        var turned = item.Rotation % 180 != 0;
+        var (planAcross, planAlong) = turned ? (item.Depth, item.Width) : (item.Width, item.Depth);
+        var (across, deep) = frame.Sideways ? (planAlong, planAcross) : (planAcross, planAlong);
+
+        return (fromLeft, fromFar, across, deep);
     }
 
     /// <summary>Points over an object on the plan: a grid over its footprint, on the floor and at its top.</summary>
@@ -441,7 +487,7 @@ public static partial class PlanPrompt
 
     /// <summary>A color as words and its code, such as "sage green (#A8B89A)".</summary>
     /// <param name="color">The color.</param>
-    private static string Color(HexColor color)
+    internal static string Color(HexColor color)
     {
         return $"{ColorName(color)} ({color.Value})";
     }

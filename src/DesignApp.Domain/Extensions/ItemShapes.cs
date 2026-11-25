@@ -19,11 +19,18 @@ public static class ItemShapes
         return shape is ItemShape.Picture or ItemShape.WallBox;
     }
 
-    /// <summary>Whether a shape belongs to a wall (an opening or a mounted object) rather than the floor.</summary>
+    /// <summary>Whether a shape is an area of the floor or a wall in its own material: a surface, not furniture.</summary>
+    /// <param name="shape">The shape.</param>
+    public static bool IsZone(this ItemShape shape)
+    {
+        return shape is ItemShape.FloorZone or ItemShape.WallZone;
+    }
+
+    /// <summary>Whether a shape belongs to a wall (an opening, a mounted object or a wall area) rather than the floor.</summary>
     /// <param name="shape">The shape.</param>
     public static bool IsOnWall(this ItemShape shape)
     {
-        return shape.IsOpening() || shape.IsMounted();
+        return shape.IsOpening() || shape.IsMounted() || shape is ItemShape.WallZone;
     }
 
     /// <summary>How high a new object of a shape usually starts above the floor, in centimetres.</summary>

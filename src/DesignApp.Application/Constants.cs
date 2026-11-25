@@ -654,6 +654,30 @@ public static class Constants
                 return $"a {(left ? "left-hand" : "right-hand")} wall {fromLeft} cm from the left wall, from {from} to {to} cm from the far wall";
             }
 
+            /// <summary>An area of the floor in its own material and color.</summary>
+            /// <param name="floor">Its material in words (see <see cref="FloorWords"/>).</param>
+            /// <param name="color">Its color in words.</param>
+            /// <param name="across">How wide it is, as the photo sees it, in cm.</param>
+            /// <param name="deep">How deep it is, in cm.</param>
+            /// <param name="fromLeft">Its middle's distance from the left wall, in cm.</param>
+            /// <param name="fromFar">Its middle's distance from the far wall, in cm.</param>
+            public static string FloorZone(string floor, string color, string across, string deep, string fromLeft, string fromFar)
+            {
+                return $"Part of the floor is {floor} in {color}: an area {across} cm wide and {deep} cm deep, its middle {fromLeft} cm " +
+                    $"from the left wall and {fromFar} cm from the far wall, flush with the rest of the floor.";
+            }
+
+            /// <summary>An area of a wall in its own finish and color.</summary>
+            /// <param name="where">Where its middle is, such as "on the far wall, its middle 120 cm from the left wall".</param>
+            /// <param name="look">Its finish and color, such as "exposed brick in terracotta (#B5654A)".</param>
+            /// <param name="width">Its width, in cm.</param>
+            /// <param name="bottom">How high its bottom is, in cm.</param>
+            /// <param name="top">How high its top is, in cm.</param>
+            public static string WallZone(string where, string look, string width, string bottom, string top)
+            {
+                return $"Part of a wall, {where}, is {look}: an area {width} cm wide from {bottom} cm to {top} cm above the floor, flat on the wall.";
+            }
+
             /// <summary>The words for a thing a wall of the room partly hides from the camera.</summary>
             public const string PartlyHidden = ", partly hidden behind a corner of the room";
 
@@ -767,6 +791,32 @@ public static class Constants
             public static string Objects(string objects)
             {
                 return $"The objects: {objects}.";
+            }
+
+            /// <summary>The areas of the floor and walls in their own materials, drawn as such in the render.</summary>
+            /// <param name="areas">The areas.</param>
+            public static string Areas(string areas)
+            {
+                return $"Parts of the floor and walls have their own material, exactly where the render shows them, flat and flush with the rest: {areas}.";
+            }
+
+            /// <summary>An area of the floor.</summary>
+            /// <param name="floor">Its material in words.</param>
+            /// <param name="color">Its color in words.</param>
+            /// <param name="width">Its width, in cm.</param>
+            /// <param name="depth">Its depth, in cm.</param>
+            public static string FloorArea(string floor, string color, string width, string depth)
+            {
+                return $"an area of the floor, {width} by {depth} cm, in {floor} in {color}";
+            }
+
+            /// <summary>An area of a wall.</summary>
+            /// <param name="look">Its finish and color, such as "exposed brick in terracotta (#B5654A)".</param>
+            /// <param name="width">Its width, in cm.</param>
+            /// <param name="height">Its height, in cm.</param>
+            public static string WallArea(string look, string width, string height)
+            {
+                return $"an area of a wall, {width} cm wide and {height} cm high, {look}";
             }
 
             /// <summary>One object's width, after its description.</summary>

@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text;
 using DesignApp.Domain.Entities;
+using DesignApp.Domain.Extensions;
+using DesignApp.Domain.Objects;
 
 using static DesignApp.Domain.Constants;
 
@@ -26,7 +28,8 @@ public static class PanoramaPrompt
 
         var culture = CultureInfo.InvariantCulture;
         var text = new StringBuilder(P.Intro(PlanPrompt.Words(plan.RoomType.ToString())));
-        var objects = plan.Items.Select((item, n) => $"{n + 1}. {PlanPrompt.Describe(item, P.Wide(PlanPrompt.Cm(item.Width)))}");
+        var objects = plan.Items.Where(i => !i.Shape.IsZone()).Select((item, n) => $"{n + 1}. {PlanPrompt.Describe(item, P.Wide(PlanPrompt.Cm(item.Width)))}");
+        var areas = plan.Items.Where(i => i.Shape.IsZone()).Select(Area).ToList();
 
         // The style and the user's own words come early, as in the photo prompt: at the end the model ignored them.
         if (Constants.Builder.Prompt.Style(style) is { Length: > 0 } styled)
@@ -43,6 +46,20 @@ public static class PanoramaPrompt
         text.Append(culture, $" {PlanPrompt.Surfaces(plan, _ => P.AccentWall)} {Constants.Builder.Prompt.Mood(plan.Finish.TimeOfDay)}");
         text.Append(culture, $" {P.Contents} {P.Objects(string.Join("; ", objects))}");
 
+        if (areas.Count > 0)
+        {
+            text.Append(culture, $" {P.Areas(string.Join("; ", areas))}");
+        }
+
         return text.ToString();
+    }
+
+    /// <summary>An area of the floor or a wall in its own material, in words: what it is, its material and color, and its size.</summary>
+    /// <param name="zone">The area.</param>
+    private static string Area(PlanItem zone)
+    {
+        return zone.Shape is ItemShape.FloorZone
+            ? P.FloorArea(Constants.Builder.Prompt.FloorWords(Enum.Parse<FloorType>(zone.Material)), PlanPrompt.Color(zone.Color), PlanPrompt.Cm(zone.Width), PlanPrompt.Cm(zone.Depth))
+            : P.WallArea(PlanPrompt.Look(Enum.Parse<WallFinish>(zone.Material), zone.Color), PlanPrompt.Cm(zone.Width), PlanPrompt.Cm(zone.Height));
     }
 }
