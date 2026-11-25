@@ -1021,6 +1021,58 @@ public static class Constants
         public const int PngQuality = 100;
     }
 
+    /// <summary>
+    /// Tuning of the color correction of photos made from a built room (<see cref="Photos.SkiaPhotoColors"/>), found on
+    /// seven real photos: it brought their regions from a median CIEDE2000 of 15 from the 3D view to about 1.
+    /// </summary>
+    public static class ColorCorrection
+    {
+        /// <summary>
+        /// How far in from a region's edge its typical color is measured, in pixels: at the edge the photo and the 3D
+        /// view may not line up.
+        /// </summary>
+        public const int EdgeMargin = 4;
+
+        /// <summary>The fewest pixels a region's inside needs for its color to be corrected.</summary>
+        public const int MinInsidePixels = 400;
+
+        /// <summary>How softly a region's shift fades across its edge: the spread of its blur, in pixels.</summary>
+        public const double Feather = 3.0;
+
+        /// <summary>How far the blur reaches, in spreads.</summary>
+        public const double FeatherReach = 3.0;
+
+        /// <summary>
+        /// The Lab distance from a region's typical color at which a pixel is shifted only to 37% (e^-1): what the AI
+        /// added on an object, such as a throw on an armchair or books on a table, keeps its own color.
+        /// </summary>
+        public const double Likeness = 28.0;
+
+        /// <summary>
+        /// How much lightness counts, against hue and colorfulness, in telling which planned color a pixel of a surface
+        /// shows: the 3D view's shading darkens a wall, which says little about its paint.
+        /// </summary>
+        public const double SurfaceLightnessWeight = 0.25;
+
+        /// <summary>
+        /// The size of the Lab grid's cells, in Lab units, in which a region's most common color is found: the cell its
+        /// pixels fill most.
+        /// </summary>
+        public const double ColorCell = 8.0;
+
+        /// <summary>
+        /// How far from the fullest cell's middle a pixel still belongs to the region's main part, in Lab units: a white
+        /// cooker's body, not its black oven window.
+        /// </summary>
+        public const double MainPartReach = 14.0;
+
+        /// <summary>The smallest shift worth making, in Lab units: below it the region is left as it is.</summary>
+        public const double MinShift = 0.5;
+
+        /// <summary>A blurred weight below this doesn't count.</summary>
+        public const double MinWeight = 0.001;
+    }
+
     /// <summary>Tuning of the label map cleanup after SAM 3.</summary>
     public static class Refiner
     {

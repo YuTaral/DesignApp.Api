@@ -112,8 +112,8 @@ public class PanoramaTests
         Assert.Null(await save.HandleAsync(Guid.NewGuid(), new PanoramaView(0, 0, 60), CancellationToken.None));
 
         var other = Plan();
-        var photo = (await new GeneratePlanRoom(_plans, _rooms, new FixedUser("user-1"), Ai(), Takes(), Photos("user-1"), _clock)
-            .HandleAsync(other.Id, TestImages.Create(1280, 960), PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
+        var photo = (await new GeneratePlanRoom(_plans, _rooms, new FixedUser("user-1"), Ai(), Takes(), Photos("user-1"), new SkiaPhotoColors(NullLogger<SkiaPhotoColors>.Instance), _clock)
+            .HandleAsync(other.Id, TestImages.Create(1280, 960), null, PhotoStyle.AsBuilt, null, null, null, null, new PhotoRun(null, "one"), CancellationToken.None))!.Value;
 
         Assert.Equal(DesignApp.Application.Constants.Messages.NoPanorama,
             (await save.HandleAsync(photo.Id, new PanoramaView(0, 0, 60), CancellationToken.None))!.Error);

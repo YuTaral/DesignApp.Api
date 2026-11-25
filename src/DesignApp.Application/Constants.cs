@@ -59,6 +59,28 @@ public static class Constants
         /// <summary>The largest 3D view the browser may send for a photo.</summary>
         public const int MaxGuideBytes = 10 * 1024 * 1024;
 
+        /// <summary>The largest object masks the browser may send with a photo's 3D view.</summary>
+        public const int MaxMasksBytes = 10 * 1024 * 1024;
+
+        /// <summary>The shapes whose color in a photo is left as the image model made it: windows and doors aren't furniture.</summary>
+        public static readonly IReadOnlySet<ItemShape> UncorrectedShapes = new HashSet<ItemShape> { ItemShape.Window, ItemShape.Door };
+
+        /// <summary>
+        /// The room's surfaces in the object masks the browser draws for a photo (<c>MASK_ID</c> in DesignApp.Web's
+        /// <c>scene-3d.ts</c>, which must match); an object's id is 1 + its position in the plan, and 0 is nothing.
+        /// </summary>
+        public static class MaskIds
+        {
+            /// <summary>The floor, with its areas in other materials.</summary>
+            public const int Floor = 250;
+
+            /// <summary>The walls, with their areas in other finishes.</summary>
+            public const int Wall = 251;
+
+            /// <summary>The ceiling.</summary>
+            public const int Ceiling = 252;
+        }
+
         /// <summary>The longest extra instructions the user may add for the photo.</summary>
         public const int MaxInstructionsLength = 500;
 
@@ -1074,6 +1096,9 @@ public static class Constants
 
         /// <summary>Object boxes that aren't on the plan's objects or inside the picture.</summary>
         public const string PhotoBoxes = "Each object box must name one of the room's objects and lie inside the picture.";
+
+        /// <summary>Object masks that are too large.</summary>
+        public static readonly string PhotoMasks = $"The object masks must be a PNG of at most {Builder.MaxMasksBytes / (1024 * 1024)} MB.";
 
         /// <summary>A photo asked for from a wall the room doesn't have, or a camera spot that isn't one of the choices.</summary>
         public const string PhotoShot = "Choose one of the room's walls and where the photo is taken from.";

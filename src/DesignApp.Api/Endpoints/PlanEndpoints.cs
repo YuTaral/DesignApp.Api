@@ -172,6 +172,10 @@ internal static class PlanEndpoints
     /// <summary><c>POST /api/plans/{id}/generate</c>: a photo of the built room, as a new room.</summary>
     /// <param name="id">The plan's id.</param>
     /// <param name="guide">The room's 3D view (PNG).</param>
+    /// <param name="masks">
+    /// The optional <c>masks</c> file: which object or surface each pixel of the 3D view shows (PNG, the id in its red
+    /// channel), to bring the photo's colors back to the room as planned.
+    /// </param>
     /// <param name="style">The optional <c>style</c> form field: the photo's interior style.</param>
     /// <param name="instructions">The optional <c>instructions</c> form field: the user's own words for the AI.</param>
     /// <param name="seed">The optional <c>seed</c> form field: makes the photo repeatable, to compare changes fairly.</param>
@@ -198,7 +202,7 @@ internal static class PlanEndpoints
     /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
     /// <returns>200 with the room (waiting for its analysis), 400 when no photo could be made, or 404.</returns>
     private static async Task<Results<Ok<RoomResponse>, ProblemHttpResult, NotFound>> GenerateAsync(
-        Guid id, IFormFile guide, [FromForm] string? style, [FromForm] string? instructions, [FromForm] int? seed, [FromForm] string? boxes,
+        Guid id, IFormFile guide, IFormFile? masks, [FromForm] string? style, [FromForm] string? instructions, [FromForm] int? seed, [FromForm] string? boxes,
         [FromForm] int? view, [FromForm] string? corner, [FromForm] Guid? roomId, [FromForm] string? note, [FromForm] Guid? replaces, [FromForm] string? referenceBoxes,
         GeneratePlanRoom generate,
         CancellationToken cancellationToken)
@@ -220,6 +224,11 @@ internal static class PlanEndpoints
             return Problems.BadRequest(Application.Constants.Messages.PhotoBoxes, Constants.Titles.GenerateFailed);
         }
 
+        if (masks?.Length > Application.Constants.Builder.MaxMasksBytes)
+        {
+            return Problems.BadRequest(Application.Constants.Messages.PhotoMasks, Constants.Titles.GenerateFailed);
+        }
+
         if (view is { } wall)
         {
             var spot = ViewCorner.None;
@@ -233,8 +242,9 @@ internal static class PlanEndpoints
         }
 
         var bytes = await ReadAllAsync(guide, cancellationToken);
+        var masksBytes = masks is null ? null : await ReadAllAsync(masks, cancellationToken);
         var run = new PhotoRun(roomId, note, replaces, inReference);
-        var outcome = await generate.HandleAsync(id, bytes, photoStyle, instructions, seed, layout, shot, run, cancellationToken);
+        var outcome = await generate.HandleAsync(id, bytes, masksBytes, photoStyle, instructions, seed, layout, shot, run, cancellationToken);
 
         return ToRoomResult(outcome);
     }

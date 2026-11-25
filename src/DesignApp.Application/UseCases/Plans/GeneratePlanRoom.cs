@@ -15,7 +15,8 @@ namespace DesignApp.Application.UseCases;
 /// every view has the same furniture, materials and decorations. Its analysis waits until the user starts it (with the
 /// real AI it costs money). A signed-in user's
 /// room goes into the plan's own design, or, when the run replaces an older room of the plan (Edit in 3D on a design's
-/// page), into that room's place, and the old room is deleted.
+/// page), into that room's place, and the old room is deleted. With the 3D view's object masks, the photo's colors are
+/// brought back to the room as planned before it is stored (<see cref="IPhotoColors"/>).
 /// </summary>
 /// <param name="plans">Where plans are stored.</param>
 /// <param name="rooms">Where rooms and their photos are stored.</param>
@@ -23,13 +24,19 @@ namespace DesignApp.Application.UseCases;
 /// <param name="ai">The AI providers.</param>
 /// <param name="takes">Stores the photos.</param>
 /// <param name="planPhotos">Checks the request, and puts the room into the plan's design or a replaced room's place.</param>
+/// <param name="colors">Brings the photo's colors back to the room as planned.</param>
 /// <param name="clock">When the room is made.</param>
 public sealed class GeneratePlanRoom(
-    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanPhotos planPhotos, TimeProvider clock)
+    IPlanRepository plans, IRoomRepository rooms, ICurrentUser currentUser, IAiProviders ai, TakeStore takes, PlanPhotos planPhotos, IPhotoColors colors,
+    TimeProvider clock)
 {
     /// <summary>Generates the photo and the room.</summary>
     /// <param name="planId">The plan.</param>
     /// <param name="guidePng">The room's simple 3D view as the browser drew it (PNG).</param>
+    /// <param name="masksPng">
+    /// Which object or surface each pixel of the 3D view shows (see <see cref="IPhotoColors.Correct"/>), to correct the
+    /// photo's colors by; <c>null</c> to keep them as the image model made them.
+    /// </param>
     /// <param name="style">The interior style of the photo.</param>
     /// <param name="instructions">The user's own extra instructions for the AI, if any.</param>
     /// <param name="seed">Makes the photo repeatable (see <see cref="IImageGenerator.GenerateAsync"/>); <c>null</c> for a random one.</param>
@@ -45,8 +52,8 @@ public sealed class GeneratePlanRoom(
     /// <param name="cancellationToken">Cancels the work.</param>
     /// <returns>The room (waiting for its analysis), a failure the user can read, or <c>null</c> when the user has no such plan.</returns>
     public async Task<Result<Room>?> HandleAsync(
-        Guid planId, byte[] guidePng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes, PlanShot? shot,
-        PhotoRun run, CancellationToken cancellationToken)
+        Guid planId, byte[] guidePng, byte[]? masksPng, PhotoStyle style, string? instructions, int? seed, IReadOnlyList<ItemBox>? boxes,
+        PlanShot? shot, PhotoRun run, CancellationToken cancellationToken)
     {
         var plan = await plans.FindAsync(planId, currentUser.Id, cancellationToken);
 
@@ -84,6 +91,11 @@ public sealed class GeneratePlanRoom(
             return Result.Failure<Room>(Constants.Messages.PhotoSeed);
         }
 
+        if (masksPng?.Length > Constants.Builder.MaxMasksBytes)
+        {
+            return Result.Failure<Room>(Constants.Messages.PhotoMasks);
+        }
+
         if (!PlanPhotos.FitAll(boxes, plan.Items.Count) || !PlanPhotos.FitAll(run.ReferenceBoxes, plan.Items.Count))
         {
             return Result.Failure<Room>(Constants.Messages.PhotoBoxes);
@@ -106,8 +118,9 @@ public sealed class GeneratePlanRoom(
             return Result.Failure<Room>(photo.Error);
         }
 
+        var colored = masksPng is null ? photo.Value : colors.Correct(photo.Value, guidePng, masksPng, PhotoRegionsOf.Plan(plan));
         var newId = room?.Id ?? Guid.CreateVersion7(clock.GetUtcNow());
-        var stored = await takes.StoreAsync(newId, photo.Value, run.Note ?? "", null, cancellationToken);
+        var stored = await takes.StoreAsync(newId, colored, run.Note ?? "", null, cancellationToken);
 
         if (!stored.Succeeded)
         {

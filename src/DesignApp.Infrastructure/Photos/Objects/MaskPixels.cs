@@ -13,13 +13,23 @@ internal static class MaskPixels
     /// <param name="mask">The mask.</param>
     public static PixelRect? CoveredRect(ObjectMask mask)
     {
-        var (x0, y0, x1, y1) = (mask.Width, mask.Height, -1, -1);
+        return Bounds(mask.Width, mask.Height, i => mask.Coverage[i] >= Constants.Imaging.CoverageThreshold);
+    }
 
-        for (var y = 0; y < mask.Height; y++)
+    /// <summary>The smallest rectangle holding every pixel a test picks.</summary>
+    /// <param name="width">The picture's width.</param>
+    /// <param name="height">Its height.</param>
+    /// <param name="picks">Whether the pixel at a position (row by row from the top) counts.</param>
+    /// <returns>The rectangle (its right and bottom edges just past the last pixels), or <c>null</c> when it picks none.</returns>
+    public static PixelRect? Bounds(int width, int height, Func<int, bool> picks)
+    {
+        var (x0, y0, x1, y1) = (width, height, -1, -1);
+
+        for (var y = 0; y < height; y++)
         {
-            for (var x = 0; x < mask.Width; x++)
+            for (var x = 0; x < width; x++)
             {
-                if (mask.Coverage[y * mask.Width + x] < Constants.Imaging.CoverageThreshold)
+                if (!picks(y * width + x))
                 {
                     continue;
                 }
