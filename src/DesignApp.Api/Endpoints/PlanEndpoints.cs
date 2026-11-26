@@ -391,6 +391,6 @@ internal static class PlanEndpoints
     {
         return new PlanItem(item.Label ?? "", item.Shape, item.X, item.Y, item.Width, item.Depth, item.Height, item.Rotation, HexColor.Parse(item.Color ?? ""),
             item.Wall, item.Elevation, item.Form, item.Parts?.ToDomain(), item.Decorations is null ? null : new ItemDecorations(item.Decorations), item.Material,
-            item.Covering?.ToDomain(), item.Worktop?.ToDomain());
+            item.Covering?.ToDomain(), item.Worktop?.ToDomain(), item.Lit);
     }
 }

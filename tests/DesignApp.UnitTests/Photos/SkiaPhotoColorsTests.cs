@@ -222,7 +222,7 @@ public class SkiaPhotoColorsTests
         var f = plan.Finish;
 
         plan.Update(plan.Name, plan.Outline, plan.Height, plan.WallColor, plan.FloorColor, plan.FloorType, plan.View, plan.Items, DateTimeOffset.UnixEpoch,
-            new RoomFinish(f.Walls, f.OwnWalls, f.CeilingColor, f.TrimColor, f.CeilingLight, TimeOfDay.Evening));
+            new RoomFinish(f.Walls, f.OwnWalls, f.CeilingColor, f.TrimColor, TimeOfDay.Evening));
 
         return plan;
     }
@@ -282,7 +282,7 @@ public class SkiaPhotoColorsTests
                 new PlanItem("painting", ItemShape.Picture, 100, 0, 60, 3, 40, 0, red, 0, 140),
                 new PlanItem("floor area", ItemShape.FloorZone, 300, 300, 100, 100, 1, 0, tiles, material: nameof(FloorType.Tiles)),
             ], now, new RoomFinish(WallFinish.Paint, [new WallLook(3, WallFinish.Brick, brick)], RoomFinish.Default.CeilingColor, RoomFinish.Default.TrimColor,
-                CeilingLight.Pendant, TimeOfDay.Midday));
+                TimeOfDay.Midday));
         var regions = PhotoRegionsOf.Plan(plan);
 
         // The bed and the painting (whose masks show only its frame); not the window, nor the floor area (a surface).

@@ -40,19 +40,22 @@ internal static class RoomFinishJson
     /// <summary>
     /// A finish as stored. Finishes stored before walls had their own looks have one accent wall instead
     /// (<paramref name="AccentWall"/>, <paramref name="AccentColor"/>, <paramref name="AccentFinish"/>): it is read as
-    /// that wall's own look, and saved again in the new form.
+    /// that wall's own look, and saved again in the new form. Rows from before ceiling lights were objects had a
+    /// <c>ceilingLight</c>, which a migration turned into a light on the plan (it is no longer read); they have no
+    /// <paramref name="Tone"/> or <paramref name="North"/>, read as warm light with north at the back.
     /// </summary>
     /// <param name="Walls">What the walls are finished in.</param>
     /// <param name="OwnWalls">The walls in their own finish and color (missing in older rows).</param>
     /// <param name="CeilingColor">The ceiling's color, #RRGGBB.</param>
     /// <param name="TrimColor">The skirting boards' color, #RRGGBB.</param>
-    /// <param name="CeilingLight">The ceiling light.</param>
     /// <param name="TimeOfDay">When the photo is taken.</param>
+    /// <param name="Tone">The color of the lights' light (missing in older rows).</param>
+    /// <param name="North">The side of the plan facing north (missing in older rows).</param>
     /// <param name="AccentWall">An older row's accent wall's number (missing for none, and in newer rows).</param>
     /// <param name="AccentColor">An older row's accent wall's color, #RRGGBB.</param>
     /// <param name="AccentFinish">What an older row's accent wall is finished in.</param>
-    private sealed record StoredFinish(WallFinish Walls, IReadOnlyList<StoredWall>? OwnWalls, string CeilingColor, string TrimColor, CeilingLight CeilingLight,
-        TimeOfDay TimeOfDay, int? AccentWall = null, string? AccentColor = null, WallFinish? AccentFinish = null)
+    private sealed record StoredFinish(WallFinish Walls, IReadOnlyList<StoredWall>? OwnWalls, string CeilingColor, string TrimColor, TimeOfDay TimeOfDay,
+        LightTone? Tone = null, PlanWall? North = null, int? AccentWall = null, string? AccentColor = null, WallFinish? AccentFinish = null)
     {
         /// <summary>The stored form of a finish.</summary>
         /// <param name="f">The finish.</param>
@@ -60,7 +63,7 @@ internal static class RoomFinishJson
         {
             var own = f.OwnWalls.Select(w => new StoredWall(w.Wall, w.Finish, w.Color.Value)).ToList();
 
-            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.CeilingLight, f.TimeOfDay);
+            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North);
         }
 
         /// <summary>The finish this stored form describes.</summary>
@@ -69,7 +72,7 @@ internal static class RoomFinishJson
             var accent = AccentWall is { } wall ? [new WallLook(wall, AccentFinish ?? WallFinish.Paint, HexColor.Parse(AccentColor ?? ""))] : new List<WallLook>();
             var own = OwnWalls?.Select(w => new WallLook(w.Wall, w.Finish, HexColor.Parse(w.Color))).ToList() ?? accent;
 
-            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), CeilingLight, TimeOfDay);
+            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back);
         }
     }
 

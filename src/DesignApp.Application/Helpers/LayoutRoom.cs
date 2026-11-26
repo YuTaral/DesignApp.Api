@@ -487,6 +487,47 @@ public sealed record LayoutRoom(double Width, double Length, double Height, IRea
     }
 
     /// <summary>
+    /// A light on the ceiling at a point of the plan, over whatever stands below (it takes no floor), reaching no lower than
+    /// <see cref="SL.LightClearance"/> above the floor.
+    /// </summary>
+    /// <param name="key">The catalog object.</param>
+    /// <param name="x">Its middle across the plan.</param>
+    /// <param name="y">Its middle down the plan.</param>
+    /// <param name="width">Its width, when not the usual (spotlights spread over it).</param>
+    /// <param name="depth">Its depth, when not the usual.</param>
+    /// <returns>The light, or <c>null</c> when the catalog has no such object.</returns>
+    public PlanItem? Light(string key, double x, double y, double? width = null, double? depth = null)
+    {
+        var item = Get(key) is { } o ? LightFrom(o, x, y, Height, width, depth) : null;
+
+        if (item is not null)
+        {
+            Items.Add(item);
+        }
+
+        return item;
+    }
+
+    /// <summary>A ceiling light from its catalog object, at a point of a room with a ceiling so high.</summary>
+    /// <param name="o">The catalog object.</param>
+    /// <param name="x">Its middle across the plan.</param>
+    /// <param name="y">Its middle down the plan.</param>
+    /// <param name="ceiling">The ceiling's height, in centimetres.</param>
+    /// <param name="width">Its width, when not the usual.</param>
+    /// <param name="depth">Its depth, when not the usual.</param>
+    public static PlanItem LightFrom(CatalogObject o, double x, double y, double ceiling, double? width = null, double? depth = null)
+    {
+        ArgumentNullException.ThrowIfNull(o);
+        var drop = Math.Max(Domain.Constants.Plans.MinItemCentimetres, Math.Min(o.Height, ceiling - SL.LightClearance));
+
+        var min = Domain.Constants.Plans.MinItemCentimetres;
+
+        // Spotlights spread over a room too small for a margin are one spotlight.
+        return new PlanItem(o.Label, o.Shape, Math.Round(x), Math.Round(y), Math.Max(min, Math.Round(width ?? o.Width)), Math.Max(min, Math.Round(depth ?? o.Depth)), drop, 0, o.Color,
+            material: o.Material);
+    }
+
+    /// <summary>
     /// The worktop a kitchen unit starts with: white quartz, with a low upstand along a wall (an island has none); none
     /// for other objects.
     /// </summary>

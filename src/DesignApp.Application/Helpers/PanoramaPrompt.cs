@@ -28,7 +28,9 @@ public static class PanoramaPrompt
 
         var culture = CultureInfo.InvariantCulture;
         var text = new StringBuilder(P.Intro(PlanPrompt.Words(plan.RoomType.ToString())));
-        var objects = plan.Items.Where(i => !i.Shape.IsZone()).Select((item, n) => $"{n + 1}. {PlanPrompt.Describe(item, P.Wide(PlanPrompt.Cm(item.Width)))}");
+        var objects = plan.Items
+            .Where(i => !i.Shape.IsZone())
+            .Select((item, n) => $"{n + 1}. {PlanPrompt.Describe(item, P.Wide(PlanPrompt.Cm(item.Width)))}{PlanPrompt.Switch(item, plan)}");
         var areas = plan.Items.Where(i => i.Shape.IsZone()).Select(Area).ToList();
 
         // The style and the user's own words come early, as in the photo prompt: at the end the model ignored them.
@@ -43,7 +45,7 @@ public static class PanoramaPrompt
         }
 
         text.Append(culture, $" {P.Room(PlanPrompt.Cm(plan.Width * 100), PlanPrompt.Cm(plan.Length * 100), PlanPrompt.Cm(plan.Height * 100))}");
-        text.Append(culture, $" {PlanPrompt.Surfaces(plan, wall => P.OwnWall(plan.Outline.Walls[wall].Side))} {Constants.Builder.Prompt.Mood(plan.Finish.TimeOfDay)}");
+        text.Append(culture, $" {PlanPrompt.Surfaces(plan, wall => P.OwnWall(plan.Outline.Walls[wall].Side))} {PlanPrompt.Light(plan)}");
         text.Append(culture, $" {P.Contents} {P.Objects(string.Join("; ", objects))}");
 
         if (areas.Count > 0)

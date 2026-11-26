@@ -56,9 +56,10 @@ internal static class PlanItemsJson
     /// <param name="Material">What it is made of (missing when none, and in older plans).</param>
     /// <param name="Covering">A window's curtains or blinds (missing when none, and in older plans).</param>
     /// <param name="Worktop">A kitchen unit's worktop (missing when none, and in older plans).</param>
+    /// <param name="Lit">Whether a light is switched on (missing to follow the time of day, and in older plans).</param>
     private sealed record StoredItem(string Label, ItemShape Shape, double X, double Y, double Width, double Depth, double Height, int Rotation, string Color,
         int? Wall = null, double Elevation = 0, ItemForm? Form = null, ItemParts? Parts = null, IReadOnlyList<string>? Decorations = null, string? Material = null,
-        StoredCovering? Covering = null, StoredWorktop? Worktop = null)
+        StoredCovering? Covering = null, StoredWorktop? Worktop = null, bool? Lit = null)
     {
         /// <summary>The stored form of an object.</summary>
         /// <param name="i">The object.</param>
@@ -67,7 +68,7 @@ internal static class PlanItemsJson
             return new(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation,
                 i.Form == ItemForm.Standard ? null : i.Form, i.Parts, i.Decorations.IsEmpty ? null : i.Decorations.Names, i.Material.Length == 0 ? null : i.Material,
                 i.Covering is { } c ? new StoredCovering(c.Kind, c.Color.Value, c.Fabric, c.Length) : null,
-                i.Worktop is { } t ? new StoredWorktop(t.Material, t.Color.Value, t.Backsplash, t.BacksplashColor.Value) : null);
+                i.Worktop is { } t ? new StoredWorktop(t.Material, t.Color.Value, t.Backsplash, t.BacksplashColor.Value) : null, i.Lit);
         }
 
         /// <summary>The object this stored form describes.</summary>
@@ -76,7 +77,7 @@ internal static class PlanItemsJson
             return new(Label, Shape, X, Y, Width, Depth, Height, Rotation, HexColor.Parse(Color), Wall, Elevation, Form ?? ItemForm.Standard, Parts,
                 Decorations is null ? null : new ItemDecorations(Decorations), Material,
                 Covering is { } c ? new WindowCovering(c.Kind, HexColor.Parse(c.Color), c.Fabric, c.Length) : null,
-                Worktop is { } t ? new Worktop(t.Material, HexColor.Parse(t.Color), t.Backsplash, HexColor.Parse(t.BacksplashColor)) : null);
+                Worktop is { } t ? new Worktop(t.Material, HexColor.Parse(t.Color), t.Backsplash, HexColor.Parse(t.BacksplashColor)) : null, Lit);
         }
     }
 

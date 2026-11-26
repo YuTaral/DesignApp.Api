@@ -449,7 +449,9 @@ public class PlanTests
             plan.Update("", width, length, 2.6, Wall, Floor, FloorType.Wood, PlanWall.Back, items, Now);
             Assert.Single(items, i => i.Shape == ItemShape.Door);
             Assert.Contains(items, i => i.Shape == ItemShape.Window);
-            var standing = items.Where(i => i.Wall is null).ToList();
+            // A ceiling light, over whatever stands below it (so it isn't counted as standing).
+            Assert.Contains(items, i => i.Shape.IsCeilingLight());
+            var standing = items.Where(i => i.Wall is null && !i.Shape.IsCeilingLight()).ToList();
 
             Assert.True(standing.Count >= (width * length >= 12 ? 4 : 2), $"{type} {width}×{length}: only {standing.Count} objects");
 

@@ -65,23 +65,61 @@ public static class StarterLayout
                 break;
         }
 
+        CeilingLights(type, room);
+
         return room.Items;
     }
 
     /// <summary>
-    /// The finish a furnished room of a type starts with: tiled walls and spotlights in a bathroom, spotlights in a
-    /// kitchen, an accent wall behind the bed in a bedroom (the right wall) and a kids' room, the usual pendant elsewhere.
+    /// The ceiling lights a furnished room starts with: a grid of spotlights in a kitchen or bathroom (and two pendants
+    /// over a kitchen island), a chandelier over a dining table, a pendant in a living room, and a flush ceiling lamp
+    /// elsewhere, in the room's middle unless over what they light.
+    /// </summary>
+    /// <param name="type">The room type.</param>
+    /// <param name="room">The room, furnished.</param>
+    private static void CeilingLights(RoomType type, LayoutRoom room)
+    {
+        var (w, l) = (room.Width, room.Length);
+        var table = room.Items.FirstOrDefault(i => i.Shape is ItemShape.Table);
+        var island = room.Items.FirstOrDefault(i => i.Label.Contains(SL.IslandWord, StringComparison.Ordinal));
+
+        switch (type)
+        {
+            case RoomType.Kitchen or RoomType.Bathroom:
+                room.Light(SL.CeilingLightKeys[CeilingLight.Spotlights], w / 2, l / 2, width: w - 2 * SL.SpotInset, depth: l - 2 * SL.SpotInset);
+
+                if (island is { } i)
+                {
+                    room.Light(SL.CeilingLightKeys[CeilingLight.Pendant], i.X - i.Width / 4, i.Y);
+                    room.Light(SL.CeilingLightKeys[CeilingLight.Pendant], i.X + i.Width / 4, i.Y);
+                }
+
+                break;
+            case RoomType.DiningRoom:
+                room.Light(SL.CeilingLightKeys[CeilingLight.Chandelier], table?.X ?? w / 2, table?.Y ?? l / 2);
+                break;
+            case RoomType.LivingRoom:
+                room.Light(SL.CeilingLightKeys[CeilingLight.Pendant], w / 2, l / 2);
+                break;
+            default:
+                room.Light(SL.CeilingLightKeys[CeilingLight.FlushLight], w / 2, l / 2);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The finish a furnished room of a type starts with: tiled walls in a bathroom, an accent wall behind the bed in a
+    /// bedroom (the right wall) and a kids' room, the plain finish elsewhere. Its ceiling lights are objects (see
+    /// <see cref="CeilingLights"/>).
     /// </summary>
     /// <param name="type">The room type.</param>
     public static RoomFinish FinishFor(RoomType type)
     {
         var plain = RoomFinish.Default;
-        var spotlights = new RoomFinish(plain.Walls, [], plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay);
 
         return type switch
         {
-            RoomType.Bathroom => new RoomFinish(WallFinish.Tiles, [], plain.CeilingColor, plain.TrimColor, CeilingLight.Spotlights, plain.TimeOfDay),
-            RoomType.Kitchen => spotlights,
+            RoomType.Bathroom => new RoomFinish(WallFinish.Tiles, [], plain.CeilingColor, plain.TrimColor, plain.TimeOfDay),
             RoomType.Bedroom => Accent(plain, HexColor.Parse(SL.BedroomAccent)),
             RoomType.KidsRoom => Accent(plain, HexColor.Parse(SL.KidsAccent)),
             _ => plain,
@@ -93,8 +131,7 @@ public static class StarterLayout
     /// <param name="color">The wall's color.</param>
     private static RoomFinish Accent(RoomFinish plain, HexColor color)
     {
-        return new RoomFinish(plain.Walls, [new WallLook((int)PlanWall.Right, WallFinish.Paint, color)], plain.CeilingColor, plain.TrimColor, plain.CeilingLight,
-            plain.TimeOfDay);
+        return new RoomFinish(plain.Walls, [new WallLook((int)PlanWall.Right, WallFinish.Paint, color)], plain.CeilingColor, plain.TrimColor, plain.TimeOfDay);
     }
 
     /// <summary>

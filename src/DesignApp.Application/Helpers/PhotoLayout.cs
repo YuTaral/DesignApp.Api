@@ -135,7 +135,7 @@ public static class PhotoLayout
         }
 
         return new PlanItem(item.Label, item.Shape, item.X, item.Y, item.Width, item.Depth, item.Height, (item.Rotation + 180) % 360, item.Color, item.Wall,
-            item.Elevation, item.Form, item.Parts, item.Decorations, item.Material, item.Covering, item.Worktop);
+            item.Elevation, item.Form, item.Parts, item.Decorations, item.Material, item.Covering, item.Worktop, item.Lit);
     }
 
     /// <summary>
@@ -204,6 +204,6 @@ public static class PhotoLayout
     private static PlanItem Moved(PlanItem item, double x, double y, double? elevation = null)
     {
         return new PlanItem(item.Label, item.Shape, Math.Round(x), Math.Round(y), item.Width, item.Depth, item.Height, item.Rotation, item.Color, item.Wall,
-            elevation ?? item.Elevation, item.Form, item.Parts, item.Decorations, item.Material, item.Covering, item.Worktop);
+            elevation ?? item.Elevation, item.Form, item.Parts, item.Decorations, item.Material, item.Covering, item.Worktop, item.Lit);
     }
 }

@@ -26,8 +26,10 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var objects = (await response.Content.ReadFromJsonAsync<List<JsonElement>>())!;
 
-        // Every room's eighteen: six windows and doors, nine things to hang and three for the floor; then the bedroom's seventeen.
-        Assert.Equal(35, objects.Count);
+        // Every room's twenty-three: six windows and doors, nine things to hang, three for the floor and five ceiling lights;
+        // then the bedroom's seventeen.
+        Assert.Equal(40, objects.Count);
+        Assert.Contains(objects, o => o.GetProperty("key").GetString() == "pendant-light" && o.GetProperty("shape").GetString() == "PendantLight");
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "painting" && o.GetProperty("shape").GetString() == "Picture" && o.GetProperty("elevation").GetDouble() == 130);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "window" && o.GetProperty("elevation").GetDouble() == 90);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "double-bed" && o.GetProperty("shape").GetString() == "Bed");
@@ -172,7 +174,7 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         {
             walls = "Plaster",
             ownWalls = new[] { new { wall = 0, finish = "Brick", color = "#B5654A" }, new { wall = 2, finish = "Paint", color = "#8A9A84" } },
-            ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", ceilingLight = "Chandelier", timeOfDay = "Evening",
+            ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", timeOfDay = "Evening", tone = "Cool", north = "Right",
         };
         var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
 
@@ -181,9 +183,11 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var plan = (await created.Content.ReadFromJsonAsync<JsonElement>())!;
         var id = plan.GetProperty("id").GetGuid();
 
-        // A furnished bedroom starts with the wall behind its bed in its own color, and its furniture in its materials.
-        Assert.Equal((1, "Paint", "Pendant"), (plan.GetProperty("finish").GetProperty("ownWalls")[0].GetProperty("wall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
-            plan.GetProperty("finish").GetProperty("ceilingLight").GetString()));
+        // A furnished bedroom starts with the wall behind its bed in its own color, warm light, north at the back, a flush
+        // ceiling lamp, and its furniture in its materials.
+        Assert.Equal((1, "Paint", "Warm", "Back"), (plan.GetProperty("finish").GetProperty("ownWalls")[0].GetProperty("wall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
+            plan.GetProperty("finish").GetProperty("tone").GetString(), plan.GetProperty("finish").GetProperty("north").GetString()));
+        Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("shape").GetString() == "CeilingLamp");
         Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("material").GetString() == "linen upholstered");
 
         using var saved = await Client.PutAsJsonAsync($"/api/plans/{id}", new
@@ -198,16 +202,16 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         using var refused = await Client.PutAsJsonAsync($"/api/plans/{id}", new
         {
             name = "Sleep", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", view = 0, items = new[] { sofa },
-            finish = new { finish.walls, ownWalls = new[] { new { wall = 9, finish = "Brick", color = "#B5654A" } }, finish.ceilingColor, finish.trimColor, finish.ceilingLight, finish.timeOfDay },
+            finish = new { finish.walls, ownWalls = new[] { new { wall = 9, finish = "Brick", color = "#B5654A" } }, finish.ceilingColor, finish.trimColor, finish.timeOfDay },
         });
         var stored = read.GetProperty("finish");
 
         saved.EnsureSuccessStatusCode();
         kept.EnsureSuccessStatusCode();
         // Saving without a finish keeps the one the room has, each wall in its own look; a wall the room lacks is refused.
-        Assert.Equal(("Plaster", "0 Brick #B5654A | 2 Paint #8A9A84", "#3A3A3A", "Chandelier", "Evening"), (stored.GetProperty("walls").GetString(),
+        Assert.Equal(("Plaster", "0 Brick #B5654A | 2 Paint #8A9A84", "#3A3A3A", "Cool Right", "Evening"), (stored.GetProperty("walls").GetString(),
             string.Join(" | ", stored.GetProperty("ownWalls").EnumerateArray().Select(w => $"{w.GetProperty("wall").GetInt32()} {w.GetProperty("finish").GetString()} {w.GetProperty("color").GetString()}")),
-            stored.GetProperty("ceilingColor").GetString(), stored.GetProperty("ceilingLight").GetString(), stored.GetProperty("timeOfDay").GetString()));
+            stored.GetProperty("ceilingColor").GetString(), $"{stored.GetProperty("tone").GetString()} {stored.GetProperty("north").GetString()}", stored.GetProperty("timeOfDay").GetString()));
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }
@@ -243,9 +247,10 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal("Waiting", room.GetProperty("status").GetString());
         Assert.Equal(HttpStatusCode.Created, built.StatusCode);
-        // The fake AI's living room, linked to the photo, with every object kept.
+        // The fake AI's living room, linked to the photo, with every object kept and the pendant it sees on the ceiling.
         Assert.Equal(("LivingRoom", roomId), (read.GetProperty("roomType").GetString(), read.GetProperty("fromRoomId").GetGuid()));
-        Assert.Equal(8, read.GetProperty("items").GetArrayLength());
+        Assert.Equal(9, read.GetProperty("items").GetArrayLength());
+        Assert.Contains(read.GetProperty("items").EnumerateArray(), i => i.GetProperty("shape").GetString() == "PendantLight");
         Assert.Equal(0, answer.GetProperty("leftOut").GetArrayLength());
         // Seen from where the photo was taken, kept with the plan.
         Assert.Equal(("Spot", 200.0, 470.0), (read.GetProperty("corner").GetString(), read.GetProperty("cameraSpot").GetProperty("x").GetDouble(),

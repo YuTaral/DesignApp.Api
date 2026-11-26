@@ -19,6 +19,13 @@ public static class ItemShapes
         return shape is ItemShape.Picture or ItemShape.WallBox;
     }
 
+    /// <summary>Whether a shape is a light on the ceiling (placed on the plan; its height is how far down it reaches).</summary>
+    /// <param name="shape">The shape.</param>
+    public static bool IsCeilingLight(this ItemShape shape)
+    {
+        return shape is ItemShape.PendantLight or ItemShape.Spotlight or ItemShape.Chandelier or ItemShape.CeilingLamp or ItemShape.TrackLight;
+    }
+
     /// <summary>Whether a shape is an area of the floor or a wall in its own material: a surface, not furniture.</summary>
     /// <param name="shape">The shape.</param>
     public static bool IsZone(this ItemShape shape)

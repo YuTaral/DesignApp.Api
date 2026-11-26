@@ -139,6 +139,21 @@ public static class Constants
             public const double CameraClearance = 80;
             /// <summary>The worktop a new kitchen's units start with: white quartz.</summary>
             public const string WorktopMaterial = "quartz";
+            /// <summary>The catalog's ceiling light for each kind of light read from a photo.</summary>
+            public static readonly IReadOnlyDictionary<CeilingLight, string> CeilingLightKeys = new Dictionary<CeilingLight, string>
+            {
+                [CeilingLight.Pendant] = "pendant-light",
+                [CeilingLight.Spotlights] = "spotlights",
+                [CeilingLight.Chandelier] = "chandelier",
+                [CeilingLight.FlushLight] = "ceiling-lamp",
+                [CeilingLight.TrackLights] = "track-light",
+            };
+            /// <summary>The word in a kitchen island's name, which a new kitchen hangs its pendants over.</summary>
+            public const string IslandWord = "island";
+            /// <summary>How far in from the walls, in cm, a new kitchen's or bathroom's spotlights start.</summary>
+            public const double SpotInset = 70;
+            /// <summary>How low, in cm above the floor, a ceiling light read from a photo or in a new room may reach at most.</summary>
+            public const double LightClearance = 180;
             /// <summary>The color a new kitchen's worktop and upstand start in.</summary>
             public const string WorktopColor = "#F2F0EB";
             /// <summary>The color a new room's curtains and blinds start in: a warm white.</summary>
@@ -347,15 +362,14 @@ public static class Constants
             /// by <see cref="OwnWallsJoin"/>; empty for none.
             /// </param>
             /// <param name="ceiling">The ceiling's color.</param>
-            /// <param name="light">The ceiling light in words (see <see cref="LightWords"/>).</param>
             /// <param name="trim">The skirting boards' color.</param>
             /// <param name="floor">The floor's material.</param>
             /// <param name="floorColor">The floor's color.</param>
-            public static string Surfaces(string walls, string ownWalls, string ceiling, string light, string trim, string floor, string floorColor)
+            public static string Surfaces(string walls, string ownWalls, string ceiling, string trim, string floor, string floorColor)
             {
                 var except = ownWalls.Length == 0 ? "" : $", except {ownWalls}";
 
-                return $"The walls are {walls}{except}. The ceiling is {ceiling} with {light}, the skirting boards are {trim}, " +
+                return $"The walls are {walls}{except}. The ceiling is {ceiling}, the skirting boards are {trim}, " +
                     $"and the floor is {floor} in {floorColor}.";
             }
 
@@ -390,19 +404,107 @@ public static class Constants
             public static readonly (string Far, string Left, string Right, string Facing) WallNames =
                 ("the far wall", "the left wall", "the right wall", "a wall facing the camera");
 
-            /// <summary>A ceiling light in words.</summary>
-            /// <param name="light">The light.</param>
-            public static string LightWords(CeilingLight light)
+            /// <summary>The points of the compass clockwise from north, as a plan's sides run clockwise from its back.</summary>
+            public static readonly string[] Compass = ["north", "east", "south", "west"];
+
+            /// <summary>
+            /// Where the sun is at a time of day, as a point of <see cref="Compass"/> (as in the northern half of the
+            /// world): the east in the morning, the south at midday, the west at golden hour; <c>null</c> in the evening.
+            /// </summary>
+            /// <param name="time">The time of day.</param>
+            public static int? SunFrom(TimeOfDay time)
             {
-                return light switch
+                return time switch
                 {
-                    CeilingLight.None => "no ceiling light",
-                    CeilingLight.Spotlights => "recessed spotlights",
-                    CeilingLight.Chandelier => "a chandelier hanging from its middle",
-                    CeilingLight.FlushLight => "a flush round ceiling light",
-                    CeilingLight.TrackLights => "black track lights",
-                    _ => "a pendant lamp hanging from its middle",
+                    TimeOfDay.Morning => 1,
+                    TimeOfDay.Midday => 2,
+                    TimeOfDay.GoldenHour => 3,
+                    _ => null,
                 };
+            }
+
+            /// <summary>
+            /// The daylight through the windows: which ways they face, and whether the sun shines straight in through some of
+            /// them (laying patches of sunlight) or is round the other side (soft, indirect light).
+            /// </summary>
+            /// <param name="facing">Which ways the windows face, such as "south and west".</param>
+            /// <param name="time">The time of day (not the evening).</param>
+            /// <param name="sunThrough">The way the windows the sun shines through face; <c>null</c> when none do.</param>
+            public static string Daylight(string facing, TimeOfDay time, string? sunThrough)
+            {
+                var sun = time switch
+                {
+                    TimeOfDay.Morning => "low morning",
+                    TimeOfDay.GoldenHour => "low, golden evening",
+                    _ => "high midday",
+                };
+                var light = sunThrough is null
+                    ? "The sun is round the other side of the house, so the daylight through them is soft and indirect."
+                    : $"The {sun} sun shines straight in through the {sunThrough}-facing windows, laying bright patches of sunlight on the floor.";
+
+                return $"The windows face {facing}. {light}";
+            }
+
+            /// <summary>The color of the lights' light in words.</summary>
+            /// <param name="tone">The tone.</param>
+            public static string ToneWords(LightTone tone)
+            {
+                return tone switch
+                {
+                    LightTone.Neutral => "neutral white (about 4000 K)",
+                    LightTone.Cool => "cool, daylight white (about 5500 K)",
+                    _ => "warm white (about 2700 K)",
+                };
+            }
+
+            /// <summary>The light the lamps and ceiling lights that are on give.</summary>
+            /// <param name="tone">Its color in words (see <see cref="ToneWords"/>).</param>
+            public static string Lit(string tone)
+            {
+                return $"The lights that are switched on give {tone} light.";
+            }
+
+            /// <summary>Whether a lamp or light is on, after its description.</summary>
+            /// <param name="on">Whether it is on.</param>
+            public static string Switched(bool on)
+            {
+                return on ? ", switched on and glowing" : ", switched off";
+            }
+
+            /// <summary>The heading before the ceiling lights the photo sees.</summary>
+            public const string CeilingHeading = "On the ceiling: ";
+
+            /// <summary>A light on the ceiling: where its middle is, how big, and how far down it reaches.</summary>
+            /// <param name="name">It in words, with its color.</param>
+            /// <param name="fromLeft">Its middle's distance from the left wall.</param>
+            /// <param name="fromFar">Its middle's distance from the far wall.</param>
+            /// <param name="across">Its size left to right.</param>
+            /// <param name="deep">Its size front to back.</param>
+            /// <param name="drop">How far down from the ceiling it reaches.</param>
+            public static string Ceiling(string name, string fromLeft, string fromFar, string across, string deep, string drop)
+            {
+                return $"{name}: middle {fromLeft} cm from the left wall and {fromFar} cm from the far wall, {across} × {deep} cm, " +
+                    $"reaching {drop} cm down from the ceiling";
+            }
+
+            /// <summary>How many recessed spotlights there are, after their name; nothing for a single one.</summary>
+            /// <param name="across">How many left to right.</param>
+            /// <param name="deep">How many front to back.</param>
+            public static string SpotCount(int across, int deep)
+            {
+                return (across * deep) switch
+                {
+                    1 => "",
+                    _ when across == 1 || deep == 1 => $" ({across * deep} in a row)",
+                    _ => $" ({across * deep} in a {across} × {deep} grid)",
+                };
+            }
+
+            /// <summary>How many spot heads a track light has, after its name.</summary>
+            /// <param name="heads">How many.</param>
+            public static string TrackHeads(int heads)
+            {
+                return $" with {heads} spot head{(heads == 1 ? "" : "s")}";
             }
 
             /// <summary>The photo's light and mood at a time of day.</summary>
@@ -413,7 +515,7 @@ public static class Constants
                 {
                     TimeOfDay.Morning => "Soft, cool morning daylight comes in through the windows.",
                     TimeOfDay.GoldenHour => "Warm, low golden-hour sunlight streams in through the windows, casting long soft shadows.",
-                    TimeOfDay.Evening => "It is evening: dark outside the windows, with the lamps and the ceiling light on, giving the room a warm, cosy glow.",
+                    TimeOfDay.Evening => "It is evening: dark outside the windows, the room lit only by its lamps and lights that are switched on.",
                     _ => "Bright, even daylight fills the room.",
                 };
             }

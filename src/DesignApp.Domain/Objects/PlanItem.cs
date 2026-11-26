@@ -65,6 +65,12 @@ public sealed record PlanItem
     /// <summary>A kitchen unit's worktop and backsplash; <c>null</c> for none, and for other objects.</summary>
     public Worktop? Worktop { get; }
 
+    /// <summary>
+    /// Whether a light (a lamp, a ceiling light, or a piece with a lamp on it) is switched on; <c>null</c> to follow the
+    /// time of day (on in the evening). See <see cref="Extensions.Lights"/>.
+    /// </summary>
+    public bool? Lit { get; }
+
     /// <summary>Creates an object.</summary>
     /// <param name="label">What it is.</param>
     /// <param name="shape">How it is drawn.</param>
@@ -83,10 +89,11 @@ public sealed record PlanItem
     /// <param name="material">What it is made of, such as "velvet"; none when missing or empty.</param>
     /// <param name="covering">A window's curtains or blinds; <c>null</c> for none, and for other objects.</param>
     /// <param name="worktop">A kitchen unit's worktop and backsplash; <c>null</c> for none, and for other objects.</param>
+    /// <param name="lit">Whether a light is switched on; <c>null</c> to follow the time of day.</param>
     /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline, a part or the material is invalid.</exception>
     public PlanItem(string label, ItemShape shape, double x, double y, double width, double depth, double height, int rotation, HexColor color,
         int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null,
-        string? material = null, WindowCovering? covering = null, Worktop? worktop = null)
+        string? material = null, WindowCovering? covering = null, Worktop? worktop = null, bool? lit = null)
     {
         var made = (material ?? "").Trim();
 
@@ -149,6 +156,11 @@ public sealed record PlanItem
             throw new DomainException(Constants.Messages.PlanZoneMaterial);
         }
 
+        if (shape.IsCeilingLight() && (wall.HasValue || elevation != 0 || decorations is { IsEmpty: false }))
+        {
+            throw new DomainException(Constants.Messages.PlanCeilingLight);
+        }
+
         if (covering is not null && shape is not ItemShape.Window)
         {
             throw new DomainException(Constants.Messages.PlanCovering);
@@ -175,7 +187,7 @@ public sealed record PlanItem
         }
 
         (Wall, Elevation, Form, Parts, Decorations, Material) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None, made);
-        (Covering, Worktop) = (covering, worktop);
+        (Covering, Worktop, Lit) = (covering, worktop, lit);
     }
 
     /// <summary>Whether a zone's material is one of its kind's: a floor type for a floor area, a wall finish for a wall area.</summary>

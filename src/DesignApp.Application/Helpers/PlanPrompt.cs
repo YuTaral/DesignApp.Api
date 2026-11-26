@@ -45,7 +45,7 @@ public static partial class PlanPrompt
         var text = new StringBuilder();
         var camera = new PlanCamera(frame.Across, plan.Height * 100, frame.Pose);
         var standing = plan.Items
-            .Where(i => i.Wall is null && !i.Shape.IsZone())
+            .Where(i => i.Wall is null && !i.Shape.IsZone() && !i.Shape.IsCeilingLight())
             .Select(item => (Item: item, Seen: Look(Footprint(item), frame, camera)))
             .Where(seen => seen.Seen.Edges is not null)
             .ToList();
@@ -59,6 +59,11 @@ public static partial class PlanPrompt
             .Select(item => (Item: item, Seen: Look(OnWallPoints(item, plan.Outline, item.Depth), frame, camera)))
             .Where(seen => seen.Seen.Edges is not null)
             .ToList();
+        var ceiling = plan.Items
+            .Where(i => i.Shape.IsCeilingLight())
+            .Select(item => (Item: item, Seen: Look(Hanging(item, plan.Height * 100), frame, camera)))
+            .Where(seen => seen.Seen.Edges is not null)
+            .ToList();
         // Decorations are drawn only on objects the photo shows, so only those decide the sentence.
         var decorated = standing.Concat(openings).Concat(mounted).Any(seen => !seen.Item.Decorations.IsEmpty);
 
@@ -68,7 +73,7 @@ public static partial class PlanPrompt
         if (B.Prompt.Style(style) is { Length: > 0 } styled)
         {
             text.Append(culture, $" {styled}");
-            text.Append(Kept(standing.Concat(mounted).Select(seen => seen.Item).ToList()));
+            text.Append(Kept(standing.Concat(mounted).Concat(ceiling).Select(seen => seen.Item).ToList()));
         }
 
         if (instructions?.Trim().TrimEnd('.') is { Length: > 0 } extra)
@@ -83,7 +88,7 @@ public static partial class PlanPrompt
             text.Append(culture, $" {B.Prompt.Shape(walls)}");
         }
 
-        text.Append(culture, $" {Surfaces(plan, frame)} {B.Prompt.Mood(plan.Finish.TimeOfDay)}");
+        text.Append(culture, $" {Surfaces(plan, frame)} {Light(plan)}");
         text.Append(Zones(plan, frame, camera));
         text.Append(culture, $" {frame.CameraPlace.Sentence(frame.Pose)}");
         text.Append(culture, $" {(decorated ? B.Prompt.WithDecorations : B.Prompt.Undecorated)}");
@@ -91,7 +96,7 @@ public static partial class PlanPrompt
         if (standing.Count > 0)
         {
             text.Append(culture, $" {B.Prompt.ObjectsHeading}");
-            text.Append(string.Join("; ", standing.Select((seen, n) => $"{n + 1}. {Standing(seen.Item, frame)}{Cut(seen.Seen)}{Decorations(seen.Item)}")));
+            text.Append(string.Join("; ", standing.Select((seen, n) => $"{n + 1}. {Standing(seen.Item, frame)}{Cut(seen.Seen)}{Decorations(seen.Item)}{Switch(seen.Item, plan)}")));
             text.Append('.');
         }
 
@@ -102,7 +107,12 @@ public static partial class PlanPrompt
 
         if (mounted.Count > 0)
         {
-            text.Append(culture, $" {B.Prompt.MountedHeading}{string.Join("; ", mounted.Select(seen => Hung(seen.Item, frame) + Cut(seen.Seen) + Decorations(seen.Item)))}.");
+            text.Append(culture, $" {B.Prompt.MountedHeading}{string.Join("; ", mounted.Select(seen => Hung(seen.Item, frame) + Cut(seen.Seen) + Decorations(seen.Item) + Switch(seen.Item, plan)))}.");
+        }
+
+        if (ceiling.Count > 0)
+        {
+            text.Append(culture, $" {B.Prompt.CeilingHeading}{string.Join("; ", ceiling.Select(seen => Ceiling(seen.Item, frame) + Cut(seen.Seen) + Switch(seen.Item, plan)))}.");
         }
 
         if (standing.Count > 0 || mounted.Count > 0)
@@ -139,7 +149,7 @@ public static partial class PlanPrompt
             .Where(w => w.Name is not null)
             .Select(w => B.Prompt.OwnWall(w.Name!, w.Look));
 
-        return B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), B.Prompt.LightWords(finish.CeilingLight), Color(finish.TrimColor),
+        return B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
             B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
     }
 
@@ -233,6 +243,78 @@ public static partial class PlanPrompt
                 yield return (px, py, item.Height);
             }
         }
+    }
+
+    /// <summary>Points over a light on the ceiling: a grid over its footprint, at the ceiling and as low as it reaches.</summary>
+    /// <param name="item">The ceiling light.</param>
+    /// <param name="ceiling">The ceiling's height, in centimetres.</param>
+    private static IEnumerable<(double X, double Y, double Height)> Hanging(PlanItem item, double ceiling)
+    {
+        return Footprint(item).Select(p => (p.X, p.Y, p.Height == 0 ? ceiling : ceiling - item.Height));
+    }
+
+    /// <summary>
+    /// A light on the ceiling: its name with its color (and how many spotlights or spot heads), where its middle is as the
+    /// photo sees it, its size, and how far down it reaches.
+    /// </summary>
+    /// <param name="item">The ceiling light.</param>
+    /// <param name="frame">The photo's frame.</param>
+    private static string Ceiling(PlanItem item, Frame frame)
+    {
+        var (fromLeft, fromFar, across, deep) = AsSeen(item, frame);
+        var (spotsAcross, spotsDeep) = item.Spots();
+        var count = item.Shape switch
+        {
+            ItemShape.Spotlight => B.Prompt.SpotCount(spotsAcross, spotsDeep),
+            ItemShape.TrackLight => B.Prompt.TrackHeads(item.TrackHeads()),
+            _ => "",
+        };
+
+        return B.Prompt.Ceiling(Named(item) + count, Cm(fromLeft), Cm(fromFar), Cm(across), Cm(deep), Cm(item.Height));
+    }
+
+    /// <summary>Whether a lamp or light is on, after its description; nothing for what gives no light.</summary>
+    /// <param name="item">The object.</param>
+    /// <param name="plan">The room, for its time of day.</param>
+    internal static string Switch(PlanItem item, RoomPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+
+        return item.GivesLight() ? B.Prompt.Switched(item.IsOn(plan.Finish.TimeOfDay)) : "";
+    }
+
+    /// <summary>
+    /// The light in the room: the time of day's mood; then, by day, which ways the windows face and whether the sun shines
+    /// straight in through some of them; and the color of the lights that are on, if any are.
+    /// </summary>
+    /// <param name="plan">The room.</param>
+    internal static string Light(RoomPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        var finish = plan.Finish;
+        var text = new StringBuilder(B.Prompt.Mood(finish.TimeOfDay));
+        // Each window's way, as a point of the compass: the plan's sides run clockwise from its back, as the compass does from north.
+        var facing = plan.Items
+            .Where(i => i.Shape is ItemShape.Window)
+            .Select(i => ((int)plan.Outline.Walls[i.Wall!.Value].Side - (int)finish.North + 4) % 4)
+            .Distinct()
+            .Order()
+            .ToList();
+        var sun = B.Prompt.SunFrom(finish.TimeOfDay);
+
+        if (sun is { } from && facing.Count > 0)
+        {
+            var ways = Listed([.. facing.Select(point => B.Prompt.Compass[point])]);
+
+            text.Append(' ').Append(B.Prompt.Daylight(ways, finish.TimeOfDay, facing.Contains(from) ? B.Prompt.Compass[from] : null));
+        }
+
+        if (plan.Items.Any(i => i.IsOn(finish.TimeOfDay)))
+        {
+            text.Append(' ').Append(B.Prompt.Lit(B.Prompt.ToneWords(finish.Tone)));
+        }
+
+        return text.ToString();
     }
 
     /// <summary>Points over a window, door or hung thing on the plan: a grid over its face, out from its wall.</summary>

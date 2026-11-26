@@ -165,6 +165,18 @@ public static class Constants
         /// <summary>How high a window's bottom usually is above the floor, in centimetres.</summary>
         public const double WindowSill = 90;
 
+        /// <summary>
+        /// The words naming something that gives light, in an object's name or a decoration: a wall sconce, a table lamp,
+        /// under-cabinet lights.
+        /// </summary>
+        public const string LightWords = @"\b(lamps?|lights?|sconces?|chandeliers?|lanterns?)\b";
+
+        /// <summary>How far apart recessed spotlights are in a row or grid, in centimetres (a spotlights object spans them).</summary>
+        public const double SpotSpacing = 120;
+
+        /// <summary>How far apart the spot heads on a track light are, in centimetres.</summary>
+        public const double TrackHeadSpacing = 50;
+
         /// <summary>How high a new object hung on a wall usually starts above the floor, in centimetres.</summary>
         public const double MountedElevation = 140;
 
@@ -266,6 +278,9 @@ public static class Constants
         /// <summary>A covering on something that isn't a window, or one not in the lists, or with too long a fabric.</summary>
         public static readonly string PlanCovering =
             $"Only a window has curtains or blinds, of the kinds and lengths offered, with a fabric named in up to {Plans.MaxMaterialLength} characters.";
+
+        /// <summary>A ceiling light placed on a wall, raised, or with decorations.</summary>
+        public const string PlanCeilingLight = "A ceiling light hangs from the ceiling: it isn't on a wall, starts at the ceiling and has no decorations.";
 
         /// <summary>A floor or wall area whose material isn't a floor type or wall finish, or that has decorations.</summary>
         public const string PlanZoneMaterial = "A floor area needs a floor material (such as Tiles), and a wall area a wall finish (such as Brick); neither has decorations.";
@@ -590,6 +605,27 @@ public static class Constants
         /// a surface, not furniture.
         /// </summary>
         WallZone,
+        /// <summary>A pendant light hanging from the ceiling on a cord, its height the drop from the ceiling.</summary>
+        PendantLight,
+        /// <summary>Recessed spotlights in the ceiling: one, or a row or grid of them over the size given.</summary>
+        Spotlight,
+        /// <summary>A chandelier hanging from the ceiling.</summary>
+        Chandelier,
+        /// <summary>A flush light fixed to the ceiling.</summary>
+        CeilingLamp,
+        /// <summary>A track on the ceiling with spot heads along it.</summary>
+        TrackLight,
+    }
+
+    /// <summary>The color of a built room's lamps and ceiling lights.</summary>
+    public enum LightTone
+    {
+        /// <summary>Warm white, cosy (about 2700 K).</summary>
+        Warm,
+        /// <summary>Neutral white (about 4000 K).</summary>
+        Neutral,
+        /// <summary>Cool, daylight white (about 5500 K).</summary>
+        Cool,
     }
 
     /// <summary>
@@ -756,7 +792,7 @@ public static class Constants
         Concrete,
     }
 
-    /// <summary>The light on a built room's ceiling.</summary>
+    /// <summary>The light on a room's ceiling, as read from a photo (a built room has ceiling lights as objects).</summary>
     public enum CeilingLight
     {
         /// <summary>No ceiling light.</summary>

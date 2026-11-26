@@ -24,6 +24,7 @@ namespace DesignApp.Api.Requests;
 /// <param name="Material">What it is made of or covered in, such as "velvet"; none when missing or empty.</param>
 /// <param name="Covering">A window's curtains or blinds; null for none, and for other objects.</param>
 /// <param name="Worktop">A kitchen unit's worktop and backsplash; null for none, and for other objects.</param>
+/// <param name="Lit">Whether a lamp or light is switched on; null to follow the time of day (on in the evening).</param>
 public sealed record PlanItemRequest(string? Label, ItemShape Shape, double X, double Y, double Width, double Depth, double Height, int Rotation, string? Color,
     int? Wall = null, double Elevation = 0, ItemForm Form = ItemForm.Standard, ItemPartsRequest? Parts = null, IReadOnlyList<string>? Decorations = null,
-    string? Material = null, WindowCoveringRequest? Covering = null, WorktopRequest? Worktop = null);
+    string? Material = null, WindowCoveringRequest? Covering = null, WorktopRequest? Worktop = null, bool? Lit = null);

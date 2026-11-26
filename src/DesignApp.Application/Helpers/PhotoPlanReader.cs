@@ -6,6 +6,8 @@ using DesignApp.Domain.Objects;
 
 using static DesignApp.Domain.Constants;
 
+using SL = DesignApp.Application.Constants.Builder.Layout;
+
 namespace DesignApp.Application.Helpers;
 
 /// <summary>
@@ -42,9 +44,15 @@ public static class PhotoPlanReader
         var (tidied, unplaced) = PhotoLayout.Tidy(width, length, height, items, camera);
         var wallColor = HexColor.TryParse(answer.WallColor, out var walls) ? walls : HexColor.Parse(Plans.DefaultWallColor);
         var floorColor = HexColor.TryParse(answer.FloorColor, out var floor) ? floor : HexColor.Parse(Plans.DefaultFloorColor);
-        var finish = new RoomFinish(answer.Walls, [], plain.CeilingColor, plain.TrimColor, answer.CeilingLight, plain.TimeOfDay);
+        var finish = new RoomFinish(answer.Walls, [], plain.CeilingColor, plain.TrimColor, plain.TimeOfDay);
+        // The ceiling light the photo shows, in the room's middle (spotlights spread over it); it takes no floor, so it isn't tidied.
+        var light = SL.CeilingLightKeys.TryGetValue(answer.CeilingLight, out var key) && byKey.TryGetValue(key, out var lamp)
+            ? LayoutRoom.LightFrom(lamp, width * 50, length * 50, height * 100,
+                lamp.Shape is ItemShape.Spotlight ? width * 100 - 2 * SL.SpotInset : null, lamp.Shape is ItemShape.Spotlight ? length * 100 - 2 * SL.SpotInset : null)
+            : null;
+        List<PlanItem> lights = light is null ? [] : [light];
 
-        return new TidiedPhotoPlan(width, length, height, wallColor, floorColor, finish, camera, [.. tidied.Take(Plans.MaxItems)], [.. leftOut, .. unplaced]);
+        return new TidiedPhotoPlan(width, length, height, wallColor, floorColor, finish, camera, [.. tidied.Take(Plans.MaxItems - lights.Count), .. lights], [.. leftOut, .. unplaced]);
     }
 
     /// <summary>A place on the plan kept between two ends (a value that isn't a number is taken as the far one).</summary>

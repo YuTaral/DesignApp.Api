@@ -6,14 +6,15 @@ namespace DesignApp.Domain.Objects;
 
 /// <summary>
 /// How a built room's walls and ceiling are finished and lit: the walls' finish (each wall may have its own finish and
-/// color instead), the ceiling's and the skirting boards' colors, the ceiling light, and the time of day its photo is
-/// taken at.
+/// color instead), the ceiling's and the skirting boards' colors, the time of day its photo is taken at, the color of
+/// its lamps' and ceiling lights' light, and which side of the plan faces north (where the sun comes from). The ceiling
+/// lights themselves are objects on the plan.
 /// </summary>
 public sealed record RoomFinish
 {
-    /// <summary>Painted walls, none in its own look, a soft white ceiling, warm white trim, a pendant light, at midday.</summary>
+    /// <summary>Painted walls, none in its own look, a soft white ceiling, warm white trim, at midday, warm light, north at the back.</summary>
     public static readonly RoomFinish Default = new(WallFinish.Paint, [], HexColor.Parse(Constants.Plans.CeilingColor), HexColor.Parse(Constants.Plans.TrimColor),
-        CeilingLight.Pendant, TimeOfDay.Midday);
+        TimeOfDay.Midday);
 
     /// <summary>What the walls are finished in (in the room's wall color), but those in <see cref="OwnWalls"/>.</summary>
     public WallFinish Walls { get; }
@@ -27,25 +28,30 @@ public sealed record RoomFinish
     /// <summary>The skirting boards' color (windows and doors keep their own colors).</summary>
     public HexColor TrimColor { get; }
 
-    /// <summary>The light on the ceiling.</summary>
-    public CeilingLight CeilingLight { get; }
-
     /// <summary>When the photo is taken.</summary>
     public TimeOfDay TimeOfDay { get; }
+
+    /// <summary>The color of the lamps' and ceiling lights' light.</summary>
+    public LightTone Tone { get; }
+
+    /// <summary>The side of the plan that faces north, which decides where the sun comes in from at each time of day.</summary>
+    public PlanWall North { get; }
 
     /// <summary>Creates a finish.</summary>
     /// <param name="walls">What the walls are finished in.</param>
     /// <param name="ownWalls">The walls in their own finish and color; each wall at most once.</param>
     /// <param name="ceilingColor">The ceiling's color.</param>
     /// <param name="trimColor">The skirting boards' color.</param>
-    /// <param name="ceilingLight">The ceiling light.</param>
     /// <param name="timeOfDay">When the photo is taken.</param>
+    /// <param name="tone">The color of the lamps' and ceiling lights' light.</param>
+    /// <param name="north">The side of the plan that faces north.</param>
     /// <exception cref="DomainException">A choice isn't one of the lists, or a wall has its own look twice.</exception>
-    public RoomFinish(WallFinish walls, IReadOnlyList<WallLook> ownWalls, HexColor ceilingColor, HexColor trimColor, CeilingLight ceilingLight, TimeOfDay timeOfDay)
+    public RoomFinish(WallFinish walls, IReadOnlyList<WallLook> ownWalls, HexColor ceilingColor, HexColor trimColor, TimeOfDay timeOfDay,
+        LightTone tone = LightTone.Warm, PlanWall north = PlanWall.Back)
     {
         ArgumentNullException.ThrowIfNull(ownWalls);
 
-        if (!Enum.IsDefined(walls) || !Enum.IsDefined(ceilingLight) || !Enum.IsDefined(timeOfDay))
+        if (!Enum.IsDefined(walls) || !Enum.IsDefined(timeOfDay) || !Enum.IsDefined(tone) || !Enum.IsDefined(north))
         {
             throw new DomainException(Constants.Messages.PlanFinish);
         }
@@ -56,14 +62,14 @@ public sealed record RoomFinish
         }
 
         (Walls, OwnWalls) = (walls, [.. ownWalls.OrderBy(w => w.Wall)]);
-        (CeilingColor, TrimColor, CeilingLight, TimeOfDay) = (ceilingColor, trimColor, ceilingLight, timeOfDay);
+        (CeilingColor, TrimColor, TimeOfDay, Tone, North) = (ceilingColor, trimColor, timeOfDay, tone, north);
     }
 
     /// <summary>This finish without the walls' own looks of walls a room no longer has, the rest the same.</summary>
     /// <param name="wallCount">How many walls the room has.</param>
     public RoomFinish Within(int wallCount)
     {
-        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, CeilingLight, TimeOfDay);
+        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, TimeOfDay, Tone, North);
     }
 
     /// <summary>A wall's finish and color: its own, or the room's.</summary>
@@ -77,7 +83,7 @@ public sealed record RoomFinish
     /// <inheritdoc/>
     public bool Equals(RoomFinish? other)
     {
-        return other is not null && (Walls, CeilingColor, TrimColor, CeilingLight, TimeOfDay) == (other.Walls, other.CeilingColor, other.TrimColor, other.CeilingLight, other.TimeOfDay)
+        return other is not null && (Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North) == (other.Walls, other.CeilingColor, other.TrimColor, other.TimeOfDay, other.Tone, other.North)
             && OwnWalls.SequenceEqual(other.OwnWalls);
     }
 
@@ -86,7 +92,7 @@ public sealed record RoomFinish
     {
         var hash = new HashCode();
 
-        hash.Add((Walls, CeilingColor, TrimColor, CeilingLight, TimeOfDay));
+        hash.Add((Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North));
 
         foreach (var wall in OwnWalls)
         {

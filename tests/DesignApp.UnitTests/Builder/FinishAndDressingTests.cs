@@ -35,12 +35,12 @@ public class FinishAndDressingTests
         return plan;
     }
 
-    /// <summary>A finish with brick on some walls, a dark ceiling, black trim, a chandelier, in the evening.</summary>
+    /// <summary>A finish with brick on some walls, a dark ceiling, black trim, in the evening, cool light, north on the right.</summary>
     /// <param name="brickWalls">The brick walls' numbers.</param>
     private static RoomFinish Moody(params int[] brickWalls)
     {
         return new RoomFinish(WallFinish.Plaster, [.. brickWalls.Select(w => new WallLook(w, WallFinish.Brick, Brick))], HexColor.Parse("#3A3A3A"), HexColor.Parse("#1E1E1E"),
-            CeilingLight.Chandelier, TimeOfDay.Evening);
+            TimeOfDay.Evening, LightTone.Cool, PlanWall.Right);
     }
 
     [Fact]
@@ -51,7 +51,9 @@ public class FinishAndDressingTests
         Assert.Equal(Moody((int)PlanWall.Left), plan.Finish);
         Assert.Equal(RoomFinish.Default, RoomPlan.Create(Guid.CreateVersion7(Now), "user-1", "", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood,
             AiMode.Fake, Now).Finish);
-        Assert.Throws<DomainException>(() => new RoomFinish((WallFinish)99, [], Wall, Wall, CeilingLight.None, TimeOfDay.Midday));
+        Assert.Throws<DomainException>(() => new RoomFinish((WallFinish)99, [], Wall, Wall, TimeOfDay.Midday));
+        Assert.Throws<DomainException>(() => new RoomFinish(WallFinish.Paint, [], Wall, Wall, TimeOfDay.Midday, (LightTone)9));
+        Assert.Throws<DomainException>(() => new RoomFinish(WallFinish.Paint, [], Wall, Wall, TimeOfDay.Midday, LightTone.Warm, (PlanWall)9));
         Assert.Throws<DomainException>(() => new WallLook(-1, WallFinish.Paint, Brick));
         // Each wall has its own look at most once.
         Assert.Throws<DomainException>(() => Moody(1, 1));
@@ -93,13 +95,12 @@ public class FinishAndDressingTests
         // The 360-degree prompt names each by where it is in the panorama.
         Assert.Contains("except the wall in the middle of the panorama, which is exposed brick in", panorama, StringComparison.Ordinal);
         Assert.Contains(", and the wall to the left of the middle, which is exposed brick in", panorama, StringComparison.Ordinal);
-        Assert.Contains("(#3A3A3A) with a chandelier", moody, StringComparison.Ordinal);
+        Assert.Contains("The ceiling is charcoal (#3A3A3A), the skirting", moody, StringComparison.Ordinal);
         Assert.Contains("the skirting boards are black (#1E1E1E)", moody, StringComparison.Ordinal);
         Assert.Contains("It is evening", moody, StringComparison.Ordinal);
         // The wall behind the camera isn't in the photo, so its brick isn't mentioned.
         Assert.DoesNotContain("exposed brick", behind, StringComparison.Ordinal);
         Assert.Contains("The walls are painted", plain, StringComparison.Ordinal);
-        Assert.Contains("a pendant lamp", plain, StringComparison.Ordinal);
         Assert.Contains("Bright, even daylight", plain, StringComparison.Ordinal);
     }
 
@@ -199,7 +200,7 @@ public class FinishAndDressingTests
         var chosen = (await create.HandleAsync("", RoomType.Bedroom, 4, 4, 2.6, Wall, Floor, FloorType.Wood, AiMode.Fake, true, Moody(), null, null, CancellationToken.None)).Value;
 
         Assert.Equal(WallFinish.Tiles, bathroom.Finish.Walls);
-        Assert.Equal(CeilingLight.Spotlights, bathroom.Finish.CeilingLight);
+        Assert.Contains(bathroom.Items, i => i.Shape is ItemShape.Spotlight);
         Assert.Equal([(int)PlanWall.Right], bedroom.Finish.OwnWalls.Select(w => w.Wall));
         Assert.Equal(RoomFinish.Default, empty.Finish);
         Assert.Equal(Moody(), chosen.Finish);

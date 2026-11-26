@@ -153,7 +153,8 @@ public class PhotoPlanTests
 
         var outcome = await Build().HandleAsync(room.Id, null, null, CancellationToken.None);
         var plan = outcome!.Value.Plan;
-        var standing = plan.Items.Where(i => !i.Shape.IsOnWall() && i.Shape != ItemShape.Rug).ToList();
+        var standing = plan.Items.Where(i => !i.Shape.IsOnWall() && i.Shape != ItemShape.Rug && !i.Shape.IsCeilingLight()).ToList();
+        var light = plan.Items.Single(i => i.Shape.IsCeilingLight());
         var window = plan.Items.Single(i => i.Shape == ItemShape.Window);
         var tv = plan.Items.Single(i => i.Label == "wall TV");
         var saved = await _plans.ListByOwnerAsync("user-1", CancellationToken.None);
@@ -166,6 +167,8 @@ public class PhotoPlanTests
         Assert.Equal(20, plan.Items.Single(i => i.Label == "TV stand").Y);
         Assert.True(tv.X + tv.Width / 2 <= window.X - window.Width / 2 || tv.X - tv.Width / 2 >= window.X + window.Width / 2, $"TV at {tv.X}");
         Assert.Equal("velvet", plan.Items.Single(i => i.Label == "three-seat sofa").Material);
+        // The pendant the photo shows hangs in the room's middle.
+        Assert.Equal((ItemShape.PendantLight, 200.0, 250.0), (light.Shape, light.X, light.Y));
         // The photo is seen from where it was taken, and nothing stands there.
         Assert.Equal((ViewCorner.Spot, new OutlinePoint(200, 470)), (plan.Corner, plan.CameraSpot));
         Assert.DoesNotContain(standing, i => Math.Abs(i.X - 200) < i.Width / 2 + 40 && Math.Abs(i.Y - 470) < i.Depth / 2 + 40);

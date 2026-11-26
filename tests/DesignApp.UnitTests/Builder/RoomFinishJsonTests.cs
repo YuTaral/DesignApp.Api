@@ -14,7 +14,7 @@ public class RoomFinishJsonTests
         const string older = """{"walls":"Plaster","accentWall":2,"accentColor":"#B5654A","accentFinish":"Brick","ceilingColor":"#FAFAF7","trimColor":"#F4F1EA","ceilingLight":"Pendant","timeOfDay":"Midday"}""";
         const string none = """{"walls":"Paint","accentWall":null,"accentColor":"#8A9A84","accentFinish":"Paint","ceilingColor":"#FAFAF7","trimColor":"#F4F1EA","ceilingLight":"Pendant","timeOfDay":"Midday"}""";
         var finish = new RoomFinish(WallFinish.Paint, [new WallLook(0, WallFinish.Brick, HexColor.Parse("#B5654A")), new WallLook(3, WallFinish.Tiles, HexColor.Parse("#FFFFFF"))],
-            HexColor.Parse("#FAFAF7"), HexColor.Parse("#F4F1EA"), CeilingLight.Pendant, TimeOfDay.Evening);
+            HexColor.Parse("#FAFAF7"), HexColor.Parse("#F4F1EA"), TimeOfDay.Evening, LightTone.Neutral, PlanWall.Left);
 
         var read = (RoomFinish)RoomFinishJson.Converter.ConvertFromProvider(older)!;
         var plain = (RoomFinish)RoomFinishJson.Converter.ConvertFromProvider(none)!;
@@ -25,6 +25,8 @@ public class RoomFinishJsonTests
         Assert.Single(read.OwnWalls);
         Assert.Empty(plain.OwnWalls);
         Assert.Equal(finish, back);
+        // A row from before had no tone or north (and a ceiling light, now an object): warm light, north at the back.
+        Assert.Equal((LightTone.Warm, PlanWall.Back), (read.Tone, read.North));
         Assert.DoesNotContain("accent", json, StringComparison.OrdinalIgnoreCase);
     }
 }

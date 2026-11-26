@@ -110,6 +110,31 @@
       {"key": "standard", "name": "Carpet", "label": "carpet", "width": 250, "depth": 350, "height": 1},
       {"key": "runner", "name": "Runner", "label": "runner carpet", "width": 80, "depth": 300, "height": 1},
       {"key": "round", "name": "Round", "label": "round carpet", "width": 200, "depth": 200, "height": 1, "form": "Round"}
+    ] },
+    { "key": "pendant-light", "shape": "PendantLight", "color": "#F4F1EA", "materials": "lamp", "material": "linen shade", "variants": [
+      {"key": "dome", "name": "Dome", "label": "dome pendant light", "width": 40, "depth": 40, "height": 70},
+      {"key": "globe", "name": "Globe", "label": "globe pendant light", "width": 30, "depth": 30, "height": 60},
+      {"key": "cluster", "name": "Cluster", "label": "cluster pendant light", "width": 60, "depth": 60, "height": 80}
+    ] },
+    { "key": "spotlights", "shape": "Spotlight", "color": "#FFFFFF", "materials": "metal", "material": "brushed steel", "variants": [
+      {"key": "single", "name": "Single", "label": "recessed spotlight", "width": 10, "depth": 10, "height": 3},
+      {"key": "row", "name": "Row of three", "label": "row of recessed spotlights", "width": 240, "depth": 10, "height": 3},
+      {"key": "grid", "name": "Grid of four", "label": "grid of recessed spotlights", "width": 120, "depth": 120, "height": 3}
+    ] },
+    { "key": "chandelier", "shape": "Chandelier", "color": "#C9A86A", "materials": "lamp", "variants": [
+      {"key": "classic", "name": "Classic", "label": "chandelier", "width": 70, "depth": 70, "height": 70},
+      {"key": "small", "name": "Small", "label": "small chandelier", "width": 50, "depth": 50, "height": 55},
+      {"key": "large", "name": "Large", "label": "large chandelier", "width": 100, "depth": 100, "height": 90}
+    ] },
+    { "key": "ceiling-lamp", "shape": "CeilingLamp", "color": "#F4F1EA", "materials": "lamp", "material": "ceramic", "variants": [
+      {"key": "round", "name": "Round", "label": "flush ceiling lamp", "width": 40, "depth": 40, "height": 12},
+      {"key": "large", "name": "Large", "label": "large flush ceiling lamp", "width": 60, "depth": 60, "height": 14},
+      {"key": "square", "name": "Square", "label": "square flush ceiling lamp", "width": 45, "depth": 45, "height": 12}
+    ] },
+    { "key": "track-light", "shape": "TrackLight", "color": "#2A2A2A", "materials": "metal", "material": "powder-coated metal", "variants": [
+      {"key": "short", "name": "1 m", "label": "short track light", "width": 100, "depth": 6, "height": 15},
+      {"key": "standard", "name": "2 m", "label": "track light", "width": 200, "depth": 6, "height": 15},
+      {"key": "long", "name": "3 m", "label": "long track light", "width": 300, "depth": 6, "height": 15}
     ] }
   ],
   "rooms": {
