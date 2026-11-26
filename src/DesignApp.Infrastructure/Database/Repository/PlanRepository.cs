@@ -15,6 +15,12 @@ internal sealed class PlanRepository(AppDbContext db) : IPlanRepository
     }
 
     /// <inheritdoc/>
+    public void Remove(RoomPlan plan)
+    {
+        db.RoomPlans.Remove(plan);
+    }
+
+    /// <inheritdoc/>
     public Task<RoomPlan?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken)
     {
         return db.RoomPlans.SingleOrDefaultAsync(p => p.Id == id && p.OwnerId == ownerId, cancellationToken);
@@ -23,7 +29,7 @@ internal sealed class PlanRepository(AppDbContext db) : IPlanRepository
     /// <inheritdoc/>
     public async Task<IReadOnlyList<RoomPlan>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken)
     {
-        return await db.RoomPlans.Where(p => p.OwnerId == ownerId).ToListAsync(cancellationToken);
+        return await db.RoomPlans.Where(p => p.OwnerId == ownerId).OrderByDescending(p => p.UpdatedAt).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

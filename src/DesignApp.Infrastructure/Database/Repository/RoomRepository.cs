@@ -48,6 +48,14 @@ internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Room>> ListByPlanAsync(Guid planId, string ownerId, CancellationToken cancellationToken)
+    {
+        return await db.Rooms
+            .Where(r => r.PlanId == planId && r.OwnerId == ownerId)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken)
     {
         return db.Rooms.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);

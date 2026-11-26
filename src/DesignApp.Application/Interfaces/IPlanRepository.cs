@@ -9,6 +9,10 @@ public interface IPlanRepository
     /// <param name="plan">The plan.</param>
     void Add(RoomPlan plan);
 
+    /// <summary>Deletes a plan, with the next <see cref="SaveChangesAsync"/>.</summary>
+    /// <param name="plan">The plan.</param>
+    void Remove(RoomPlan plan);
+
     /// <summary>Finds a plan of an owner.</summary>
     /// <param name="id">The plan's id.</param>
     /// <param name="ownerId">The account or guest.</param>

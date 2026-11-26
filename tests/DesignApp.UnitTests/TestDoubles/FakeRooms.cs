@@ -51,6 +51,12 @@ internal sealed class FakeRooms : IRoomRepository
     }
 
     /// <inheritdoc/>
+    public Task<IReadOnlyList<Room>> ListByPlanAsync(Guid planId, string ownerId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<Room>>([.. Saved.Where(r => r.PlanId == planId && r.OwnerId == ownerId)]);
+    }
+
+    /// <inheritdoc/>
     public Task<Room?> GetForAnalysisAsync(Guid id, CancellationToken cancellationToken)
     {
         return Task.FromResult(Saved.SingleOrDefault(r => r.Id == id));

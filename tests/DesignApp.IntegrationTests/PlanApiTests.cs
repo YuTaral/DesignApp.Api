@@ -424,6 +424,40 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Contains("?set=", design.GetProperty("rooms")[0].GetProperty("photoUrl").GetString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task A_built_room_is_listed_and_deleted_by_its_owner_and_its_photos_room_stays_without_it()
+    {
+        var room = new { roomType = "Kitchen", width = 4.0, length = 5.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A", furnish = true };
+
+        using var keptCreated = await Client.PostAsJsonAsync("/api/plans", new { name = "Kept", room.roomType, room.width, room.length, room.height, room.wallColor, room.floorColor, room.furnish });
+        var kept = (await keptCreated.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var goneCreated = await Client.PostAsJsonAsync("/api/plans", new { name = "Gone", room.roomType, room.width, room.length, room.height, room.wallColor, room.floorColor });
+        var gone = (await goneCreated.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var generated = await GenerateAsync(gone);
+        var photoRoom = (await generated.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        var listed = await Client.GetFromJsonAsync<List<JsonElement>>("/api/plans");
+        using var stranger = factory.CreateClient();
+        using var strangers = await stranger.DeleteAsync($"/api/plans/{kept}");
+        using var deleted = await Client.DeleteAsync($"/api/plans/{gone}");
+        using var again = await Client.DeleteAsync($"/api/plans/{gone}");
+        using var read = await Client.GetAsync($"/api/plans/{gone}");
+        var after = await Client.GetFromJsonAsync<List<JsonElement>>("/api/plans");
+        var photo = await Client.GetFromJsonAsync<JsonElement>($"/api/rooms/{photoRoom}");
+
+        // Both are listed, the last saved first, with their objects and photos counted.
+        Assert.Equal(HttpStatusCode.OK, generated.StatusCode);
+        Assert.Equal([gone, kept], listed!.Select(p => p.GetProperty("id").GetGuid()).Take(2));
+        Assert.Equal((1, 0), (listed![0].GetProperty("photos").GetInt32(), listed[1].GetProperty("photos").GetInt32()));
+        Assert.True(listed[1].GetProperty("items").GetInt32() > 0);
+        // Only the owner deletes it; then it is gone, and its photo's room stays without it.
+        Assert.Equal(HttpStatusCode.NotFound, strangers.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, again.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, read.StatusCode);
+        Assert.Equal([kept], after!.Select(p => p.GetProperty("id").GetGuid()));
+        Assert.Equal(JsonValueKind.Null, photo.GetProperty("planId").ValueKind);
+    }
+
     /// <summary>Asks for a photo of a plan with a 3D view.</summary>
     /// <param name="id">The plan.</param>
     /// <param name="style">The photo's style, if any.</param>

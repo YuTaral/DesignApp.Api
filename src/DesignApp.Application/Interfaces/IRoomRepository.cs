@@ -35,6 +35,12 @@ public interface IRoomRepository
     /// <param name="cancellationToken">Cancels the query.</param>
     Task<IReadOnlyList<Room>> ListByOwnerAsync(string ownerId, CancellationToken cancellationToken);
 
+    /// <summary>The rooms holding a plan's photos.</summary>
+    /// <param name="planId">The plan.</param>
+    /// <param name="ownerId">The plan's owner.</param>
+    /// <param name="cancellationToken">Cancels the query.</param>
+    Task<IReadOnlyList<Room>> ListByPlanAsync(Guid planId, string ownerId, CancellationToken cancellationToken);
+
     /// <summary>Loads a room for background work, without checking who owns it. Never use this for a request.</summary>
     /// <param name="id">The room's id.</param>
     /// <param name="cancellationToken">Cancels the query.</param>

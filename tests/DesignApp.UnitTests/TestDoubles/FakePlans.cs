@@ -18,6 +18,12 @@ internal sealed class FakePlans : IPlanRepository
     }
 
     /// <inheritdoc/>
+    public void Remove(RoomPlan plan)
+    {
+        _plans.Remove(plan);
+    }
+
+    /// <inheritdoc/>
     public Task<RoomPlan?> FindAsync(Guid id, string ownerId, CancellationToken cancellationToken)
     {
         return Task.FromResult(_plans.SingleOrDefault(p => p.Id == id && p.OwnerId == ownerId));

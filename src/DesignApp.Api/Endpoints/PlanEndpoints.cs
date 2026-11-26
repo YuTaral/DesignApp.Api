@@ -41,9 +41,15 @@ internal static class PlanEndpoints
             .WithDescription("An optional `ai` query (`Fake` or `Real`, where `GET /api/ai` allows it) sets the AI its descriptions and photos use. " +
                 "An optional `designId` (one of the user's designs with room for another room) puts the room's photos into that design; " +
                 "without one, an optional `newDesign` (`name`, `description`) is the new design they go into, made with the first photo.");
+        plans.MapGet(Constants.Routes.Root, ListAsync)
+            .WithName("ListPlans")
+            .WithSummary("Lists the rooms the user builds, the most recently saved first, with how many objects and photos each has.");
         plans.MapGet(Constants.Routes.ById, GetAsync)
             .WithName("GetPlan")
             .WithSummary("Returns a built room with its walls and objects.");
+        plans.MapDelete(Constants.Routes.ById, DeleteAsync)
+            .WithName("DeletePlan")
+            .WithSummary("Deletes a built room. The rooms holding its photos stay, in their designs, without its 3D view.");
         plans.MapPut(Constants.Routes.ById, SaveAsync)
             .WithName("SavePlan")
             .WithSummary("Saves a built room as the user left it: name, walls, colors and objects (positions in centimetres from the back-left corner).");
@@ -113,6 +119,29 @@ internal static class PlanEndpoints
         return created.Succeeded
             ? TypedResults.Created(Constants.Routes.PlanUrl(created.Value.Id), PlanResponse.From(created.Value))
             : Problems.BadRequest(created.Error, Constants.Titles.PlanDesignRefused);
+    }
+
+    /// <summary><c>GET /api/plans</c>: the rooms the user builds.</summary>
+    /// <param name="getPlans">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>200 with the plans, the most recently saved first.</returns>
+    private static async Task<Ok<List<PlanSummaryResponse>>> ListAsync(GetPlans getPlans, CancellationToken cancellationToken)
+    {
+        var summaries = await getPlans.HandleAsync(cancellationToken);
+
+        return TypedResults.Ok(summaries.Select(PlanSummaryResponse.From).ToList());
+    }
+
+    /// <summary><c>DELETE /api/plans/{id}</c>: deletes a built room; its photos' rooms stay.</summary>
+    /// <param name="id">The plan's id.</param>
+    /// <param name="deletePlan">The use case.</param>
+    /// <param name="cancellationToken">Cancelled when the client disconnects.</param>
+    /// <returns>204, or 404 when the user has no such plan.</returns>
+    private static async Task<Results<NoContent, NotFound>> DeleteAsync(Guid id, DeletePlan deletePlan, CancellationToken cancellationToken)
+    {
+        var deleted = await deletePlan.HandleAsync(id, cancellationToken);
+
+        return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
     /// <summary><c>GET /api/plans/{id}</c>: a built room.</summary>

@@ -177,6 +177,15 @@ public sealed class Room
         return room;
     }
 
+    /// <summary>
+    /// Lets go of the plan whose photos the room holds, as the plan is deleted: the room and its photos (and a 360-degree
+    /// photo) stay, without the plan's 3D view.
+    /// </summary>
+    public void LeavePlan()
+    {
+        PlanId = null;
+    }
+
     /// <summary>Gives a room of a plan's photos its 360-degree photo.</summary>
     /// <param name="panorama">The panorama, stored in the room's folder.</param>
     /// <exception cref="DomainException">The room holds no plan's photos.</exception>
