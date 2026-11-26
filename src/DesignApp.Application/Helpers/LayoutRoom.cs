@@ -83,8 +83,8 @@ public sealed record LayoutRoom(double Width, double Length, double Height, IRea
     /// </summary>
     /// <param name="sill">How high their bottom is above the floor, in centimetres.</param>
     /// <param name="share">The glass wanted, as a share of the floor area.</param>
-    /// <param name="dressing">What they are dressed with, such as "sheer curtains".</param>
-    public void Windows(double sill, double share, string dressing)
+    /// <param name="dressing">What they are dressed with, such as sheer curtains.</param>
+    public void Windows(double sill, double share, WindowCovering dressing)
     {
         var window = Catalog.FirstOrDefault(o => o.Key == "window") ?? Catalog.FirstOrDefault(o => o.Shape == ItemShape.Window);
 
@@ -140,10 +140,10 @@ public sealed record LayoutRoom(double Width, double Length, double Height, IRea
     /// <param name="height">Its height.</param>
     /// <param name="sill">Its height above the floor.</param>
     /// <param name="dressing">What it is dressed with.</param>
-    private void AddWindow(CatalogObject window, PlanWall wall, double along, double width, double height, double sill, string dressing)
+    private void AddWindow(CatalogObject window, PlanWall wall, double along, double width, double height, double sill, WindowCovering dressing)
     {
         Items.Add(new PlanItem(window.Label, window.Shape, Math.Round(along), 0, width, window.Depth, Math.Round(height), 0, window.Color, (int)wall, sill,
-            decorations: new ItemDecorations([dressing]), material: window.Material));
+            material: window.Material, covering: dressing));
         _openings.Add((wall, along - width / 2, along + width / 2, sill, sill + height));
     }
 
@@ -480,9 +480,24 @@ public sealed record LayoutRoom(double Width, double Length, double Height, IRea
 
         var (w, d) = (Math.Round(width ?? o.Width), Math.Round(depth ?? o.Depth));
         var h = Math.Min(o.Height, Height - 5);
-        var item = new PlanItem(label ?? o.Label, o.Shape, Math.Round(x), Math.Round(y), w, d, h, rotation, o.Color, decorations: Dress(o), material: o.Material);
+        var item = new PlanItem(label ?? o.Label, o.Shape, Math.Round(x), Math.Round(y), w, d, h, rotation, o.Color, decorations: Dress(o), material: o.Material,
+            worktop: StartingWorktop(o));
 
         return Add(item);
+    }
+
+    /// <summary>
+    /// The worktop a kitchen unit starts with: white quartz, with a low upstand along a wall (an island has none); none
+    /// for other objects.
+    /// </summary>
+    /// <param name="o">The catalog object.</param>
+    private static Worktop? StartingWorktop(CatalogObject o)
+    {
+        var white = HexColor.Parse(SL.WorktopColor);
+
+        return o.Worktop is { } spot && o.Shape is ItemShape.Box
+            ? new Worktop(SL.WorktopMaterial, white, spot is WorktopSpot.Island ? BacksplashKind.None : BacksplashKind.Upstand, white)
+            : null;
     }
 
     /// <summary>Keeps a square of floor free of standing things (rugs may still lie there), such as where the camera stands.</summary>

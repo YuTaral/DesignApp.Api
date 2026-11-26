@@ -35,7 +35,8 @@ public sealed record PlanResponse(
     public static PlanResponse From(RoomPlan plan)
     {
         var items = plan.Items
-            .Select(i => new PlanItemRequest(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation, i.Form, ItemPartsRequest.From(i.Parts), i.Decorations.Names, i.Material))
+            .Select(i => new PlanItemRequest(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation, i.Form, ItemPartsRequest.From(i.Parts), i.Decorations.Names, i.Material, WindowCoveringRequest.From(i.Covering),
+                WorktopRequest.From(i.Worktop)))
             .ToList();
         var outline = plan.Outline.Points.Select(p => new OutlinePointRequest(p.X, p.Y)).ToList();
         var spot = plan.CameraSpot is { } at ? new OutlinePointRequest(at.X, at.Y) : null;

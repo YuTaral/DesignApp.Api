@@ -18,8 +18,10 @@ namespace DesignApp.Api.Responses;
 /// <param name="Decorations">The most popular small things to put on it (up to five), offered when it is added; may be empty.</param>
 /// <param name="Materials">What it is usually made of, to choose from; may be empty.</param>
 /// <param name="Material">The material it starts in; empty when it has none.</param>
+/// <param name="Worktop">Where a kitchen unit's worktop is (Wall or Island); null for other objects.</param>
 public sealed record CatalogObjectResponse(string Key, string Label, ItemShape Shape, double Width, double Depth, double Height, string Color, double Elevation,
-    ItemForm Form, IReadOnlyList<CatalogVariantResponse> Variants, IReadOnlyList<string> Decorations, IReadOnlyList<string> Materials, string Material)
+    ItemForm Form, IReadOnlyList<CatalogVariantResponse> Variants, IReadOnlyList<string> Decorations, IReadOnlyList<string> Materials, string Material,
+    WorktopSpot? Worktop = null)
 {
     /// <summary>Maps a catalog object to its API shape.</summary>
     /// <param name="o">The object.</param>
@@ -27,6 +29,6 @@ public sealed record CatalogObjectResponse(string Key, string Label, ItemShape S
     {
         var variants = (o.Variants ?? []).Select(CatalogVariantResponse.From).ToList();
 
-        return new(o.Key, o.Label, o.Shape, o.Width, o.Depth, o.Height, o.Color.Value, o.Elevation, o.Form, variants, o.Decorations ?? [], o.Materials ?? [], o.Material);
+        return new(o.Key, o.Label, o.Shape, o.Width, o.Depth, o.Height, o.Color.Value, o.Elevation, o.Form, variants, o.Decorations ?? [], o.Materials ?? [], o.Material, o.Worktop);
     }
 }

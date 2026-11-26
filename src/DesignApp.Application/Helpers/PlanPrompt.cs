@@ -321,13 +321,17 @@ public static partial class PlanPrompt
         return string.Join("; ", described);
     }
 
-    /// <summary>The decorations the user put on an object, as words after it, or none.</summary>
+    /// <summary>A window's curtains or blinds, a kitchen unit's worktop, and the decorations the user put on an object, as words after it, or none.</summary>
     /// <param name="item">The object.</param>
     private static string Decorations(PlanItem item)
     {
         var names = item.Decorations.Names;
+        var covering = item.Covering is { } c
+            ? B.Prompt.Covered(c.Kind, c.Fabric.Length == 0 ? "" : c.Fabric + " ", Color(c.Color), B.Prompt.LengthWords(c.Length))
+            : "";
+        var worktop = item.Worktop is { } t ? B.Prompt.Topped(t.Material, Color(t.Color), t.Backsplash, Color(t.BacksplashColor)) : "";
 
-        return names.Count == 0 ? "" : B.Prompt.Decorated(Listed(names));
+        return covering + worktop + (names.Count == 0 ? "" : B.Prompt.Decorated(Listed(names)));
     }
 
     /// <summary>

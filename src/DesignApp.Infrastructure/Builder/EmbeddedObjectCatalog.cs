@@ -76,7 +76,7 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
         }
 
         return new CatalogObject(o.Key, first.Label, first.Shape, first.Width, first.Depth, first.Height, HexColor.Parse(o.Color), first.Elevation, first.Form, variants,
-            (o.Decorations ?? []).AsReadOnly(), made.AsReadOnly(), material, (o.Dressing ?? []).AsReadOnly());
+            (o.Decorations ?? []).AsReadOnly(), made.AsReadOnly(), material, (o.Dressing ?? []).AsReadOnly(), o.Worktop);
     }
 
     /// <summary>The file: the objects every room has (windows and doors), and each room type's own.</summary>
@@ -94,8 +94,9 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
     /// <param name="Materials">The name of its material list in the file's <c>materials</c>, if any.</param>
     /// <param name="Material">The material it starts in (the list's first when missing).</param>
     /// <param name="Dressing">The decorations it has in a furnished new room, some of <paramref name="Decorations"/>.</param>
+    /// <param name="Worktop">Where a kitchen unit's worktop is, if it has one.</param>
     private sealed record CatalogFileObject(string Key, ItemShape Shape, string Color, List<CatalogFileVariant> Variants, List<string>? Decorations = null,
-        string? Materials = null, string? Material = null, List<string>? Dressing = null);
+        string? Materials = null, string? Material = null, List<string>? Dressing = null, WorktopSpot? Worktop = null);
 
     /// <summary>One variation of an object as the file stores it.</summary>
     /// <param name="Key">Its id within the object.</param>

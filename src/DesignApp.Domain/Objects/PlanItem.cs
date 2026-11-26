@@ -59,6 +59,12 @@ public sealed record PlanItem
     /// <summary>What it is made of or covered in, such as "velvet" or "oak"; empty when only its color is given.</summary>
     public string Material { get; }
 
+    /// <summary>A window's curtains or blinds; <c>null</c> for none, and for other objects.</summary>
+    public WindowCovering? Covering { get; }
+
+    /// <summary>A kitchen unit's worktop and backsplash; <c>null</c> for none, and for other objects.</summary>
+    public Worktop? Worktop { get; }
+
     /// <summary>Creates an object.</summary>
     /// <param name="label">What it is.</param>
     /// <param name="shape">How it is drawn.</param>
@@ -75,10 +81,12 @@ public sealed record PlanItem
     /// <param name="parts">An L- or P-shaped object's parts (the usual ones when missing); <c>null</c> for other outlines.</param>
     /// <param name="decorations">The small things on it, such as cushions; none when missing.</param>
     /// <param name="material">What it is made of, such as "velvet"; none when missing or empty.</param>
+    /// <param name="covering">A window's curtains or blinds; <c>null</c> for none, and for other objects.</param>
+    /// <param name="worktop">A kitchen unit's worktop and backsplash; <c>null</c> for none, and for other objects.</param>
     /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline, a part or the material is invalid.</exception>
     public PlanItem(string label, ItemShape shape, double x, double y, double width, double depth, double height, int rotation, HexColor color,
         int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null,
-        string? material = null)
+        string? material = null, WindowCovering? covering = null, Worktop? worktop = null)
     {
         var made = (material ?? "").Trim();
 
@@ -141,6 +149,16 @@ public sealed record PlanItem
             throw new DomainException(Constants.Messages.PlanZoneMaterial);
         }
 
+        if (covering is not null && shape is not ItemShape.Window)
+        {
+            throw new DomainException(Constants.Messages.PlanCovering);
+        }
+
+        if (worktop is not null && shape is not ItemShape.Box)
+        {
+            throw new DomainException(Constants.Messages.PlanWorktop);
+        }
+
         var hasParts = form is ItemForm.LShaped or ItemForm.PShaped;
 
         (Label, Shape, X, Y, Width, Depth, Height, Rotation, Color) = (label.Trim(), shape, x, y, width, depth, height, rotation, color);
@@ -157,6 +175,7 @@ public sealed record PlanItem
         }
 
         (Wall, Elevation, Form, Parts, Decorations, Material) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None, made);
+        (Covering, Worktop) = (covering, worktop);
     }
 
     /// <summary>Whether a zone's material is one of its kind's: a floor type for a floor area, a wall finish for a wall area.</summary>

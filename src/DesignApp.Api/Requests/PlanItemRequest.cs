@@ -22,6 +22,8 @@ namespace DesignApp.Api.Requests;
 /// <param name="Parts">An L- or P-shaped object's parts (the usual ones when missing); null for other outlines.</param>
 /// <param name="Decorations">The small things on it, such as "cushions", shown on it in the photo; none when missing.</param>
 /// <param name="Material">What it is made of or covered in, such as "velvet"; none when missing or empty.</param>
+/// <param name="Covering">A window's curtains or blinds; null for none, and for other objects.</param>
+/// <param name="Worktop">A kitchen unit's worktop and backsplash; null for none, and for other objects.</param>
 public sealed record PlanItemRequest(string? Label, ItemShape Shape, double X, double Y, double Width, double Depth, double Height, int Rotation, string? Color,
     int? Wall = null, double Elevation = 0, ItemForm Form = ItemForm.Standard, ItemPartsRequest? Parts = null, IReadOnlyList<string>? Decorations = null,
-    string? Material = null);
+    string? Material = null, WindowCoveringRequest? Covering = null, WorktopRequest? Worktop = null);

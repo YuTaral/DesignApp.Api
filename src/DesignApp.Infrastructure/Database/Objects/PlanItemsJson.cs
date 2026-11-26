@@ -54,22 +54,43 @@ internal static class PlanItemsJson
     /// <param name="Parts">An L- or P-shaped object's parts (missing for other outlines; the usual ones in older plans).</param>
     /// <param name="Decorations">The small things on it (missing when none).</param>
     /// <param name="Material">What it is made of (missing when none, and in older plans).</param>
+    /// <param name="Covering">A window's curtains or blinds (missing when none, and in older plans).</param>
+    /// <param name="Worktop">A kitchen unit's worktop (missing when none, and in older plans).</param>
     private sealed record StoredItem(string Label, ItemShape Shape, double X, double Y, double Width, double Depth, double Height, int Rotation, string Color,
-        int? Wall = null, double Elevation = 0, ItemForm? Form = null, ItemParts? Parts = null, IReadOnlyList<string>? Decorations = null, string? Material = null)
+        int? Wall = null, double Elevation = 0, ItemForm? Form = null, ItemParts? Parts = null, IReadOnlyList<string>? Decorations = null, string? Material = null,
+        StoredCovering? Covering = null, StoredWorktop? Worktop = null)
     {
         /// <summary>The stored form of an object.</summary>
         /// <param name="i">The object.</param>
         public static StoredItem From(PlanItem i)
         {
             return new(i.Label, i.Shape, i.X, i.Y, i.Width, i.Depth, i.Height, i.Rotation, i.Color.Value, i.Wall, i.Elevation,
-                i.Form == ItemForm.Standard ? null : i.Form, i.Parts, i.Decorations.IsEmpty ? null : i.Decorations.Names, i.Material.Length == 0 ? null : i.Material);
+                i.Form == ItemForm.Standard ? null : i.Form, i.Parts, i.Decorations.IsEmpty ? null : i.Decorations.Names, i.Material.Length == 0 ? null : i.Material,
+                i.Covering is { } c ? new StoredCovering(c.Kind, c.Color.Value, c.Fabric, c.Length) : null,
+                i.Worktop is { } t ? new StoredWorktop(t.Material, t.Color.Value, t.Backsplash, t.BacksplashColor.Value) : null);
         }
 
         /// <summary>The object this stored form describes.</summary>
         public PlanItem ToDomain()
         {
             return new(Label, Shape, X, Y, Width, Depth, Height, Rotation, HexColor.Parse(Color), Wall, Elevation, Form ?? ItemForm.Standard, Parts,
-                Decorations is null ? null : new ItemDecorations(Decorations), Material);
+                Decorations is null ? null : new ItemDecorations(Decorations), Material,
+                Covering is { } c ? new WindowCovering(c.Kind, HexColor.Parse(c.Color), c.Fabric, c.Length) : null,
+                Worktop is { } t ? new Worktop(t.Material, HexColor.Parse(t.Color), t.Backsplash, HexColor.Parse(t.BacksplashColor)) : null);
         }
     }
+
+    /// <summary>A window's curtains or blinds, as stored.</summary>
+    /// <param name="Kind">Which they are.</param>
+    /// <param name="Color">Their color, #RRGGBB.</param>
+    /// <param name="Fabric">What they are made of.</param>
+    /// <param name="Length">How far curtains hang.</param>
+    private sealed record StoredCovering(CoveringKind Kind, string Color, string Fabric, CurtainLength Length);
+
+    /// <summary>A kitchen unit's worktop, as stored.</summary>
+    /// <param name="Material">What it is made of.</param>
+    /// <param name="Color">Its color, #RRGGBB.</param>
+    /// <param name="Backsplash">What covers the wall behind it.</param>
+    /// <param name="BacksplashColor">The tiles' or glass's color, #RRGGBB.</param>
+    private sealed record StoredWorktop(string Material, string Color, BacksplashKind Backsplash, string BacksplashColor);
 }

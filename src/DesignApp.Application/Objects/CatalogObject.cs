@@ -25,6 +25,7 @@ namespace DesignApp.Application.Objects;
 /// <param name="Materials">What it is usually made of or covered in, to choose from (such as "linen" or "velvet"); none for an object the AI described.</param>
 /// <param name="Material">The material it starts in, one of <paramref name="Materials"/>; empty when it has none.</param>
 /// <param name="Dressing">The decorations it has in a furnished new room, some of <paramref name="Decorations"/>; none when missing.</param>
+/// <param name="Worktop">Where its worktop is, for a kitchen unit that has one; <c>null</c> for other objects.</param>
 public sealed record CatalogObject(string Key, string Label, ItemShape Shape, double Width, double Depth, double Height, HexColor Color, double Elevation = 0,
     ItemForm Form = ItemForm.Standard, IReadOnlyList<CatalogVariant>? Variants = null, IReadOnlyList<string>? Decorations = null,
-    IReadOnlyList<string>? Materials = null, string Material = "", IReadOnlyList<string>? Dressing = null);
+    IReadOnlyList<string>? Materials = null, string Material = "", IReadOnlyList<string>? Dressing = null, WorktopSpot? Worktop = null);

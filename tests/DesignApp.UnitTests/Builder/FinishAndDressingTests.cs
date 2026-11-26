@@ -143,9 +143,11 @@ public class FinishAndDressingTests
             var items = StarterLayout.For(type, 4, 5, 2.6, _catalog.ForRoom(type));
             var wet = type is RoomType.Kitchen or RoomType.Bathroom;
 
-            Assert.All(items.Where(i => i.Shape == ItemShape.Window), w => Assert.Equal([wet ? "roller blind" : "sheer curtains"], w.Decorations.Names));
+            Assert.All(items.Where(i => i.Shape == ItemShape.Window), w => Assert.Equal(wet ? CoveringKind.RollerBlind : CoveringKind.Sheers, w.Covering?.Kind));
             Assert.Contains(items, i => i.Shape.IsMounted());
-            Assert.True(items.Count(i => !i.Decorations.IsEmpty) >= 4, $"{type}: only {items.Count(i => !i.Decorations.IsEmpty)} dressed");
+            var dressed = items.Count(i => !i.Decorations.IsEmpty || i.Covering is not null);
+
+            Assert.True(dressed >= 4, $"{type}: only {dressed} dressed");
             Assert.True(items.Count(i => i.Material.Length > 0) >= items.Count - 2, $"{type}: {string.Join(", ", items.Where(i => i.Material.Length == 0).Select(i => i.Label))}");
         });
         var living = StarterLayout.For(RoomType.LivingRoom, 4, 5, 2.6, _catalog.ForRoom(RoomType.LivingRoom));

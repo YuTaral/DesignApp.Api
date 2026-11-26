@@ -25,22 +25,22 @@
       {"key": "standard", "name": "Standard", "label": "window", "width": 120, "depth": 10, "height": 140, "elevation": 90},
       {"key": "small", "name": "Small", "label": "small window", "width": 80, "depth": 10, "height": 100, "elevation": 110},
       {"key": "tall", "name": "Tall", "label": "tall window", "width": 100, "depth": 10, "height": 180, "elevation": 60}
-    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blind", "plants on the sill"] },
+    ], "decorations": ["plants on the sill", "a vase on the sill", "books on the sill", "candles on the sill", "a small sculpture on the sill"] },
     { "key": "wide-window", "shape": "Window", "color": "#F4F1EA", "materials": "window", "variants": [
       {"key": "standard", "name": "Wide", "label": "wide window", "width": 200, "depth": 10, "height": 150, "elevation": 80},
       {"key": "panoramic", "name": "Panoramic", "label": "panoramic window", "width": 300, "depth": 10, "height": 160, "elevation": 70},
       {"key": "ribbon", "name": "Ribbon", "label": "ribbon window", "width": 240, "depth": 10, "height": 60, "elevation": 150}
-    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blinds", "plants on the sill"] },
+    ], "decorations": ["plants on the sill", "a vase on the sill", "books on the sill", "candles on the sill", "a small sculpture on the sill"] },
     { "key": "french-window", "shape": "Window", "color": "#F4F1EA", "materials": "window", "variants": [
       {"key": "standard", "name": "Two-leaf", "label": "French window", "width": 140, "depth": 10, "height": 220, "elevation": 0},
       {"key": "single", "name": "Single", "label": "single French window", "width": 80, "depth": 10, "height": 220, "elevation": 0},
       {"key": "sliding", "name": "Sliding", "label": "sliding glass door", "width": 240, "depth": 10, "height": 220, "elevation": 0}
-    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "vertical blinds", "roller blinds"] },
+    ], "decorations": ["plants on the sill", "a vase on the sill", "books on the sill", "candles on the sill", "a small sculpture on the sill"] },
     { "key": "arched-window", "shape": "Window", "color": "#F4F1EA", "materials": "window", "variants": [
       {"key": "standard", "name": "Standard", "label": "arched window", "width": 100, "depth": 10, "height": 170, "elevation": 80, "form": "Arched"},
       {"key": "small", "name": "Small", "label": "small arched window", "width": 70, "depth": 10, "height": 110, "elevation": 110, "form": "Arched"},
       {"key": "tall", "name": "Tall", "label": "tall arched window", "width": 120, "depth": 10, "height": 230, "elevation": 20, "form": "Arched"}
-    ], "decorations": ["sheer curtains", "double sheer curtains", "curtains", "roller blind", "plants on the sill"] },
+    ], "decorations": ["plants on the sill", "a vase on the sill", "books on the sill", "candles on the sill", "a small sculpture on the sill"] },
     { "key": "door", "shape": "Door", "color": "#F4F1EA", "materials": "door", "variants": [
       {"key": "standard", "name": "Standard", "label": "door", "width": 90, "depth": 5, "height": 210, "elevation": 0},
       {"key": "narrow", "name": "Narrow", "label": "narrow door", "width": 80, "depth": 5, "height": 200, "elevation": 0},
@@ -288,7 +288,7 @@
       ] }
     ],
     "Kitchen": [
-      { "key": "base-cabinets", "shape": "Box", "color": "#F4F1EA", "materials": "cabinet", "dressing": ["potted herbs", "utensil holder"], "variants": [
+      { "key": "base-cabinets", "shape": "Box", "worktop": "Wall", "color": "#F4F1EA", "materials": "cabinet", "dressing": ["potted herbs", "utensil holder"], "variants": [
         {"key": "standard", "name": "Straight", "label": "base cabinets", "width": 240, "depth": 60, "height": 90},
         {"key": "corner", "name": "L-shaped", "label": "L-shaped base cabinets", "width": 240, "depth": 180, "height": 90, "form": "LShaped"},
         {"key": "short", "name": "Short", "label": "short base cabinets", "width": 120, "depth": 60, "height": 90}
@@ -308,7 +308,7 @@
         {"key": "range", "name": "Range", "label": "range cooker", "width": 90, "depth": 60, "height": 90},
         {"key": "large-range", "name": "Large range", "label": "large range cooker", "width": 110, "depth": 60, "height": 90}
       ], "decorations": ["kettle", "pots", "frying pan", "tea towel", "utensil holder"] },
-      { "key": "island", "shape": "Box", "color": "#4A6274", "materials": "cabinet", "dressing": ["fruit bowl", "vase with flowers"], "variants": [
+      { "key": "island", "shape": "Box", "worktop": "Island", "color": "#4A6274", "materials": "cabinet", "dressing": ["fruit bowl", "vase with flowers"], "variants": [
         {"key": "standard", "name": "Standard", "label": "kitchen island", "width": 180, "depth": 90, "height": 90},
         {"key": "large", "name": "Large", "label": "large kitchen island", "width": 240, "depth": 100, "height": 90},
         {"key": "small", "name": "Small", "label": "small kitchen island", "width": 120, "depth": 70, "height": 90}
@@ -348,12 +348,12 @@
         {"key": "wide", "name": "Wide", "label": "wide cooker hood", "width": 90, "depth": 50, "height": 60, "elevation": 150},
         {"key": "canopy", "name": "Canopy", "label": "canopy hood", "width": 90, "depth": 55, "height": 80, "elevation": 140}
       ], "decorations": [] },
-      { "key": "sink-unit", "shape": "Box", "color": "#F4F1EA", "materials": "cabinet", "dressing": ["dish soap", "tea towel"], "variants": [
+      { "key": "sink-unit", "shape": "Box", "worktop": "Wall", "color": "#F4F1EA", "materials": "cabinet", "dressing": ["dish soap", "tea towel"], "variants": [
         {"key": "standard", "name": "Single sink", "label": "sink base cabinet with a sink and tap", "width": 80, "depth": 60, "height": 90},
         {"key": "double", "name": "Double sink", "label": "sink base cabinet with a double sink and tap", "width": 120, "depth": 60, "height": 90},
         {"key": "butler", "name": "Butler sink", "label": "base cabinet with a ceramic butler sink", "width": 90, "depth": 60, "height": 90}
       ], "decorations": ["dish soap", "plant on the windowsill", "tea towel", "dish rack", "soap pump"] },
-      { "key": "dishwasher", "shape": "Box", "color": "#F4F1EA", "materials": "cabinet", "variants": [
+      { "key": "dishwasher", "shape": "Box", "worktop": "Wall", "color": "#F4F1EA", "materials": "cabinet", "variants": [
         {"key": "standard", "name": "Integrated", "label": "integrated dishwasher", "width": 60, "depth": 60, "height": 90},
         {"key": "slim", "name": "Slim", "label": "slim integrated dishwasher", "width": 45, "depth": 60, "height": 90},
         {"key": "freestanding", "name": "Freestanding", "label": "freestanding dishwasher", "width": 60, "depth": 60, "height": 85}

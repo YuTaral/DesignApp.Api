@@ -34,7 +34,11 @@ public static class StarterLayout
         var wet = type is RoomType.Kitchen or RoomType.Bathroom;
 
         room.Door();
-        room.Windows(wet ? SL.WetSill : SL.Sill, type is RoomType.Bathroom ? SL.BathroomGlassShare : SL.GlassShare, wet ? SL.Blind : SL.Curtains);
+        var dressed = wet
+            ? new WindowCovering(CoveringKind.RollerBlind, HexColor.Parse(SL.CoveringColor), SL.BlindFabric, CurtainLength.Sill)
+            : new WindowCovering(CoveringKind.Sheers, HexColor.Parse(SL.CoveringColor), SL.SheerFabric, CurtainLength.Floor);
+
+        room.Windows(wet ? SL.WetSill : SL.Sill, type is RoomType.Bathroom ? SL.BathroomGlassShare : SL.GlassShare, dressed);
 
         switch (type)
         {

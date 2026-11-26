@@ -259,6 +259,14 @@ public static class Constants
         /// <summary>An object's material is named too long.</summary>
         public static readonly string PlanItemMaterial = $"Name an object's material in up to {Plans.MaxMaterialLength} characters.";
 
+        /// <summary>A worktop on something that isn't a floor unit, or without a material, or with a backsplash not in the list.</summary>
+        public static readonly string PlanWorktop =
+            $"Only a kitchen unit on the floor has a worktop, with a material named in up to {Plans.MaxMaterialLength} characters and a backsplash from the list.";
+
+        /// <summary>A covering on something that isn't a window, or one not in the lists, or with too long a fabric.</summary>
+        public static readonly string PlanCovering =
+            $"Only a window has curtains or blinds, of the kinds and lengths offered, with a fabric named in up to {Plans.MaxMaterialLength} characters.";
+
         /// <summary>A floor or wall area whose material isn't a floor type or wall finish, or that has decorations.</summary>
         public const string PlanZoneMaterial = "A floor area needs a floor material (such as Tiles), and a wall area a wall finish (such as Brick); neither has decorations.";
 
@@ -675,6 +683,58 @@ public static class Constants
         Traditional,
         /// <summary>Geometric patterns, brass, velvet and lacquer.</summary>
         ArtDeco,
+    }
+
+    /// <summary>What covers the wall behind a kitchen worktop.</summary>
+    public enum BacksplashKind
+    {
+        /// <summary>Nothing: the wall as it is (an island has no wall behind it).</summary>
+        None,
+        /// <summary>A low upstand of the worktop's material along the wall.</summary>
+        Upstand,
+        /// <summary>The worktop's material running up the wall to the wall cabinets.</summary>
+        WorktopUp,
+        /// <summary>Tiles up to the wall cabinets.</summary>
+        Tiles,
+        /// <summary>A sheet of colored glass up to the wall cabinets.</summary>
+        Glass,
+    }
+
+    /// <summary>Where a catalog object's worktop is: along a wall (with a backsplash behind it) or on an island.</summary>
+    public enum WorktopSpot
+    {
+        /// <summary>Base cabinets, a sink unit or a dishwasher, along a wall.</summary>
+        Wall,
+        /// <summary>A kitchen island, with no wall behind it.</summary>
+        Island,
+    }
+
+    /// <summary>What a window of a built room is dressed with.</summary>
+    public enum CoveringKind
+    {
+        /// <summary>Sheer curtains that let the light through.</summary>
+        Sheers,
+        /// <summary>Full curtains, drawn open to the sides.</summary>
+        Curtains,
+        /// <summary>Sheer curtains under full curtains drawn open to the sides.</summary>
+        SheersAndCurtains,
+        /// <summary>A roller blind, half down.</summary>
+        RollerBlind,
+        /// <summary>A Roman blind folded up half way.</summary>
+        RomanBlind,
+        /// <summary>Venetian blinds of horizontal slats.</summary>
+        VenetianBlind,
+        /// <summary>Vertical blinds, drawn open.</summary>
+        VerticalBlinds,
+    }
+
+    /// <summary>How far a window's curtains hang.</summary>
+    public enum CurtainLength
+    {
+        /// <summary>To just below the windowsill.</summary>
+        Sill,
+        /// <summary>To the floor.</summary>
+        Floor,
     }
 
     /// <summary>What a built room's walls are finished in.</summary>

@@ -137,10 +137,16 @@ public static class Constants
             public const double NudgeReach = 120;
             /// <summary>The side, in cm, of the floor kept clear where the camera of a photo read into a plan stands.</summary>
             public const double CameraClearance = 80;
-            /// <summary>What a living room's, bedroom's, dining room's, office's or kids' room's windows start dressed with.</summary>
-            public const string Curtains = "sheer curtains";
-            /// <summary>What a kitchen's or bathroom's windows start dressed with.</summary>
-            public const string Blind = "roller blind";
+            /// <summary>The worktop a new kitchen's units start with: white quartz.</summary>
+            public const string WorktopMaterial = "quartz";
+            /// <summary>The color a new kitchen's worktop and upstand start in.</summary>
+            public const string WorktopColor = "#F2F0EB";
+            /// <summary>The color a new room's curtains and blinds start in: a warm white.</summary>
+            public const string CoveringColor = "#F4F1EA";
+            /// <summary>The fabric a new room's sheer curtains start in.</summary>
+            public const string SheerFabric = "linen";
+            /// <summary>The fabric a new kitchen's or bathroom's roller blind starts in.</summary>
+            public const string BlindFabric = "fabric";
             /// <summary>The least room left between something hung on a wall and the ceiling, in centimetres.</summary>
             public const double CeilingGap = 10;
             /// <summary>The color of the wall behind a furnished bedroom's bed: a muted sage.</summary>
@@ -270,6 +276,58 @@ public static class Constants
             public static string Decorated(string names)
             {
                 return $", decorated with {names}";
+            }
+
+            /// <summary>A window's curtains or blinds, after its description.</summary>
+            /// <param name="kind">Which they are.</param>
+            /// <param name="fabric">What they are made of, such as "linen", followed by a space; empty for none named.</param>
+            /// <param name="color">Their color in words.</param>
+            /// <param name="length">How far curtains hang, such as "floor-length".</param>
+            public static string Covered(CoveringKind kind, string fabric, string color, string length)
+            {
+                return kind switch
+                {
+                    CoveringKind.Sheers => $", dressed with {length} sheer {fabric}curtains in {color} hanging over the glass",
+                    CoveringKind.Curtains => $", dressed with {length} {fabric}curtains in {color} drawn open to both sides",
+                    CoveringKind.SheersAndCurtains => $", dressed with sheer white curtains over the glass under {length} {fabric}curtains in {color} drawn open to both sides",
+                    CoveringKind.RollerBlind => $", with {A(fabric + "roller")} {fabric}roller blind in {color} pulled half way down",
+                    CoveringKind.RomanBlind => $", with {A(fabric + "Roman")} {fabric}Roman blind in {color} folded half way up",
+                    CoveringKind.VenetianBlind => $", with {fabric}venetian blinds in {color}, their slats tilted open",
+                    _ => $", with {fabric}vertical blinds in {color} drawn open to one side",
+                };
+            }
+
+            /// <summary>A kitchen unit's worktop and the backsplash behind it, after its description.</summary>
+            /// <param name="material">What the worktop is made of, such as "quartz".</param>
+            /// <param name="color">Its color in words.</param>
+            /// <param name="backsplash">What covers the wall behind it.</param>
+            /// <param name="backsplashColor">The tiles' or glass's color in words.</param>
+            public static string Topped(string material, string color, BacksplashKind backsplash, string backsplashColor)
+            {
+                var behind = backsplash switch
+                {
+                    BacksplashKind.Upstand => $" and a low {material} upstand along the wall",
+                    BacksplashKind.WorktopUp => $", the same {material} running up the wall behind it to the wall cabinets",
+                    BacksplashKind.Tiles => $" and a backsplash of tiles in {backsplashColor} up to the wall cabinets",
+                    BacksplashKind.Glass => $" and a glass backsplash in {backsplashColor} up to the wall cabinets",
+                    _ => "",
+                };
+
+                return $", with {A(material)} {material} worktop in {color}{behind}";
+            }
+
+            /// <summary>"an" before a word that starts with a vowel, else "a".</summary>
+            /// <param name="next">The word that follows.</param>
+            private static string A(string next)
+            {
+                return next.Length > 0 && "aeiou".Contains(char.ToLowerInvariant(next[0]), StringComparison.Ordinal) ? "an" : "a";
+            }
+
+            /// <summary>How far curtains hang, in words.</summary>
+            /// <param name="length">The length.</param>
+            public static string LengthWords(CurtainLength length)
+            {
+                return length is CurtainLength.Floor ? "floor-length" : "sill-length";
             }
 
             /// <summary>The room's size as the photo sees it.</summary>
