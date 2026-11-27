@@ -40,6 +40,9 @@ public sealed record RoomFinish
     /// <summary>The room's architecture: its ceiling's shape, mouldings, wainscoting and casings.</summary>
     public RoomDetails Details { get; }
 
+    /// <summary>How the room is fitted: its cabinets' fronts and handles, the hardware, the sink, tap and basin, and the tile pattern.</summary>
+    public RoomFittings Fittings { get; }
+
     /// <summary>Creates a finish.</summary>
     /// <param name="walls">What the walls are finished in.</param>
     /// <param name="ownWalls">The walls in their own finish and color; each wall at most once.</param>
@@ -49,9 +52,10 @@ public sealed record RoomFinish
     /// <param name="tone">The color of the lamps' and ceiling lights' light.</param>
     /// <param name="north">The side of the plan that faces north.</param>
     /// <param name="details">The room's architecture; <see cref="RoomDetails.Default"/> when missing.</param>
+    /// <param name="fittings">How the room is fitted; <see cref="RoomFittings.Default"/> when missing.</param>
     /// <exception cref="DomainException">A choice isn't one of the lists, or a wall has its own look twice.</exception>
     public RoomFinish(WallFinish walls, IReadOnlyList<WallLook> ownWalls, HexColor ceilingColor, HexColor trimColor, TimeOfDay timeOfDay,
-        LightTone tone = LightTone.Warm, PlanWall north = PlanWall.Back, RoomDetails? details = null)
+        LightTone tone = LightTone.Warm, PlanWall north = PlanWall.Back, RoomDetails? details = null, RoomFittings? fittings = null)
     {
         ArgumentNullException.ThrowIfNull(ownWalls);
 
@@ -67,13 +71,14 @@ public sealed record RoomFinish
 
         (Walls, OwnWalls) = (walls, [.. ownWalls.OrderBy(w => w.Wall)]);
         (CeilingColor, TrimColor, TimeOfDay, Tone, North, Details) = (ceilingColor, trimColor, timeOfDay, tone, north, details ?? RoomDetails.Default);
+        Fittings = (fittings ?? RoomFittings.Default).Checked();
     }
 
     /// <summary>This finish without the walls' own looks of walls a room no longer has, the rest the same.</summary>
     /// <param name="wallCount">How many walls the room has.</param>
     public RoomFinish Within(int wallCount)
     {
-        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, TimeOfDay, Tone, North, Details);
+        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, TimeOfDay, Tone, North, Details, Fittings);
     }
 
     /// <summary>A wall's finish and color: its own, or the room's.</summary>
@@ -88,7 +93,7 @@ public sealed record RoomFinish
     public bool Equals(RoomFinish? other)
     {
         return other is not null && (Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North) == (other.Walls, other.CeilingColor, other.TrimColor, other.TimeOfDay, other.Tone, other.North)
-            && Details.Equals(other.Details) && OwnWalls.SequenceEqual(other.OwnWalls);
+            && Details.Equals(other.Details) && Fittings.Equals(other.Fittings) && OwnWalls.SequenceEqual(other.OwnWalls);
     }
 
     /// <inheritdoc/>
@@ -98,6 +103,7 @@ public sealed record RoomFinish
 
         hash.Add((Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North));
         hash.Add(Details);
+        hash.Add(Fittings);
 
         foreach (var wall in OwnWalls)
         {

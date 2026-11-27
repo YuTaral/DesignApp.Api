@@ -437,6 +437,87 @@ public static class Constants
                 };
             }
 
+            /// <summary>The cabinets in a sentence: their fronts and handles, whether the upper ones are glass-fronted, and the hardware.</summary>
+            /// <param name="fronts">The fronts.</param>
+            /// <param name="handles">The handles.</param>
+            /// <param name="glassUppers">Whether the upper cabinets have glass doors.</param>
+            /// <param name="hardware">The metal finish of the handles, taps and fittings.</param>
+            public static string Cabinets(CabinetFronts fronts, HandleStyle handles, bool glassUppers, Hardware hardware)
+            {
+                var doors = fronts switch
+                {
+                    CabinetFronts.Shaker => "shaker",
+                    CabinetFronts.Fluted => "fluted",
+                    _ => "flat slab",
+                };
+                var pulls = handles switch
+                {
+                    HandleStyle.Knob => "round knobs",
+                    HandleStyle.CupPull => "cup pulls",
+                    HandleStyle.EdgePull => "thin edge pulls along their top",
+                    HandleStyle.Handleless => "no handles (push-to-open)",
+                    _ => "slim bar handles",
+                };
+                var metal = hardware switch
+                {
+                    Hardware.BrushedBrass => "brushed brass",
+                    Hardware.MatteBlack => "matte black",
+                    Hardware.Chrome => "polished chrome",
+                    _ => "brushed stainless steel",
+                };
+                var glass = glassUppers ? ", the upper ones glass-fronted" : "";
+                var metals = handles is HandleStyle.Handleless ? "taps and fittings are" : "handles, taps and fittings are";
+
+                return $"The cabinets have {doors} fronts with {pulls}{glass}; {metals} {metal}.";
+            }
+
+            /// <summary>The kitchen sink and its tap in a sentence.</summary>
+            /// <param name="sink">The sink.</param>
+            /// <param name="tap">The tap.</param>
+            public static string Sink(KitchenSink sink, KitchenTap tap)
+            {
+                var bowl = sink switch
+                {
+                    KitchenSink.Farmhouse => "a deep farmhouse sink with an apron front",
+                    KitchenSink.Inset => "an inset sink with its rim on the worktop",
+                    _ => "an undermount sink",
+                };
+                var spout = tap switch
+                {
+                    KitchenTap.Bridge => "a traditional bridge tap",
+                    KitchenTap.PullDown => "a pull-down spray tap",
+                    _ => "a tall gooseneck tap",
+                };
+
+                return $"The kitchen sink is {bowl} with {spout}.";
+            }
+
+            /// <summary>The vanity's basin in a sentence.</summary>
+            /// <param name="basin">The basin.</param>
+            public static string Basin(Basin basin)
+            {
+                return basin switch
+                {
+                    Domain.Constants.Basin.Vessel => "The vanity has a vessel basin, a bowl sitting on its top.",
+                    Domain.Constants.Basin.Undermount => "The vanity has an undermount basin under its top.",
+                    _ => "The vanity has a basin moulded into its top.",
+                };
+            }
+
+            /// <summary>How the tiles are laid, in a sentence.</summary>
+            /// <param name="pattern">The pattern.</param>
+            public static string TilesLaid(TilePattern pattern)
+            {
+                return pattern switch
+                {
+                    TilePattern.Subway => "The tiles are subway tiles laid in a brick bond.",
+                    TilePattern.Herringbone => "The tiles are laid in a herringbone pattern.",
+                    TilePattern.VerticalStack => "The tiles are long tiles stacked vertically.",
+                    TilePattern.LargeFormat => "The tiles are large-format tiles, about 60 × 120 cm, with thin joints.",
+                    _ => "The tiles are square tiles laid in a straight grid.",
+                };
+            }
+
             /// <summary>A wall finish in words, said before its color: "painted", "exposed brick in"...</summary>
             /// <param name="finish">The finish.</param>
             public static string FinishWords(WallFinish finish)

@@ -43,7 +43,8 @@ internal static class RoomFinishJson
     /// that wall's own look, and saved again in the new form. Rows from before ceiling lights were objects had a
     /// <c>ceilingLight</c>, which a migration turned into a light on the plan (it is no longer read); they have no
     /// <paramref name="Tone"/> or <paramref name="North"/>, read as warm light with north at the back. Rows from before
-    /// rooms had architecture have no <paramref name="Details"/>, read as <see cref="RoomDetails.Default"/>.
+    /// rooms had architecture have no <paramref name="Details"/>, read as <see cref="RoomDetails.Default"/>, and those from before
+    /// rooms were fitted no <paramref name="Fittings"/>, read as <see cref="RoomFittings.Default"/>.
     /// </summary>
     /// <param name="Walls">What the walls are finished in.</param>
     /// <param name="OwnWalls">The walls in their own finish and color (missing in older rows).</param>
@@ -53,11 +54,12 @@ internal static class RoomFinishJson
     /// <param name="Tone">The color of the lights' light (missing in older rows).</param>
     /// <param name="North">The side of the plan facing north (missing in older rows).</param>
     /// <param name="Details">The room's architecture (missing in older rows).</param>
+    /// <param name="Fittings">How the room is fitted (missing in older rows).</param>
     /// <param name="AccentWall">An older row's accent wall's number (missing for none, and in newer rows).</param>
     /// <param name="AccentColor">An older row's accent wall's color, #RRGGBB.</param>
     /// <param name="AccentFinish">What an older row's accent wall is finished in.</param>
     private sealed record StoredFinish(WallFinish Walls, IReadOnlyList<StoredWall>? OwnWalls, string CeilingColor, string TrimColor, TimeOfDay TimeOfDay,
-        LightTone? Tone = null, PlanWall? North = null, StoredDetails? Details = null, int? AccentWall = null, string? AccentColor = null,
+        LightTone? Tone = null, PlanWall? North = null, StoredDetails? Details = null, RoomFittings? Fittings = null, int? AccentWall = null, string? AccentColor = null,
         WallFinish? AccentFinish = null)
     {
         /// <summary>The stored form of a finish.</summary>
@@ -68,7 +70,7 @@ internal static class RoomFinishJson
 
             var details = new StoredDetails(f.Details.Ceiling, f.Details.BeamColor.Value, f.Details.Mouldings, f.Details.Wainscot, f.Details.Casing);
 
-            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North, details);
+            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North, details, f.Fittings);
         }
 
         /// <summary>The finish this stored form describes.</summary>
@@ -79,7 +81,7 @@ internal static class RoomFinishJson
 
             var details = Details is null ? null : new RoomDetails(Details.Ceiling, HexColor.Parse(Details.BeamColor), Details.Mouldings, Details.Wainscot, Details.Casing);
 
-            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back, details);
+            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back, details, Fittings);
         }
     }
 

@@ -180,6 +180,18 @@ public static class Constants
         /// </summary>
         public const string LightWords = @"\b(lamps?|lights?|sconces?|chandeliers?|lanterns?)\b";
 
+        /// <summary>
+        /// The words naming fitted cabinetry in an object's name: kitchen units and cabinets, an island, a vanity; not a mirror
+        /// cabinet, whose front is its mirror.
+        /// </summary>
+        public const string CabinetWords = @"^(?!.*\bmirror).*\b(cabinets?|units?|vanity|vanities|island|dishwasher|oven tower|drawers)\b";
+
+        /// <summary>The word naming a kitchen sink unit in an object's name.</summary>
+        public const string SinkWords = @"\bsink\b";
+
+        /// <summary>The words naming a bathroom vanity (with its basin) in an object's name.</summary>
+        public const string VanityWords = @"\b(vanity|vanities)\b";
+
         /// <summary>How far apart recessed spotlights are in a row or grid, in centimetres (a spotlights object spans them).</summary>
         public const double SpotSpacing = 120;
 
@@ -323,6 +335,9 @@ public static class Constants
 
         /// <summary>A built room's ceiling style, moulding, wainscoting or casing isn't one of the choices, or a moulding is given twice.</summary>
         public const string PlanDetails = "Choose the ceiling style, mouldings (each once), wainscoting and casings from the lists.";
+
+        /// <summary>A built room's cabinet fronts, handles, hardware, sink, tap, basin or tile pattern isn't one of the choices.</summary>
+        public const string PlanFittings = "Choose the cabinet fronts, handles, hardware, sink, tap, basin and tile pattern from the lists.";
 
         /// <summary>An archway with decorations.</summary>
         public const string PlanArchway = "An archway is an opening in the wall: it has no decorations.";
@@ -671,6 +686,93 @@ public static class Constants
         Beadboard,
         /// <summary>Flat panels in plain square frames.</summary>
         ShakerPanels,
+    }
+
+    /// <summary>The door style of a built room's cabinets (kitchen units, an island, tall cabinets, a vanity).</summary>
+    public enum CabinetFronts
+    {
+        /// <summary>Flat, plain doors.</summary>
+        Slab,
+        /// <summary>Doors with a recessed middle in a square frame.</summary>
+        Shaker,
+        /// <summary>Doors with fine vertical reeds.</summary>
+        Fluted,
+    }
+
+    /// <summary>The handles on a built room's cabinet doors and drawers.</summary>
+    public enum HandleStyle
+    {
+        /// <summary>Slim bar handles.</summary>
+        Bar,
+        /// <summary>Round knobs.</summary>
+        Knob,
+        /// <summary>Cup pulls.</summary>
+        CupPull,
+        /// <summary>A thin pull along the doors' top edge.</summary>
+        EdgePull,
+        /// <summary>No handles: push-to-open doors with a groove.</summary>
+        Handleless,
+    }
+
+    /// <summary>The metal finish of a built room's handles, taps and fittings.</summary>
+    public enum Hardware
+    {
+        /// <summary>Brushed brass.</summary>
+        BrushedBrass,
+        /// <summary>Matte black.</summary>
+        MatteBlack,
+        /// <summary>Polished chrome.</summary>
+        Chrome,
+        /// <summary>Brushed stainless steel.</summary>
+        BrushedSteel,
+    }
+
+    /// <summary>A built kitchen's sink.</summary>
+    public enum KitchenSink
+    {
+        /// <summary>Mounted under the worktop.</summary>
+        Undermount,
+        /// <summary>A deep farmhouse sink with an apron front.</summary>
+        Farmhouse,
+        /// <summary>Dropped into the worktop, its rim on top.</summary>
+        Inset,
+    }
+
+    /// <summary>A built kitchen's tap.</summary>
+    public enum KitchenTap
+    {
+        /// <summary>A tall arched spout.</summary>
+        Gooseneck,
+        /// <summary>A traditional bridge tap with two handles.</summary>
+        Bridge,
+        /// <summary>A tap with a pull-down spray head.</summary>
+        PullDown,
+    }
+
+    /// <summary>A built bathroom vanity's basin.</summary>
+    public enum Basin
+    {
+        /// <summary>Moulded into the vanity top.</summary>
+        Integrated,
+        /// <summary>Mounted under the vanity top.</summary>
+        Undermount,
+        /// <summary>A bowl sitting on the vanity top.</summary>
+        Vessel,
+    }
+
+    /// <summary>How a built room's tiles are laid, wherever they are (walls, floor, a backsplash).</summary>
+    public enum TilePattern
+    {
+        /// <summary>Square tiles in a straight grid.</summary>
+        Grid,
+        /// <summary>Subway tiles in a brick bond.</summary>
+        Subway,
+        /// <summary>Herringbone.</summary>
+        Herringbone,
+        /// <summary>Long tiles stacked vertically.</summary>
+        VerticalStack,
+        /// <summary>Large-format tiles, about 60 × 120 cm.</summary>
+        LargeFormat,
     }
 
     /// <summary>The trim around a built room's doors, windows and archways, in the trim color.</summary>

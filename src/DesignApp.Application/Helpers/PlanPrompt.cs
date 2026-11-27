@@ -151,9 +151,45 @@ public static partial class PlanPrompt
 
         var surfaces = B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
             B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
-        var details = Details(finish);
+        var more = string.Join(" ", new[] { Details(finish), Fittings(plan) }.Where(s => s.Length > 0));
 
-        return details.Length == 0 ? surfaces : $"{surfaces} {details}";
+        return more.Length == 0 ? surfaces : $"{surfaces} {more}";
+    }
+
+    /// <summary>
+    /// How the room is fitted, in up to four sentences, each only for what it has: its cabinets' fronts, handles and
+    /// hardware (with cabinetry), the kitchen sink and tap (with a sink unit), the vanity's basin (with a vanity), and
+    /// how its tiles are laid (with tiles anywhere).
+    /// </summary>
+    /// <param name="plan">The room.</param>
+    internal static string Fittings(RoomPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+
+        var fit = plan.Finish.Fittings;
+        var sentences = new List<string>();
+
+        if (plan.HasCabinets())
+        {
+            sentences.Add(B.Prompt.Cabinets(fit.Fronts, fit.Handles, fit.GlassUppers && plan.HasUpperCabinets(), fit.Hardware));
+        }
+
+        if (plan.HasSink())
+        {
+            sentences.Add(B.Prompt.Sink(fit.Sink, fit.Tap));
+        }
+
+        if (plan.HasVanity())
+        {
+            sentences.Add(B.Prompt.Basin(fit.Basin));
+        }
+
+        if (plan.UsesTiles())
+        {
+            sentences.Add(B.Prompt.TilesLaid(fit.Tiles));
+        }
+
+        return string.Join(" ", sentences);
     }
 
     /// <summary>

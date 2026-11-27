@@ -177,6 +177,7 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             ownWalls = new[] { new { wall = 0, finish = "Brick", color = "#B5654A" }, new { wall = 2, finish = "Paint", color = "#8A9A84" } },
             ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", timeOfDay = "Evening", tone = "Cool", north = "Right",
             details = new { ceiling = "Beams", beamColor = "#5A4030", mouldings = new[] { "DadoRail", "Crown" }, wainscot = "RaisedPanels", casing = "Ornate" },
+            fittings = new { fronts = "Fluted", glassUppers = true, handles = "CupPull", hardware = "MatteBlack", sink = "Inset", tap = "PullDown", basin = "Undermount", tiles = "Subway" },
         };
         var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
 
@@ -219,6 +220,9 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(("Beams #5A4030", "Crown DadoRail", "RaisedPanels Ornate"), ($"{stored.GetProperty("details").GetProperty("ceiling").GetString()} {stored.GetProperty("details").GetProperty("beamColor").GetString()}",
             string.Join(" ", stored.GetProperty("details").GetProperty("mouldings").EnumerateArray().Select(m => m.GetString())),
             $"{stored.GetProperty("details").GetProperty("wainscot").GetString()} {stored.GetProperty("details").GetProperty("casing").GetString()}"));
+        Assert.Equal("Fluted True CupPull MatteBlack Inset PullDown Undermount Subway",
+            string.Join(" ", stored.GetProperty("fittings").EnumerateObject().Select(p => p.Value.ToString())));
+        Assert.Equal("Slab", plan.GetProperty("finish").GetProperty("fittings").GetProperty("fronts").GetString());
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }
