@@ -55,11 +55,14 @@ internal static class RoomFinishJson
     /// <param name="North">The side of the plan facing north (missing in older rows).</param>
     /// <param name="Details">The room's architecture (missing in older rows).</param>
     /// <param name="Fittings">How the room is fitted (missing in older rows).</param>
+    /// <param name="FloorMaterial">What the floor is made of within its type (missing for any, and in older rows).</param>
+    /// <param name="WallSheen">How shiny the painted walls are (missing in older rows: matte).</param>
     /// <param name="AccentWall">An older row's accent wall's number (missing for none, and in newer rows).</param>
     /// <param name="AccentColor">An older row's accent wall's color, #RRGGBB.</param>
     /// <param name="AccentFinish">What an older row's accent wall is finished in.</param>
     private sealed record StoredFinish(WallFinish Walls, IReadOnlyList<StoredWall>? OwnWalls, string CeilingColor, string TrimColor, TimeOfDay TimeOfDay,
-        LightTone? Tone = null, PlanWall? North = null, StoredDetails? Details = null, RoomFittings? Fittings = null, int? AccentWall = null, string? AccentColor = null,
+        LightTone? Tone = null, PlanWall? North = null, StoredDetails? Details = null, RoomFittings? Fittings = null, string? FloorMaterial = null,
+        PaintSheen? WallSheen = null, int? AccentWall = null, string? AccentColor = null,
         WallFinish? AccentFinish = null)
     {
         /// <summary>The stored form of a finish.</summary>
@@ -70,7 +73,8 @@ internal static class RoomFinishJson
 
             var details = new StoredDetails(f.Details.Ceiling, f.Details.BeamColor.Value, f.Details.Mouldings, f.Details.Wainscot, f.Details.Casing);
 
-            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North, details, f.Fittings);
+            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North, details, f.Fittings,
+                f.FloorMaterial.Length == 0 ? null : f.FloorMaterial, f.WallSheen);
         }
 
         /// <summary>The finish this stored form describes.</summary>
@@ -81,7 +85,8 @@ internal static class RoomFinishJson
 
             var details = Details is null ? null : new RoomDetails(Details.Ceiling, HexColor.Parse(Details.BeamColor), Details.Mouldings, Details.Wainscot, Details.Casing);
 
-            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back, details, Fittings);
+            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back, details, Fittings,
+                FloorMaterial, WallSheen ?? PaintSheen.Matte);
         }
     }
 

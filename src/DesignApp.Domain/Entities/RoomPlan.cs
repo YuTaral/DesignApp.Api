@@ -184,6 +184,12 @@ public sealed class RoomPlan
             throw new DomainException(Constants.Messages.PlanOwnWalls);
         }
 
+        // A new finish must name a material of the floor's type; a kept one loses it when the floor's type changed.
+        if (!Constants.Plans.IsFloorMaterial(floorType, kept.FloorMaterial))
+        {
+            kept = finish is null ? kept.WithFloorMaterial("") : throw new DomainException(Constants.Messages.PlanFloorMaterial);
+        }
+
         foreach (var item in items)
         {
             if (item.Wall is not { } wall)

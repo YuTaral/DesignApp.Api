@@ -1023,18 +1023,60 @@ public static class Constants
 
             /// <summary>A floor material in words.</summary>
             /// <param name="type">The floor type.</param>
-            public static string FloorWords(FloorType type)
+            /// <param name="material">What it is made of within its type (see <see cref="Domain.Constants.Plans.FloorMaterials"/>); empty for any.</param>
+            public static string FloorWords(FloorType type, string material = "")
             {
+                if (material.Length == 0)
+                {
+                    return type switch
+                    {
+                        FloorType.Parquet => "herringbone wooden parquet",
+                        FloorType.Tiles => "ceramic floor tiles",
+                        FloorType.Stone => "large stone slabs",
+                        FloorType.Concrete => "polished concrete",
+                        FloorType.Carpet => "wall-to-wall carpet",
+                        FloorType.Vinyl => "vinyl plank flooring",
+                        _ => "wooden plank flooring",
+                    };
+                }
+
                 return type switch
                 {
-                    FloorType.Parquet => "herringbone wooden parquet",
-                    FloorType.Tiles => "ceramic floor tiles",
-                    FloorType.Stone => "large stone slabs",
-                    FloorType.Concrete => "polished concrete",
-                    FloorType.Carpet => "wall-to-wall carpet",
-                    FloorType.Vinyl => "vinyl plank flooring",
-                    _ => "wooden plank flooring",
+                    FloorType.Parquet => $"herringbone {material} parquet",
+                    FloorType.Tiles => $"{material} floor tiles",
+                    FloorType.Stone => $"large {material} slabs",
+                    FloorType.Concrete => material,
+                    FloorType.Carpet => $"{material} wall-to-wall carpet",
+                    FloorType.Vinyl => $"{material} vinyl plank flooring",
+                    _ => $"{material} wooden plank flooring",
                 };
+            }
+
+            /// <summary>An object's sheen as a word said before its material: "matte", "satin-finish", "glossy".</summary>
+            /// <param name="sheen">The sheen.</param>
+            public static string SheenWords(Sheen sheen)
+            {
+                return sheen switch
+                {
+                    Sheen.Satin => "satin-finish",
+                    Sheen.Gloss => "glossy",
+                    _ => "matte",
+                };
+            }
+
+            /// <summary>The painted walls' sheen in a sentence (not for matte paint, which needs no words).</summary>
+            /// <param name="sheen">The sheen.</param>
+            public static string WallSheen(PaintSheen sheen)
+            {
+                var finish = sheen switch
+                {
+                    PaintSheen.Eggshell => "a soft eggshell",
+                    PaintSheen.Satin => "a satin",
+                    PaintSheen.Gloss => "a glossy, lacquer-like",
+                    _ => "a flat matte",
+                };
+
+                return $"The painted walls have {finish} finish.";
             }
         }
     }

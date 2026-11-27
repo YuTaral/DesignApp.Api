@@ -150,8 +150,11 @@ public static partial class PlanPrompt
             .Select(w => B.Prompt.OwnWall(w.Name!, w.Look));
 
         var surfaces = B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
-            B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
-        var more = string.Join(" ", new[] { Details(finish), Fittings(plan) }.Where(s => s.Length > 0));
+            B.Prompt.FloorWords(plan.FloorType, finish.FloorMaterial), Color(plan.FloorColor));
+        // The paint's sheen is said only when some wall is painted and the paint isn't plain matte.
+        var painted = finish.Walls is WallFinish.Paint || finish.OwnWalls.Any(w => w.Finish is WallFinish.Paint);
+        var sheen = painted && finish.WallSheen is not PaintSheen.Matte ? B.Prompt.WallSheen(finish.WallSheen) : "";
+        var more = string.Join(" ", new[] { sheen, Details(finish), Fittings(plan) }.Where(s => s.Length > 0));
 
         return more.Length == 0 ? surfaces : $"{surfaces} {more}";
     }
@@ -640,11 +643,13 @@ public static partial class PlanPrompt
         return item.Shape is ItemShape.Picture ? B.Prompt.Framed(item.Label, Looks(item)) : $"{Looks(item)} {item.Label}";
     }
 
-    /// <summary>An object's color with its material, if any: "sage green (#A8B89A) velvet".</summary>
+    /// <summary>An object's color with its sheen and material, if any: "sage green (#A8B89A) satin-finish velvet".</summary>
     /// <param name="item">The object.</param>
     private static string Looks(PlanItem item)
     {
-        return item.Material.Length == 0 ? Color(item.Color) : $"{Color(item.Color)} {item.Material}";
+        var made = string.Join(" ", new[] { item.Sheen is { } sheen ? B.Prompt.SheenWords(sheen) : "", item.Material }.Where(s => s.Length > 0));
+
+        return made.Length == 0 ? Color(item.Color) : $"{Color(item.Color)} {made}";
     }
 
     /// <summary>A color as words and its code, such as "sage green (#A8B89A)".</summary>

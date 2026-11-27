@@ -178,8 +178,9 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", timeOfDay = "Evening", tone = "Cool", north = "Right",
             details = new { ceiling = "Beams", beamColor = "#5A4030", mouldings = new[] { "DadoRail", "Crown" }, wainscot = "RaisedPanels", casing = "Ornate" },
             fittings = new { fronts = "Fluted", glassUppers = true, handles = "CupPull", hardware = "MatteBlack", sink = "Inset", tap = "PullDown", basin = "Undermount", tiles = "Subway" },
+            floorMaterial = "walnut", wallSheen = "Eggshell",
         };
-        var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
+        var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet", sheen = "Satin" };
 
         using var created = await Client.PostAsJsonAsync("/api/plans",
             new { name = "Sleep", roomType = "Bedroom", width = 4.0, length = 4.0, height = 2.6, wallColor = "#E8E2D6", floorColor = "#B89B7A" });
@@ -223,6 +224,8 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal("Fluted True CupPull MatteBlack Inset PullDown Undermount Subway",
             string.Join(" ", stored.GetProperty("fittings").EnumerateObject().Select(p => p.Value.ToString())));
         Assert.Equal("Slab", plan.GetProperty("finish").GetProperty("fittings").GetProperty("fronts").GetString());
+        Assert.Equal(("walnut", "Eggshell", "Satin"), (stored.GetProperty("floorMaterial").GetString(), stored.GetProperty("wallSheen").GetString(),
+            read.GetProperty("items")[0].GetProperty("sheen").GetString()));
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }

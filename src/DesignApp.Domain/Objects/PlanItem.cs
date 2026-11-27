@@ -71,6 +71,9 @@ public sealed record PlanItem
     /// </summary>
     public bool? Lit { get; }
 
+    /// <summary>How shiny it is; <c>null</c> when not said.</summary>
+    public Sheen? Sheen { get; }
+
     /// <summary>Creates an object.</summary>
     /// <param name="label">What it is.</param>
     /// <param name="shape">How it is drawn.</param>
@@ -90,10 +93,11 @@ public sealed record PlanItem
     /// <param name="covering">A window's curtains or blinds; <c>null</c> for none, and for other objects.</param>
     /// <param name="worktop">A kitchen unit's worktop and backsplash; <c>null</c> for none, and for other objects.</param>
     /// <param name="lit">Whether a light is switched on; <c>null</c> to follow the time of day.</param>
+    /// <param name="sheen">How shiny it is; <c>null</c> when not said.</param>
     /// <exception cref="DomainException">The name, a side, the position, the shape, the turn, the wall, the outline, a part or the material is invalid.</exception>
     public PlanItem(string label, ItemShape shape, double x, double y, double width, double depth, double height, int rotation, HexColor color,
         int? wall = null, double elevation = 0, ItemForm form = ItemForm.Standard, ItemParts? parts = null, ItemDecorations? decorations = null,
-        string? material = null, WindowCovering? covering = null, Worktop? worktop = null, bool? lit = null)
+        string? material = null, WindowCovering? covering = null, Worktop? worktop = null, bool? lit = null, Sheen? sheen = null)
     {
         var made = (material ?? "").Trim();
 
@@ -161,6 +165,11 @@ public sealed record PlanItem
             throw new DomainException(Constants.Messages.PlanCeilingLight);
         }
 
+        if (sheen is { } given && !Enum.IsDefined(given))
+        {
+            throw new DomainException(Constants.Messages.PlanSheen);
+        }
+
         if (shape is ItemShape.Archway && decorations is { IsEmpty: false })
         {
             throw new DomainException(Constants.Messages.PlanArchway);
@@ -192,7 +201,7 @@ public sealed record PlanItem
         }
 
         (Wall, Elevation, Form, Parts, Decorations, Material) = (wall, elevation, form, parts, decorations ?? ItemDecorations.None, made);
-        (Covering, Worktop, Lit) = (covering, worktop, lit);
+        (Covering, Worktop, Lit, Sheen) = (covering, worktop, lit, sheen);
     }
 
     /// <summary>Whether a zone's material is one of its kind's: a floor type for a floor area, a wall finish for a wall area.</summary>

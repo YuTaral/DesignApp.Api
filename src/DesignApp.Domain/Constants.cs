@@ -186,6 +186,29 @@ public static class Constants
         /// </summary>
         public const string CabinetWords = @"^(?!.*\bmirror).*\b(cabinets?|units?|vanity|vanities|island|dishwasher|oven tower|drawers)\b";
 
+        /// <summary>
+        /// What a floor of each type can be made of (its species, stone or kind), as the prompt names it; a floor's material
+        /// is one of its type's, or empty for any.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<FloorType, IReadOnlyList<string>> FloorMaterials = new Dictionary<FloorType, IReadOnlyList<string>>
+        {
+            [FloorType.Wood] = ["oak", "white oak", "walnut", "ash", "maple", "teak", "reclaimed pine"],
+            [FloorType.Parquet] = ["oak", "smoked oak", "walnut"],
+            [FloorType.Tiles] = ["porcelain", "ceramic", "zellige", "terracotta", "encaustic cement"],
+            [FloorType.Stone] = ["Carrara marble", "Calacatta marble", "travertine", "limestone", "slate", "terrazzo", "granite"],
+            [FloorType.Concrete] = ["polished concrete", "microcement", "raw concrete"],
+            [FloorType.Carpet] = ["wool", "sisal", "jute", "nylon"],
+            [FloorType.Vinyl] = ["wood-look", "stone-look"],
+        };
+
+        /// <summary>Whether a floor material is one of its type's, or empty (any).</summary>
+        /// <param name="type">The floor type.</param>
+        /// <param name="material">The material.</param>
+        public static bool IsFloorMaterial(FloorType type, string material)
+        {
+            return material.Length == 0 || (FloorMaterials.TryGetValue(type, out var known) && known.Contains(material));
+        }
+
         /// <summary>The word naming a kitchen sink unit in an object's name.</summary>
         public const string SinkWords = @"\bsink\b";
 
@@ -338,6 +361,12 @@ public static class Constants
 
         /// <summary>A built room's cabinet fronts, handles, hardware, sink, tap, basin or tile pattern isn't one of the choices.</summary>
         public const string PlanFittings = "Choose the cabinet fronts, handles, hardware, sink, tap, basin and tile pattern from the lists.";
+
+        /// <summary>An object's sheen that isn't matte, satin or gloss.</summary>
+        public const string PlanSheen = "Choose matte, satin or gloss for an object's sheen.";
+
+        /// <summary>A floor material that isn't one of its floor type's, or a paint sheen that isn't one of the choices.</summary>
+        public const string PlanFloorMaterial = "Choose the floor's material from its type's list, and the paint's sheen from the list.";
 
         /// <summary>An archway with decorations.</summary>
         public const string PlanArchway = "An archway is an opening in the wall: it has no decorations.";
@@ -773,6 +802,30 @@ public static class Constants
         VerticalStack,
         /// <summary>Large-format tiles, about 60 × 120 cm.</summary>
         LargeFormat,
+    }
+
+    /// <summary>How shiny an object's surface is.</summary>
+    public enum Sheen
+    {
+        /// <summary>Flat, no shine.</summary>
+        Matte,
+        /// <summary>A soft sheen.</summary>
+        Satin,
+        /// <summary>High gloss.</summary>
+        Gloss,
+    }
+
+    /// <summary>How shiny a built room's painted walls are.</summary>
+    public enum PaintSheen
+    {
+        /// <summary>Flat, chalky matte paint.</summary>
+        Matte,
+        /// <summary>A faint eggshell sheen.</summary>
+        Eggshell,
+        /// <summary>A satin sheen.</summary>
+        Satin,
+        /// <summary>Glossy, lacquer-like paint.</summary>
+        Gloss,
     }
 
     /// <summary>The trim around a built room's doors, windows and archways, in the trim color.</summary>

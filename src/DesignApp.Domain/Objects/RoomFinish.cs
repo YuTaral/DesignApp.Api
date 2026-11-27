@@ -43,6 +43,12 @@ public sealed record RoomFinish
     /// <summary>How the room is fitted: its cabinets' fronts and handles, the hardware, the sink, tap and basin, and the tile pattern.</summary>
     public RoomFittings Fittings { get; }
 
+    /// <summary>What the floor is made of within its type (such as "walnut" or "Calacatta marble"); empty for any.</summary>
+    public string FloorMaterial { get; }
+
+    /// <summary>How shiny the painted walls are.</summary>
+    public PaintSheen WallSheen { get; }
+
     /// <summary>Creates a finish.</summary>
     /// <param name="walls">What the walls are finished in.</param>
     /// <param name="ownWalls">The walls in their own finish and color; each wall at most once.</param>
@@ -53,15 +59,23 @@ public sealed record RoomFinish
     /// <param name="north">The side of the plan that faces north.</param>
     /// <param name="details">The room's architecture; <see cref="RoomDetails.Default"/> when missing.</param>
     /// <param name="fittings">How the room is fitted; <see cref="RoomFittings.Default"/> when missing.</param>
+    /// <param name="floorMaterial">What the floor is made of within its type; empty (any) when missing.</param>
+    /// <param name="wallSheen">How shiny the painted walls are; matte when missing.</param>
     /// <exception cref="DomainException">A choice isn't one of the lists, or a wall has its own look twice.</exception>
     public RoomFinish(WallFinish walls, IReadOnlyList<WallLook> ownWalls, HexColor ceilingColor, HexColor trimColor, TimeOfDay timeOfDay,
-        LightTone tone = LightTone.Warm, PlanWall north = PlanWall.Back, RoomDetails? details = null, RoomFittings? fittings = null)
+        LightTone tone = LightTone.Warm, PlanWall north = PlanWall.Back, RoomDetails? details = null, RoomFittings? fittings = null, string? floorMaterial = null,
+        PaintSheen wallSheen = PaintSheen.Matte)
     {
         ArgumentNullException.ThrowIfNull(ownWalls);
 
         if (!Enum.IsDefined(walls) || !Enum.IsDefined(timeOfDay) || !Enum.IsDefined(tone) || !Enum.IsDefined(north))
         {
             throw new DomainException(Constants.Messages.PlanFinish);
+        }
+
+        if (!Enum.IsDefined(wallSheen) || (floorMaterial ?? "").Trim().Length > Constants.Plans.MaxMaterialLength)
+        {
+            throw new DomainException(Constants.Messages.PlanFloorMaterial);
         }
 
         if (ownWalls.DistinctBy(w => w.Wall).Count() != ownWalls.Count)
@@ -72,13 +86,21 @@ public sealed record RoomFinish
         (Walls, OwnWalls) = (walls, [.. ownWalls.OrderBy(w => w.Wall)]);
         (CeilingColor, TrimColor, TimeOfDay, Tone, North, Details) = (ceilingColor, trimColor, timeOfDay, tone, north, details ?? RoomDetails.Default);
         Fittings = (fittings ?? RoomFittings.Default).Checked();
+        (FloorMaterial, WallSheen) = ((floorMaterial ?? "").Trim(), wallSheen);
     }
 
     /// <summary>This finish without the walls' own looks of walls a room no longer has, the rest the same.</summary>
     /// <param name="wallCount">How many walls the room has.</param>
     public RoomFinish Within(int wallCount)
     {
-        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, TimeOfDay, Tone, North, Details, Fittings);
+        return new RoomFinish(Walls, [.. OwnWalls.Where(w => w.Wall < wallCount)], CeilingColor, TrimColor, TimeOfDay, Tone, North, Details, Fittings, FloorMaterial, WallSheen);
+    }
+
+    /// <summary>This finish with another floor material, the rest the same.</summary>
+    /// <param name="floorMaterial">The floor's material; empty for any.</param>
+    public RoomFinish WithFloorMaterial(string floorMaterial)
+    {
+        return new RoomFinish(Walls, OwnWalls, CeilingColor, TrimColor, TimeOfDay, Tone, North, Details, Fittings, floorMaterial, WallSheen);
     }
 
     /// <summary>A wall's finish and color: its own, or the room's.</summary>
@@ -93,7 +115,8 @@ public sealed record RoomFinish
     public bool Equals(RoomFinish? other)
     {
         return other is not null && (Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North) == (other.Walls, other.CeilingColor, other.TrimColor, other.TimeOfDay, other.Tone, other.North)
-            && Details.Equals(other.Details) && Fittings.Equals(other.Fittings) && OwnWalls.SequenceEqual(other.OwnWalls);
+            && Details.Equals(other.Details) && Fittings.Equals(other.Fittings) && (FloorMaterial, WallSheen) == (other.FloorMaterial, other.WallSheen)
+            && OwnWalls.SequenceEqual(other.OwnWalls);
     }
 
     /// <inheritdoc/>
@@ -104,6 +127,7 @@ public sealed record RoomFinish
         hash.Add((Walls, CeilingColor, TrimColor, TimeOfDay, Tone, North));
         hash.Add(Details);
         hash.Add(Fittings);
+        hash.Add((FloorMaterial, WallSheen));
 
         foreach (var wall in OwnWalls)
         {
