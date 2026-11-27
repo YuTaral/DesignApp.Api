@@ -67,6 +67,7 @@ public class FittingsTests
         Assert.Equal((true, true, true, false, false), (kitchen.HasCabinets(), kitchen.HasUpperCabinets(), kitchen.HasSink(), kitchen.HasVanity(), kitchen.UsesTiles()));
         Assert.Equal((true, false, false, true, true), (bathroom.HasCabinets(), bathroom.HasUpperCabinets(), bathroom.HasSink(), bathroom.HasVanity(), bathroom.UsesTiles()));
         Assert.Equal((false, false), (lounge.HasCabinets(), lounge.UsesTiles()));
+        Assert.Equal((false, true, false), bathroom.Tiled());
         // A mirror cabinet's front is its mirror: not fitted cabinetry.
         Assert.False(new PlanItem("mirror cabinet", ItemShape.WallBox, 100, 0, 60, 15, 70, 0, White, (int)PlanWall.Back, 120).IsCabinet());
     }
@@ -82,13 +83,13 @@ public class FittingsTests
         Assert.Contains("The cabinets have shaker fronts with round knobs, the upper ones glass-fronted; handles, taps and fittings are brushed brass.", kitchen);
         Assert.Contains("The kitchen sink is a deep farmhouse sink with an apron front with a traditional bridge tap.", kitchen);
         Assert.DoesNotContain("vanity has", kitchen);
-        Assert.DoesNotContain("The tiles are", kitchen);
+        Assert.DoesNotContain("tiles are", kitchen);
         Assert.Contains("The vanity has a vessel basin, a bowl sitting on its top.", bathroom);
-        Assert.Contains("The tiles are laid in a herringbone pattern.", bathroom);
+        Assert.Contains("The floor tiles are laid in a herringbone pattern: rectangular tiles set at right angles in a zig-zag.", bathroom);
         // Without upper cabinets nothing is glass-fronted; a living room with none of these says none of it.
         Assert.DoesNotContain("glass-fronted", bathroom);
         Assert.DoesNotContain("The cabinets have", lounge);
-        Assert.DoesNotContain("The tiles are", lounge);
+        Assert.DoesNotContain("tiles are", lounge);
         Assert.Contains("The cabinets have flat slab fronts with slim bar handles; handles, taps and fittings are brushed stainless steel.", plainKitchen);
     }
 

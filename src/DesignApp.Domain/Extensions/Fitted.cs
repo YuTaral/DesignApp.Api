@@ -61,13 +61,27 @@ public static partial class Fitted
     /// <param name="plan">The room.</param>
     public static bool UsesTiles(this RoomPlan plan)
     {
+        var (walls, floor, backsplash) = plan.Tiled();
+
+        return walls || floor || backsplash;
+    }
+
+    /// <summary>
+    /// Where the room has tiles: on its walls (all of them, one of them, or an area of one), on its floor (or an area of
+    /// it), and on a kitchen unit's backsplash.
+    /// </summary>
+    /// <param name="plan">The room.</param>
+    public static (bool Walls, bool Floor, bool Backsplash) Tiled(this RoomPlan plan)
+    {
         ArgumentNullException.ThrowIfNull(plan);
 
         var finish = plan.Finish;
-        var tiledZone = plan.Items.Any(i => i.Shape.IsZone() && i.Material is nameof(FloorType.Tiles) or nameof(WallFinish.Tiles));
+        var walls = finish.Walls is WallFinish.Tiles || finish.OwnWalls.Any(w => w.Finish is WallFinish.Tiles)
+            || plan.Items.Any(i => i.Shape is ItemShape.WallZone && i.Material is nameof(WallFinish.Tiles));
+        var floor = plan.FloorType is FloorType.Tiles || plan.Items.Any(i => i.Shape is ItemShape.FloorZone && i.Material is nameof(FloorType.Tiles));
+        var backsplash = plan.Items.Any(i => i.Worktop?.Backsplash is BacksplashKind.Tiles);
 
-        return finish.Walls is WallFinish.Tiles || finish.OwnWalls.Any(w => w.Finish is WallFinish.Tiles) || plan.FloorType is FloorType.Tiles || tiledZone
-            || plan.Items.Any(i => i.Worktop?.Backsplash is BacksplashKind.Tiles);
+        return (walls, floor, backsplash);
     }
 
     [GeneratedRegex(Plans.CabinetWords, RegexOptions.IgnoreCase)]

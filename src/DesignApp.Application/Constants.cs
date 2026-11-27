@@ -504,19 +504,26 @@ public static class Constants
                 };
             }
 
-            /// <summary>How the tiles are laid, in a sentence.</summary>
+            /// <summary>How the tiles are laid, in a sentence naming where they are, so the image model lays each surface's tiles so.</summary>
             /// <param name="pattern">The pattern.</param>
-            public static string TilesLaid(TilePattern pattern)
+            /// <param name="places">Where the tiles are, such as "floor" and "backsplash" (see <see cref="TilePlaces"/>), at least one.</param>
+            public static string TilesLaid(TilePattern pattern, IReadOnlyList<string> places)
             {
-                return pattern switch
+                var where = places.Count == 1 ? places[0] : $"{string.Join(", ", places.Take(places.Count - 1))} and {places[^1]}";
+                var laid = pattern switch
                 {
-                    TilePattern.Subway => "The tiles are subway tiles laid in a brick bond.",
-                    TilePattern.Herringbone => "The tiles are laid in a herringbone pattern.",
-                    TilePattern.VerticalStack => "The tiles are long tiles stacked vertically.",
-                    TilePattern.LargeFormat => "The tiles are large-format tiles, about 60 × 120 cm, with thin joints.",
-                    _ => "The tiles are square tiles laid in a straight grid.",
+                    TilePattern.Subway => "are subway tiles laid in a brick bond",
+                    TilePattern.Herringbone => "are laid in a herringbone pattern: rectangular tiles set at right angles in a zig-zag",
+                    TilePattern.VerticalStack => "are long narrow tiles stacked vertically in straight columns",
+                    TilePattern.LargeFormat => "are large-format tiles, about 60 × 120 cm, with thin joints",
+                    _ => "are square tiles laid in a straight grid",
                 };
+
+                return $"The {where} tiles {laid}.";
             }
+
+            /// <summary>The names of the surfaces that can be tiled, said before "tiles": the floor, the walls and the backsplash.</summary>
+            public static readonly (string Floor, string Walls, string Backsplash) TilePlaces = ("floor", "wall", "backsplash");
 
             /// <summary>A wall finish in words, said before its color: "painted", "exposed brick in"...</summary>
             /// <param name="finish">The finish.</param>

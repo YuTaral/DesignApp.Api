@@ -186,7 +186,13 @@ public static partial class PlanPrompt
 
         if (plan.UsesTiles())
         {
-            sentences.Add(B.Prompt.TilesLaid(fit.Tiles));
+            var (walls, floor, backsplash) = plan.Tiled();
+            var places = new[] { (floor, B.Prompt.TilePlaces.Floor), (walls, B.Prompt.TilePlaces.Walls), (backsplash, B.Prompt.TilePlaces.Backsplash) }
+                .Where(p => p.Item1)
+                .Select(p => p.Item2)
+                .ToList();
+
+            sentences.Add(B.Prompt.TilesLaid(fit.Tiles, places));
         }
 
         return string.Join(" ", sentences);
