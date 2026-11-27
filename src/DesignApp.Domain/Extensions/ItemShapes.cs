@@ -5,18 +5,21 @@ namespace DesignApp.Domain.Extensions;
 /// <summary>Rules for <see cref="ItemShape"/>: which shapes are in a wall, on a wall, or stand on the floor.</summary>
 public static class ItemShapes
 {
-    /// <summary>Whether a shape is an opening in a wall: a window or a door.</summary>
+    /// <summary>Whether a shape is an opening in a wall: a window, a door or an archway.</summary>
     /// <param name="shape">The shape.</param>
     public static bool IsOpening(this ItemShape shape)
     {
-        return shape is ItemShape.Window or ItemShape.Door;
+        return shape is ItemShape.Window or ItemShape.Door or ItemShape.Archway;
     }
 
-    /// <summary>Whether a shape hangs on a wall: a picture (paintings, mirrors, a TV) or a wall box (upper cabinets, shelves, a hood).</summary>
+    /// <summary>
+    /// Whether a shape is on a wall above the floor: a picture (paintings, mirrors, a TV), a wall box (upper cabinets,
+    /// shelves, a hood) or a niche in the wall.
+    /// </summary>
     /// <param name="shape">The shape.</param>
     public static bool IsMounted(this ItemShape shape)
     {
-        return shape is ItemShape.Picture or ItemShape.WallBox;
+        return shape is ItemShape.Picture or ItemShape.WallBox or ItemShape.Niche;
     }
 
     /// <summary>Whether a shape is a light on the ceiling (placed on the plan; its height is how far down it reaches).</summary>

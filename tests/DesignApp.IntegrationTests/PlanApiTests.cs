@@ -26,9 +26,10 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var objects = (await response.Content.ReadFromJsonAsync<List<JsonElement>>())!;
 
-        // Every room's twenty-three: six windows and doors, nine things to hang, three for the floor and five ceiling lights;
-        // then the bedroom's seventeen.
-        Assert.Equal(40, objects.Count);
+        // Every room's twenty-six: seven windows, doors and archways, ten things to hang, three for the floor, five ceiling
+        // lights and a column; then the bedroom's seventeen.
+        Assert.Equal(43, objects.Count);
+        Assert.Contains(objects, o => o.GetProperty("key").GetString() == "column" && o.GetProperty("variants")[0].GetProperty("toCeiling").GetBoolean());
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "pendant-light" && o.GetProperty("shape").GetString() == "PendantLight");
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "painting" && o.GetProperty("shape").GetString() == "Picture" && o.GetProperty("elevation").GetDouble() == 130);
         Assert.Contains(objects, o => o.GetProperty("key").GetString() == "window" && o.GetProperty("elevation").GetDouble() == 90);
@@ -175,6 +176,7 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             walls = "Plaster",
             ownWalls = new[] { new { wall = 0, finish = "Brick", color = "#B5654A" }, new { wall = 2, finish = "Paint", color = "#8A9A84" } },
             ceilingColor = "#3A3A3A", trimColor = "#1E1E1E", timeOfDay = "Evening", tone = "Cool", north = "Right",
+            details = new { ceiling = "Beams", beamColor = "#5A4030", mouldings = new[] { "DadoRail", "Crown" }, wainscot = "RaisedPanels", casing = "Ornate" },
         };
         var sofa = new { label = "sofa", shape = "Sofa", x = 200.0, y = 60.0, width = 200.0, depth = 90.0, height = 85.0, rotation = 0, color = "#8A8580", material = "velvet" };
 
@@ -184,10 +186,12 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var id = plan.GetProperty("id").GetGuid();
 
         // A furnished bedroom starts with the wall behind its bed in its own color, warm light, north at the back, a flush
-        // ceiling lamp, and its furniture in its materials.
+        // ceiling lamp, a flat ceiling and simple casings, and its furniture in its materials.
         Assert.Equal((1, "Paint", "Warm", "Back"), (plan.GetProperty("finish").GetProperty("ownWalls")[0].GetProperty("wall").GetInt32(), plan.GetProperty("finish").GetProperty("walls").GetString(),
             plan.GetProperty("finish").GetProperty("tone").GetString(), plan.GetProperty("finish").GetProperty("north").GetString()));
         Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("shape").GetString() == "CeilingLamp");
+        Assert.Equal(("Flat", "Simple", 0), (plan.GetProperty("finish").GetProperty("details").GetProperty("ceiling").GetString(),
+            plan.GetProperty("finish").GetProperty("details").GetProperty("casing").GetString(), plan.GetProperty("finish").GetProperty("details").GetProperty("mouldings").GetArrayLength()));
         Assert.Contains(plan.GetProperty("items").EnumerateArray(), i => i.GetProperty("material").GetString() == "linen upholstered");
 
         using var saved = await Client.PutAsJsonAsync($"/api/plans/{id}", new
@@ -212,6 +216,9 @@ public class PlanApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(("Plaster", "0 Brick #B5654A | 2 Paint #8A9A84", "#3A3A3A", "Cool Right", "Evening"), (stored.GetProperty("walls").GetString(),
             string.Join(" | ", stored.GetProperty("ownWalls").EnumerateArray().Select(w => $"{w.GetProperty("wall").GetInt32()} {w.GetProperty("finish").GetString()} {w.GetProperty("color").GetString()}")),
             stored.GetProperty("ceilingColor").GetString(), $"{stored.GetProperty("tone").GetString()} {stored.GetProperty("north").GetString()}", stored.GetProperty("timeOfDay").GetString()));
+        Assert.Equal(("Beams #5A4030", "Crown DadoRail", "RaisedPanels Ornate"), ($"{stored.GetProperty("details").GetProperty("ceiling").GetString()} {stored.GetProperty("details").GetProperty("beamColor").GetString()}",
+            string.Join(" ", stored.GetProperty("details").GetProperty("mouldings").EnumerateArray().Select(m => m.GetString())),
+            $"{stored.GetProperty("details").GetProperty("wainscot").GetString()} {stored.GetProperty("details").GetProperty("casing").GetString()}"));
         Assert.Equal("velvet", read.GetProperty("items")[0].GetProperty("material").GetString());
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
     }

@@ -159,8 +159,17 @@ public static class Constants
         /// <summary>A built room's ceiling color until the user picks one: a soft white.</summary>
         public const string CeilingColor = "#FAFAF7";
 
-        /// <summary>A built room's skirting boards' color until the user picks one: a warm white.</summary>
+        /// <summary>A built room's trim color (skirting, mouldings, casings) until the user picks one: a warm white.</summary>
         public const string TrimColor = "#F4F1EA";
+
+        /// <summary>A built room's exposed beams' color until the user picks one: an oak.</summary>
+        public const string BeamColor = "#8B6A4A";
+
+        /// <summary>How high wainscoting and the dado rail on top of it reach, in centimetres.</summary>
+        public const double WainscotHeight = 90;
+
+        /// <summary>How far below the ceiling a picture rail runs, in centimetres.</summary>
+        public const double PictureRailDrop = 30;
 
         /// <summary>How high a window's bottom usually is above the floor, in centimetres.</summary>
         public const double WindowSill = 90;
@@ -311,6 +320,12 @@ public static class Constants
 
         /// <summary>A wall in its own finish that isn't one of the room's walls, or is given twice.</summary>
         public const string PlanOwnWalls = "Each wall in its own finish must be one of the room's walls, once.";
+
+        /// <summary>A built room's ceiling style, moulding, wainscoting or casing isn't one of the choices, or a moulding is given twice.</summary>
+        public const string PlanDetails = "Choose the ceiling style, mouldings (each once), wainscoting and casings from the lists.";
+
+        /// <summary>An archway with decorations.</summary>
+        public const string PlanArchway = "An archway is an opening in the wall: it has no decorations.";
 
         /// <summary>A built room type or shape that doesn't exist.</summary>
         public const string UnknownRoomType = "Pick the room's type from the list.";
@@ -615,6 +630,60 @@ public static class Constants
         CeilingLamp,
         /// <summary>A track on the ceiling with spot heads along it.</summary>
         TrackLight,
+        /// <summary>An opening in a wall with no door, square or arched (its form), through to the space beyond.</summary>
+        Archway,
+        /// <summary>A recess in a wall, square or arched (its form), sometimes with shelves; it can hold decorations.</summary>
+        Niche,
+    }
+
+    /// <summary>How a built room's ceiling is shaped under its paint.</summary>
+    public enum CeilingStyle
+    {
+        /// <summary>A flat, plain ceiling.</summary>
+        Flat,
+        /// <summary>Exposed beams across the room's shorter span, in the beam color.</summary>
+        Beams,
+        /// <summary>A grid of recessed square panels.</summary>
+        Coffered,
+        /// <summary>A raised middle with a lower border around the walls.</summary>
+        Tray,
+    }
+
+    /// <summary>A moulding run along a built room's walls, in the trim color.</summary>
+    public enum Moulding
+    {
+        /// <summary>Crown moulding where the walls meet the ceiling.</summary>
+        Crown,
+        /// <summary>A picture rail a little below the ceiling.</summary>
+        PictureRail,
+        /// <summary>A dado (chair) rail at about hip height.</summary>
+        DadoRail,
+    }
+
+    /// <summary>Panelling on the lower part of a built room's walls, up to the dado height, in the trim color.</summary>
+    public enum Wainscot
+    {
+        /// <summary>No wainscoting.</summary>
+        None,
+        /// <summary>Classic raised panels.</summary>
+        RaisedPanels,
+        /// <summary>Narrow vertical tongue-and-groove boards.</summary>
+        Beadboard,
+        /// <summary>Flat panels in plain square frames.</summary>
+        ShakerPanels,
+    }
+
+    /// <summary>The trim around a built room's doors, windows and archways, in the trim color.</summary>
+    public enum Casing
+    {
+        /// <summary>No casing: a plain plastered reveal.</summary>
+        Plain,
+        /// <summary>A slim, simple casing.</summary>
+        Simple,
+        /// <summary>A wide, flat casing.</summary>
+        Wide,
+        /// <summary>A classic stepped casing with a head cap.</summary>
+        Ornate,
     }
 
     /// <summary>The color of a built room's lamps and ceiling lights.</summary>

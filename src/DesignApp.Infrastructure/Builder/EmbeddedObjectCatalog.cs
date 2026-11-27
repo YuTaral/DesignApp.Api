@@ -60,7 +60,7 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
             : materials.TryGetValue(o.Materials, out var list) ? list : throw new InvalidDataException($"The catalog's {o.Key} has unknown materials {o.Materials}.");
         var material = o.Material ?? made.FirstOrDefault() ?? "";
         var variants = o.Variants
-            .Select(v => new CatalogVariant(v.Key, v.Name, v.Label, v.Shape ?? o.Shape, v.Width, v.Depth, v.Height, v.Elevation, v.Form))
+            .Select(v => new CatalogVariant(v.Key, v.Name, v.Label, v.Shape ?? o.Shape, v.Width, v.Depth, v.Height, v.Elevation, v.Form, v.ToCeiling))
             .ToList()
             .AsReadOnly();
         var first = variants.FirstOrDefault() ?? throw new InvalidDataException($"The catalog's {o.Key} has no variations.");
@@ -108,6 +108,7 @@ internal sealed class EmbeddedObjectCatalog : IObjectCatalog
     /// <param name="Shape">How it is drawn, when not as the object.</param>
     /// <param name="Elevation">How high its bottom is above the floor, in centimetres (windows).</param>
     /// <param name="Form">Its outline from above.</param>
+    /// <param name="ToCeiling">Whether it reaches the ceiling (a column).</param>
     private sealed record CatalogFileVariant(string Key, string Name, string Label, double Width, double Depth, double Height, ItemShape? Shape = null,
-        double Elevation = 0, ItemForm Form = ItemForm.Standard);
+        double Elevation = 0, ItemForm Form = ItemForm.Standard, bool ToCeiling = false);
 }

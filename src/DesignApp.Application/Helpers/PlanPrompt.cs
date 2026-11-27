@@ -149,8 +149,40 @@ public static partial class PlanPrompt
             .Where(w => w.Name is not null)
             .Select(w => B.Prompt.OwnWall(w.Name!, w.Look));
 
-        return B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
+        var surfaces = B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
             B.Prompt.FloorWords(plan.FloorType), Color(plan.FloorColor));
+        var details = Details(finish);
+
+        return details.Length == 0 ? surfaces : $"{surfaces} {details}";
+    }
+
+    /// <summary>
+    /// The room's architecture in up to two sentences: the ceiling's shape (none for a flat one), and the walls' mouldings,
+    /// wainscoting and casings with the trim's color (none when the room has none of them).
+    /// </summary>
+    /// <param name="finish">The room's finish.</param>
+    internal static string Details(RoomFinish finish)
+    {
+        ArgumentNullException.ThrowIfNull(finish);
+
+        var details = finish.Details;
+        var ceiling = B.Prompt.CeilingShape(details.Ceiling, Color(details.BeamColor));
+        var parts = details.Mouldings.Select(B.Prompt.MouldingWords).ToList();
+        var casing = B.Prompt.CasingWords(details.Casing);
+
+        if (details.Wainscot != Wainscot.None)
+        {
+            parts.Add(B.Prompt.WainscotWords(details.Wainscot, $"{Cm(Plans.WainscotHeight)} cm"));
+        }
+
+        if (casing.Length > 0)
+        {
+            parts.Add(casing);
+        }
+
+        var trim = parts.Count == 0 ? "" : B.Prompt.Trim(parts, Color(finish.TrimColor));
+
+        return string.Join(" ", new[] { ceiling, trim }.Where(s => s.Length > 0));
     }
 
     /// <summary>

@@ -14,12 +14,14 @@ namespace DesignApp.Api.Responses;
 /// <param name="Height">Its height, in centimetres.</param>
 /// <param name="Elevation">How high its bottom is above the floor, in centimetres (a window's sill; else 0).</param>
 /// <param name="Form">Its outline from above.</param>
-public sealed record CatalogVariantResponse(string Key, string Name, string Label, ItemShape Shape, double Width, double Depth, double Height, double Elevation, ItemForm Form)
+/// <param name="ToCeiling">Whether it reaches the ceiling (a column): added as tall as the room.</param>
+public sealed record CatalogVariantResponse(string Key, string Name, string Label, ItemShape Shape, double Width, double Depth, double Height, double Elevation, ItemForm Form,
+    bool ToCeiling)
 {
     /// <summary>Maps a variation to its API shape.</summary>
     /// <param name="v">The variation.</param>
     public static CatalogVariantResponse From(CatalogVariant v)
     {
-        return new(v.Key, v.Name, v.Label, v.Shape, v.Width, v.Depth, v.Height, v.Elevation, v.Form);
+        return new(v.Key, v.Name, v.Label, v.Shape, v.Width, v.Depth, v.Height, v.Elevation, v.Form, v.ToCeiling);
     }
 }

@@ -42,20 +42,23 @@ internal static class RoomFinishJson
     /// (<paramref name="AccentWall"/>, <paramref name="AccentColor"/>, <paramref name="AccentFinish"/>): it is read as
     /// that wall's own look, and saved again in the new form. Rows from before ceiling lights were objects had a
     /// <c>ceilingLight</c>, which a migration turned into a light on the plan (it is no longer read); they have no
-    /// <paramref name="Tone"/> or <paramref name="North"/>, read as warm light with north at the back.
+    /// <paramref name="Tone"/> or <paramref name="North"/>, read as warm light with north at the back. Rows from before
+    /// rooms had architecture have no <paramref name="Details"/>, read as <see cref="RoomDetails.Default"/>.
     /// </summary>
     /// <param name="Walls">What the walls are finished in.</param>
     /// <param name="OwnWalls">The walls in their own finish and color (missing in older rows).</param>
     /// <param name="CeilingColor">The ceiling's color, #RRGGBB.</param>
-    /// <param name="TrimColor">The skirting boards' color, #RRGGBB.</param>
+    /// <param name="TrimColor">The trim's color, #RRGGBB.</param>
     /// <param name="TimeOfDay">When the photo is taken.</param>
     /// <param name="Tone">The color of the lights' light (missing in older rows).</param>
     /// <param name="North">The side of the plan facing north (missing in older rows).</param>
+    /// <param name="Details">The room's architecture (missing in older rows).</param>
     /// <param name="AccentWall">An older row's accent wall's number (missing for none, and in newer rows).</param>
     /// <param name="AccentColor">An older row's accent wall's color, #RRGGBB.</param>
     /// <param name="AccentFinish">What an older row's accent wall is finished in.</param>
     private sealed record StoredFinish(WallFinish Walls, IReadOnlyList<StoredWall>? OwnWalls, string CeilingColor, string TrimColor, TimeOfDay TimeOfDay,
-        LightTone? Tone = null, PlanWall? North = null, int? AccentWall = null, string? AccentColor = null, WallFinish? AccentFinish = null)
+        LightTone? Tone = null, PlanWall? North = null, StoredDetails? Details = null, int? AccentWall = null, string? AccentColor = null,
+        WallFinish? AccentFinish = null)
     {
         /// <summary>The stored form of a finish.</summary>
         /// <param name="f">The finish.</param>
@@ -63,7 +66,9 @@ internal static class RoomFinishJson
         {
             var own = f.OwnWalls.Select(w => new StoredWall(w.Wall, w.Finish, w.Color.Value)).ToList();
 
-            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North);
+            var details = new StoredDetails(f.Details.Ceiling, f.Details.BeamColor.Value, f.Details.Mouldings, f.Details.Wainscot, f.Details.Casing);
+
+            return new(f.Walls, own, f.CeilingColor.Value, f.TrimColor.Value, f.TimeOfDay, f.Tone, f.North, details);
         }
 
         /// <summary>The finish this stored form describes.</summary>
@@ -72,9 +77,19 @@ internal static class RoomFinishJson
             var accent = AccentWall is { } wall ? [new WallLook(wall, AccentFinish ?? WallFinish.Paint, HexColor.Parse(AccentColor ?? ""))] : new List<WallLook>();
             var own = OwnWalls?.Select(w => new WallLook(w.Wall, w.Finish, HexColor.Parse(w.Color))).ToList() ?? accent;
 
-            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back);
+            var details = Details is null ? null : new RoomDetails(Details.Ceiling, HexColor.Parse(Details.BeamColor), Details.Mouldings, Details.Wainscot, Details.Casing);
+
+            return new(Walls, own, HexColor.Parse(CeilingColor), HexColor.Parse(TrimColor), TimeOfDay, Tone ?? LightTone.Warm, North ?? PlanWall.Back, details);
         }
     }
+
+    /// <summary>A room's architecture, as stored.</summary>
+    /// <param name="Ceiling">How the ceiling is shaped.</param>
+    /// <param name="BeamColor">The exposed beams' color, #RRGGBB.</param>
+    /// <param name="Mouldings">The mouldings along the walls.</param>
+    /// <param name="Wainscot">The panelling on the lower part of the walls.</param>
+    /// <param name="Casing">The trim around the doors, windows and archways.</param>
+    private sealed record StoredDetails(CeilingStyle Ceiling, string BeamColor, IReadOnlyList<Moulding> Mouldings, Wainscot Wainscot, Casing Casing);
 
     /// <summary>A wall in its own finish, as stored.</summary>
     /// <param name="Wall">The wall's number.</param>

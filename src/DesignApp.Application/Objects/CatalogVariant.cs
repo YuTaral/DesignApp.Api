@@ -15,4 +15,6 @@ namespace DesignApp.Application.Objects;
 /// <param name="Height">Its height, in centimetres.</param>
 /// <param name="Elevation">How high its bottom is above the floor, in centimetres (a window's sill; else 0).</param>
 /// <param name="Form">Its outline from above.</param>
-public sealed record CatalogVariant(string Key, string Name, string Label, ItemShape Shape, double Width, double Depth, double Height, double Elevation, ItemForm Form);
+/// <param name="ToCeiling">Whether it reaches the ceiling (a column): added as tall as the room, whatever <paramref name="Height"/> says.</param>
+public sealed record CatalogVariant(string Key, string Name, string Label, ItemShape Shape, double Width, double Depth, double Height, double Elevation, ItemForm Form,
+    bool ToCeiling = false);

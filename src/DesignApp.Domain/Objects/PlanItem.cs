@@ -103,7 +103,7 @@ public sealed record PlanItem
             ItemForm.LShaped => shape is ItemShape.Sofa or ItemShape.Table or ItemShape.Box,
             ItemForm.PShaped => shape is ItemShape.Sofa,
             ItemForm.Round => shape is ItemShape.Table or ItemShape.Rug,
-            ItemForm.Arched => shape is ItemShape.Window,
+            ItemForm.Arched => shape is ItemShape.Window or ItemShape.Archway or ItemShape.Niche,
             ItemForm.GlassScreen or ItemForm.GlassCubicle => shape is ItemShape.Box,
             ItemForm.Swivel => shape is ItemShape.Chair,
             _ => false,
@@ -159,6 +159,11 @@ public sealed record PlanItem
         if (shape.IsCeilingLight() && (wall.HasValue || elevation != 0 || decorations is { IsEmpty: false }))
         {
             throw new DomainException(Constants.Messages.PlanCeilingLight);
+        }
+
+        if (shape is ItemShape.Archway && decorations is { IsEmpty: false })
+        {
+            throw new DomainException(Constants.Messages.PlanArchway);
         }
 
         if (covering is not null && shape is not ItemShape.Window)

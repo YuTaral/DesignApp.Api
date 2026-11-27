@@ -18,7 +18,8 @@
     "frame": ["painted wood", "oak", "walnut", "metal", "brass"],
     "window": ["uPVC", "aluminium", "oak", "painted wood"],
     "door": ["painted wood", "oak", "walnut", "glass panel"],
-    "fireplace": ["white marble", "natural stone", "brick", "concrete", "painted wood"]
+    "fireplace": ["white marble", "natural stone", "brick", "concrete", "painted wood"],
+    "plasterwork": ["painted plaster", "white marble", "natural stone", "concrete", "painted wood"]
   },
   "everyRoom": [
     { "key": "window", "shape": "Window", "color": "#F4F1EA", "materials": "window", "variants": [
@@ -51,6 +52,11 @@
       {"key": "wide", "name": "Wide", "label": "wide double door", "width": 180, "depth": 5, "height": 220, "elevation": 0},
       {"key": "tall", "name": "Tall", "label": "tall double door", "width": 150, "depth": 5, "height": 240, "elevation": 0}
     ], "decorations": ["wreath", "door mat", "garland", "nameplate", "potted plants on each side"] },
+    { "key": "archway", "shape": "Archway", "color": "#F4F1EA", "materials": "plasterwork", "variants": [
+      {"key": "standard", "name": "Arched", "label": "archway", "width": 100, "depth": 5, "height": 220, "elevation": 0, "form": "Arched"},
+      {"key": "square", "name": "Square", "label": "square opening", "width": 100, "depth": 5, "height": 210, "elevation": 0},
+      {"key": "wide", "name": "Wide", "label": "wide arched opening", "width": 180, "depth": 5, "height": 230, "elevation": 0, "form": "Arched"}
+    ] },
     { "key": "painting", "shape": "Picture", "color": "#2F2C2A", "materials": "frame", "material": "oak", "variants": [
       {"key": "standard", "name": "Standard", "label": "painting", "width": 80, "depth": 3, "height": 60, "elevation": 130},
       {"key": "large", "name": "Large", "label": "large painting", "width": 120, "depth": 3, "height": 80, "elevation": 120},
@@ -81,6 +87,11 @@
       {"key": "pair", "name": "Pair", "label": "pair of wall sconces", "width": 80, "depth": 15, "height": 25, "elevation": 160},
       {"key": "swing-arm", "name": "Swing arm", "label": "swing-arm wall lamp", "width": 20, "depth": 40, "height": 30, "elevation": 140}
     ] },
+    { "key": "niche", "shape": "Niche", "color": "#F4F1EA", "materials": "plasterwork", "variants": [
+      {"key": "standard", "name": "Arched", "label": "arched wall niche", "width": 60, "depth": 20, "height": 100, "elevation": 100, "form": "Arched"},
+      {"key": "square", "name": "Square", "label": "square wall niche", "width": 60, "depth": 20, "height": 60, "elevation": 120},
+      {"key": "shelves", "name": "With shelves", "label": "wall niche with shelves", "width": 80, "depth": 25, "height": 140, "elevation": 60}
+    ], "decorations": ["vases", "books", "candles", "a sculpture", "plants"] },
     { "key": "floor-mirror", "shape": "Picture", "color": "#C9A86A", "materials": "frame", "material": "brass", "variants": [
       {"key": "standard", "name": "Leaning", "label": "leaning floor mirror", "width": 60, "depth": 4, "height": 170, "elevation": 2},
       {"key": "arched", "name": "Arched", "label": "arched floor mirror", "width": 70, "depth": 4, "height": 180, "elevation": 2},
@@ -135,6 +146,11 @@
       {"key": "short", "name": "1 m", "label": "short track light", "width": 100, "depth": 6, "height": 15},
       {"key": "standard", "name": "2 m", "label": "track light", "width": 200, "depth": 6, "height": 15},
       {"key": "long", "name": "3 m", "label": "long track light", "width": 300, "depth": 6, "height": 15}
+    ] },
+    { "key": "column", "shape": "Cylinder", "color": "#F4F1EA", "materials": "plasterwork", "variants": [
+      {"key": "standard", "name": "Round", "label": "round column", "width": 35, "depth": 35, "height": 260, "toCeiling": true},
+      {"key": "square", "name": "Square", "label": "square pillar", "width": 35, "depth": 35, "height": 260, "shape": "Box", "toCeiling": true},
+      {"key": "slim", "name": "Slim", "label": "slim round column", "width": 25, "depth": 25, "height": 260, "toCeiling": true}
     ] }
   ],
   "rooms": {

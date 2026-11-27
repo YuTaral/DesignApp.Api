@@ -362,7 +362,7 @@ public static class Constants
             /// by <see cref="OwnWallsJoin"/>; empty for none.
             /// </param>
             /// <param name="ceiling">The ceiling's color.</param>
-            /// <param name="trim">The skirting boards' color.</param>
+            /// <param name="trim">The trim's color (the skirting boards').</param>
             /// <param name="floor">The floor's material.</param>
             /// <param name="floorColor">The floor's color.</param>
             public static string Surfaces(string walls, string ownWalls, string ceiling, string trim, string floor, string floorColor)
@@ -371,6 +371,70 @@ public static class Constants
 
                 return $"The walls are {walls}{except}. The ceiling is {ceiling}, the skirting boards are {trim}, " +
                     $"and the floor is {floor} in {floorColor}.";
+            }
+
+            /// <summary>The ceiling's shape in a sentence, with the beams' color; empty for a flat ceiling.</summary>
+            /// <param name="style">How the ceiling is shaped.</param>
+            /// <param name="beams">The beams' color.</param>
+            public static string CeilingShape(CeilingStyle style, string beams)
+            {
+                return style switch
+                {
+                    CeilingStyle.Beams => $"The ceiling has exposed wooden beams across it in {beams}.",
+                    CeilingStyle.Coffered => "The ceiling is coffered: a grid of recessed square panels.",
+                    CeilingStyle.Tray => "The ceiling is a tray ceiling: its middle is raised above a lower border around the walls.",
+                    _ => "",
+                };
+            }
+
+            /// <summary>The walls' trim in a sentence: its parts (see <see cref="MouldingWords"/>...) and color.</summary>
+            /// <param name="parts">The parts, such as "crown moulding where they meet the ceiling", at least one.</param>
+            /// <param name="trim">The trim's color.</param>
+            public static string Trim(IReadOnlyList<string> parts, string trim)
+            {
+                var all = parts.Count == 1 ? parts[0] : $"{string.Join(", ", parts.Take(parts.Count - 1))} and {parts[^1]}";
+
+                return $"The walls have {all}, all in {trim}.";
+            }
+
+            /// <summary>A moulding in words, as a part of <see cref="Trim"/>.</summary>
+            /// <param name="moulding">The moulding.</param>
+            public static string MouldingWords(Moulding moulding)
+            {
+                return moulding switch
+                {
+                    Moulding.PictureRail => "a picture rail just below the ceiling",
+                    Moulding.DadoRail => "a dado rail at hip height",
+                    _ => "crown moulding where they meet the ceiling",
+                };
+            }
+
+            /// <summary>Wainscoting in words, as a part of <see cref="Trim"/>.</summary>
+            /// <param name="wainscot">The wainscoting (not none).</param>
+            /// <param name="height">How high it reaches, such as "90 cm".</param>
+            public static string WainscotWords(Wainscot wainscot, string height)
+            {
+                var kind = wainscot switch
+                {
+                    Wainscot.Beadboard => "beadboard",
+                    Wainscot.ShakerPanels => "shaker-panel",
+                    _ => "raised-panel",
+                };
+
+                return $"{kind} wainscoting up to {height}";
+            }
+
+            /// <summary>Casings in words, as a part of <see cref="Trim"/>; empty for plain reveals.</summary>
+            /// <param name="casing">The casings.</param>
+            public static string CasingWords(Casing casing)
+            {
+                return casing switch
+                {
+                    Casing.Simple => "simple casings around the doors and windows",
+                    Casing.Wide => "wide flat casings around the doors and windows",
+                    Casing.Ornate => "ornate stepped casings with head caps around the doors and windows",
+                    _ => "",
+                };
             }
 
             /// <summary>A wall finish in words, said before its color: "painted", "exposed brick in"...</summary>
