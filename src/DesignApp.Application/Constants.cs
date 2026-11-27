@@ -1052,31 +1052,33 @@ public static class Constants
                 };
             }
 
-            /// <summary>An object's sheen as a word said before its material: "matte", "satin-finish", "glossy".</summary>
+            /// <summary>An object's sheen as a word said before its material: "matte", "satin-finish", "high-gloss".</summary>
             /// <param name="sheen">The sheen.</param>
             public static string SheenWords(Sheen sheen)
             {
                 return sheen switch
                 {
                     Sheen.Satin => "satin-finish",
-                    Sheen.Gloss => "glossy",
+                    Sheen.Gloss => "high-gloss",
                     _ => "matte",
                 };
             }
 
-            /// <summary>The painted walls' sheen in a sentence (not for matte paint, which needs no words).</summary>
-            /// <param name="sheen">The sheen.</param>
-            public static string WallSheen(PaintSheen sheen)
+            /// <summary>
+            /// Painted walls in their color with the paint's sheen, as the walls' own words ("painted in high-gloss lacquered
+            /// sage green"), so the image model doesn't miss it; plain "painted" for matte paint, as the walls always said.
+            /// </summary>
+            /// <param name="sheen">The paint's sheen.</param>
+            /// <param name="color">The color, as words and its code.</param>
+            public static string Painted(PaintSheen sheen, string color)
             {
-                var finish = sheen switch
+                return sheen switch
                 {
-                    PaintSheen.Eggshell => "a soft eggshell",
-                    PaintSheen.Satin => "a satin",
-                    PaintSheen.Gloss => "a glossy, lacquer-like",
-                    _ => "a flat matte",
+                    PaintSheen.Eggshell => $"painted in soft eggshell-finish {color}",
+                    PaintSheen.Satin => $"painted in satin-finish {color} with a gentle sheen",
+                    PaintSheen.Gloss => $"painted in high-gloss lacquered {color} that reflects the light",
+                    _ => $"painted {color}",
                 };
-
-                return $"The painted walls have {finish} finish.";
             }
         }
     }

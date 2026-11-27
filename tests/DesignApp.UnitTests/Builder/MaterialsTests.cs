@@ -73,12 +73,13 @@ public class MaterialsTests
         var rich = PlanPrompt.Write(Room(FloorType.Stone, Finished("Calacatta marble", PaintSheen.Eggshell), Sideboard(Sheen.Gloss)));
         var plain = PlanPrompt.Write(Room(FloorType.Wood, Finished(""), Sideboard(null)));
 
-        Assert.Contains("glossy walnut sideboard", rich);
+        Assert.Contains("high-gloss walnut sideboard", rich);
         Assert.Contains("large Calacatta marble slabs", rich);
-        Assert.Contains("The painted walls have a soft eggshell finish.", rich);
+        Assert.Contains("The walls are painted in soft eggshell-finish", rich);
         Assert.Contains("walnut sideboard", plain);
-        Assert.DoesNotContain("glossy", plain);
-        Assert.DoesNotContain("painted walls have", plain);
+        Assert.DoesNotContain("high-gloss", plain);
+        Assert.DoesNotContain("-finish", plain);
+        Assert.Contains("The walls are painted ", plain);
         Assert.Contains("wooden plank flooring", plain);
     }
 

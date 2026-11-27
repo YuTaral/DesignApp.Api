@@ -143,18 +143,15 @@ public static partial class PlanPrompt
         ArgumentNullException.ThrowIfNull(wallName);
 
         var finish = plan.Finish;
-        var walls = Look(finish.Walls, plan.WallColor);
+        var walls = Look(finish.Walls, plan.WallColor, finish.WallSheen);
         var own = finish.OwnWalls
-            .Select(w => (Name: wallName(w.Wall), Look: Look(w.Finish, w.Color)))
+            .Select(w => (Name: wallName(w.Wall), Look: Look(w.Finish, w.Color, finish.WallSheen)))
             .Where(w => w.Name is not null)
             .Select(w => B.Prompt.OwnWall(w.Name!, w.Look));
 
         var surfaces = B.Prompt.Surfaces(walls, string.Join(B.Prompt.OwnWallsJoin, own), Color(finish.CeilingColor), Color(finish.TrimColor),
             B.Prompt.FloorWords(plan.FloorType, finish.FloorMaterial), Color(plan.FloorColor));
-        // The paint's sheen is said only when some wall is painted and the paint isn't plain matte.
-        var painted = finish.Walls is WallFinish.Paint || finish.OwnWalls.Any(w => w.Finish is WallFinish.Paint);
-        var sheen = painted && finish.WallSheen is not PaintSheen.Matte ? B.Prompt.WallSheen(finish.WallSheen) : "";
-        var more = string.Join(" ", new[] { sheen, Details(finish), Fittings(plan) }.Where(s => s.Length > 0));
+        var more = string.Join(" ", new[] { Details(finish), Fittings(plan) }.Where(s => s.Length > 0));
 
         return more.Length == 0 ? surfaces : $"{surfaces} {more}";
     }
@@ -253,7 +250,7 @@ public static partial class PlanPrompt
         foreach (var item in plan.Items.Where(i => i.Shape is ItemShape.WallZone && frame.Faces(i.Wall!.Value)
             && Look(OnWallPoints(i, plan.Outline, 0), frame, camera).Edges is not null))
         {
-            var look = Look(Enum.Parse<WallFinish>(item.Material), item.Color);
+            var look = Look(Enum.Parse<WallFinish>(item.Material), item.Color, plan.Finish.WallSheen);
 
             text.Append(' ').Append(B.Prompt.WallZone(frame.Place(item.Wall!.Value, item.X), look, Cm(item.Width), Cm(item.Elevation),
                 Cm(item.Elevation + item.Height)));
@@ -262,12 +259,16 @@ public static partial class PlanPrompt
         return text.ToString();
     }
 
-    /// <summary>A wall finish with its color, such as "exposed brick in terracotta (#B5654A)".</summary>
+    /// <summary>
+    /// A wall finish with its color, such as "exposed brick in terracotta (#B5654A)"; paint with its sheen, such as
+    /// "painted in high-gloss lacquered sage green (#A8B89A) that reflects the light".
+    /// </summary>
     /// <param name="finish">The finish.</param>
     /// <param name="color">The color.</param>
-    internal static string Look(WallFinish finish, HexColor color)
+    /// <param name="sheen">The room's paint sheen (for paint).</param>
+    internal static string Look(WallFinish finish, HexColor color, PaintSheen sheen = PaintSheen.Matte)
     {
-        return $"{B.Prompt.FinishWords(finish)} {Color(color)}";
+        return finish is WallFinish.Paint ? B.Prompt.Painted(sheen, Color(color)) : $"{B.Prompt.FinishWords(finish)} {Color(color)}";
     }
 
     /// <summary>An object on the floor: its color, where its middle is, its size as the photo sees it, and its facing.</summary>
